@@ -18,9 +18,9 @@
 ;;(require 'zyoy)
 ;;(require 'rain)
 ;;(require 'he)
-(require 'he-quick)
+;;(require 'he-quick)
 ;; (require 'flypy)
-;; (require 'pyim-init)
+(require 'pyim-init)
 
 (require 'load-abbrev)
 (require 'load-calendar)

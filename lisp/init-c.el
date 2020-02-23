@@ -46,7 +46,7 @@
     :diminish
     :init (modern-c++-font-lock-global-mode t))
 
-  (unless centaur-lsp
+  (unless suk-lsp
     (use-package irony
       :defines (irony-mode-map irony-server-w32-pipe-buffer-size)
       :hook (((c-mode c++-mode objc-mode) . irony-mode)

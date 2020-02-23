@@ -94,7 +94,7 @@
 (require 'init-shell)
 (require 'init-org)
 (require 'init-utils)
-(require 'init-bbbd)
+;;(require 'init-bbbd)
 
 ;; Programming
 (require 'init-vcs)

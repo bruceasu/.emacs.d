@@ -74,7 +74,7 @@
 
   (message "Set package archives to '%s'." archives))
 
-(set-package-archives centaur-package-archives)
+(set-package-archives suk-package-archives)
 
 ;; Initialize packages
 (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
@@ -100,7 +100,7 @@
 (use-package bind-key)
 
 ;; Initialization benchmark
-(when centaur-benchmark
+(when suk-benchmark
   (use-package benchmark-init
     :commands (benchmark-init/activate)
     :hook (after-init . benchmark-init/deactivate)

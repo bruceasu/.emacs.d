@@ -99,7 +99,7 @@
 (defun browse-homepage ()
   "Browse the Github page of Centuar Emacs."
   (interactive)
-  (browse-url centaur-homepage))
+  (browse-url suk-homepage))
 
 ;; Open custom file
 (defun open-custom-file()
@@ -114,8 +114,8 @@
     (find-file custom-file)))
 
 ;; Update
-(defun centaur-update-config ()
-  "Update Centaur Emacs configurations to the latest version."
+(defun suk-update-config ()
+  "Update suk Emacs configurations to the latest version."
   (interactive)
   (let ((dir (expand-file-name user-emacs-directory)))
     (if (file-exists-p dir)
@@ -127,31 +127,31 @@
       (message "\"%s\" doesn't exist." dir))))
 
 (declare-function upgrade-packages 'init-package)
-(defalias 'centaur-update-packages 'upgrade-packages)
-(defun centaur-update()
+(defalias 'suk-update-packages 'upgrade-packages)
+(defun suk-update()
   "Update confgiurations and packages."
   (interactive)
-  (centaur-update-config)
-  (centaur-update-packages nil))
+  (suk-update-config)
+  (suk-update-packages nil))
 
-(defun centaur-update-all()
+(defun suk-update-all()
   "Update dotfiles, org files, Emacs confgiurations and packages, ."
   (interactive)
-  (centaur-update)
-  (centaur-update-org)
-  (centaur-update-dotfiles))
+  (suk-update)
+  (suk-update-org)
+  (suk-update-dotfiles))
 
 (declare-function upgrade-packages-and-restart 'init-package)
-(defalias 'centaur-update-packages-and-restart 'upgrade-packages-and-restart)
-(defun centaur-update-and-restart ()
+(defalias 'suk-update-packages-and-restart 'upgrade-packages-and-restart)
+(defun suk-update-and-restart ()
   "Update configurations and packages, then restart."
   (interactive)
-  (centaur-update-config)
-  (centaur-update-org)
-  (centaur-update-dotfiles)
-  (centaur-update-packages-and-restart nil))
+  (suk-update-config)
+  (suk-update-org)
+  (suk-update-dotfiles)
+  (suk-update-packages-and-restart nil))
 
-(defun centaur-update-dotfiles ()
+(defun suk-update-dotfiles ()
   "Update the dotfiles to the latest version."
   (interactive)
   (let ((dir (or (getenv "DOTFILES")
@@ -164,7 +164,7 @@
           (message "Update finished."))
       (message "\"%s\" doesn't exist." dir))))
 
-(defun centaur-update-org ()
+(defun suk-update-org ()
   "Update Org files to the latest version."
   (interactive)
   (let ((dir (expand-file-name "~/victor/org/")))
@@ -212,14 +212,14 @@
   "Show http/https proxy."
   (interactive)
   (if url-proxy-services
-      (message "Current HTTP proxy is \"%s\"" centaur-proxy)
+      (message "Current HTTP proxy is \"%s\"" suk-proxy)
     (message "No proxy")))
 
 (defun proxy-http-enable ()
   "Enable http/https proxy."
   (interactive)
-  (setq url-proxy-services `(("http" . ,centaur-proxy)
-                             ("https" . ,centaur-proxy)
+  (setq url-proxy-services `(("http" . ,suk-proxy)
+                             ("https" . ,suk-proxy)
                              ("no_proxy" . "^\\(localhost\\|192.168.*\\|10.*\\)")))
   (proxy-http-show))
 

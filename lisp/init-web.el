@@ -65,7 +65,7 @@
          (js2-mode . js2-highlight-unused-variables-mode))
   :config
   ;; Use default keybindings for lsp
-  (if centaur-lsp
+  (if suk-lsp
       (unbind-key "M-." js2-mode-map))
 
   (with-eval-after-load 'flycheck
