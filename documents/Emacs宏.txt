@@ -1,0 +1,48 @@
+Emacs中宏的基本使用方法
+Filed Under (技术) by waterlin
+
+宏，即Macro，在Emacs中是一个使用非常广泛的技巧。
+
+比如说我有下面一段文字，我需要把前面的注释（即;;）全部去掉，怎么办呢？在一般的编辑器里，大家就会一行一行地删掉，但是如果有一百行、二百行呢？如果有几百个这样的文件呢？
+
+    ;; (require ‘worklog)
+    ;; (setq worklog-automatic-login t)
+    ;; (add-hook ‘emacs-startup-hook
+    ;; (function (lambda ()
+    ;; (worklog-do-task “Hacking emacs” t)
+    ;; )))
+    ;;
+    ;; (add-hook ‘kill-emacs-hook
+    ;; (function (lambda ()
+    ;; (worklog-do-task “logout” t)
+    ;; (worklog-finish)
+    ;; )))
+
+在Emacs中，只需要使用宏就可以快速地把这些多余的东西去掉：
+
+1) 开始录制宏，用C-x (；
+2) 输入你删除的动作，C-d C-d C-d；
+3) 移动到下一行，C-n；
+4) 结束录制宏，用C-x )；
+5) 用C-x e来使用宏。
+
+当然，在这里，可以利用C-u来重复使用11次这个宏，即命令C-u 11 C-x e。
+
+于是，你就能看到;;全部被快速地删掉了。
+
+你还可以对已定义的宏命名并保存到文本中，以便下次再用：
+
+1) 按照上面的过程定义一个宏；
+2) M-x name-last-kbd-macro；
+3) 按提示输入你所要定义的宏名称；
+4) 打你的.emacs文件并把光标跳转到特定的位置；
+5) M-x insert-kbd-macro；
+6) 输入你刚刚取的名字。
+
+于是你就看到了有这样的东西存在
+(fset ‘delete-double-column
+“\C-d\C-d\C-d\C-n”)
+
+这样，你的宏不仅已经被命名，还存到了.emacs里，下次打开Emacs的时候，还能再用，即相当于多拥有了一个命令。
+
+当你要使用这个宏的时候，只要用`M-x <宏名>‘就可以调用你的宏了。

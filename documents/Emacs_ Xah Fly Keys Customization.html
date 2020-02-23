@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<!-- saved from url=(0057)http://ergoemacs.org/misc/xah-fly-keys_customization.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="./Emacs_ Xah Fly Keys Customization_files/xahemacs.css">
+
+<title>Emacs: Xah Fly Keys Customization</title>
+<script async="" src="http://www.google-analytics.com/analytics.js"></script><script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-10884311-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-5125343095650532",
+          enable_page_level_ads: true
+     });
+</script>
+</head>
+<body><div id="tooltip75523" style="visibility: hidden; position: fixed; font-family: sans-serif; font-size: 16px; color: black; font-weight: normal; left: 249.594px; top: 718.313px; padding: 4px; text-align: left; border: thin solid grey; border-radius: 8px; background-color: rgb(253, 245, 230); box-shadow: black 3px 3px 20px; z-index: 341;">In KEYMAP, define key sequence KEY as DEF.<br>KEYMAP is a keymap.<br><br>KEY is a string or a vector of symbols and characters, representing a<br>sequence of keystrokes and events.  Non-ASCII characters with codes<br>above 127 (such as ISO Latin-1) can be represented by vectors.<br>Two types of vector have special meanings:<br> [remap COMMAND] remaps any key binding for COMMAND.<br> [t] creates a default definition, which applies to any event with no<br>    other definition in KEYMAP.<br><br>DEF is anything that can be a key’s definition:<br> nil (means key is undefined in this keymap),<br> a command (a Lisp function suitable for interactive calling),<br> a string (treated as a keyboard macro),<br> a keymap (to define a prefix key),<br> a symbol (when the key is looked up, the symbol will stand for its<br>    function definition, which should at that time be one of the above,<br>    or another symbol whose function definition is used, etc.),<br> a cons (STRING . DEFN), meaning that DEFN is the definition<br>    (DEFN should be a valid definition in its own right),<br> or a cons (MAP . CHAR), meaning use definition of CHAR in keymap MAP,<br> or an extended menu item definition.<br> (See info node ‘(elisp)Extended Menu Items’.)<br><br>If KEYMAP is a sparse keymap with a binding for KEY, the existing<br>binding is altered.  If there is no binding for KEY, the new pair<br>binding KEY to DEF is added at the front of KEYMAP.<br><br>(fn KEYMAP KEY DEF)</div>
+
+<nav class="nav-back-85230"><a href="http://ergoemacs.org/index.html">Xah Emacs</a></nav>
+
+<aside id="aside-right-89129">
+</aside>
+
+<main>
+
+<div class="ad_top_39054">
+</div>
+
+<h1>Emacs: Xah Fly Keys Customization</h1>
+
+<div class="byline">By Xah Lee. Date: <time>2017-02-02</time>. Last updated: <time>2019-02-12</time>.</div>
+
+<p>This page shows how to customize <a href="http://ergoemacs.org/misc/ergoemacs_vi_mode.html">Emacs: Xah Fly Keys</a>.</p>
+
+<h2>Add/Change Command Mode Activation Key</h2>
+
+<p>Here's a example of how to set the command mode activation key.</p>
+
+<pre class="emacs-lisp"><span class="comment-delimiter">;; </span><span class="comment">make key 【f4】 key do activate command mode.
+</span>(<span class="xah-elisp-command">global-set-key</span> (<span class="function-name">kbd</span> <span class="string">"&lt;f4&gt;"</span>) 'xah-fly-command-mode-activate)</pre>
+
+<p>The <code>(kbd "&lt;f4&gt;") </code> is the <kbd>F4</kbd> key.
+For other key's syntax, see
+<a href="http://ergoemacs.org/emacs/keyboard_shortcuts.html">Emacs: How to Define Keys</a></p>
+
+<p>On a typical PC keyboard, i recommend you make the <kbd>CapsLock</kbd> key to send <kbd>Home</kbd> key signal for activating command mode.</p>
+
+<p>(<kbd>Home</kbd> key by default will activate command mode.)</p>
+
+<h2>How to Make the CapsLock Key do Home Key</h2>
+
+<p><a href="http://ergoemacs.org/misc/capslock_do_home_key.html">How to Make the CapsLock Key do Home Key</a></p>
+
+<h2>Add/Change Insert Mode Activation Key</h2>
+
+<p>If you have a nice keyboard with extra thumb keys such as
+<a href="http://ergoemacs.org/emacs/emacs_best_keyboard.html">kinesis, ergodox</a>, you can
+set a dedicated key to switch to insert mode.</p>
+
+<p>For example:</p>
+
+<pre class="emacs-lisp"><span class="comment-delimiter">;; </span><span class="comment">make key 【end】 to activate insertion mode.
+</span>(<span class="xah-elisp-command">global-set-key</span> (<span class="function-name">kbd</span> <span class="string">"&lt;end&gt;"</span>) 'xah-fly-insert-mode-activate)</pre>
+
+<h2>Disable Changes to Control Key</h2>
+
+<p>xah-fly-keys supports standard control key such as
+【<kbd>Ctrl</kbd>+<kbd>o</kbd>】 open,
+【<kbd>Ctrl</kbd>+<kbd>w</kbd>】 close
+【<kbd>Ctrl</kbd>+<kbd>v</kbd>】 paste
+【<kbd>Ctrl</kbd>+<kbd>z</kbd>】 undo, etc.</p>
+
+<p>You can disable them by:</p>
+
+<pre class="emacs-lisp">(<span class="keyword">setq</span> xah-fly-use-control-key <span class="builtin">nil</span>) <span class="comment-delimiter">; </span><span class="comment">must come before loading xah-fly-keys</span></pre>
+
+<p>when disabled, no control binding will be touched by xah-fly-keys.</p>
+
+<h2>Disable Changes to Meta Key</h2>
+
+<p>The only meta keybinding
+xah-fly-keys bind is
+【<kbd>Alt</kbd>+<kbd>Space</kbd>】
+as a extra key for
+<code class="elisp_f_3d841">xah-fly-command-mode-activate</code>
+(so, out of the box, it's convenient for people who haven't bothered setting <kbd>CapsLock</kbd>.)
+</p>
+
+<p>You can disable this by:</p>
+
+<pre class="emacs-lisp">(<span class="keyword">setq</span> xah-fly-use-meta-key <span class="builtin">nil</span>) <span class="comment-delimiter">; </span><span class="comment">must come before loading xah-fly-keys</span></pre>
+
+<h2>Make Escape Key Do C-g</h2>
+
+<p>You can make the <kbd>Escape</kbd> key do emacs's 【<kbd>Ctrl</kbd>+<kbd>g</kbd>】.</p>
+
+<pre class="emacs-lisp">(<span class="function-name">define-key</span> <span class="variable-name">key-translation-map</span> (<span class="function-name">kbd</span> <span class="string">"ESC"</span>) (<span class="function-name">kbd</span> <span class="string">"C-g"</span>))</pre>
+
+<p>Note: this will work 99% of time. When it doesn't work, just press 【<kbd>Ctrl</kbd>+<kbd>g</kbd>】.
+(the only case i know it doesn't work is when you quit emacs, and emacs says there are unsaved file and if you still want to quit, and pressing <kbd>Escape</kbd> to cancel quit doesn't work, but
+【<kbd>Ctrl</kbd>+<kbd>g</kbd>】 works.)</p>
+
+<h2>Change Global Leader Key</h2>
+
+<p>You can set your own choice of the global leader key like this:</p>
+
+<pre class="emacs-lisp">(<span class="function-name">define-key</span> xah-fly-key-map (<span class="function-name">kbd</span> <span class="string">"&lt;f9&gt;"</span>) xah-fly-leader-key-map) <span class="comment-delimiter">; </span><span class="comment">must come after loading xah-fly-keys</span></pre>
+
+<p>Put the above in your init, after the code for loading xah-fly-keys.</p>
+
+<h2>Add or Change Leader Key Sequence</h2>
+
+<p>Here's a example of add/change a 3-key sequence.</p>
+
+<p>Put this in your init, after loading xah-fly-keys:</p>
+
+<pre class="emacs-lisp"><span class="comment-delimiter">;; </span><span class="comment">make xah-fly-keys qwerty 【leader d f】 do command calendar
+</span>(<span class="function-name">define-key</span> xah-fly-e-keymap (<span class="function-name">kbd</span> <span class="string">"u"</span>) 'calendar)
+<span class="comment-delimiter">;; </span><span class="comment">qwerty 【leader d f】 is dvorak 【leader e u】
+</span><span class="comment-delimiter">;; </span><span class="comment">this overwrites existing command or keymap of 【leader e u】</span></pre>
+
+<p>Note, xah-fly-keys's key syntax is with dvorak keys.
+So, if you are using qwerty, you need to first find out what's the dvorak key.</p>
+
+<p>For example, let's say you are a qwerty user, and you want to add/change the qwerty key sequence 【leader d f】 to call command <code class="elisp_f_3d841">calendar</code>.</p>
+
+<p>The steps are:</p>
+
+<p>① Find out what's qwerty d in dvorak. (qwerty d is dvorak e)</p>
+
+<p>[see <a href="http://ergoemacs.org/misc/qwerty_dvorak_table.html">QWERTY Dvorak Layout Conversion Table</a>]</p>
+
+<p>② in xah-fly-keys.el file, find the keymap name that corresponds to the leader key map for the dvorak key, by finding it in the definition of <code class="elisp_f_3d841">xah-fly-leader-key-map</code>.</p>
+
+<p>Here's the short version of <code class="elisp_f_3d841">xah-fly-leader-key-map</code> definition:</p>
+
+<pre class="emacs-lisp">(xah-fly--define-keys
+ (<span class="function-name">define-prefix-command</span> 'xah-fly-leader-key-map)
+ '(
+   <span class="comment-delimiter">;; </span><span class="comment">...
+</span>
+   (<span class="string">"1"</span> . <span class="builtin">nil</span>)
+   (<span class="string">"2"</span> . <span class="builtin">nil</span>)
+   (<span class="string">"3"</span> . <span class="xah-elisp-command">delete-window</span>)
+   (<span class="string">"4"</span> . <span class="xah-elisp-command">split-window-right</span>)
+   (<span class="string">"5"</span> . <span class="xah-elisp-command">balance-windows</span>)
+   (<span class="string">"6"</span> . <span class="builtin">nil</span>)
+   (<span class="string">"7"</span> . <span class="builtin">nil</span>)
+   (<span class="string">"8"</span> . <span class="builtin">nil</span>)
+   (<span class="string">"9"</span> . ispell-word)
+   (<span class="string">"0"</span> . <span class="builtin">nil</span>)
+
+   (<span class="string">"a"</span> . mark-whole-buffer)
+   (<span class="string">"b"</span> . <span class="xah-elisp-command">end-of-buffer</span>)
+   (<span class="string">"c"</span> . xah-fly-c-keymap)
+   (<span class="string">"d"</span> . <span class="xah-elisp-command">beginning-of-buffer</span>)
+   (<span class="string">"e"</span> . xah-fly-e-keymap)
+   (<span class="string">"f"</span> . xah-search-current-word)
+   (<span class="string">"g"</span> . isearch-forward)
+   (<span class="string">"h"</span> . xah-fly-h-keymap)
+   (<span class="string">"i"</span> . xah-copy-file-path)
+   (<span class="string">"j"</span> . xah-copy-all-or-region)
+   (<span class="string">"k"</span> . xah-paste-or-paste-previous)
+   (<span class="string">"l"</span> . <span class="xah-elisp-command">recenter-top-bottom</span>)
+   (<span class="string">"m"</span> . dired-jump)
+   (<span class="string">"n"</span> . xah-fly-n-keymap)
+   (<span class="string">"o"</span> . exchange-point-and-mark)
+   (<span class="string">"p"</span> . query-replace)
+   (<span class="string">"q"</span> . xah-cut-all-or-region)
+   (<span class="string">"r"</span> . xah-fly-r-keymap)
+   (<span class="string">"s"</span> . <span class="xah-elisp-command">save-buffer</span>)
+   (<span class="string">"t"</span> . xah-fly-t-keymap)
+   (<span class="string">"u"</span> . <span class="xah-elisp-command">switch-to-buffer</span>)
+   (<span class="string">"v"</span> . <span class="builtin">nil</span>)
+   (<span class="string">"w"</span> . xah-fly-w-keymap)
+   (<span class="string">"x"</span> . <span class="builtin">nil</span>)
+   (<span class="string">"y"</span> . xah-show-kill-ring)
+   (<span class="string">"z"</span> . <span class="builtin">nil</span>)
+   <span class="comment-delimiter">;;</span><span class="comment">
+</span>   ))</pre>
+
+<p>Since you are looking for qwerty 【leader d】, and that's dvorak e, so you look at the entry for e, and the result is <code class="elisp_f_3d841">xah-fly-e-keymap</code></p>
+
+<p>③ now, since you want add/change qwerty 【leader d f】, now find out what's qwerty f in dvorak.
+(qwerty f is dvorak u)</p>
+
+<p>④ Now you know, the key you want to change is u, in keymap <code class="elisp_f_3d841">xah-fly-e-keymap</code>.</p>
+
+<p>So, the code you want to put in init file is:</p>
+
+<pre class="emacs-lisp">(xah-fly-keys 1)
+
+<span class="comment-delimiter">;; </span><span class="comment">make xah-fly-keys qwerty 【leader d f】 do calendar
+</span>(<span class="function-name">define-key</span> xah-fly-e-keymap (<span class="function-name">kbd</span> <span class="string">"u"</span>) 'calendar)
+<span class="comment-delimiter">;; </span><span class="comment">this is dvorak 【leader e u】
+</span></pre>
+
+<h2>Creating a Whole Keymap</h2>
+
+<p>Here's a example of creating a whole keymap.</p>
+
+<p>Let's say you want</p>
+
+<ul>
+<li>【leader 8 space】 to call cmd1</li>
+<li>【leader 8 3】 to call cmd2</li>
+<li>【leader 8 a】 to call cmd3</li>
+</ul>
+
+<p>and anything after 【leader 8】 would be your personal keys.</p>
+
+<p>Here's the code:</p>
+
+<pre class="emacs-lisp">(<span class="function-name">define-prefix-command</span> 'my-keymap)
+
+(<span class="function-name">define-key</span> my-keymap (<span class="function-name">kbd</span> <span class="string">"SPC"</span>) 'cmd1)
+(<span class="function-name">define-key</span> my-keymap (<span class="function-name">kbd</span> <span class="string">"3"</span>) 'cmd2)
+(<span class="function-name">define-key</span> my-keymap (<span class="function-name">kbd</span> <span class="string">"a"</span>) 'cmd3)
+
+<span class="comment-delimiter">;; </span><span class="comment">make xah-fly-keys 【leader 8】 as prefix for my-keymap
+</span>(<span class="function-name">define-key</span> xah-fly-leader-key-map (<span class="function-name">kbd</span> <span class="string">"8"</span>) my-keymap)
+
+<span class="comment-delimiter">;; </span><span class="comment">so now,
+</span><span class="comment-delimiter">;; </span><span class="comment">【leader 8 space】 is cmd1
+</span><span class="comment-delimiter">;; </span><span class="comment">【leader 8 3】 is cmd2
+</span><span class="comment-delimiter">;; </span><span class="comment">【leader 8 a】 is cmd3
+</span><span class="comment-delimiter">;; </span><span class="comment">etc</span></pre>
+
+<p>If you want your letters to be translated according to <code class="elisp_f_3d841">xah-fly-keys-set-layout</code>, then do it this way:</p>
+
+<pre class="emacs-lisp">(xah-fly--define-keys
+ <span class="comment-delimiter">;; </span><span class="comment">create a keymap my-keymap
+</span> (<span class="function-name">define-prefix-command</span> 'my-keymap)
+ '(
+   (<span class="string">"SPC"</span> . cmd1)
+   (<span class="string">"3"</span> . cmd2)
+   (<span class="string">"a"</span> . cmd3)
+   <span class="comment-delimiter">;;</span><span class="comment">
+</span>   ))
+
+<span class="comment-delimiter">;; </span><span class="comment">make xah-fly-keys 【leader 8】 as prefix for my-keymap
+</span>(xah-fly--define-keys
+ (<span class="function-name">define-prefix-command</span> 'xah-fly-leader-key-map)
+ '(
+   (<span class="string">"8"</span> . my-keymap)
+   <span class="comment-delimiter">;;</span><span class="comment">
+</span>   ))
+
+<span class="comment-delimiter">;; </span><span class="comment">all letters are dvorak. They get translated to whatever your xah-fly-keys-set-layout is set to</span></pre>
+
+<h2>Add Hook</h2>
+
+<p>There are these hooks you can use:</p>
+
+<ul>
+<li><var class="elisp">xah-fly-command-mode-activate-hook</var> → hook variable. Value should be a list of function symbols. When command mode is activated, these functions are called after activation.</li>
+<li><var class="elisp">xah-fly-insert-mode-activate-hook</var> → hook variable. Value should be a list of function symbols. When insert mode is activated, these functions are called after activation.</li>
+</ul>
+
+<h2>Auto Save When Switching to Command Mode</h2>
+
+<p>This code will make emacs save current file (if it is a file), when you switch to command mode:</p>
+
+<pre class="emacs-lisp"><span class="comment-delimiter">;; </span><span class="comment">automatic save buffer when switching to command mode
+</span>(<span class="function-name">add-hook</span> 'xah-fly-command-mode-activate-hook 'xah-fly-save-buffer-if-file)</pre>
+
+<p>You can remove hook like this:</p>
+
+<pre class="emacs-lisp"><span class="comment-delimiter">;; </span><span class="comment">remove a hook
+</span>(<span class="function-name">remove-hook</span> 'xah-fly-command-mode-activate-hook 'xah-fly-save-buffer-if-file)</pre>
+
+<h2>Add or Change Command Mode Keys</h2>
+
+<p>You can do it this way.</p>
+
+<pre class="emacs-lisp">(<span class="keyword">defun</span> my-bindkey-xfk-insert-mode ()
+  <span class="string">"Define keys for `xah-fly-insert-mode-activate-hook'"</span>
+  (<span class="keyword">interactive</span>)
+  (<span class="function-name">define-key</span> xah-fly-key-map (<span class="function-name">kbd</span> <span class="string">"DEL"</span>) 'xah-fly-command-mode-activate)
+  <span class="comment-delimiter">;; </span><span class="comment">more here
+</span>  )
+
+(<span class="keyword">defun</span> my-bindkey-xfk-command-mode ()
+  <span class="string">"Define keys for `xah-fly-command-mode-activate-hook'"</span>
+  (<span class="keyword">interactive</span>)
+  (<span class="function-name">define-key</span> xah-fly-key-map (<span class="function-name">kbd</span> <span class="string">"DEL"</span>) 'xah-fly-insert-mode-activate)
+  <span class="comment-delimiter">;; </span><span class="comment">more here
+</span>  )
+
+(<span class="function-name">add-hook</span> 'xah-fly-insert-mode-activate-hook 'my-bindkey-xfk-insert-mode)
+<span class="comment-delimiter">;; </span><span class="comment">(add-hook 'xah-fly-command-mode-activate-hook 'my-bindkey-xfk-command-mode)</span></pre>
+
+<p>Alternatively, just modify xah-fly-keys.el directly. Modify
+the function
+ <code class="elisp_f_3d841">xah-fly-command-mode-init</code>.
+(or, just copy the whole function out, modify it, put in your init at after loading xah-fly-keys.)
+</p>
+
+<p>But i recommend that you do not change it. Just stick to it. Because,
+one thing about creating a keybinding system is that there's a lot habit
+to overcome. I've been changing keys every month for over 10 years. Each
+time, it's extremely painful, and with strong desire to go back. And, once
+you start to explore keys, you often become biased towards your CURRENT
+workflow or work. So, you get into a situation that you change
+every few months, when project changes, or your choice of major mode changes,
+and in particular, when your keyboard changes. Also, if you don't have
+a year or two dedicated study about keybinding system, you create a key
+system that you think must be logically flawless, but actually just to
+your habit, your hands, your current keyboard, and your workflow, not to someone else.</p>
+
+<p>xah-fly-keys's keybinding choices is not scientifically the best, because
+that is basically an illusive concept, but is near optimal.</p>
+
+<p>if you are interested in keybinding efficiency research, be sure to read:</p>
+
+<ul>
+<li><a href="http://xahlee.info/kbd/efficiency_of_keybinding_emacs_vs_vim.html">Emacs vs vim, Compute Keybinding Efficiency</a></li>
+<li><a href="http://ergoemacs.org/emacs/science_of_command_efficiency.html">emacs and vi: Science of Command Efficiency</a></li>
+<li><a href="http://xahlee.info/kbd/keybinding_index.html">Keybinding Design ⌨</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_keys_index.html">Emacs Keybinding, Keyboard, Articles Index</a></li>
+</ul>
+
+<h2>Make a Key do x Depending on Major Mode</h2>
+
+<p>You can have a key do different things depending on what's the current major mode.</p>
+
+<p>The most simple way, is to write a wrapper command.
+The wrapper command will check current mode and call different commands.
+Then, bind the wrapper command to a key in command mode.</p>
+
+<p>Here's a example of a wrapper command.</p>
+
+<p>When in command mode, suppose you want key <kbd>5</kbd> to call:</p>
+
+<ul>
+<li><code class="elisp_f_3d841">x1-cmd</code> if current mode is <code class="elisp_f_3d841">x1-mode</code></li>
+<li><code class="elisp_f_3d841">x2-cmd</code> if current mode is <code class="elisp_f_3d841">x2-mode</code></li>
+</ul>
+
+<pre class="emacs-lisp">(<span class="keyword">defun</span> my-wrapper ()
+  <span class="string">"call different commands depending on what's current major mode."</span>
+  (<span class="keyword">interactive</span>)
+  (<span class="keyword">cond</span>
+   ((<span class="function-name">string-equal</span> <span class="variable-name">major-mode</span> <span class="string">"x1-mode"</span>) (x1-cmd))
+   ((<span class="function-name">string-equal</span> <span class="variable-name">major-mode</span> <span class="string">"x2-mode"</span>) (x2-cmd))
+   <span class="comment-delimiter">;; </span><span class="comment">more major-mode checking here
+</span>
+   <span class="comment-delimiter">;; </span><span class="comment">if nothing match, do nothing
+</span>   (<span class="builtin">t</span> <span class="builtin">nil</span>)))</pre>
+
+<p>Then, just follow the keybinding instruction mentioned on this page
+to set this command to a key.</p>
+
+<h2>Change Cursor Shape, Command Mode, Insert Mode</h2>
+
+<p>You can make the mode state more obvious, by changing current line highlight. e.g.</p>
+
+<pre class="emacs-lisp">(<span class="keyword">defun</span> my-highlight-line-on () (global-hl-line-mode 1))
+(<span class="keyword">defun</span> my-highlight-line-off () (global-hl-line-mode 0))
+
+(<span class="function-name">add-hook</span> 'xah-fly-command-mode-activate-hook 'my-highlight-line-on)
+(<span class="function-name">add-hook</span> 'xah-fly-insert-mode-activate-hook  'my-highlight-line-off)</pre>
+
+<p>You can also use background color, e.g.</p>
+
+<pre class="emacs-lisp">(<span class="keyword">defun</span> my-xfk-command-color () (set-background-color <span class="string">"honeydew"</span>))
+(<span class="keyword">defun</span> my-xfk-insert-color () (set-background-color <span class="string">"white"</span>))
+
+(<span class="function-name">add-hook</span> 'xah-fly-command-mode-activate-hook 'my-xfk-command-color)
+(<span class="function-name">add-hook</span> 'xah-fly-insert-mode-activate-hook  'my-xfk-insert-color)</pre>
+
+<h2>Russian Layout Addon</h2>
+
+<p><a href="http://ergoemacs.org/misc/xah-fly-keys_russian.html">Emacs: Xah Fly Keys for Russian Layout</a></p>
+
+<h2>Advanced Customization, How Does xah-fly-keys Work</h2>
+
+<p>If you look at the file, in 10 minutes you should have a basic idea. The code is simple.</p>
+
+<p>Here's a outline of the code.</p>
+
+<p>There's these 2 important variables:</p>
+
+<ul>
+<li><var class="elisp">xah-fly-key-map</var> → Variable. Value is a elisp keymap. This keymap is used for command mode and insertion mode.</li>
+<li><var class="elisp">xah-fly-leader-key-map</var> → Variable. Value is a elisp keymap. It's the leader keys sequence.</li>
+</ul>
+
+<p>(note: in elisp, keymap is just a list of key/command pairs. The command part can be another keymap, in which case, it is a key sequence.)</p>
+
+<p>There's these 2 important commands:</p>
+
+<ul>
+<li><code class="elisp_f_3d841">xah-fly-command-mode-init</code> → set keybinding for command mode. Basically, it just modify <var class="elisp">xah-fly-key-map</var>.</li>
+<li><code class="elisp_f_3d841">xah-fly-insert-mode-init</code> → set keybinding for insert mode. Basically, it just modify <var class="elisp">xah-fly-key-map</var>, by setting all keys to nil (which means, do emacs default, usually means they do <code class="elisp_f_3d841">self-insert-command</code>).</li>
+</ul>
+
+<p><code class="elisp_f_3d841">xah-fly-command-mode-init</code> looks like this:</p>
+
+<pre class="emacs-lisp">(<span class="keyword">defun</span> xah-fly-command-mode-init ()
+  (xah-fly--define-keys
+   xah-fly-key-map
+   '(
+
+     (<span class="string">"a"</span> . <span class="xah-elisp-command">execute-extended-command</span>)
+     (<span class="string">"b"</span> . isearch-forward)
+     (<span class="string">"c"</span> . previous-line)
+     <span class="comment-delimiter">;; </span><span class="comment">more here
+</span>
+     )))</pre>
+
+<p>The
+<code>"a"</code>
+<code>"b"</code>
+<code>"c"</code> there are Dvorak keys.</p>
+
+<p>The function
+<code class="elisp_f_3d841">xah-fly--define-keys</code> takes care of translating Dvorak to QWERTY, if user has qwery set
+<code>(xah-fly-keys-set-layout "qwerty")</code>
+.</p>
+
+<p><code class="elisp_f_3d841">xah-fly-insert-mode-init</code> looks like this:</p>
+
+<pre class="emacs-lisp">(<span class="keyword">defun</span> xah-fly-insert-mode-init ()
+  (xah-fly--define-keys
+   xah-fly-key-map
+   '(
+
+     (<span class="string">"a"</span> . <span class="builtin">nil</span>)
+     (<span class="string">"b"</span> . <span class="builtin">nil</span>)
+     (<span class="string">"c"</span> . <span class="builtin">nil</span>)
+
+     <span class="comment-delimiter">;; </span><span class="comment">more
+</span>     )))</pre>
+
+<p><var class="elisp">xah-fly-leader-key-map</var> looks like this:</p>
+
+<pre class="emacs-lisp">(xah-fly--define-keys
+ (<span class="function-name">define-prefix-command</span> 'xah-fly-leader-key-map)
+ '(
+
+   (<span class="string">"a"</span> . mark-whole-buffer)
+   (<span class="string">"b"</span> . <span class="xah-elisp-command">end-of-buffer</span>)
+   (<span class="string">"c"</span> . xah-fly-c-keymap)
+   (<span class="string">"d"</span> . <span class="xah-elisp-command">beginning-of-buffer</span>)
+   (<span class="string">"e"</span> . xah-fly-e-keymap)
+   (<span class="string">"f"</span> . xah-search-current-word)
+
+   <span class="comment-delimiter">;; </span><span class="comment">more
+</span>   ))</pre>
+
+<p>For example, the line
+<code>("b" . end-of-buffer)</code>
+means
+press 【<kbd>leader</kbd> <kbd>b</kbd>】 will call <code class="elisp_f_3d841">end-of-buffer</code>.</p>
+
+<p>Note: All keys in the file are Dvorak keys. For example, if you see
+<code>("b" . isearch-forward)</code>, that's Dvorak b, and when user has QWERTY set, that b is automatically translated to n.</p>
+
+<p>back to
+<a href="http://ergoemacs.org/misc/ergoemacs_vi_mode.html">Emacs: Xah Fly Keys</a></p>
+
+<div class="ads-bottom-65900">
+</div>
+
+<div class="buyxahemacs97449">
+<p>If you have a question, put $5 at <a class="sorc" href="https://www.patreon.com/xahlee" data-accessed="2017-08-01">patreon</a> and message me.
+<br>
+Or <a href="http://ergoemacs.org/emacs/buy_xah_emacs_tutorial.html">Buy Xah Emacs Tutorial</a>
+<br>
+Or buy a nice keyboard:
+<a href="http://ergoemacs.org/emacs/emacs_best_keyboard.html">Best Keyboards for Emacs</a></p>
+</div>
+
+</main>
+
+<div class="lpanel_h7h547">
+<h4>Emacs</h4>
+<ul>
+<li><a href="http://ergoemacs.org/emacs/emacs.html">Practical Emacs</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_init_index.html">Init Setup</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_keys_index.html">Emacs Keys</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_extra_index.html">Xah Commands</a></li>
+</ul>
+<h4>Emacs Lisp</h4>
+<ul>
+<li><a href="http://ergoemacs.org/emacs/elisp.html">Practical Elisp</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_command_examples_index.html">Command Examples</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_script_examples_index.html">Script Examples</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_write_major_mode_index.html">Write Major Mode</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_misc_index.html">Elisp Misc</a></li>
+</ul>
+<h4>Misc</h4>
+<ul>
+<li><a href="http://ergoemacs.org/emacs/xah_emacs_modes.html">Xah Packages</a></li>
+<li><a href="http://ergoemacs.org/misc/emacs_misc_index.html">Emacs Misc</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_modernization.html">Emacs Modernization</a></li>
+<li><a href="http://ergoemacs.org/emacs_fun_index.html">Emacs Fun</a></li>
+<li><a href="http://ergoemacs.org/emacs/blog.html">Blog</a></li>
+</ul>
+</div>
+
+<!-- comment_6b83f -->
+
+<footer><span class="xsignet">∑</span><span class="xsignetxah">XAH</span> <div class="cpr">© 2006, 2019 Xah Lee.</div></footer>
+
+<script defer="" src="./Emacs_ Xah Fly Keys Customization_files/emacs_tooltip.js.下载"></script>
+
+<script defer="" src="./Emacs_ Xah Fly Keys Customization_files/highlightlink24082.js.下载"></script>
+
+
+</body></html>

@@ -1,0 +1,240 @@
+/* --------------------------------------------------------------------------------------------- */
+/* layout */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-image: url(./bg-paper-with-binder-1800.jpg);
+  background-size:contain;
+  margin-left: 5%; margin-right: 5%;
+}
+
+p {
+  text-indent: 40px
+}
+
+li {
+  margin-bottom: 0.5rem;
+}
+
+
+h1 {
+  text-align: center;
+}
+
+div.main {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+div.article {
+  width:85%;
+  /* margin-left: 1rem; */
+  margin-right: 6rem;
+  /* border: 2px gray; */
+  /* border-left-style: dashed; */
+  padding: 1.5rem;
+}
+
+div.nav {
+  width:15%;
+  border: 2px gray;
+  border-left-style: dashed;
+}
+
+div.nav.li {
+  margin-bottom:.6rem;
+}
+
+footer {
+  border:solid thin silver;
+  margin:1ex;
+  border-radius:1rem;
+  text-align: center;
+}
+
+section
+{
+  border:solid thin silver;
+  margin:.3rem;
+  padding:.3rem;
+  border-radius:1rem;
+}
+section.qna_xl {border:solid thin grey;}
+section.qna_xl h3.q {margin:1ex}
+
+/* --------------------------------------------------------------------------------------------- */
+/* time setting */
+time {
+  background-color: silver;
+  display: table;
+  margin: 0.5rem;
+}
+
+div.peng-time {
+  display: table;
+  margin: 0.5rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* table setting */
+table {
+  border-spacing: 5px;
+  width: 100%;
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+}
+
+caption {
+  align-self: bottom;
+  margin: 0.5rem;
+  font-weight: bold;
+}
+
+/* -------------------------------------------------------------------------- */
+/* for mobile */
+@media screen and (max-width: 667px) {
+  div.main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  div.nav {
+    width: 100%;
+    border: 200px gray;
+  }
+
+  div.nav.li {
+    margin-bottom: 0.5rem;
+  }
+
+  div.article {
+    width: 100%;
+    margin: 0.5rem;
+    /* margin-left: 5%; */
+    /* margin-rigth: 5%; */
+  }
+
+}
+
+/* -------------------------------------------------------------------------- */
+/* copy code style from xah blog */
+pre {font-family: "Courier", monospace;}
+
+pre.bash,
+pre.bash-output,
+pre.bbcode,
+pre.code,
+pre.cpp,
+pre.css,
+pre.emacs-lisp,
+pre.lua,
+pre.html,
+pre.java,
+pre.js,
+pre.mathematica,
+pre.ocaml,
+pre.org-mode,
+pre.output,
+pre.perl,
+pre.python,
+pre.python3,
+pre.ruby,
+pre.xml
+{
+  min-width:44%;
+  white-space:pre-wrap;
+  background-color:#eeeeee;
+  border:solid thin grey;
+  padding:.5rem;
+  margin:.5rem;
+  border-radius: 1rem;
+}
+
+pre:before {content:"";
+  position:relative;
+  top:-1ex;
+  right:0;
+  float:right;
+  color:black;
+  text-shadow: 0.2ex 0.2ex 0.2ex white;
+}
+
+pre.bash {background-color:hsl(22,24%,85%)}
+pre.bash-output {background-color:hsl(204,81%,95%)}
+pre.bash:before {content:"bash"}
+pre.code {background-color:hsl(0,0%,95%)}
+pre.css {background-color:hsl(160,50%,97%)}
+pre.css:before {content:"CSS"}
+pre.emacs-lisp {background-color:hsl(120,100%,98%)}
+pre.emacs-lisp:before {content:"emacs lisp"}
+pre.lua {background-color:hsl(22,24%,85%)}
+pre.lua:before {content:"Lua"}
+pre.html {background-color:hsl(244,61%,90%)}
+pre.html:before {content:"HTML"}
+pre.java {background-color:hsl(280,50%,97%)}
+pre.java:before {content:"Java"}
+pre.js {background-color:hsl(70,50%,95%)}
+pre.js:before {content:"JavaScript"}
+pre.mathematica {background-color:hsl(103,47%,82%)}
+pre.mathematica:before {content:"Wolfram Language"}
+pre.ocaml {background-color: hsl(180,50%,97%)}
+pre.ocaml:before {content:"OCaml"}
+pre.org-mode {background-color:hsl(158,27%,75%)}
+pre.output {background-color:hsl(0,0%,95%)}
+pre.perl {background-color:hsl(200,50%,98%)}
+pre.perl:before {content:"Perl"}
+pre.python {background-color:hsl(159,40%,92%)}
+pre.python3 {background-color:hsl(165,49%,86%)}
+pre.python3:before {content:"Python 3"}
+pre.python:before {content:"Python 2"}
+pre.ruby {background-color:hsl(90,50%,97%)}
+pre.ruby:before {content:"Ruby"}
+pre.xml {background-color:hsl(230,50%,95%)}
+pre.xml:before {content:"XML"}
+
+pre .bold {font-weight:bold}
+pre .builtin {color:#483d8b}
+pre .comment {color:#b22222}
+pre .comment-delimiter {color:#b22222}
+pre .constant {color:#008b8b}
+pre .doc {color:#8b2252}
+pre .function-name {color:#0000ff}
+pre .keyword {color:#a020f0}
+pre .preprocessor {color:hsl(314,19%,30%);background-color:silver}
+pre .string {color:#8b2252}
+pre .type {color:#228b22}
+pre .underline {text-decoration:underline}
+pre .variable-name {color:#a0522d}
+pre .warning {color:#ff0000;font-weight:bold}
+
+span.css-property {color:#a0522d}
+span.css-selector {color:#0000ff}
+span.xah-css-id-selector {color:darkred}
+
+.xahk-mode-command-name {color:#0000ff}
+
+pre .xah-elisp-command {color:#228b22}
+pre .xah-elisp-dollar-symbol {font-weight: bold;color:darkgreen;}
+pre .xah-elisp-at-symbol { font-weight:bold; color:#ff0000; }
+pre .xah-elisp-cap-variable { font-weight:bold; color:#b22222; }
+
+.tuareg-font-lock-governing { color: #000000; font-weight: bold; }
+.tuareg-font-lock-operator { color: #a52a2a; }
+.tuareg-font-lock-constructor { color: #000000; background-color: #f0fff0; }
+.tuareg-font-lock-module { color: #228b22; }
+
+.cperl-array {color:#0000ff;background-color:#eeeed1;font-weight:bold}
+.cperl-hash {color:#ff0000;background-color:#eeeed1;font-weight:bold;font-style:italic}
+.cperl-nonoverridable {color:#66cd00}
+
+pre.xml span.sgml-namespace {color:#da70d6}
