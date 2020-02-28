@@ -73,8 +73,71 @@
  )
 )
 
+;; 下面这两个键模拟Vi的光标不动屏幕动效果, 我很喜欢, 几乎总在使用.
+(global-set-key [(meta n)] 'window-move-up)        
+(global-set-key [(meta p)] 'window-move-DOWN)
+;; 同上, 但是是另一个buffer窗口上下移动. 常常查看帮助用这个.
+(global-set-key [(control N)] 'other-window-move-down)
+(global-set-key [(control P)] 'other-window-move-up)
 
 ;;;
+;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
+;; (define-prefix-command 'comma-map)
+;; (global-set-key (kbd ",") 'comma-map)
+;; (global-set-key [(meta c)] 'meta-c-map)
+
+;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
+ (add-hook 'isearch-mode-hook
+ '(lambda ()
+;; 搜索下一个结果
+ (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
+;; 搜索前一个结果
+(define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
+;; 替换
+ (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
+;; 正则替换
+ (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
+ (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
+;; 剪切板作为搜索内容
+ (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
+;; 将光标到行尾作为搜索内容
+ (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
+(define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
+;; 向左或向右(选择/取消)单个字符作为搜索内容
+(define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
+;; 显示occur视图
+(define-key isearch-mode-map [(meta o)] 'isearch-occur)
+;; 单词搜索
+ (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
+ (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
+))
+
+;; ------------------------------下面是上面用到的函数定义------------------------------
+(defun window-move-up (&optional arg)
+	"Current window move-up 2 lines."
+	(interactive "P")
+	(if arg
+		(scroll-up arg)
+		(scroll-up 2)))
+
+(defun window-move-down (&optional arg)
+	"Current window move-down 3 lines."
+	(interactive "P")
+	(if arg
+		(scroll-down arg)
+		(scroll-down 3)))
+
+		(defun other-window-move-up (&optional arg)
+		"Other window move-up 1 lines."
+		(interactive "p")
+		(scroll-other-window arg))
+
+(defun other-window-move-down (&optional arg)
+	"Other window move-down 2 lines."
+	(interactive "P")
+	(if arg
+		(scroll-other-window-down arg)
+	(scroll-other-window-down 2)))
 
 
 ;; C-x C-q set/unset readonly

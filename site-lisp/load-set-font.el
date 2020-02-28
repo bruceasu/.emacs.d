@@ -46,7 +46,7 @@
   "加载默認字体。"
   (interactive)
   ;(set-default-font "Migu 1M Less-12")
-  (set-default-font "Monospace-12")
+  (set-default-font "等距更纱黑体 SC-12")
   (set-fontset-font (frame-parameter nil 'font) 'han '("Simsun" . "unicode-bmp"))
   (setq loaded-font-type 0)
   (setq-default line-spacing 1)
@@ -56,9 +56,9 @@
 (defun load-program-font ()
   "加载开发字体。"
   (interactive)
-  (set-frame-font "VictorMono-12")
+  (set-frame-font "等距更纱黑体 SC-12")
   (set-fontset-font (frame-parameter nil 'font)
-            'han '("Sarasa Mono SC" . "unicode-bmp"))
+            'han '("等距更纱黑体 SC" . "unicode-bmp"))
   (setq loaded-font-type 1)
   (message "設置開發字體 ")
   (setq default-fill-column 79)
@@ -163,7 +163,7 @@
 ;;         (set-face-attribute 'default nil :font "Migu 1M Less-12")
 ;;         (dolist (charset '(kana han cjk-misc bopomofo))
 ;;            (set-fontset-font "fontset-default"
-;;               charset (font-spec :name "Sarasa Mono SC")))
+;;               charset (font-spec :name "等距更纱黑体 SC")))
 ;;         )
 ;;     )
 ;; )
