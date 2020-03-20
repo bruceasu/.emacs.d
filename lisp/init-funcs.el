@@ -97,7 +97,7 @@
 ;; =========================================================
 ;; Browse the homepage
 (defun browse-homepage ()
-  "Browse the Github page of Centuar Emacs."
+  "Browse the Github page of Suk Emacs."
   (interactive)
   (browse-url suk-homepage))
 
@@ -122,7 +122,7 @@
         (progn
           (message "Updating Emacs configurations...")
           (cd dir)
-          (shell-command "git pull")
+          (shell-command "git pull --rebase")
           (message "Update finished. Restart Emacs to complete the process."))
       (message "\"%s\" doesn't exist." dir))))
 

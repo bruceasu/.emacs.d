@@ -102,6 +102,7 @@
 (require 'init-projectile)
 (require 'init-c)
 (require 'init-web)
+(require 'init-meghanada)
 (require 'init-ide)
 ;; windows 下表现不好
 ;;(require 'init-snails)
@@ -113,3 +114,4 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here
+(put 'scroll-left 'disabled nil)

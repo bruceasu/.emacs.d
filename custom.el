@@ -8,7 +8,7 @@
 (setq suk-full-name "Bruce Asu")              ; User full name
 (setq suk-mail-address "bruceasu@163.com")    ; Email address
 ;; (setq suk-proxy "127.0.0.1:1080")          ; Network proxy
-;;(setq suk-package-archives 'emacs-china)    ; Package repo: melpa, melpa-mirror, emacs-china netease or tuna
+(setq suk-package-archives 'emacs-china)    ; Package repo: melpa, melpa-mirror, emacs-china netease or tuna
 ;; (setq suk-theme 'classic)                  ; Color theme: default, classic, doom, dark, light or daylight
 (setq suk-cnfonts t)                          ; Use cnfonts not: t or nil
 ;; (setq suk-dashboard nil)                   ; Use dashboard at startup or not: t or nil
@@ -56,6 +56,12 @@
 ;;     (set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")))
 ;;   )
 
+(when (eq system-type 'windows-nt)
+  (setq locale-coding-system 'gb18030)  ;此句保证中文字体设置有效
+  (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
+  (setq file-name-coding-system 'gb18030) ; 设置文件名的编码为gb18030
+  )
+  
 ;; Misc.
 (setq confirm-kill-emacs 'y-or-n-p)
 
