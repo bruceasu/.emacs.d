@@ -104,6 +104,8 @@
 (require 'init-web)
 (require 'init-meghanada)
 (require 'init-ide)
+(require 'init-lazy-search)
+;;(require 'init-nox)
 ;; windows 下表现不好
 ;;(require 'init-snails)
 ;; (require 'init-xah-fly-keys)

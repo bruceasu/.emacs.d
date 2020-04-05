@@ -26,7 +26,6 @@
 (require 'load-calendar)
 (require 'load-epa)
 (require 'ox-html5presentation)
-(require 'load-set-font)
 ;;(require 'redo)
 ;;(require 'tabbar)
 ;;(require 'load-tabbar)

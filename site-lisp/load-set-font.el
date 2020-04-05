@@ -23,8 +23,6 @@
 ;;               :slant 'normal
 ;;               :size 16.5)))
 
-
-
 ;; 默认用宋体
 ;; (dolist (charset '(kana han symbol cjk-misc bopomofo))
 ;;   (set-fontset-font (frame-parameter nil 'font)
@@ -39,58 +37,75 @@
 ;; (set-fontset-font (frame-parameter nil 'font) 'japanese-jisx0208 '("Meiryo" ."unicode-bmp"))
 
 (defvar loaded-font-type 0)
-(defvar loaded-font-type-num 4)
+(defvar loaded-font-type-num 3)
 
-;----------------------------------------------------------
-(defun load-default-font ()
-  "加载默認字体。"
-  (interactive)
-  ;(set-default-font "Migu 1M Less-12")
-  (set-default-font "等距更纱黑体 SC-12")
-  (set-fontset-font (frame-parameter nil 'font) 'han '("Simsun" . "unicode-bmp"))
-  (setq loaded-font-type 0)
-  (setq-default line-spacing 1)
-  (message "設置默認字體 ")
-)
 ;----------------------------------------------------------
 (defun load-program-font ()
   "加载开发字体。"
   (interactive)
-  (set-frame-font "等距更纱黑体 SC-12")
-  (set-fontset-font (frame-parameter nil 'font)
-            'han '("等距更纱黑体 SC" . "unicode-bmp"))
+  ;; Set a default font
+  (set-face-attribute 'default nil :font "Victor Mono 12")
+  ;;(set-face-attribute 'default nil :font "Victor Mono-12");; linux
+  ;;(set-face-attribute 'default nil :font "Source Code Pro"))
+  ;;(set-face-attribute 'default nil :font "Menlo"))
+  ;;(set-face-attribute 'default nil :font "Monaco"))
+  ;;(set-face-attribute 'default nil :font "DejaVu Sans Mono"))
+  ;;(set-face-attribute 'default nil :font "Consolas")))
+
+  ;; Specify font for chinese characters
+  (set-fontset-font (frame-parameter nil 'font) 
+  	'han  '("Simsun" . "unicode-bmp"))
+  	;;'han  '("PMingliU" . "unicode-bmp"))
+  	;;'han  '("AR PL UKai CN" . "unicode-bmp"))
+  	;;'han  '("AR PL UMing CN" . "unicode-bmp"))
+  	;;'han  '("WenQuanYi Micro Hei" . "unicode-bmp"))
+  	;;'han  '("Microsoft Yahei" . "unicode-bmp"))
+  
   (setq loaded-font-type 1)
   (message "設置開發字體 ")
-  (setq default-fill-column 79)
 )
 ;----------------------------------------------------------
 
 (defun load-article-font ()
   "加载文章用字体。"
   (interactive)
-  (set-frame-font "Times New Roman-12")
+  (set-frame-font "Times New Roman 12")
+  ;; (set-frame-font "Times New Roman-12") ;; linux
   (set-fontset-font (frame-parameter nil 'font)
-            'han '("Simsun" . "unicode-bmp"))
+            'han '("PMingliU" . "unicode-bmp"))
   (setq loaded-font-type 2)
   (setq-default line-spacing 5)
   (message "設置文章字體 ")
-  (setq default-fill-column 72)
 )
-;----------------------------------------------------------
 
-(defun load-org-font ()
-  "加载org-mode字体。"
+
+;----------------------------------------------------------
+(defun load-default-font ()
+  "加载默認字体。"
   (interactive)
-  (set-default-font "Migu 1M Less-12")
-  (set-fontset-font (frame-parameter nil 'font)
-            'han '("Simsun" . "unicode-bmp"))
-  (setq loaded-font-type 3)
-  (setq-default line-spacing 5)
-  (message "設置org-mode字體 ")
-  (setq default-fill-column 77)
+  (load-program-font)
+  (setq loaded-font-type 0)
+  (setq-default line-spacing 1)
+  (message "設置默認字體 ")
 )
+
 ;;; ----------------------------------------------------------
 
+(with-eval-after-load 'org
+
+	(defun load-org-font ()
+	  "加载org-mode字体。"
+	  (interactive)
+	  (make-face 'width-font-face)
+	  (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC 12")
+	  (setq buffer-face-mode-face 'width-font-face)
+	  (buffer-face-mode)
+	  (setq loaded-font-type 3)
+	  (setq-default line-spacing 5)
+	  (message "設置org-mode字體")
+	)
+  (add-hook 'org-mode-hook 'load-org-font))
+  
 (defun toggle-font ()
   "toggle font between program envirement and article envirement."
   (interactive)
@@ -107,20 +122,7 @@
          (load-program-font))
         ((eq loaded-font-type 2)
          (load-article-font))
-        ((eq loaded-font-type 3)
-         (load-org-font))
         )
-  (if (eq line-spacing 1)
-      (setq-default line-spacing 5)
-    (setq-default line-spacing 1))
-
-  (if (eq line-spacing 1)
-      (load-program-font)
-    (load-article-font))
-  (if (eq line-spacing 1)
-      (color-theme-comidia)
-    (color-theme-ld-dark)
-    )
   )
 
 
@@ -142,7 +144,7 @@
 
 ;; ------------------------------------------------------
 ;; 设置不同操作系统使用不同的字体
-;; (defun my--set-font (&optional frame)
+;; (defun my-set-font (&optional frame)
 ;;     ;; (load-default-font)
 ;;     (with-selected-frame (or frame (selected-frame))
 ;;         (if (string-equal system-type "windows-nt")
@@ -169,7 +171,7 @@
 ;; )
 
 ;; 运行一下立即设置字体。
-;; (my--set-font)
+;; (my-set-font)
 ;; (load-default-font)
 
 

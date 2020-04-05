@@ -112,8 +112,8 @@
                 (minibuffer-setup . solaire-mode-in-minibuffer)
                 (after-load-theme . solaire-mode-swap-bg)))
 
-       ;;(use-package doom-modeline
-       ;;  :hook (after-init . doom-modeline-init))
+;;       (use-package doom-modeline
+;;         :hook (after-init . doom-modeline-init))
     )
   (progn
     (ignore-errors
@@ -147,6 +147,10 @@
 (setq inhibit-compacting-font-caches t) ;
 
 ;; Fonts
+(set-frame-font "Victor Mono 12")
+;; (set-frame-font "Simsun 12")
+(require 'load-set-font)
+
 (when (and suk-cnfonts (display-graphic-p))
   ;; cnfonts doesn't support terminal
   (use-package cnfonts
@@ -166,6 +170,43 @@
     (setq cnfonts--profiles-steps '(("program-normal" . 4)
                                     ("org-mode" . 6)
                                     ("read-book" . 8)))))
+;; (when (and (not suk-cnfonts) (display-graphic-p))
+;;   ;; Set a default font
+;;   (cond
+;;    ((member "Source Code Pro" (font-family-list))
+;;     (set-face-attribute 'default nil :font "Source Code Pro"))
+;;    ((member "Menlo" (font-family-list))
+;;     (set-face-attribute 'default nil :font "Menlo"))
+;;    ((member "Monaco" (font-family-list))
+;;     (set-face-attribute 'default nil :font "Monaco"))
+;;    ((member "DejaVu Sans Mono" (font-family-list))
+;;     (set-face-attribute 'default nil :font "DejaVu Sans Mono"))
+;;    ((member "Consolas" (font-family-list))
+;;     (set-face-attribute 'default nil :font "Consolas")))
+
+;;   (cond
+;;    (sys/mac-x-p
+;;     (set-face-attribute 'default nil :height 130))
+;;    (sys/win32p
+;;     (set-face-attribute 'default nil :height 110)))
+
+;;   ;; Specify font for all unicode characters
+;;   (when (member "Symbola" (font-family-list))
+;;     (set-fontset-font t 'unicode "Symbola" nil 'prepend))
+
+;;   ;; Specify font for chinese characters
+;;   (cond
+;;    ((member "WenQuanYi Micro Hei" (font-family-list))
+;;     (set-fontset-font t '(#x4e00 . #x9fff) "WenQuanYi Micro Hei"))
+;;    ((member "Microsoft Yahei" (font-family-list))
+;;     (set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")))
+;;   )
+
+(when (eq system-type 'windows-nt)
+  (setq locale-coding-system 'gb18030)  ;此句保证中文字体设置有效
+  (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
+  (setq file-name-coding-system 'gb18030) ; 设置文件名的编码为gb18030
+  )
 
 ;; Line and Column
 (setq-default fill-column 80)
