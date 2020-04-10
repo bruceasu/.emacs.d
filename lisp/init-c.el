@@ -30,7 +30,7 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'init-custom))
+  (require '+custom))
 
 ;; C/C++ Mode
 (use-package cc-mode

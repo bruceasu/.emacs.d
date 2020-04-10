@@ -30,8 +30,8 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'init-const)
-  (require 'init-custom))
+  (require '+const)
+  (require '+custom))
 
 ;; Git
 (use-package magit

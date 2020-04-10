@@ -1,4 +1,4 @@
-;; init-const.el --- Define constants.	-*- lexical-binding: t -*-
+;; +const.el --- Define constants.	-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -78,7 +78,7 @@
       (and (= emacs-major-version 25) (>= emacs-minor-version 2)))
   "Emacs is 25.2 or above.")
 
-(provide 'init-const)
+(provide '+const)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init-const.el ends here
+;;; +const.el ends here

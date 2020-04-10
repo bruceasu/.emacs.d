@@ -30,8 +30,8 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'init-const)
-  (require 'init-custom))
+  (require '+const)
+  (require '+custom))
 
 ;; Logo
 (setq fancy-splash-image suk-logo)
@@ -125,6 +125,7 @@
 
   ))
 
+
 (require 'awesome-tab)
 (awesome-tab-mode t)
 
@@ -147,7 +148,7 @@
 (setq inhibit-compacting-font-caches t) ;
 
 ;; Fonts
-(set-frame-font "Victor Mono 12")
+(set-frame-font "AR PL UKai CN-12")
 ;; (set-frame-font "Simsun 12")
 (require 'load-set-font)
 

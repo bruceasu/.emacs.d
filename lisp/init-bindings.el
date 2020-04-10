@@ -32,7 +32,7 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'init-custom))
+  (require '+custom))
 
 ;; M-x global-set-key RET 交互式的绑定你的键。
 ;; C-x Esc Esc 调出上一条“复杂命令”
@@ -93,15 +93,14 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
       '([M-f10]              aweshell-prev)
       '([M-f11]              aweshell-next)
       '([M-f9]               aweshell-new)
-      '([C-f2]               xah-new-empty-buffer)
-      ;; '([f2]             calendar)
-      '([S-f2]            gnus)
-      '([C-f1]          toggle-font)
- ))
+      '([S-f2]               suk/new-empty-buffer)
+      '([f2]             hs-toggle-hiding)
+      ;; '([C-f2]            gnus)
+      '([S-f1]          snails)
+      ))
+
 (global-set-key  (kbd "S-SPC") 'set-mark-command)
 (global-set-key "\C-c\C-i" 'indent-region) ; C-u C-c TAB => (un)indent-region
-(global-set-key (kbd "C-x k") 'xah-close-current-buffer)
-(global-set-key (kbd "C-S-t") 'xah-open-last-closed) ; control+shift+t
 
 ;; global-set-key examples:
 ;; (global-set-key (kbd "C-x C-\\") 'next-line)

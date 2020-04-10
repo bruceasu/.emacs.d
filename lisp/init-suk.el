@@ -1,5 +1,5 @@
 (eval-when-compile
-  (require 'init-custom))
+  (require '+custom))
 
 ;; Ó¢Óï×Ô¶¯²¹È«
 (require 'company-english-helper)
@@ -29,8 +29,9 @@
 ;;(require 'tabbar)
 ;;(require 'load-tabbar)
 
-;(require 'color-theme-molokai)
-;(color-theme-molokai)
+;; new version is not support
+;;(require 'color-theme-molokai)
+;;(color-theme-molokai)
 
 (require 'org-download)
 ;; Drag-and-drop to `dired`

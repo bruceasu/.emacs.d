@@ -30,7 +30,7 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'init-custom))
+  (require '+custom))
 
 (use-package css-mode
   :ensure nil

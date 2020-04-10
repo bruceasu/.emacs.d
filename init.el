@@ -69,11 +69,12 @@
 
 (update-load-path)
 
+(require '+autoload)
 ;; Constants
-(require 'init-const)
+(require '+const)
 
 ;; Customization
-(require 'init-custom)
+(require '+custom)
 
 ;; Packages
 ;; Without this comment Emacs25 adds (package-initialize) here
@@ -81,36 +82,32 @@
 ;; Preferences
 (require 'init-basic)
 (require 'init-bindings)
-(require 'init-funcs)
 (require 'init-ui)
-(require 'init-edit)
 
 (require 'init-ivy)
-(require 'init-highlight)
-(require 'init-ibuffer)
-(require 'init-kill-ring)
-(require 'init-eshell)
-(require 'init-shell)
 (require 'init-org)
 (require 'init-utils)
-;;(require 'init-bbbd)
+(require 'init-bbdb)
 
 ;; Programming
 (require 'init-vcs)
 (require 'init-flycheck)
 (require 'init-projectile)
-(require 'init-c)
+;; (require 'init-c)
 (require 'init-web)
 (require 'init-meghanada)
 (require 'init-ide)
 (require 'init-lazy-search)
-;;(require 'init-nox)
+
 ;; windows 下表现不好
-;;(require 'init-snails)
+(if sys/linuxp
+    (require 'init-snails))
+
 ;; 个人的一些特别设置
 (require 'init-suk)
 )
 
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here
 (put 'scroll-left 'disabled nil)

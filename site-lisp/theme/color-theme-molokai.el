@@ -5,7 +5,7 @@
 ;; Hazenberg and a darker variant by Hamish Stuart Macpherson.
 
 (eval-when-compile
-  (require 'color-theme))
+  (require 'color-theme-modern))
 
 (defun color-theme-molokai ()
   "Color theme based on the Molokai color scheme for vim."

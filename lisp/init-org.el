@@ -29,7 +29,7 @@
 
 ;;; Code:
 (eval-when-compile
-  (require 'init-const))
+  (require '+const))
 
 ;; 频繁打开/关闭输入法还是挺翻的，比如在连续输入章节或者列表项时，
 ;; 输入章节前面的 * 或者 列表项 前面的 * 或者 - 号，

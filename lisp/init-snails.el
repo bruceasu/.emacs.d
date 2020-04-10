@@ -8,6 +8,6 @@
 ;;; Code:
 (require 'snails)
 (provide 'init-snails)
-(snails)
+;; (snails)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init-snails.el ends here

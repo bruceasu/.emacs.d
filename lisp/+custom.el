@@ -1,4 +1,4 @@
-;; init-custom.el --- Define customizations.	-*- lexical-binding: t -*-
+;; +custom.el --- Define customizations.	-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -30,7 +30,7 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'init-const))
+  (require '+const))
 
 (defgroup suk nil
   "suk Emacs customizations."
@@ -60,17 +60,6 @@
           (const :tag "Emacs-China" emacs-china)
           (const :tag "Netease" netease)
           (const :tag "Tuna" tuna)))
-
-(defcustom suk-theme 'default
-  "Set color theme."
-  :type '(choice
-          (const :tag "Default theme" default)
-          (const :tag "Classic theme" classic)
-          (const :tag "Doom theme" doom)
-          (const :tag "Dark theme" dark)
-          (const :tag "Light theme" light)
-          (const :tag "Daylight theme" daylight)
-          symbol))
 
 (defcustom suk-cnfonts nil
   "Use cnfonts or not."
@@ -123,7 +112,7 @@ If Non-nil, use dashboard, otherwise will restore previous session."
               (if (file-exists-p file)
                   (load file)))))
 
-(provide 'init-custom)
+(provide '+custom)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init-custom.el ends here
+;;; +custom.el ends here

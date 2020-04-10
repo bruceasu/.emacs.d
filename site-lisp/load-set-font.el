@@ -1,4 +1,4 @@
-;;; Commentary: load-set-font.el --- load my fonts.
+ ;;; Commentary: load-set-font.el --- load my fonts.
 
 
 ;;; Code:
@@ -44,8 +44,8 @@
   "加载开发字体。"
   (interactive)
   ;; Set a default font
-  (set-face-attribute 'default nil :font "Victor Mono 12")
-  ;;(set-face-attribute 'default nil :font "Victor Mono-12");; linux
+  ;;(set-face-attribute 'default nil :font "Victor Mono 12")
+  (set-face-attribute 'default nil :font "Victor Mono Light-12");; linux
   ;;(set-face-attribute 'default nil :font "Source Code Pro"))
   ;;(set-face-attribute 'default nil :font "Menlo"))
   ;;(set-face-attribute 'default nil :font "Monaco"))
@@ -54,8 +54,8 @@
 
   ;; Specify font for chinese characters
   (set-fontset-font (frame-parameter nil 'font) 
-  	;; 'han  '("Simsun" . "unicode-bmp"))
-  	'han  '("PMingliU" . "unicode-bmp"))
+  	'han  '("Simsun" . "unicode-bmp"))
+  	;;'han  '("PMingliU" . "unicode-bmp"))
   	;;'han  '("AR PL UKai CN" . "unicode-bmp"))
   	;;'han  '("AR PL UMing CN" . "unicode-bmp"))
   	;;'han  '("WenQuanYi Micro Hei" . "unicode-bmp"))
@@ -70,7 +70,6 @@
   "加载文章用字体。"
   (interactive)
   (set-frame-font "Times New Roman 12")
-  ;; (set-frame-font "Times New Roman-12") ;; linux
   (set-fontset-font (frame-parameter nil 'font)
             'han '("PMingliU" . "unicode-bmp"))
   (setq loaded-font-type 2)
@@ -97,7 +96,8 @@
 	  "加载org-mode字体。"
 	  (interactive)
 	  (make-face 'width-font-face)
-	  (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC 12")
+	  ;;(set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC 12")
+	  (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC" :size 12) ;; linux
 	  (setq buffer-face-mode-face 'width-font-face)
 	  (buffer-face-mode)
 	  (setq loaded-font-type 3)
@@ -189,3 +189,4 @@
 
 (provide 'load-set-font)
 ;;; load-set-font.el ends here.
+
