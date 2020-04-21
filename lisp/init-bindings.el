@@ -69,10 +69,10 @@
       ;; '([f2]             calendar)
       '([f2]            gnus)
       '([C-f1]          toggle-font)
-      '([apps]          showOrHide)
+      '([apps]          hs-toogle-hiding)
  )
 )
-
+;; (global-set-key [f2] 'hs-toggle-hiding)
 ;; 下面这两个键模拟Vi的光标不动屏幕动效果, 我很喜欢, 几乎总在使用.
 (global-set-key [(meta n)] 'window-move-up)        
 (global-set-key [(meta p)] 'window-move-DOWN)
@@ -85,7 +85,7 @@
 ;; (define-prefix-command 'comma-map)
 ;; (global-set-key (kbd ",") 'comma-map)
 ;; (global-set-key [(meta c)] 'meta-c-map)
-
+0
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
  (add-hook 'isearch-mode-hook
  '(lambda ()

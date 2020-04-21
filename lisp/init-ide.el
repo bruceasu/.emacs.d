@@ -96,6 +96,16 @@
         try-expand-whole-kill              ;kill-ring里面补全
         ))
 
+;;代码折叠
+(add-hook 'c-mode-common-hook   'hs-minor-mode)
+(add-hook 'emacs-lisp-mode-hook 'hs-minor-mode)
+(add-hook 'java-mode-hook       'hs-minor-mode)
+(add-hook 'ess-mode-hook       'hs-minor-mode)
+(add-hook 'perl-mode-hook       'hs-minor-mode)
+(add-hook 'sh-mode-hook         'hs-minor-mode)
+(add-hook 'python-mode-hook         'hs-minor-mode)
+ 
+;; (global-set-key [f2] 'hs-toggle-hiding)
 
 (provide 'init-ide)
 
