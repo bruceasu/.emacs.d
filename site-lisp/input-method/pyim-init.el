@@ -23,7 +23,7 @@
 
 ;; pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
 ;; (setq pyim-default-scheme 'pyim-shuangpin)
-;; (setq pyim-default-scheme 'xiaohe-shuangpin)
+(setq pyim-default-scheme 'xiaohe-shuangpin)
 ;; 注意：
 ;; 
 ;; pyim 支持微软双拼（microsoft-shuangpin）和小鹤双拼（xiaohe-shuangpin）。
@@ -35,12 +35,14 @@
 ;; 我自己使用的中英文动态切换规则是：
 ;; 1. 光标只有在注释里面时，才可以输入中文。
 ;; 2. 光标前是汉字字符时，才能输入中文。
-;; 3. 使用 M-j 快捷键，强制将光标前的拼音字符串转换为中文。
+;; 3. 使用 M-j 快捷键(容易冲突，改成 M-i)，强制将光标前的拼音字符串转换为中文。
 (setq-default pyim-english-input-switch-functions
-              '(pyim-probe-dynamic-english
+              '(
+                pyim-probe-dynamic-english
                 pyim-probe-isearch-mode
                 pyim-probe-program-mode
                 pyim-probe-org-structure-template))
+
 (setq pyim-isearch-enable-pinyin-search t)
 
 (setq-default pyim-punctuation-half-width-functions
@@ -75,7 +77,7 @@
 ;; `pyim-delete-word' 从个人词库中删除当前高亮选择的词条。
 
 ;; 选词框显示5个候选词
-(setq pyim-page-length 2)
+(setq pyim-page-length 5)
 
 ;; 让 Emacs 启动时自动加载 pyim 词库
 ;;(add-hook 'emacs-startup-hook
@@ -124,8 +126,17 @@
 ;; 第二种方法：使用命令 `pyim-punctuation-translate-at-point' 只切换光标处标点的样式。
 
 ;; 第三种方法：设置变量 `pyim-translate-trigger-char' ，输入变量设定的字符会切换光标处标点的样式。
+;; 使用 ; 做次选
+(define-key pyim-mode-map ";"
+  (lambda ()
+    (interactive)
+    (pyim-page-select-word-by-number 2)))
 
-
+;; 使用 / 做三选
+(define-key pyim-mode-map "/"
+  (lambda ()
+    (interactive)
+    (pyim-page-select-word-by-number 3)))
 
 (require 'pyim-hyly)
 (pyim-hyly-enable)
