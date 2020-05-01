@@ -14,6 +14,10 @@
 ;;
 (global-set-key (kbd "M-s") 'lazy-search)
 
+;; bbyac
+(require 'bbyac)
+(bbyac-global-mode 1)
+
 ;;  ‰»Î∑®
 ;;(require 'zyoy)
 ;;(require 'rain)

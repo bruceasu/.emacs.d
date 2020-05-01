@@ -108,8 +108,6 @@
 ;;(require 'init-nox)
 ;; windows 下表现不好
 ;;(require 'init-snails)
-;; (require 'init-xah-fly-keys)
-;; (require 'init-ergoemacs-mode)
 ;; 个人的一些特别设置
 (require 'init-suk)
 )
