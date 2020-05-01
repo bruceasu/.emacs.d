@@ -38,8 +38,6 @@
 (suk-set-key-bindings 'global-set-key
   (list
       (list (kbd "C-x l")   'suk/count-brf-lines)
-      (list (kbd "C-c u")   'outline-up-heading)
-      (list (kbd "C-x a")   'align)
       (list (kbd "C-x M-a") 'align-regexp)
       (list (kbd "C-x x")   'suk/switch-major-mode)
       (list (kbd "C-x X")   'suk/get-mode-name)
@@ -64,18 +62,17 @@
       '([M-f10]              aweshell-prev)
       '([M-f11]              aweshell-next)
       '([M-f9]               aweshell-new)
-      ;; Ctrl-z 在普通PC中是undo, 在终端是转到后台。经常按错。把它做称开始选区文本吧。
-      '([C-z]               set-mark-command)
+      '([C-F2]               xah-new-empty-buffer)
+      ;; '([C-z]               set-mark-command)
       ;; '([f2]             calendar)
-      '([f2]            gnus)
+      '([S-f2]            gnus)
       '([C-f1]          toggle-font)
-      '([apps]          hs-toogle-hiding)
  )
 )
-;; (global-set-key [f2] 'hs-toggle-hiding)
+
 ;; 下面这两个键模拟Vi的光标不动屏幕动效果, 我很喜欢, 几乎总在使用.
-(global-set-key [(meta n)] 'window-move-up)        
-(global-set-key [(meta p)] 'window-move-DOWN)
+(global-set-key [(meta N)] 'window-move-up)        
+(global-set-key [(meta P)] 'window-move-DOWN)
 ;; 同上, 但是是另一个buffer窗口上下移动. 常常查看帮助用这个.
 (global-set-key [(control N)] 'other-window-move-down)
 (global-set-key [(control P)] 'other-window-move-up)
@@ -85,7 +82,7 @@
 ;; (define-prefix-command 'comma-map)
 ;; (global-set-key (kbd ",") 'comma-map)
 ;; (global-set-key [(meta c)] 'meta-c-map)
-0
+
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
  (add-hook 'isearch-mode-hook
  '(lambda ()

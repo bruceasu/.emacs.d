@@ -661,209 +661,28 @@ in that cyclic order."
 ;; The default port number for the socks server is 1080, if not specified otherwise.
 ;; =========================================================
 
+(defun my/unfill-paragraph (&optional region)
+    "Takes a multi-line paragraph and makes it into a single line of text."
+    (interactive (progn
+                   (barf-if-buffer-read-only)
+                   (list t)))
+    (let ((fill-column (point-max)))
+      (fill-paragraph nil region)))
+(bind-key "M-Q" 'my/unfill-paragraph)
 
-(defun xah-open-in-external-app (&optional @fname)
-  "Open the current file or dired marked files in external app.
-The app is chosen from your OS's preference.
+;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
+ (defun my/fill-or-unfill-paragraph (&optional unfill region)
+    "Fill paragraph (or REGION).
+  With the prefix argument UNFILL, unfill it instead."
+    (interactive (progn
+                   (barf-if-buffer-read-only)
+                   (list (if current-prefix-arg 'unfill) t)))
+    (let ((fill-column (if unfill (point-max) fill-column)))
+      (fill-paragraph nil region)))
+(bind-key "M-q" 'my/fill-or-unfill-paragraph)
 
-When called in emacs lisp, if @fname is given, open that.
+;; ====================================================
 
-URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
-Version 2019-11-04"
-  (interactive)
-  (let* (
-         ($file-list
-          (if @fname
-              (progn (list @fname))
-            (if (string-equal major-mode "dired-mode")
-                (dired-get-marked-files)
-              (list (buffer-file-name)))))
-         ($do-it-p (if (<= (length $file-list) 5)
-                       t
-                     (y-or-n-p "Open more than 5 files? "))))
-    (when $do-it-p
-      (cond
-       ((string-equal system-type "windows-nt")
-        (mapc
-         (lambda ($fpath)
-           (w32-shell-execute "open" $fpath)) $file-list))
-       ((string-equal system-type "darwin")
-        (mapc
-         (lambda ($fpath)
-           (shell-command
-            (concat "open " (shell-quote-argument $fpath))))  $file-list))
-       ((string-equal system-type "gnu/linux")
-        (mapc
-         (lambda ($fpath) (let ((process-connection-type nil))
-                            (start-process "" nil "xdg-open" $fpath))) $file-list))))))
-
-(defun xah-show-in-desktop ()
-  "Show current file in desktop.
- (Mac Finder, Windows Explorer, Linux file manager)
- This command can be called when in a file or in `dired'.
-
-URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
-Version 2019-11-04"
-  (interactive)
-  (let (($path (if (buffer-file-name) (buffer-file-name) default-directory )))
-    (cond
-     ((string-equal system-type "windows-nt")
-      (w32-shell-execute "open" default-directory))
-     ((string-equal system-type "darwin")
-      (if (eq major-mode 'dired-mode)
-          (let (($files (dired-get-marked-files )))
-            (if (eq (length $files) 0)
-                (shell-command (concat "open " default-directory))
-              (shell-command (concat "open -R " (shell-quote-argument (car (dired-get-marked-files )))))))
-        (shell-command
-         (concat "open -R " $path))))
-     ((string-equal system-type "gnu/linux")
-      (let (
-            (process-connection-type nil)
-            (openFileProgram (if (file-exists-p "/usr/bin/gvfs-open")
-                                 "/usr/bin/gvfs-open"
-                               "/usr/bin/xdg-open")))
-        (start-process "" nil openFileProgram $path))
-      ;; (shell-command "xdg-open .") ;; 2013-02-10 this sometimes froze emacs till the folder is closed. eg with nautilus
-      ))))
-
-(defun xah-open-in-vscode ()
-  "Open current file or dir in vscode.
-
-URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
-Version 2019-11-04"
-  (interactive)
-  (let (($path (if (buffer-file-name) (buffer-file-name) default-directory )))
-    (cond
-     ((string-equal system-type "darwin")
-      (shell-command (format "open -a Visual\\ Studio\\ Code.app \"%s\"" $path)))
-     ((string-equal system-type "windows-nt")
-      (shell-command (format "Code \"%s\"" $path)))
-     ((string-equal system-type "gnu/linux")
-      (shell-command (format "code \"%s\"" $path))))))
-
-(defun xah-open-in-terminal ()
-  "Open the current dir in a new terminal window.
-URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
-Version 2019-11-04"
-  (interactive)
-  (cond
-   ((string-equal system-type "windows-nt")
-    (let ((process-connection-type nil))
-      (start-process "" nil "powershell" "start-process" "powershell"  "-workingDirectory" default-directory)))
-   ((string-equal system-type "darwin")
-    (let ((process-connection-type nil))
-      (start-process "" nil "/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal" default-directory)))
-   ((string-equal system-type "gnu/linux")
-    (let ((process-connection-type nil))
-      (start-process "" nil "x-terminal-emulator"
-                     (concat "--working-directory=" default-directory))))))
-
-(defun xah-html-open-in-chrome-browser ()
-  "Open the current file or `dired' marked files in Google Chrome browser.
-Work in Windows, macOS, linux.
-URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
-Version 2019-11-10"
-  (interactive)
-  (let* (
-         ($file-list
-          (if (string-equal major-mode "dired-mode")
-              (dired-get-marked-files)
-            (list (buffer-file-name))))
-         ($do-it-p (if (<= (length $file-list) 5)
-                       t
-                     (y-or-n-p "Open more than 5 files? "))))
-    (when $do-it-p
-      (cond
-       ((string-equal system-type "darwin")
-        (mapc
-         (lambda ($fpath)
-           (shell-command
-            (format "open -a /Applications/Google\\ Chrome.app \"%s\"" $fpath)))
-         $file-list))
-       ((string-equal system-type "windows-nt")
-        ;; "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" 2019-11-09
-        (let ((process-connection-type nil))
-          (mapc
-           (lambda ($fpath)
-             (start-process "" nil "powershell" "start-process" "chrome" $fpath ))
-           $file-list)))
-       ((string-equal system-type "gnu/linux")
-        (mapc
-         (lambda ($fpath)
-           (shell-command (format "google-chrome-stable \"%s\"" $fpath)))
-         $file-list))))))
-
-(defun xah-html-open-link-in-chrome ()
-  "Open url under cursor in Google Chrome.
-Work in Windows, macOS, linux.
-Version 2019-11-10"
-  (interactive)
-  (let* (($inputStr
-          (if (use-region-p)
-              (buffer-substring-no-properties (region-beginning) (region-end))
-            (let ($p0 $p1 $p2
-                      ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
-              (setq $p0 (point))
-              (skip-chars-backward $pathStops)
-              (setq $p1 (point))
-              (goto-char $p0)
-              (skip-chars-forward $pathStops)
-              (setq $p2 (point))
-              (goto-char $p0)
-              (buffer-substring-no-properties $p1 $p2))))
-         ($path
-          (replace-regexp-in-string
-           "^file:///" "/"
-           (replace-regexp-in-string
-            ":\\'" "" $inputStr))))
-    (cond
-     ((string-equal system-type "darwin")
-      (shell-command (format "open -a Google\\ Chrome.app \"%s\"" $path)))
-     ((string-equal system-type "windows-nt")
-      ;; "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" 2019-11-09
-      (let ((process-connection-type nil))
-        (start-process "" nil "powershell" "start-process" "chrome" $path )))
-     ((string-equal system-type "gnu/linux")
-      (shell-command (format "google-chrome-stable \"%s\"" $path))))))
-
-(defun xah-html-open-link-in-firefox (&optional @fullpath)
-  "open url under cursor in Firefox browser.
-Work in Windows, macOS. 2019-11-09 linux not yet.
-Version 2019-11-09"
-  (interactive)
-  (let ($path)
-    (if @fullpath
-        (progn (setq $path @fullpath))
-      (let (($inputStr
-             (if (use-region-p)
-                 (buffer-substring-no-properties (region-beginning) (region-end))
-               (let ($p0 $p1 $p2
-                         ($pathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
-                 (setq $p0 (point))
-                 (skip-chars-backward $pathStops)
-                 (setq $p1 (point))
-                 (goto-char $p0)
-                 (skip-chars-forward $pathStops)
-                 (setq $p2 (point))
-                 (goto-char $p0)
-                 (buffer-substring-no-properties $p1 $p2)))))
-        (setq $path (replace-regexp-in-string
-                     "^file:///" "/"
-                     (replace-regexp-in-string
-                      ":\\'" "" $inputStr)))))
-    (cond
-     ((string-equal system-type "darwin")
-      (shell-command (format "open -a 'Firefox.app' \"%s\"" $path)))
-     ((string-equal system-type "windows-nt")
-      ;; "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" 2019-11-09
-      (let ((process-connection-type nil))
-        (start-process "" nil "powershell" "start-process" "firefox" $path )))
-     ((string-equal system-type "gnu/linux")
-      (shell-command (format "firefox \"%s\"" $path))))))
-
-
-;; ==================================================
 (defvar xah-recently-closed-buffers nil "alist of recently closed buffers. Each element is (buffer name, file path). The max number to track is controlled by the variable `xah-recently-closed-buffers-max'.")
 
 (defvar xah-recently-closed-buffers-max 40 "The maximum length for `xah-recently-closed-buffers'.")
@@ -964,6 +783,13 @@ Version 2017-11-01"
     ))
 
 
+(defun xah-toggle-margin-right ()
+  "Toggle the right margin between `fill-column' or window width.
+This command is convenient when reading novel, documentation."
+  (interactive)
+  (if (eq (cdr (window-margins)) nil)
+      (set-window-margins nil 0 (- (window-body-width) fill-column))
+    (set-window-margins nil 0 0)))
 
 (provide 'init-funcs)
 
