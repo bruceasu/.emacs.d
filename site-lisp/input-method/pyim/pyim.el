@@ -631,7 +631,7 @@ plist 来表示，比如：
      :document "胡言乱语输入法，采用小鹤双拼+快手辅助码。"
      :class xingma
      :first-chars "abcdefghijklmnopqrstuvwxyz;"
-     :rest-chars "abcdefghijklmnopqrstuvwxyz"
+     :rest-chars "abcdefghijklmnopqrstuvwxyz;"
      :code-prefix "." ; 词库中所有的 code 都以 "." 开头，防止词库冲突。
      :code-split-length 4 ; 默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
      :code-maximum-length 4 ; code 的最大长度（不计算 code-prefix）

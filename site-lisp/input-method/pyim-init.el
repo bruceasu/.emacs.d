@@ -23,7 +23,7 @@
 
 ;; pyim 支持双拼输入模式，用户可以通过变量 `pyim-default-scheme' 来设定：
 ;; (setq pyim-default-scheme 'pyim-shuangpin)
-(setq pyim-default-scheme 'xiaohe-shuangpin)
+;; (setq pyim-default-scheme 'xiaohe-shuangpin)
 ;; 注意：
 ;; 
 ;; pyim 支持微软双拼（microsoft-shuangpin）和小鹤双拼（xiaohe-shuangpin）。
