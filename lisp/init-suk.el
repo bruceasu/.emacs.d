@@ -5,14 +5,9 @@
 (require 'company-english-helper)
 ;; 中文自动翻译为英语
 ;; youdao / google
-(setq insert-translated-name-translate-engine "google")
+(setq insert-translated-name-translate-engine "youdao")
 (require 'insert-translated-name)
 
-;;  https://github.com/manateelazycat/lazy-search
-(require 'lazy-search)
-;; Bind any keystroke you like to `lazy-search'.
-;;
-(global-set-key (kbd "M-s") 'lazy-search)
 
 ;; bbyac
 (require 'bbyac)

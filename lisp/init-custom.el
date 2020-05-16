@@ -44,7 +44,7 @@
   "Set user full name."
   :type 'string)
 
-(defcustom suk-mail-address "seagle0128@gmail.com"
+(defcustom suk-mail-address "bruceasu@gmail.com"
   "Set user email address."
   :type 'string)
 

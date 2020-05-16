@@ -112,8 +112,8 @@
                 (minibuffer-setup . solaire-mode-in-minibuffer)
                 (after-load-theme . solaire-mode-swap-bg)))
 
-;;       (use-package doom-modeline
-;;         :hook (after-init . doom-modeline-init))
+      (use-package doom-modeline
+         :hook (after-init . doom-modeline-init))
     )
   (progn
     (ignore-errors
@@ -128,8 +128,8 @@
 (require 'awesome-tab)
 (awesome-tab-mode t)
 
-(require 'awesome-tray)
-(awesome-tray-mode 1)
+;;(require 'awesome-tray)
+;; (awesome-tray-mode 1)
 
 ;; Mode-line
 (defun mode-line-height ()
