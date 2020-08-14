@@ -1,4 +1,4 @@
-;;; init.el --- Centaur Emacs configurations.	-*- lexical-binding: t no-byte-compile: t; -*-
+;;; init.el --- Emacs configurations.	-*- lexical-binding: t no-byte-compile: t; -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 ;;
-;; Centaur Emacs configurations.
+;; Emacs configurations.
 ;;
 
 ;;; Code:
@@ -79,9 +79,8 @@
 ;; Without this comment Emacs25 adds (package-initialize) here
 (require 'init-package)
 ;; Preferences
-(require 'init-settings)
-(require 'init-bindings)
 (require 'init-basic)
+(require 'init-bindings)
 (require 'init-funcs)
 (require 'init-ui)
 (require 'init-edit)

@@ -282,7 +282,8 @@
         org-html-inline-images t
 
         ;;; Use org-manual.css from the norang website for export document stylesheets
-        org-html-head-extra "<link rel=\"stylesheet\" href=\"org-manual.css\" type=\"text/css\" />"
+        ;;; org-html-head-extra "<link rel=\"stylesheet\" href=\"org-manual.css\" type=\"text/css\" />"
+        
         org-html-head-include-default-style nil
         ;;; Do not generate internal css formatting for HTML exports
         org-export-htmlize-output-type (quote css)
@@ -714,6 +715,24 @@ Switch projects and subprojects from NEXT back to TODO"
 
 (setq org-time-stamp-rounding-minutes (quote (1 1)))
 
+(defun my-org-inline-css-hook (exporter)
+  "Insert custom inline css"
+  (when (eq exporter 'html)
+    (let* ((dir (ignore-errors (file-name-directory (buffer-file-name))))
+           (path (concat dir "org-manual.css"))
+           (homestyle (or (null dir) (null (file-exists-p path))))
+           (final (if homestyle "~/.emacs.d/documents/org-manual.css" path))) ;; <- set your own style file path
+      (setq org-html-head-include-default-style nil)
+      (setq org-html-head (concat
+                           "<style type=\"text/css\">\n"
+                           "<!--/*--><![CDATA[/*><!--*/\n"
+                           (with-temp-buffer
+                             (insert-file-contents final)
+                             (buffer-string))
+                           "/*]]>*/-->\n"
+                           "</style>\n")))))
+
+(add-hook 'org-export-before-processing-hook 'my-org-inline-css-hook)
 
 ;;; 更多的配置
 (require 'suk-org)

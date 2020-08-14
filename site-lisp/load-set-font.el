@@ -54,8 +54,8 @@
 
   ;; Specify font for chinese characters
   (set-fontset-font (frame-parameter nil 'font) 
-  	'han  '("Simsun" . "unicode-bmp"))
-  	;;'han  '("PMingliU" . "unicode-bmp"))
+  	;; 'han  '("Simsun" . "unicode-bmp"))
+  	'han  '("PMingliU" . "unicode-bmp"))
   	;;'han  '("AR PL UKai CN" . "unicode-bmp"))
   	;;'han  '("AR PL UMing CN" . "unicode-bmp"))
   	;;'han  '("WenQuanYi Micro Hei" . "unicode-bmp"))

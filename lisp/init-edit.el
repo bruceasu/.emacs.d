@@ -31,13 +31,14 @@
 
 ;; Explicitly set the prefered coding systems to avoid annoying prompt
 ;; from emacs (especially on Microsoft Windows)
-(prefer-coding-system 'utf-8)
+;; (prefer-coding-system 'utf-8)
 
 ;; Miscs
 ;; (setq initial-scratch-message nil)
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets) ; Show path if names are same
 (setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
 (setq adaptive-fill-first-line-regexp "^* *$")
+(setq kill-whole-line t)                   ; C-k deletes the end of line
 (setq delete-by-moving-to-trash t)         ; Deleting files go to OS's trash folder
 (setq make-backup-files nil)               ; Forbide to make backup files
 (setq auto-save-default nil)               ; Disable auto save
@@ -46,6 +47,7 @@
 
 (setq-default major-mode 'text-mode)
 
+;; 设置 sentence-end 可以识别中文标点。不用在 fill 时在句号后插 入两个空格。
 (setq sentence-end "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
 (setq sentence-end-double-space nil)
 
@@ -54,6 +56,23 @@
 (setq-default c-basic-offset   4
               tab-width        4
               indent-tabs-mode nil)
+;; chmod +x
+;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
+(add-hook 'after-save-hook
+          'executable-make-buffer-file-executable-if-script-p)
+
+;; delete file if empty
+;; ref. http://www.bookshelf.jp/cgi-bin/goto.cgi?file=meadow&node=delete%20nocontents
+(add-hook 'after-save-hook 'delete-file-if-no-contents t)
+(defun delete-file-if-no-contents ()
+  (when (and buffer-file-name (= (point-min) (point-max)))
+    (if (y-or-n-p "Delete file and kill buffer? ")
+      (let ((filename buffer-file-name))
+        (delete-file filename)
+        (kill-buffer (current-buffer))
+        (message (concat "Deleted " (file-name-nondirectory filename)))
+        ))))
+
 
 ;; Rectangle
 (use-package rect

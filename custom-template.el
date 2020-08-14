@@ -15,7 +15,6 @@
 ;; (setq suk-lsp nil)                         ; Set LSP client: lsp-mode, eglot or nil
 ;; (setq suk-ivy-icon nil)                    ; Display icons in ivy or not: t or nil
 ;; (setq suk-pretty-magit nil)                ; Prettify magit or not: t or nil
-;; (setq suk-company-enable-yas t)            ; Enable yasnippet for company or not: t or nil
 ;; (setq suk-benchmark t)                     ; Enable initialization benchmark or not: t or nil
 
 ;; For Emacs devel

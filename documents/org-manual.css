@@ -342,3 +342,7 @@ img.random {
     overflow: auto;
   }
 } /* END OF @media screen */
+
+#content  .org-center * {
+	text-align: center;
+}

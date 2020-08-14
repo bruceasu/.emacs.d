@@ -34,7 +34,7 @@
   (require 'init-custom))
 
 ;; =========================================================
-;; 换行符设置
+;; 换行符设置(只是设定保存文件的换行符，并不是转换文件)
 ;; Dos2Unix/Unix2Dos
 ;; ---------------------------------------------------------
 (defun dos2unix ()
@@ -46,8 +46,25 @@
   "Convert the current buffer to DOS file format."
   (interactive)
   (set-buffer-file-coding-system 'undecided-dos nil))
-;; =========================================================
 
+;; 以DOS格式重读文件（UNIX格式类似）
+;; C-x C-m r dos
+
+;; If you have a mix of lines that end in ^M and lines that don’t, you can use
+;; ‘M-x replace-string RET C-q C-m RET’ to remove the ^M’s. ‘C-q’ quotes the key
+;; you press right after it, letting you insert a ^M character. Typing ‘C-m’
+;; won’t work – you have to hold down ‘Control’ while hitting ‘q’ followed by
+;; ‘m’.
+
+(defun no-junk-please-were-unixish ()
+  ""
+  (let ((coding-str (symbol-name buffer-file-coding-system)))
+    (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
+      (set-buffer-file-coding-system 'unix))))
+
+(add-hook 'find-file-hooks 'no-junk-please-were-unixish)
+
+;; =========================================================
 ;; 另外一种解决乱码的办法，就是用命令
 ;; C-x <RET> r or M-x revert-buffer-with-coding-system
 ;; 来用指定的编码重新读入这个文件。
@@ -58,34 +75,37 @@
 ;; 5. 设定下一步操作的编码格式：C-x <RET> c，（universal-coding-system-argument）
 ;; Revert buffer
 (defun suk/revert-current-buffer ()
-  "Revert the current buffer."
+  "Revert the current buffer. key \\[suk/revert-current-buffer]."
   (interactive)
   (message "Revert this buffer.")
   (revert-buffer t t))
 
 (defun suk/revert-buffer-no-confirm ()
-  "执行`revert-buffer'时不需要确认"
+  "执行`revert-buffer'时不需要确认. key \\[suk/revert-current-buffer]."
   (interactive)
   (when (buffer-file-name)
     (revert-buffer buffer-file-name t)
    )
-)
+  )
+
 ;;; =========================================================
 ;;; 用新编码重新读取文件
 ;;; ---------------------------------------------------------
 (defun suk/revert-buffer-with-coding-system-no-confirm (coding-system)
-  "Call `revert-buffer-with-coding-system', but when `revert-buffer' do not need confirm."
+  "Call `revert-buffer-with-coding-system' with CODING-SYSTEM, but when `revert-buffer' do not need confirm."
   (interactive "Coding system for visited file (default nil): ")
   (let ((coding-system-for-read coding-system))
     (suk/revert-buffer-no-confirm)))
 ;;; ---------------------------------------------------------
 (defun suk/revert-buffer-with-gbk ()
-  "Call `revert-buffer-with-coding-system-no-confirm' with gbk."
+  "Call `revert-buffer-with-coding-system-no-confirm' with gbk.
+It is bound to \\[suk/revert-buffer-with-gbk]."
   (interactive)
-  (suk/revert-buffer-with-coding-system-no-confirm 'gbk))
+  (suk/revert-buffer-with-coding-system-no-confirm 'gb18030))
 ;;; ---------------------------------------------------------
 (defun suk/revert-buffer-with-utf8 ()
-  "Call `revert-buffer-with-coding-system-no-confirm' with utf-8."
+  "Call `revert-buffer-with-coding-system-no-confirm' with utf-8.
+It is bound to \\[suk/revert-buffer-with-utf8]."
   (interactive)
   (suk/revert-buffer-with-coding-system-no-confirm 'utf-8))
 ;;; =========================================================
@@ -662,7 +682,7 @@ in that cyclic order."
 ;; =========================================================
 
 (defun my/unfill-paragraph (&optional region)
-    "Takes a multi-line paragraph and makes it into a single line of text."
+    "Takes a multi-line paragraph (or REGION) and make it into a single line of text."
     (interactive (progn
                    (barf-if-buffer-read-only)
                    (list t)))
@@ -683,7 +703,8 @@ in that cyclic order."
 
 ;; ====================================================
 
-(defvar xah-recently-closed-buffers nil "alist of recently closed buffers. Each element is (buffer name, file path). The max number to track is controlled by the variable `xah-recently-closed-buffers-max'.")
+(defvar xah-recently-closed-buffers nil
+  "A list of recently closed buffers. Each element is (buffer name, file path). The max number to track is controlled by the variable `xah-recently-closed-buffers-max'.")
 
 (defvar xah-recently-closed-buffers-max 40 "The maximum length for `xah-recently-closed-buffers'.")
 
@@ -761,8 +782,8 @@ Version 2016-06-19"
     (mapc (lambda ($f) (insert (cdr $f) "\n"))
           xah-recently-closed-buffers)))
 
-(global-set-key (kbd "C-x k") 'xah-close-current-buffer)
-(global-set-key (kbd "C-S-t") 'xah-open-last-closed) ; control+shift+t
+;; (global-set-key (kbd "C-x k") 'xah-close-current-buffer)
+;; (global-set-key (kbd "C-S-t") 'xah-open-last-closed) ; control+shift+t
 
 ;; ==============================================
 
@@ -790,6 +811,8 @@ This command is convenient when reading novel, documentation."
   (if (eq (cdr (window-margins)) nil)
       (set-window-margins nil 0 (- (window-body-width) fill-column))
     (set-window-margins nil 0 0)))
+
+(fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
 
 (provide 'init-funcs)
 

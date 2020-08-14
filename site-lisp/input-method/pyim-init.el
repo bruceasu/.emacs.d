@@ -144,4 +144,23 @@
 '(pyim-dicts
   (quote
    ((:name "hyly" :file "~/.emacs.d/site-lisp/input-method/pyim-hyly/pyim-hyly.pyim"))))
+
+
+(defun pyim-autoselector-xingma (&rest args)
+  "适用于型码输入法的自动上屏器.
+
+比如：五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词
+条，自动选择可以减少按空格强制选词的机会。"
+  (let* ((scheme-name (pyim-scheme-name))
+         (class (pyim-scheme-get-option scheme-name :class))
+         (n (pyim-scheme-get-option scheme-name :code-split-length)))
+    (when (eq class 'xingma)
+      (cond
+       ((and (= (length (pyim-entered-get)) n)
+             (= (length pyim-candidates) 1))
+        '(:select current))
+       ((> (length (pyim-entered-get)) n)
+        '(:select last))
+       (t nil)))))
+
 (provide 'pyim-init)
