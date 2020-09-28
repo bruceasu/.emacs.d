@@ -40,6 +40,8 @@
 (when (version< emacs-version "25.1")
   (error "This requires Emacs 25.1 and above!"))
 
+;; 图形界面插件的设置
+(setq graphic-only-plugins-setting ())
 ;; Speed up startup
 (defvar default-file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
@@ -52,11 +54,11 @@
             (add-hook 'focus-out-hook 'garbage-collect)))
 
 ;; Load path
-;; Optimize: Force "lisp"" and "site-lisp" at the head to reduce the startup time.
+;; Optimize: Force "etc"" and "site-lisp" at the head to reduce the startup time.
 (defun update-load-path (&rest _)
   "Update `load-path'."
   (push (expand-file-name "site-lisp" user-emacs-directory) load-path)
-  (push (expand-file-name "lisp" user-emacs-directory) load-path))
+  (push (expand-file-name "etc" user-emacs-directory) load-path))
 
 (defun add-subdirs-to-load-path (&rest _)
   "Add subdirectories to `load-path'."
@@ -81,6 +83,10 @@
 (require 'init-package)
 ;; Preferences
 (require 'init-basic)
+(require 'init-file-encoding)
+(require 'init-buffers)
+(require 'init-sudo)
+(require 'init-bookmark)
 (require 'init-bindings)
 (require 'init-ui)
 
@@ -90,12 +96,6 @@
 (require 'init-bbdb)
 
 ;; Programming
-(require 'init-vcs)
-(require 'init-flycheck)
-(require 'init-projectile)
-;; (require 'init-c)
-(require 'init-web)
-(require 'init-meghanada)
 (require 'init-ide)
 (require 'init-lazy-search)
 

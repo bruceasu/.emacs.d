@@ -1,4 +1,7 @@
-(provide 'load-abbrev)
+;;; Commentary:
+;;; my abbrev table
+
+;;; code:
 
 ;; sample use of emacs abbreviation feature
 
@@ -52,6 +55,11 @@
 ;; (setq save-abbrevs nil)
 
 ;; turn on abbrev mode globally
+;; 简写模式
 (setq-default abbrev-mode t)
+(setq save-abbrevs nil)
+(setq abbrev-file-name "~/.emacs.d/share/abbrev_definitions")
 
+(provide 'load-abbrev)
+;; load-abbrev.el ends here
 
