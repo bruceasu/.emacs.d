@@ -310,8 +310,13 @@
 (setq inhibit-compacting-font-caches t) ;
 
 ;; Fonts
-(set-frame-font "AR PL UKai CN-12")
-;; (set-frame-font "Simsun 12")
+(when (or sys/mac-x-p sys/linux-x-p)
+  (set-frame-font "AR PL UKai CN-12"))
+
+(when sys/win32p
+  (set-frame-font "Simsun 12"))
+
+
 (require 'load-set-font)
 
 (when (and suk-cnfonts (display-graphic-p))

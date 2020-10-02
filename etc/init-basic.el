@@ -265,6 +265,9 @@ This command is convenient when reading novel, documentation."
 (setq auto-save-list-file-prefix "~/.emacs.d/var/auto-save-list/.saves-")
 ;; 设置eshell历史记录
 (setq eshell-history-file-name "~/.emacs.d/var/eshell/history")
+  
+(defun suk-update-config ()
+  "Update suk Emacs configurations to the latest version."
   (interactive)
   (let ((dir (expand-file-name user-emacs-directory)))
     (if (file-exists-p dir)
