@@ -30,7 +30,8 @@
 ;;; Code:
 
 ;; 书签文件的路径及文件名
-(setq bookmark-default-file "~/tmp/emacs/.emacs.bmk")
+(setq bookmark-default-file "~/.emacs.d/var/emacs.bmk")
+
 ;; 同步更新书签文件 ;; 或者退出时保存
 (setq bookmark-save-flag 1)
 ;;C-x r m (name)  M-x bookmark-set  设置书签

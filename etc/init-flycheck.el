@@ -52,7 +52,7 @@
       'center))
   
   ;; Display Flycheck errors in GUI tooltips
-  (if (display-graphic-p)
+  (when (display-graphic-p)
 	  (use-package flycheck-posframe 
 		:ensure t 
 		:custom-face (flycheck-posframe-border-face

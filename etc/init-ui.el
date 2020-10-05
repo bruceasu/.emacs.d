@@ -50,9 +50,9 @@
 (use-package hl-line
   :ensure nil
   :hook (after-init . global-hl-line-mode))
+
 ;; 切换buffer焦点时高亮动画
-(use-package
-  beacon
+(use-package beacon
   :ensure t
   :hook (after-init . beacon-mode))
 
@@ -67,24 +67,10 @@
                  "%b"))))
 (setq icon-title-format frame-title-format)
 
-(when sys/mac-x-p
-  (add-to-list 'default-frame-alist '(ns-appearance . dark))
-  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-  (add-hook 'after-load-theme-hook
-            (lambda ()
-              (let ((bg (frame-parameter nil 'background-mode)))
-                (set-frame-parameter nil 'ns-appearance bg)
-                (setcdr (assq 'ns-appearance default-frame-alist) bg)))))
-
-;; Menu/Tool/Scroll bars
-(unless emacs/>=27p        ; Move to early init-file in 27
-  (unless sys/mac-x-p (menu-bar-mode -1))
-  (and (bound-and-true-p tool-bar-mode) (tool-bar-mode -1))
-  (and (fboundp 'scroll-bar-mode) (scroll-bar-mode -1)))
-
 ;; Theme
 (defvar after-load-theme-hook nil
   "Hook run after a color theme is loaded using `load-theme'.")
+
 (defadvice load-theme (after run-after-load-theme-hook activate)
   "Run `after-load-theme-hook'."
   (run-hooks 'after-load-theme-hook))
@@ -137,50 +123,44 @@
 
       (use-package doom-modeline
 		:ensure t
-		:init (doom-modeline-mode 1) 
+		:init
+		(doom-modeline-mode 1)
 		:config (setq doom-modeline-height 10)
-        :hook (after-init . doom-modeline-init))
+        :hook (after-init . doom-modeline-mode))
     )
   (progn
     (ignore-errors
       (suk-load-theme suk-theme))
-
-    (use-package telephone-line
-      :init (setq ns-use-srgb-colorspace nil)
-      :hook (after-init . telephone-line-mode))
-
-  ))
+    )
+  )
 
 ;; 竖线
-(use-package 
-  page-break-lines 
-  :ensure t 
-  :config (turn-on-page-break-lines-mode))
+(use-package page-break-lines
+  :ensure t
+  :config (page-break-lines-mode))
 
-(if suk-dashboard
-	;; 启动界面
-(use-package 
-  dashboard 
-  :ensure t 
+;; 启动界面
+(use-package dashboard
+  :ensure t
   :config (dashboard-setup-startup-hook)
-  (dashboard-modify-heading-icons '((recents . "file-text") 
-                                    (bookmarks . "book")))
+  (dashboard-modify-heading-icons '((recents . "file-text")
+									(bookmarks . "book")))
   ;; 设置标题
   (setq dashboard-banner-logo-title
-        "欢迎您使用此Emacs配置文件")
+		"欢迎您使用此Emacs配置文件")
   ;; 设置banner
-  (setq dashboard-startup-banner fancy-splash-image) 
-  (setq dashboard-center-content t) 
-  (setq dashboard-set-heading-icons t) 
-  ;; (setq dashboard-set-file-icons t) 
-  (setq dashboard-set-navigator t)))
+  (setq dashboard-startup-banner fancy-splash-image)
+  (setq dashboard-center-content t)
+  (setq dashboard-set-heading-icons t)
+  ;; (setq dashboard-set-file-icons t)
+  (setq dashboard-set-navigator t))
 
 ;; 图标支持
-(use-package all-the-icons 
+(use-package all-the-icons
   :ensure t)
 ;; dired模式图标支持
-(use-package all-the-icons-dired 
-  :ensure t 
+(use-package all-the-icons-dired
+  :ensure t
   :hook ('dired-mode . 'all-the-icons-dired-mode))
 ;; 表情符号
 (use-package emojify
@@ -189,12 +169,11 @@
   :config
   (global-emojify-mode))
 ;; 浮动窗口支持
-(use-package posframe 
+(use-package posframe
   :ensure t)
 
 ;; 缩进线
-(use-package
-  indent-guide
+(use-package indent-guide
   :ensure t
   :hook (prog-mode . indent-guide-mode))
 
@@ -240,7 +219,6 @@
   (with-eval-after-load 'magit
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)))
 
-
 ;; Highlight matching paren
 (use-package paren
   :ensure nil
@@ -250,42 +228,9 @@
   (setq show-paren-when-point-in-periphery t))
 
 ;; 括号匹配
-(use-package 
-  smartparens 
-  :ensure t 
-  :hook ('prog-mode . 'smartparens-global-mode))
-
-;; 彩虹括号
-(use-package 
-  rainbow-delimiters 
-  :ensure t 
-  :config
-  ;; 设置每一级括号的颜色
-  (set-face-foreground 'rainbow-delimiters-depth-1-face "orange red") 
-  (set-face-foreground 'rainbow-delimiters-depth-2-face "gold") 
-  (set-face-foreground 'rainbow-delimiters-depth-3-face "yellow") 
-  (set-face-foreground 'rainbow-delimiters-depth-4-face "spring green") 
-  (set-face-foreground 'rainbow-delimiters-depth-5-face "cyan") 
-  (set-face-foreground 'rainbow-delimiters-depth-6-face "magenta") 
-  (set-face-foreground 'rainbow-delimiters-depth-7-face "goldenrod") 
-  (set-face-foreground 'rainbow-delimiters-depth-8-face "IndianRed1") 
-  (set-face-foreground 'rainbow-delimiters-depth-9-face "ivory1") 
-  (set-face-bold 'rainbow-delimiters-depth-1-face "t") 
-  (set-face-bold 'rainbow-delimiters-depth-2-face "t") 
-  (set-face-bold 'rainbow-delimiters-depth-3-face "t") 
-  (set-face-bold 'rainbow-delimiters-depth-4-face "t") 
-  (set-face-bold 'rainbow-delimiters-depth-5-face "t") 
-  (set-face-bold 'rainbow-delimiters-depth-6-face "t") 
-  (set-face-bold 'rainbow-delimiters-depth-7-face "t") 
-  (set-face-bold 'rainbow-delimiters-depth-8-face "t") 
-  (set-face-bold 'rainbow-delimiters-depth-9-face "t")
-  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
-
-;; 彩虹猫进度条
-(use-package nyan-mode
+(use-package smartparens
   :ensure t
-  :hook (after-init . nyan-mode))
-
+  :hook ('prog-mode . 'smartparens-global-mode))
 
 ;; 标签页
 ;; (require 'awesome-tab)
@@ -306,6 +251,7 @@
            neotree-mode
            treemacs-mode)
           . hide-mode-line-mode)))
+
 ;; 解决卡顿
 (setq inhibit-compacting-font-caches t) ;
 
@@ -338,6 +284,7 @@
     (setq cnfonts--profiles-steps '(("program-normal" . 4)
                                     ("org-mode" . 6)
                                     ("read-book" . 8)))))
+
 ;; (when (and (not suk-cnfonts) (display-graphic-p))
 ;;   ;; Set a default font
 ;;   (cond
@@ -372,7 +319,7 @@
 
 (when (eq system-type 'windows-nt)
   (setq locale-coding-system 'gb18030)  ;此句保证中文字体设置有效
-  (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
+  (setq w32-unicode-filenames 'nil)     ; 确保file-name-coding-system变量的设置不会无效
   (setq file-name-coding-system 'gb18030) ; 设置文件名的编码为gb18030
   )
 
@@ -384,6 +331,7 @@
 (defun buffer-too-big-p ()
   (or (> (buffer-size) (* 5000 80))
       (> (line-number-at-pos (point-max)) 5000)))
+
 (add-hook 'prog-mode-hook
           (lambda ()
             ;; turn off `linum-mode' when there are more than 5000 lines
@@ -418,15 +366,6 @@
 (setq scroll-step 1
       scroll-margin 0
       scroll-conservatively 100000)
-
-;; Display Time
-;; (use-package time
-;;   :ensure nil
-;;   :unless (display-graphic-p)
-;;   :hook (after-init . display-time-mode)
-;;   :init
-;;   (setq display-time-24hr-format t)
-;;   (setq display-time-day-and-date t))
 
 ;; Misc
 (fset 'yes-or-no-p 'y-or-n-p)

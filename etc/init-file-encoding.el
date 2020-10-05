@@ -160,7 +160,7 @@ It is bound to \\[suk/revert-buffer-with-utf8]."
     (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
       (set-buffer-file-coding-system 'unix))))
 
-(add-hook 'find-file-hooks 'no-junk-please-were-unixish)
+(add-hook 'find-file-hook 'no-junk-please-were-unixish)
 
 (provide 'init-file-encoding)
 ;;; init-file-encoding.el ends here

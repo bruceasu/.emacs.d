@@ -138,6 +138,7 @@ It returns the buffer (for elisp programing)."
 ;; Reload
 ;; --------------------------------------------------------------
 (defun suk/reload-emacs-configuration ()
+  "Reload emacs initial configured file init.el."
   (interactive)
   (load-file "~/.emacs.d/init.el"))
 
@@ -163,15 +164,6 @@ It returns the buffer (for elisp programing)."
   (interactive)
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (lisp-interaction-mode))
-
-;; Save a file as utf-8
-;; --------------------------------------------------------------
-(defun suk/save-buffer-as-utf8 (coding-system)
-  "Revert a buffer with `CODING-SYSTEM' and save as UTF-8."
-  (interactive "zCoding system for visited file (default nil):")
-  (revert-buffer-with-coding-system coding-system)
-  (set-buffer-file-coding-system 'utf-8)
-  (save-buffer))
 
 ;; 显示当前buffer或region或函数的行数和字符数
 ;; --------------------------------------------------------------

@@ -65,12 +65,6 @@
   "Use cnfonts or not."
   :type 'boolean)
 
-(defcustom suk-dashboard t
-  "Use dashboard at startup or not.
-
-If Non-nil, use dashboard, otherwise will restore previous session."
-  :type 'boolean)
-
 (defcustom suk-lsp 'lsp-mode
   "Set language server."
   :type '(choice
@@ -80,10 +74,6 @@ If Non-nil, use dashboard, otherwise will restore previous session."
 
 (defcustom suk-ivy-icon (and (not sys/win32p) (display-graphic-p))
   "Display icons in `ivy' or not."
-  :type 'boolean)
-
-(defcustom suk-pretty-magit t
-  "Prettify `magit' or not."
   :type 'boolean)
 
 (defcustom suk-benchmark nil

@@ -41,58 +41,49 @@
   "Map keys.
 ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
-     (mapcar (lambda(lst)
-      ""
-      (let ((x (car lst))
-        (y (car (last lst))))
-        (funcall ACTION x y))) BINDINGLIST ))
+  (mapcar (lambda(lst)
+			""
+			(let ((x (car lst))
+				  (y (car (last lst))))
+			  (funcall ACTION x y))) BINDINGLIST ))
 
 ;; 使用方式
-; (suk-set-key-bindings 'global-set-key
-;   (list
-     ; '([f2]                            calendar)
-     ; '([(shift f2)]                    remember)
-     ; '([f5]                            revert-buffer)
-     ; (list (kbd "C-c l")               'copy-line)
-;    )
-; )
+;; (suk-set-key-bindings 'global-set-key
+;;   (list
+;;      '([f2]                            calendar)
+;;      '([(shift f2)]                    remember)
+;;      '([f5]                            revert-buffer)
+;;      (list (kbd "C-c l")               'copy-line)
+;;    )
+;; )
 
 
 
-;;; 在其他地方有设置
-;;; (require 'undo-tree)
-;;;(define-key undo-tree-map (kbd "C-x u") #'(lambda ()
-;;;   (interactive)
-;;;   (undo-tree-visualize)
-;;;   (undo-tree-visualize-undo)))
-;;; c-/ c-_  undo | c-x u undo-tree | c-s-/ s-? M-_ redo
-;;; 大小写转换： M-u, M-l, M-c
 
-;; M-x align-regexp 可以方便的对齐一些文字
 (suk-set-key-bindings 'global-set-key
-  (list
-      (list (kbd "C-x l")   'suk/count-brf-lines)
-      (list (kbd "C-x M-a") 'align-regexp)
-      (list (kbd "C-x x")   'suk/switch-major-mode)
-      (list (kbd "C-x X")   'suk/get-mode-name)
-      (list (kbd "C-x U")   'suk/revert-buffer-with-utf8)
-      (list (kbd "C-x K")   'suk/revert-buffer-with-gbk)
-      '([C-t]                transpose-chars)
-     
-      '([S-f6]               hs-minor-mode)
-      '([f5]                 toggle-truncate-lines)
-      '([S-f11]              insert-translated-name-insert) ;; Chinese to English
-      '([S-f12]              toggle-company-english-helper) ;; popup English tips
-      '([M-f12]              aweshell-dedicated-toggle)
-      ;;'([M-f11]            aweshell-sudo-toggle)
-      '([M-f10]              aweshell-prev)
-      '([M-f11]              aweshell-next)
-      '([M-f9]               aweshell-new)
-     ;; '([S-f2]               suk/new-empty-buffer)
-      '([f2]             hs-toggle-hiding)
-      ;; '([C-f2]            gnus)
-      '([S-f1]          snails)
-      ))
+					  (list
+					   (list (kbd "C-x l")   'suk/count-brf-lines)
+					   (list (kbd "C-x M-a") 'align-regexp)
+					   (list (kbd "C-x x")   'suk/switch-major-mode)
+					   (list (kbd "C-x X")   'suk/get-mode-name)
+					   (list (kbd "C-x U")   'suk/revert-buffer-with-utf8)
+					   (list (kbd "C-x K")   'suk/revert-buffer-with-gbk)
+					   '([C-t]                transpose-chars)
+					   
+					   '([S-f6]               hs-minor-mode)
+					   '([f5]                 toggle-truncate-lines)
+					   '([S-f11]              insert-translated-name-insert) ;; Chinese to English
+					   '([S-f12]              toggle-company-english-helper) ;; popup English tips
+					   '([M-f12]              aweshell-dedicated-toggle)
+					   ;;'([M-f11]            aweshell-sudo-toggle)
+					   '([M-f10]              aweshell-prev)
+					   '([M-f11]              aweshell-next)
+					   '([M-f9]               aweshell-new)
+					   ;; '([S-f2]               suk/new-empty-buffer)
+					   '([f2]             hs-toggle-hiding)
+					   ;; '([C-f2]            gnus)
+					   '([S-f1]          snails)
+					   ))
 
 (global-set-key  (kbd "S-SPC") 'set-mark-command)
 (global-set-key "\C-c\C-i" 'indent-region) ; C-u C-c TAB => (un)indent-region
@@ -117,56 +108,56 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;; (global-set-key [(meta c)] 'meta-c-map)
 
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
- (add-hook 'isearch-mode-hook
- '(lambda ()
-;; 搜索下一个结果
- (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
-;; 搜索前一个结果
-(define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
-;; 替换
- (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
-;; 正则替换
- (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
- (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
-;; 剪切板作为搜索内容
- (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
-;; 将光标到行尾作为搜索内容
- (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
-(define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
-;; 向左或向右(选择/取消)单个字符作为搜索内容
-(define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
-;; 显示occur视图
-(define-key isearch-mode-map [(meta o)] 'isearch-occur)
-;; 单词搜索
- (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
- (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
-))
+(add-hook 'isearch-mode-hook
+		  '(lambda ()
+			 ;; 搜索下一个结果
+			 (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
+			 ;; 搜索前一个结果
+			 (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
+			 ;; 替换
+			 (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
+			 ;; 正则替换
+			 (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
+			 (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
+			 ;; 剪切板作为搜索内容
+			 (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
+			 ;; 将光标到行尾作为搜索内容
+			 (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
+			 (define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
+			 ;; 向左或向右(选择/取消)单个字符作为搜索内容
+			 (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
+			 ;; 显示occur视图
+			 (define-key isearch-mode-map [(meta o)] 'isearch-occur)
+			 ;; 单词搜索
+			 (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
+			 (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
+			 ))
 
 ;; ------------------------------下面是上面用到的函数定义------------------------------
 (defun window-move-up (&optional arg)
-	"Current window move-up 2 lines."
-	(interactive "P")
-	(if arg
-		(scroll-up arg)
-		(scroll-up 2)))
+  "Current window move-up 2 lines."
+  (interactive "P")
+  (if arg
+	  (scroll-up arg)
+	(scroll-up 2)))
 
 (defun window-move-down (&optional arg)
-	"Current window move-down 3 lines."
-	(interactive "P")
-	(if arg
-		(scroll-down arg)
-		(scroll-down 3)))
+  "Current window move-down 3 lines."
+  (interactive "P")
+  (if arg
+	  (scroll-down arg)
+	(scroll-down 3)))
 
-		(defun other-window-move-up (&optional arg)
-		"Other window move-up 1 lines."
-		(interactive "p")
-		(scroll-other-window arg))
+(defun other-window-move-up (&optional arg)
+  "Other window move-up 1 lines."
+  (interactive "p")
+  (scroll-other-window arg))
 
 (defun other-window-move-down (&optional arg)
-	"Other window move-down 2 lines."
-	(interactive "P")
-	(if arg
-		(scroll-other-window-down arg)
+  "Other window move-down 2 lines."
+  (interactive "P")
+  (if arg
+	  (scroll-other-window-down arg)
 	(scroll-other-window-down 2)))
 
 ;;Emacs 自动排版
@@ -175,6 +166,17 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;;C-M-\ 是排版
 
 ;; C-x C-q set/unset readonly
+
+;; (require 'undo-tree)
+;;(define-key undo-tree-map (kbd "C-x u") #'(lambda ()
+;;   (interactive)
+;;   (undo-tree-visualize)
+;;   (undo-tree-visualize-undo)))
+;; c-/ c-_  undo | c-x u undo-tree | c-s-/ s-? M-_ redo
+
+;; 大小写转换： M-u, M-l, M-c
+
+;; M-x align-regexp 可以方便的对齐一些文字
 
 ;;; rectangle
 ;; C-x r k
@@ -230,21 +232,7 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 (global-set-key (kbd "M-SPC") 'leader-key)
 (global-set-key (kbd "C-(") 'backward-sexp) 
 (global-set-key (kbd "C-)") 'forward-sexp)
-(global-set-key (kbd "<f12>") 'open-init-dired)
 
-(use-package
-  hydra
-  :ensure t)
-
-(use-package
-  hydra-posframe
-  :load-path "~/.emacs.d/site-lisp/hydra-posframe"
-  :hook (after-init . hydra-posframe-enable))
-
-(use-package
-  major-mode-hydra
-  :ensure t
-  :after hydra)
 
 ;; Bongo 音乐播放器
 (defhydra suk/hydra-music-menu (:color blue)
@@ -351,19 +339,19 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 	("h" eaf-open-browser-with-history "历史记录")
 	("e" eaf-proxy-open_download_manage_page "下载管理")
 	("m" eaf-open-bookmark "打开书签"))
-  "Application"
-  (("o" eaf-open "智能Open")
-   ("c" eaf-open-camera "打开摄像")
-   ("p" eaf-open-mindmap "思维导图(O)")
-   ("l" eaf-create-mindmap "思维导图(N)")
-   ("r" eaf-restart-process "刷新EAF"))
-  "Framwork"
-  (("t" eaf-open-terminal "打开终端")
-   ("f" eaf-file-send-qrcode "隔空投送(F)")
-   ("d" eaf-file-browser-qrcode "隔空投送(D)")
-   ("i" eaf-open-airshare "隔空投送(S)")
-   ("a" eaf-open-rss-reader "RSS阅读器"))
-  ))
+   "Application"
+   (("o" eaf-open "智能Open")
+	("c" eaf-open-camera "打开摄像")
+	("p" eaf-open-mindmap "思维导图(O)")
+	("l" eaf-create-mindmap "思维导图(N)")
+	("r" eaf-restart-process "刷新EAF"))
+   "Framwork"
+   (("t" eaf-open-terminal "打开终端")
+	("f" eaf-file-send-qrcode "隔空投送(F)")
+	("d" eaf-file-browser-qrcode "隔空投送(D)")
+	("i" eaf-open-airshare "隔空投送(S)")
+	("a" eaf-open-rss-reader "RSS阅读器"))
+   ))
 ;; 常用的命令
 (defhydra suk/hydra-common-menu ()
   "

@@ -183,7 +183,7 @@ This command is convenient when reading novel, documentation."
 
 ;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
 ;; --------------------------------------------------------------
- (defun suk/fill-or-unfill-paragraph (&optional unfill region)
+(defun suk/fill-or-unfill-paragraph (&optional unfill region)
     "Fill paragraph (or REGION).
   With the prefix argument UNFILL, unfill it instead."
     (interactive (progn
@@ -192,10 +192,6 @@ This command is convenient when reading novel, documentation."
     (let ((fill-column (if unfill (point-max) fill-column)))
       (fill-paragraph nil region)))
 (bind-key "M-q" 'suk/fill-or-unfill-paragraph)
-
-;; ==============================================================
-;; mist
-;; --------------------------------------------------------------
 
 ;; ==============================================================
 ;; Recompile elpa directory
@@ -212,9 +208,6 @@ This command is convenient when reading novel, documentation."
   (interactive)
   (byte-recompile-directory
    (concat user-emacs-directory "site-lisp") 0 t))
-
-
-
 
 ;; 设置缓存文件/杂七杂八的文件存放的地址
 ;; 不好的做法
@@ -266,168 +259,6 @@ This command is convenient when reading novel, documentation."
 ;; 设置eshell历史记录
 (setq eshell-history-file-name "~/.emacs.d/var/eshell/history")
   
-(defun suk-update-config ()
-  "Update suk Emacs configurations to the latest version."
-  (interactive)
-  (let ((dir (expand-file-name user-emacs-directory)))
-    (if (file-exists-p dir)
-        (progn
-          (message "Updating Emacs configurations...")
-          (cd dir)
-          (shell-command "git pull --rebase")
-          (message "Update finished. Restart Emacs to complete the process."))
-      (message "\"%s\" doesn't exist." dir))))
-
-(declare-function upgrade-packages 'init-package)
-
-(defalias 'suk-update-packages 'upgrade-packages)
-
-(defun suk-update()
-  "Update confgiurations and packages."
-  (interactive)
-  (suk-update-config)
-  (suk-update-packages nil))
-
-(declare-function upgrade-packages-and-restart 'init-package)
-(defalias 'suk-update-packages-and-restart 'upgrade-packages-and-restart)
-(defun suk-update-and-restart ()
-  "Update configurations and packages, then restart."
-  (interactive)
-  (suk-update-config)
-  (suk-update-packages-and-restart nil))
-
-;; =========================================================
-;; 方便的切换major mode
-;; ---------------------------------------------------------
-(defvar suk/switch-major-mode-last-mode nil)
-;; ---------------------------------------------------------
-(defun suk/major-mode-heuristic (symbol)
-  (and (fboundp symbol)
-       (string-match ".*-mode$" (symbol-name symbol))))
-;; ---------------------------------------------------------
-(defun suk/switch-major-mode (mode)
-  "切换major mode"
-  (interactive
-   (let ((fn suk/switch-major-mode-last-mode) val)
-     (setq val
-           (completing-read
-            (if fn (format "切换major-mode为(缺省为%s): " fn) "切换major mode为: ")
-            obarray 'suk/major-mode-heuristic t nil nil (symbol-name fn)))
-     (list (intern val))))
-  (let ((last-mode major-mode))
-    (funcall mode)
-    (setq switch-major-mode-last-mode last-mode)))
-;; ---------------------------------------------------------
-;; show major mode
-(defun suk/get-mode-name ()
-  "显示`major-mode'及`mode-name'"
-  (interactive)
-  (message "major-mode为%s, mode-name为%s" major-mode mode-name))
-
-(defun suk/toggle-margin-right ()
-  "Toggle the right margin between `fill-column' or window width.
-This command is convenient when reading novel, documentation."
-  (interactive)
-  (if (eq (cdr (window-margins)) nil)
-      (set-window-margins nil 0 (- (window-body-width) fill-column))
-    (set-window-margins nil 0 0)))
-
-;; =========================================================
-;; 段落格式化
-;; --------------------------------------------------------------
-(defun suk/unfill-paragraph (&optional region)
-    "Takes a multi-line paragraph (or REGION) and make it into a single line of text."
-    (interactive (progn
-                   (barf-if-buffer-read-only)
-                   (list t)))
-    (let ((fill-column (point-max)))
-      (fill-paragraph nil region)))
-(bind-key "M-Q" 'my/unfill-paragraph)
-
-;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
-;; --------------------------------------------------------------
- (defun suk/fill-or-unfill-paragraph (&optional unfill region)
-    "Fill paragraph (or REGION).
-  With the prefix argument UNFILL, unfill it instead."
-    (interactive (progn
-                   (barf-if-buffer-read-only)
-                   (list (if current-prefix-arg 'unfill) t)))
-    (let ((fill-column (if unfill (point-max) fill-column)))
-      (fill-paragraph nil region)))
-(bind-key "M-q" 'suk/fill-or-unfill-paragraph)
-
-;; ==============================================================
-;; mist
-;; --------------------------------------------------------------
-
-;; ==============================================================
-;; Recompile elpa directory
-;; --------------------------------------------------------------
-(defun suk/recompile-elpa ()
-  "Recompile packages in elpa directory. Useful if you switch Emacs versions."
-  (interactive)
-  (byte-recompile-directory package-user-dir nil t))
-
-;; Recompile site-lisp directory
-;; --------------------------------------------------------------
-(defun suk/recompile-site-lisp ()
-  "Recompile packages in site-lisp directory."
-  (interactive)
-  (byte-recompile-directory
-   (concat user-emacs-directory "site-lisp") 0 t))
-
-
-
-
-;; 设置缓存文件/杂七杂八的文件存放的地址
-;; 不好的做法
-;; (setq user-emacs-directory "~/.emacs.d/var")
-
-;; History
-;; 回到关闭文件前光标的位置
-(use-package saveplace
-  :ensure nil
-  :hook (after-init . save-place-mode))
-
-(use-package recentf
-  :ensure nil
-  ;; lazy load recentf
-  ;; :hook (find-file . (lambda () (unless recentf-mode
-  ;;                            (recentf-mode)
-  ;;                            (recentf-track-opened-file))))
-  :init
-  (add-hook 'after-init-hook #'recentf-mode)
-  (setq recentf-max-saved-items 200)
-  :config
-  (add-to-list 'recentf-exclude (expand-file-name package-user-dir))
-  (add-to-list 'recentf-exclude ".cache")
-  (add-to-list 'recentf-exclude ".cask")
-  (add-to-list 'recentf-exclude ".elfeed")
-  (add-to-list 'recentf-exclude "bookmarks")
-  (add-to-list 'recentf-exclude "cache")
-  (add-to-list 'recentf-exclude "persp-confs")
-  (add-to-list 'recentf-exclude "recentf")
-  (add-to-list 'recentf-exclude "url")
-  (add-to-list 'recentf-exclude "COMMIT_EDITMSG\\'"))
-
-(use-package savehist
-  :ensure nil
-  :hook (after-init . savehist-mode)
-  :init (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
-              history-length 1000
-              savehist-additional-variables '(mark-ring
-                                              global-mark-ring
-                                              search-ring
-                                              regexp-search-ring
-                                              extended-command-history)
-              savehist-autosave-interval 300))
-
-; 设置amx保存文件的路径
-(setq amx-save-file "~/.emacs.d/var/amx-items")
-;; 设置自动保存路径前缀
-(setq auto-save-list-file-prefix "~/.emacs.d/var/auto-save-list/.saves-")
-;; 设置eshell历史记录
-(setq eshell-history-file-name "~/.emacs.d/var/eshell/history")
 (setq recent-save-file "~/.emacs.d/var/recentf")
 
 
@@ -515,20 +346,6 @@ This command is convenient when reading novel, documentation."
 (add-hook 'after-change-major-mode-hook (lambda () 
                                           (modify-syntax-entry ?- "w")))
 
-;; delete file if empty
-;; ref. http://www.bookshelf.jp/cgi-bin/goto.cgi?file=meadow&node=delete%20nocontents
-;; --------------------------------------------------------------
-(add-hook 'after-save-hook 'delete-file-if-no-contents t)
-(defun delete-file-if-no-contents ()
-  (when (and buffer-file-name (= (point-min) (point-max)))
-    (if (y-or-n-p "Delete file and kill buffer? ")
-      (let ((filename buffer-file-name))
-        (delete-file filename)
-        (kill-buffer (current-buffer))
-        (message (concat "Deleted " (file-name-nondirectory filename)))
-        ))))
-
-
 ;; =========================================================
 ;; 通过编辑配置文件使其可以调用外部程序，来为其添加功能。
 ;; 增加命令
@@ -540,11 +357,8 @@ This command is convenient when reading novel, documentation."
 ;;系统提示：“查找联系人，请输入条件："。
 ;;输入完成后，emacs 会执行命令lxr -s names，并输出执行的结果。
 ;; =========================================================
-
-
-
 (provide 'init-basic)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; init-basic.el ends here.
+;;; init-basic.el ends here

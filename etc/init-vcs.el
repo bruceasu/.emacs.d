@@ -42,12 +42,11 @@
          ("C-x M-g" . magit-dispatch)
          ("C-c M-g" . magit-file-popup))
   :preface
-  (when suk-pretty-magit
-    (defvar pretty-magit-alist nil)
-    (defvar pretty-magit-prompt nil)
-
-    ;; Pretty magit http://www.modernemacs.com/post/pretty-magit
-    (defmacro pretty-magit (word icon props &optional no-prompt?)
+  (defvar pretty-magit-alist nil)
+  (defvar pretty-magit-prompt nil)
+  
+  ;; Pretty magit http://www.modernemacs.com/post/pretty-magit
+  (defmacro pretty-magit (word icon props &optional no-prompt?)
       "Replace sanitized WORD with ICON, PROPS and by default add to prompts."
       `(prog1
            (add-to-list 'pretty-magit-alist
@@ -56,7 +55,7 @@
          (unless ,no-prompt?
            (add-to-list 'pretty-magit-prompt (concat ,word ": ")))))
 
-    (defun add-magit-faces ()
+  (defun add-magit-faces ()
       "Add face properties and compose symbols for buffer from pretty-magit."
       (interactive)
       (with-silent-modifications
@@ -69,9 +68,10 @@
                  (match-beginning 1) (match-end 1) icon)
                 (when props
                   (add-face-text-property
-                   (match-beginning 1) (match-end 1) props)))))))))
+                   (match-beginning 1) (match-end 1) props))))))))
+	
   :init (use-package ghub+ :commands ghubp-get-notifications)
-  :config
+  ;; comment config
   (when sys/win32p
     (setenv "GIT_ASKPASS" "git-gui--askpass"))
   (magit-define-popup-switch 'magit-fetch-popup

@@ -43,7 +43,7 @@
 (setq auto-save-silent t)   ; quietly save
 (setq auto-save-delete-trailing-whitespace t)  ; automatically delete spaces at the end of the line when saving
 
-(require 'aweshell)
+;; (require 'aweshell)
 
 (require 'org-static-blog)
 

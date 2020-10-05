@@ -11,11 +11,9 @@
 (setq suk-package-archives 'emacs-china)    ; Package repo: melpa, melpa-mirror, emacs-china netease or tuna
 (setq suk-theme 'classic)                  ; Color theme: default, classic, doom, dark, light or daylight
 ;; (setq suk-cnfonts t)                          ; Use cnfonts not: t or nil
-;; (setq suk-dashboard nil)                   ; Use dashboard at startup or not: t or nil
 (setq suk-lsp nil)                            ; Set LSP client: lsp-mode, eglot or nil
 (setq suk-ivy-icon t)                         ; Display icons in ivy or not: t or nil
-(setq suk-pretty-magit t)                     ; Prettify magit or not: t or nil
-(setq suk-benchmark nil)                        ; Enable initialization benchmark or not: t or nil
+(setq suk-benchmark t)                        ; Enable initialization benchmark or not: t or nil
 
 ;; For Emacs devel
 ;; (setq package-user-dir (locate-user-emacs-file (format "elpa-%s" emacs-major-version)))

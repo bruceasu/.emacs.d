@@ -30,6 +30,7 @@
 ;;; Code:
 
 (eval-when-compile
+  (require '+const)
   (require '+custom))
 
 ;; 增强了搜索功能
@@ -51,7 +52,7 @@
   :defines (projectile-completion-system magit-completing-read-function)
   :bind (("C-s" . swiper)
          ("C-S-s" . swiper-all)
-         ("C-x C-r" . 'counsel-recentf) 
+         ("C-x C-r" . 'counsel-recentf)
          ("C-x d" . 'counsel-dired)
          ("C-c C-r" . ivy-resume)
          ("C-c v p" . ivy-push-view)
@@ -127,7 +128,7 @@
   (setq ivy-count-format "(%d/%d) ")
   (setq ivy-on-del-error-function nil)
   (setq ivy-format-function 'ivy-format-function-arrow)
-  ;; (setq ivy-initial-inputs-alist nil)
+  (setq ivy-initial-inputs-alist nil)
 
   (setq ivy-re-builders-alist
         '((read-file-name-internal . ivy--regex-fuzzy)
@@ -183,12 +184,11 @@
 
   ;; Ivy integration for Projectile
   (use-package counsel-projectile
-	 :ensure t 
-	 :hook ((counsel-mode . counsel-projectile-mode)) 
-     :init (counsel-projectile-mode 1)
-	 :bind (:map leader-key
-				 ("p" . #'projectile-command-map)))
-
+	:ensure t
+	:hook ((counsel-mode . counsel-projectile-mode))
+	:init (counsel-projectile-mode 1)
+	:bind (:map leader-key
+				("p" . #'projectile-command-map)))
   ;; Display world clock using Ivy
   (use-package counsel-world-clock
     :bind (:map counsel-mode-map
@@ -217,184 +217,149 @@
 
     (advice-add 'counsel-ag :around #'my-counsel-ag))
 
-  ;; Support pinyin in Ivy
-  ;; Input prefix ':' to match pinyin
-  ;; Refer to  https://github.com/abo-abo/swiper/issues/919 and
-  ;; https://github.com/pengpengxp/swiper/wiki/ivy-support-chinese-pinyin
-  (use-package pinyinlib
-    :functions ivy--regex-plus ivy--regex-ignore-order
-    :commands pinyinlib-build-regexp-string
-    :preface
-    (defun re-builder-pinyin (str)
-      "The regex builder wrapper to support pinyin."
-      (or (pinyin-to-utf8 str)
-          (ivy--regex-plus str)
-          (ivy--regex-ignore-order str)))
-    (defun my-pinyinlib-build-regexp-string (str)
-      "Build a pinyin regexp sequence from STR."
-      (cond ((equal str ".*")
-             ".*")
-            (t
-             (pinyinlib-build-regexp-string str t))))
-    (defun my-pinyin-regexp-helper (str)
-      "Construct pinyin regexp for STR."
-      (cond ((equal str " ")
-             ".*")
-            ((equal str "")
-             nil)
-            (t
-             str)))
-    (defun pinyin-to-utf8 (str)
-      (cond ((equal 0 (length str))
-             nil)
-            ((equal (substring str 0 1) ":")
-             (mapconcat 'my-pinyinlib-build-regexp-string
-                        (remove nil (mapcar 'my-pinyin-regexp-helper
-                                            (split-string
-                                             (replace-regexp-in-string ":" "" str ) "")))
-                        ""))
-            (t
-             nil)))
-    :init (setq ivy-re-builders-alist
-                '((read-file-name-internal . ivy--regex-fuzzy)
-                  (t . re-builder-pinyin)))))
+)
 
 ;; 美化ivy(swiper和counsel)
-		 ;;美化
-		 (use-package all-the-icons-ivy-rich 
-		   :ensure t 
-		   :init (all-the-icons-ivy-rich-mode 1))
-		 
-		 (use-package ivy-rich 
-		   :ensure t
-		   :defines all-the-icons-mode-icon-alist
-		   :functions (all-the-icons-icon-family-for-mode all-the-icons-icon-family-for-file)
-		   :init (ivy-rich-mode 1) 
-		   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
-		   :preface
-		   (with-eval-after-load 'all-the-icons
-			 (add-to-list 'all-the-icons-mode-icon-alist
-                   '(gfm-mode  all-the-icons-octicon "markdown" :v-adjust 0.0 :face all-the-icons-lblue)))
-          (defun ivy-rich-switch-buffer-icon (candidate)
-      "Show buffer icons in `ivy-rich'."
-      ;; Only on GUI
-      (when (and suk-ivy-icon
-                 (display-graphic-p)
-                 (featurep 'all-the-icons))
-        (with-current-buffer (get-buffer candidate)
-          (let ((icon (all-the-icons-icon-for-mode major-mode)))
-            (propertize
-             (if (symbolp icon)
-                 (all-the-icons-icon-for-mode 'text-mode)
+(when (display-graphic-p)
+  (progn
+	(use-package all-the-icons-ivy-rich 
+	  :ensure t 
+	  :init (all-the-icons-ivy-rich-mode 1))
+	
+	(use-package ivy-rich 
+	  :ensure t
+	  :defines all-the-icons-mode-icon-alist
+	  :functions (all-the-icons-icon-family-for-mode all-the-icons-icon-family-for-file)
+	  :init (ivy-rich-mode 1) 
+	  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+	  :preface
+	  (with-eval-after-load 'all-the-icons
+		(add-to-list 'all-the-icons-mode-icon-alist
+					 '(gfm-mode  all-the-icons-octicon "markdown" :v-adjust 0.0 :face all-the-icons-lblue)))
+	  (defun ivy-rich-switch-buffer-icon (candidate)
+		"Show buffer icons in `ivy-rich'."
+		;; Only on GUI
+		(when (and suk-ivy-icon
+				   (display-graphic-p)
+				   (featurep 'all-the-icons))
+		  (with-current-buffer (get-buffer candidate)
+			(let ((icon (all-the-icons-icon-for-mode major-mode)))
+              (propertize
+               (if (symbolp icon)
+                   (all-the-icons-icon-for-mode 'text-mode)
+				 icon)
+               'face `(
+                       :height 1.1
+                       :family ,(all-the-icons-icon-family-for-mode
+								 (if (symbolp icon)
+									 'text-mode
+                                   major-mode))
+                       :inherit
+                       ))))))
+
+      (defun ivy-rich-file-icon (candidate)
+		"Show file icons in `ivy-rich'."
+		;; Only on GUI
+		(when (and suk-ivy-icon
+                   (display-graphic-p)
+                   (featurep 'all-the-icons))
+          (let ((icon (all-the-icons-icon-for-file candidate)))
+			(propertize
+			 (if (symbolp icon)
+				 (all-the-icons-icon-for-mode 'text-mode)
                icon)
-             'face `(
-                     :height 1.1
-                     :family ,(all-the-icons-icon-family-for-mode
-                               (if (symbolp icon)
-                                   'text-mode
-                                 major-mode))
-                     :inherit
-                     ))))))
-
-        (defun ivy-rich-file-icon (candidate)
-      "Show file icons in `ivy-rich'."
-      ;; Only on GUI
-      (when (and suk-ivy-icon
-                 (display-graphic-p)
-                 (featurep 'all-the-icons))
-        (let ((icon (all-the-icons-icon-for-file candidate)))
-          (propertize
-           (if (symbolp icon)
-               (all-the-icons-icon-for-mode 'text-mode)
-             icon)
-           'face `(
-                   :height 1.1
-                   :family ,(all-the-icons-icon-family-for-file candidate)
-                   :inherit
-                   )))))
-		 :config
-		   (setq ivy-rich-display-transformers-list
-				 '(ivy-switch-buffer
-				   (:columns
-					((ivy-rich-switch-buffer-icon (:width 2))
-					 (ivy-rich-candidate (:width 30))
-					 (ivy-rich-switch-buffer-size (:width 7))
-					 (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-					 (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-					 (ivy-rich-switch-buffer-project (:width 15 :face success))
-					 (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3)))))) :predicate (lambda (cand) (get-buffer cand)))
-				  ivy-switch-buffer-other-window
-				   (:columns
-					((ivy-rich-switch-buffer-icon :width 2)
-					 (ivy-rich-candidate (:width 30))
-					 (ivy-rich-switch-buffer-size (:width 7))
-					 (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-					 (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-					 (ivy-rich-switch-buffer-project (:width 15 :face success))
-					 (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3)))))) :predicate (lambda (cand) (get-buffer cand)))
-				 counsel-find-file
-				  (:columns
-				   ((ivy-read-file-transformer)
-					(ivy-rich-counsel-find-file-truename (:face font-lock-doc-face))))
-				  counsel-M-x
-				    (:columns
-				   ((counsel-M-x-transformer (:width 40))
-					(ivy-rich-counsel-function-docstring (:face font-lock-doc-face)))) ; return docstring of the command
-				  counsel-recentf 
-				 (:columns
-				     ((ivy-rich-candidate (:width 0.8))
-				      (ivy-rich-file-last-modified-time (:face font-lock-comment-face)))) ; return last modified time of the file
+			 'face `(
+					 :height 1.1
+					 :family ,(all-the-icons-icon-family-for-file candidate)
+					 :inherit
+					 ))))
+		)
+	  :config
+	  (setq ivy-rich-display-transformers-list
+			'(ivy-switch-buffer
+			  (:columns
+			   ((ivy-rich-switch-buffer-icon (:width 2))
+				(ivy-rich-candidate (:width 30))
+				(ivy-rich-switch-buffer-size (:width 7))
+				(ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+				(ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+				(ivy-rich-switch-buffer-project (:width 15 :face success))
+				(ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3)))))) :predicate (lambda (cand) (get-buffer cand)))
+			  ivy-switch-buffer-other-window
+			  (:columns
+			   ((ivy-rich-switch-buffer-icon :width 2)
+				(ivy-rich-candidate (:width 30))
+				(ivy-rich-switch-buffer-size (:width 7))
+				(ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+				(ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+				(ivy-rich-switch-buffer-project (:width 15 :face success))
+				(ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3)))))) :predicate (lambda (cand) (get-buffer cand)))
+			  counsel-find-file
+			  (:columns
+			   ((ivy-read-file-transformer)
+				(ivy-rich-counsel-find-file-truename (:face font-lock-doc-face))))
+			  counsel-M-x
+			  (:columns
+			   ((counsel-M-x-transformer (:width 40))
+				(ivy-rich-counsel-function-docstring (:face font-lock-doc-face)))) ; return docstring of the command
+			  counsel-recentf 
+			  (:columns
+			   ((ivy-rich-candidate (:width 0.8))
+				(ivy-rich-file-last-modified-time (:face font-lock-comment-face)))) ; return last modified time of the file
 			  counsel-describe-function 
-				(:columns
-				 ((counsel-describe-function-transformer (:width 40))
-				  (ivy-rich-counsel-function-docstring (:face font-lock-doc-face)))) ; return docstring of the function
-				counsel-describe-variable 
-				  (:columns
-				   ((counsel-describe-variable-transformer (:width 40))
-					(ivy-rich-counsel-variable-docstring (:face font-lock-doc-face)))) ; return docstring of the variable
-				  ))
-		 :hook (ivy-rich-mode . (lambda () (setq ivy-virtual-abbreviate (or (and ivy-rich-mode 'abbreviate) 'name)))))
-		 
-		 ;; 美化
-		 (use-package ivy-posframe
-		;;; :disabled
-		   :ensure t 
-		   :init (ivy-posframe-mode 1)
-		   :custom
-		   (ivy-posframe-parameters
-			'((left-fringe . 8) (right-fringe . 8)))
-		   (ivy-posframe-display-functions-alist
-			'((t . ivy-posframe-display-at-frame-center)))
-		   )
-		 
+			  (:columns
+			   ((counsel-describe-function-transformer (:width 40))
+				(ivy-rich-counsel-function-docstring (:face font-lock-doc-face)))) ; return docstring of the function
+			  counsel-describe-variable 
+			  (:columns
+			   ((counsel-describe-variable-transformer (:width 40))
+				(ivy-rich-counsel-variable-docstring (:face font-lock-doc-face)))) ; return docstring of the variable
+			  ))
+	  :hook (ivy-rich-mode . (lambda () (setq ivy-virtual-abbreviate (or (and ivy-rich-mode 'abbreviate) 'name))))
+	  )
+	
+	;; 美化
+	(use-package ivy-posframe
+	  ;; :disabled
+	  :ensure t 
+	  :init (ivy-posframe-mode 1)
+	  :custom
+	  (ivy-posframe-parameters
+	   '((left-fringe . 8) (right-fringe . 8)))
+	  (ivy-posframe-display-functions-alist
+	   '((t . ivy-posframe-display-at-frame-center)))
+	  )
+	)
+  )
 
 
 ;;;###autoload
-(defun ivy-telega-chat-highlight (chat)
-  (let ((unread (funcall (telega--tl-prop :unread_count) chat))
-        (title (telega-chat-title chat 'with-identity))
-        (not-muted-p (not (telega-chat-muted-p chat)))
-        (mentions (funcall (telega--tl-prop :unread_mention_count) chat)))
+;; (defun ivy-telega-chat-highlight (chat)
+;;   (let ((unread (funcall (telega--tl-prop :unread_count) chat))
+;;         (title (telega-chat-title chat 'with-identity))
+;;         (not-muted-p (not (telega-chat-muted-p chat)))
+;;         (mentions (funcall (telega--tl-prop :unread_mention_count) chat)))
 
-    (if (and not-muted-p (> (+ unread mentions) 0))
-        (ivy-append-face (format "%s %d@%d" title unread mentions) 'ivy-highlight-face)
-      title)))
+;;     (if (and not-muted-p (> (+ unread mentions) 0))
+;;         (ivy-append-face (format "%s %d@%d" title unread mentions) 'ivy-highlight-face)
+;;       title)))
 
 ;;;###autoload
-(defun ivy-telega-chat-with ()
-  "Starts chat with defined peer"
-  (interactive)
+;; (defun ivy-telega-chat-with ()
+;;   "Starts chat with defined peer"
+;;   (interactive)
 
-  (telega t)
-  (let ((chats (mapcar
-                (lambda (x) (cons (ivy-telega-chat-highlight x) x))
-                (telega-filter-chats telega--ordered-chats 'all))))
-    (ivy-read "chat: " chats
-              :action (lambda (x) (telega-chat--pop-to-buffer (cdr x)))
-              :caller 'ivy-telega-chat-with)))
-(bind-key "t c" #'ivy-telega-chat-with leader-key)
+;;   (telega t)
+;;   (let ((chats (mapcar
+;;                 (lambda (x) (cons (ivy-telega-chat-highlight x) x))
+;;                 (telega-filter-chats telega--ordered-chats 'all))))
+;;     (ivy-read "chat: " chats
+;;               :action (lambda (x) (telega-chat--pop-to-buffer (cdr x)))
+;;               :caller 'ivy-telega-chat-with)))
 
-(setq telega-completing-read-function 'ivy-completing-read)
+;; (bind-key "t c" #'ivy-telega-chat-with leader-key)
+
+;; (setq telega-completing-read-function 'ivy-completing-read)
 
 (provide 'init-ivy)
 ;;; init-ivy.el ends here

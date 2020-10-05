@@ -80,11 +80,13 @@
 (eval-when-compile
   (require '+const)
   (require '+custom))
+;; which-key
 
-(use-package which-key
+
+(use-package bbdb
   :config
   (bbdb-initialize 'gnus 'message)   ;初始化 BBDB
-  (setq bbdb-file "~/.emacs.d/bbdb") ;数据库文件
+  (setq bbdb-file "~/.emacs.d/var/bbdb") ;数据库文件
   (setq bbdb-north-american-phone-numbers-p nil) ;不使用北美标准的电话号码
   (setq bbdb-user-mail-names suk-mail-address);把你的 email 地址告诉bbdb
   (setq bbdb-complete-name-allow-cycling t) ;补全 email 地址的时候循环往复
@@ -94,7 +96,8 @@
   (setq bbdb-use-alternate-names nil);不使用别用名字
   (setq bbdb-send-mail-style 'gnus)  ;设置bbdb发送邮件使用的风格
   )
-
+(use-package bbdb-vcard
+  :ensure t)
 
 (provide 'init-bbdb)
 ;;; init-bbdb.el ends here

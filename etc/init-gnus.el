@@ -77,23 +77,23 @@
 ;;; Code:
 
 ;; 存储设置
-(setq gnus-startup-file "~/.emacs.d/Gnus/.newsrc")                  ;初始文件
-(setq gnus-default-directory "~/.emacs.d/Gnus/")                    ;默认目录
-(setq gnus-home-directory "~/.emacs.d/Gnus/")                       ;主目录
-(setq gnus-dribble-directory "~/.emacs.d/Gnus/")                    ;恢复目录
-(setq gnus-directory "~/.emacs.d/Gnus/News/")                       ;新闻组的存储目录
-(setq gnus-article-save-directory "~/.emacs.d/Gnus/News/")          ;文章保存目录
-(setq gnus-kill-files-directory "~/.emacs.d/Gnus/News/trash/")      ;文件删除目录
-(setq gnus-agent-directory "~/.emacs.d/Gnus/News/agent/")           ;代理目录
-(setq gnus-cache-directory "~/.emacs.d/Gnus/News/cache/")           ;缓存目录
-(setq gnus-cache-active-file "~/.emacs.d/Gnus/News/cache/active")   ;缓存激活文件
-(setq message-directory "~/.emacs.d/Gnus/Mail/")                    ;邮件的存储目录
-(setq message-auto-save-directory "~/.emacs.d/Gnus/Mail/drafts")    ;自动保存的目录
-(setq mail-source-directory "~/.emacs.d/Gnus/Mail/incoming")        ;邮件的源目录
-(setq nnmail-message-id-cache-file "~/.emacs.d/Gnus/.nnmail-cache") ;nnmail的消息ID缓存
-(setq nnml-newsgroups-file "~/.emacs.d/Gnus/Mail/newsgroup")        ;邮件新闻组解释文件
-(setq nntp-marks-directory "~/.emacs.d/Gnus/News/marks")            ;nntp组存储目录
-(setq mml-default-directory "~/.gnus/")                            ;附件的存储位置
+(setq gnus-startup-file "~/.emacs.d/var/Gnus/.newsrc")                  ;初始文件
+(setq gnus-default-directory "~/.emacs.d/var/Gnus/")                    ;默认目录
+(setq gnus-home-directory "~/.emacs.d/var/Gnus/")                       ;主目录
+(setq gnus-dribble-directory "~/.emacs.d/var/Gnus/")                    ;恢复目录
+(setq gnus-directory "~/.emacs.d/var/Gnus/News/")                       ;新闻组的存储目录
+(setq gnus-article-save-directory "~/.emacs.d/var/Gnus/News/")          ;文章保存目录
+(setq gnus-kill-files-directory "~/.emacs.d/var/Gnus/News/trash/")      ;文件删除目录
+(setq gnus-agent-directory "~/.emacs.d/var/Gnus/News/agent/")           ;代理目录
+(setq gnus-cache-directory "~/.emacs.d/var/Gnus/News/cache/")           ;缓存目录
+(setq gnus-cache-active-file "~/.emacs.d/var/Gnus/News/cache/active")   ;缓存激活文件
+(setq message-directory "~/.emacs.d/var/Gnus/Mail/")                    ;邮件的存储目录
+(setq message-auto-save-directory "~/.emacs.d/var/Gnus/Mail/drafts")    ;自动保存的目录
+(setq mail-source-directory "~/.emacs.d/var/Gnus/Mail/incoming")        ;邮件的源目录
+(setq nnmail-message-id-cache-file "~/.emacs.d/var/Gnus/.nnmail-cache") ;nnmail的消息ID缓存
+(setq nnml-newsgroups-file "~/.emacs.d/var/Gnus/Mail/newsgroup")        ;邮件新闻组解释文件
+(setq nntp-marks-directory "~/.emacs.d/var/Gnus/News/marks")            ;nntp组存储目录
+(setq mml-default-directory "~/.gnus/")                                 ;附件的存储位置
 ;; 接收邮件或新闻
 (setq user-full-name my-full-name)            ;全名
 (setq user-mail-address my-mail)              ;邮件地址
@@ -101,22 +101,22 @@
 (setq gnus-refer-article-method '(nntp "localhost")) ;抓取文章的方法, 和 `gnus-select-method' 一样
 (setq gnus-secondary-select-methods                  ;次要选择方法
       '(
-        (nnmaildir "Gmail"                        ;nnmaildir后端, 从本地文件中读邮件 (getmail 抓取)
-                   (directory "~/.emacs.d/Mail/")) ;读取目录
+        (nnmaildir "Gmail"                          ;nnmaildir后端, 从本地文件中读邮件 (getmail 抓取)
+                   (directory "~/.emacs.d/var/Gnus/Mail/")) ;读取目录
         ))
-(setq mail-sources                                 ;邮件源设置
-      '((maildir :path "~/.emacs.d/Mail/"           ;本地邮件存储位置
-                 :subdirs ("cur" "new" "tmp"))))   ;本地邮件子目录划分
+(setq mail-sources                                  ;邮件源设置
+      '((maildir :path "~/.emacs.d/var/Gnus/Mail/" ;本地邮件存储位置
+                 :subdirs ("cur" "new" "tmp"))))  ;本地邮件子目录划分
 ;; 发送邮件
-(setq send-mail-function 'sendmail-send-it         ;设置邮件发送方法
+(setq send-mail-function 'sendmail-send-it          ;设置邮件发送方法
       message-send-mail-function 'sendmail-send-it ;设置消息发送方法
       sendmail-program "/usr/bin/msmtp"            ;设置发送程序
       mail-specify-envelope-from t                 ;发送邮件时指定信封来源
       mail-envelope-from 'header)                  ;信封来源于 header
-(setq gnus-message-archive-group                   ;设置消息归档的组
+(setq gnus-message-archive-group                    ;设置消息归档的组
       '((if (message-news-p)
-            "nnfolder+archive:nnfolder"             ;新闻归档
-          "nnmaildir+Gmail:inbox")))                ;邮件归档
+            "nnfolder+archive:nnfolder"            ;新闻归档
+          "nnmaildir+Gmail:inbox")))               ;邮件归档
 ;; 常规设置
 (gnus-agentize)                                     ;开启代理功能, 以支持离线浏览
 (setq gnus-inhibit-startup-message t)               ;关闭启动时的画面
