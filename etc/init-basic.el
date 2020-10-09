@@ -143,23 +143,25 @@
        (string-match ".*-mode$" (symbol-name symbol))))
 ;; ---------------------------------------------------------
 (defun suk/switch-major-mode (mode)
-  "切换major mode"
+  "Change major mode to MODE."
   (interactive
-   (let ((fn suk/switch-major-mode-last-mode) val)
-     (setq val
-           (completing-read
-            (if fn (format "切换major-mode为(缺省为%s): " fn) "切换major mode为: ")
-            obarray 'suk/major-mode-heuristic t nil nil (symbol-name fn)))
-     (list (intern val))))
+  (let ((fn suk/switch-major-mode-last-mode) val)
+    (setq val
+          (completing-read
+           (if fn (format "Change major-mode(default:%s): " fn) "Change major mode: ")
+           obarray 'suk/major-mode-heuristic t nil nil (symbol-name fn)))
+    (list (intern val))))
   (let ((last-mode major-mode))
     (funcall mode)
-    (setq switch-major-mode-last-mode last-mode)))
+    (setq suk/switch-major-mode-last-mode last-mode)
+	(message "Change to %s." major-mode))
+)
 ;; ---------------------------------------------------------
 ;; show major mode
 (defun suk/get-mode-name ()
-  "显示`major-mode'及`mode-name'"
+  "显示`major-mode'及`mode-name'."
   (interactive)
-  (message "major-mode为%s, mode-name为%s" major-mode mode-name))
+  (message "major-mode:%s, mode-name:%s" major-mode mode-name))
 
 (defun suk/toggle-margin-right ()
   "Toggle the right margin between `fill-column' or window width.
@@ -185,7 +187,7 @@ This command is convenient when reading novel, documentation."
 ;; --------------------------------------------------------------
 (defun suk/fill-or-unfill-paragraph (&optional unfill region)
     "Fill paragraph (or REGION).
-  With the prefix argument UNFILL, unfill it instead."
+With the prefix argument UNFILL, unfill it instead."
     (interactive (progn
                    (barf-if-buffer-read-only)
                    (list (if current-prefix-arg 'unfill) t)))
@@ -228,8 +230,8 @@ This command is convenient when reading novel, documentation."
   :init
   (add-hook 'after-init-hook #'recentf-mode)
   (setq recentf-max-saved-items 500)
-   (setq recentf-max-saved-items 17)
-  (setq recent-save-file "~/.emacs.d/var/recentf")
+  (setq recentf-max-saved-items 17)
+  (setq recentf-save-file "~/.emacs.d/var/recentf")
   :config
   (add-to-list 'recentf-exclude (expand-file-name package-user-dir))
   (add-to-list 'recentf-exclude ".cache")
@@ -250,18 +252,18 @@ This command is convenient when reading novel, documentation."
 
 
 
-
-(use-package savehist
-  :ensure nil
-  :hook (after-init . savehist-mode)
-  :init (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
-              history-length 1000
-              savehist-additional-variables '(mark-ring
-                                              global-mark-ring
-                                              search-ring
-                                              regexp-search-ring
-                                              extended-command-history)
-              savehist-autosave-interval 300))
+;; maybe cause slowly, so disabled.
+;; (use-package savehist
+;;   :ensure nil
+;;   :hook (after-init . savehist-mode)
+;;   :init (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
+;;               history-length 1000
+;;               savehist-additional-variables '(mark-ring
+;;                                               global-mark-ring
+;;                                               search-ring
+;;                                               regexp-search-ring
+;;                                               extended-command-history)
+;;               savehist-autosave-interval 300))
 
 ; 设置amx保存文件的路径
 (setq amx-save-file "~/.emacs.d/var/amx-items")

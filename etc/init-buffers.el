@@ -164,6 +164,15 @@ It returns the buffer (for elisp programing)."
   (interactive)
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (lisp-interaction-mode))
+(global-set-key "\C-cs" 'suk/create-scratch-buffer) ;; Bind to `C-c s'
+
+(defun suk/switch-to-minibuffer ()
+  "Switch to minibuffer window."
+  (interactive)
+  (if (active-minibuffer-window)
+      (select-window (active-minibuffer-window))
+    (error "Minibuffer is not active")))
+(global-set-key "\C-co" 'suk/switch-to-minibuffer) ;; Bind to `C-c o'
 
 ;; 显示当前buffer或region或函数的行数和字符数
 ;; --------------------------------------------------------------
