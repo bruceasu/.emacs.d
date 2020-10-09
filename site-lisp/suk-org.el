@@ -1,6 +1,7 @@
-;;; Commentary: suk-org
 ;;; suk-org --- My org-mode settings.
-
+;;; Commentary:
+;;;
+;;; My own org-mode config
 
 ;;; Code:
 ;;; The following lines are always needed. Choose your own keys.
@@ -15,7 +16,7 @@
 (require 'ox-ascii)
 
 
-; List of projects
+;; List of projects
 ;; (setq org-publish-project-alist
 ;;       (quote (
 ;;               ; org-mode-doc-org this document
@@ -47,11 +48,12 @@
 ;;                :components ("org-mode-doc-org" "org-mode-doc-extra"))
 ;;               )))
 
-; I'm lazy and don't want to remember the name of the project to publish when I modify
-; a file that is part of a project.  So this function saves the file, and publishes
-; the project that includes this file
-;
-; It's bound to C-S-F12 so I just edit and hit C-S-F12 when I'm done and move on to the next thing
+;; I'm lazy and don't want to remember the name of the project to publish when I modify
+;; a file that is part of a project.  So this function saves the file, and publishes
+;; the project that includes this file
+;;
+;; It's bound to C-S-F12 so I just edit and hit C-S-F12 when I'm done and move on to the next thing
+
 (defun bh/save-then-publish (&optional force)
   (interactive "P")
   (save-buffer)
@@ -69,7 +71,6 @@
   "Settings for a static blog generator using org-mode"
   :version "1.2.1"
   :group 'applications)
-
 (defcustom org-static-blog-publish-url "https://example.com/"
   "URL of the blog."
   :group 'org-static-blog
@@ -195,15 +196,12 @@ Depends on org-static-blog-langcode and org-static-blog-texts."
     (cdr text-lang-node)
       (concat "[" (symbol-name text-id) ":" org-static-blog-langcode "]"))))
 
-
-
 (defun org-static-blog-needs-publishing-p (post-filename)
   "Check whether POST-FILENAME was changed since last render."
   (let ((pub-filename
          (org-static-blog-matching-publish-filename post-filename)))
     (not (and (file-exists-p pub-filename)
               (file-newer-than-file-p pub-filename post-filename)))))
-
 
 (defun org-static-blog-get-post-filenames ()
   "Returns a list of all posts."
@@ -331,7 +329,6 @@ choose."
             "#+description: \n"
             "#+filetags: ")))
 
-
 ;; Key bindings
 (define-key org-mode-map (kbd "C-c C-f") 'org-static-blog-open-next-post)
 (define-key org-mode-map (kbd "C-c C-b") 'org-static-blog-open-previous-post)
@@ -344,46 +341,6 @@ choose."
 (setq org-static-blog-publish-directory "d:/temp/blog/")
 (setq org-static-blog-posts-directory "d:/temp/blog/_src/posts")
 
-;; (setq org-static-blog-enable-tags t)
-;; (setq org-export-with-toc nil)
-;; (setq org-export-with-section-numbers nil)
-
-;; ;; This header is inserted into the <head> section of every page:
-;; ;;   (you will need to create the style sheet at
-;; ;;    ~/projects/blog/static/style.css
-;; ;;    and the favicon at
-;; ;;    ~/projects/blog/static/favicon.ico)
-;; (setq org-static-blog-page-header
-;; "<meta name=\"author\" content=\"John Dow\">
-;; <meta name=\"referrer\" content=\"no-referrer\">
-;; <link href= \"static/style.css\" rel=\"stylesheet\" type=\"text/css\" />
-;; <link rel=\"icon\" href=\"static/favicon.ico\">")
-
-;; ;; This preamble is inserted at the beginning of the <body> of every page:
-;; ;;   This particular HTML creates a <div> with a simple linked headline
-;; (setq org-static-blog-page-preamble
-;; "<div class=\"header\">
-;;   <a href=\"https://staticblog.org\">My Static Org Blog</a>
-;; </div>")
-
-;; ;; This postamble is inserted at the end of the <body> of every page:
-;; ;;   This particular HTML creates a <div> with a link to the archive page
-;; ;;   and a licensing stub.
-;; (setq org-static-blog-page-postamble
-;; "<div id=\"archive\">
-;;   <a href=\"https://staticblog.org/archive.html\">Other posts</a>
-;; </div>
-;; <center><a rel=\"license\" href=\"https://creativecommons.org/licenses/by-sa/3.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by-sa/3.0/88x31.png\" /></a><br /><span xmlns:dct=\"https://purl.org/dc/terms/\" href=\"https://purl.org/dc/dcmitype/Text\" property=\"dct:title\" rel=\"dct:type\">bastibe.de</span> by <a xmlns:cc=\"https://creativecommons.org/ns#\" href=\"https://bastibe.de\" property=\"cc:attributionName\" rel=\"cc:attributionURL\">Bastian Bechtold</a> is licensed under a <a rel=\"license\" href=\"https://creativecommons.org/licenses/by-sa/3.0/\">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.</center>")
-;; #+end_src
-
-;; In order for this to work, you will also need to create a style sheet
-;; at /~/projects/blog/static/style.css/, which might for example change
-;; the appearance of the ~#preamble~, the ~#content~, and the
-;; ~#postamble~.
-
-
-
-
 ;; Always hilight the current agenda line
 (add-hook 'org-agenda-mode-hook '(lambda () (hl-line-mode 1)) 'append)
 
@@ -395,19 +352,18 @@ choose."
 ;; If there is more than one, they won't work right.
  '(org-mode-line-clock ((t (:background "grey75" :foreground "red" :box (:line-width -1 :style released-button)))) t))
 
+;; ==============================================================
+;; Agenda
+;; --------------------------------------------------------------
 (setq org-agenda-include-diary nil)
 (setq org-agenda-diary-file "~/org/diary.org")
 
-
 ;; Show all future entries for repeating tasks
 (setq org-agenda-repeating-timestamp-show-all t)
-
 ;; Start the weekly agenda on Monday
 (setq org-agenda-start-on-weekday 1)
-
 ;; Display tags farther right
 (setq org-agenda-tags-column -102)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Attachments
@@ -420,7 +376,7 @@ choose."
 ;; This generates a unique ID for the task and adds the file in the
 ;; attachment directory.
 ;;
-;; * Attachments                                                        :ATTACH:
+;; * Attachments                                     :ATTACH:
 ;;   :PROPERTIES:
 ;;   :Attachments: x.sql
 ;;   :ID:       f1d38e9a-ff70-4cc4-ab50-e8b58b2aaa7b

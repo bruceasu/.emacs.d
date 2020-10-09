@@ -222,12 +222,14 @@ This command is convenient when reading novel, documentation."
 (use-package recentf
   :ensure nil
   ;; lazy load recentf
-  ;; :hook (find-file . (lambda () (unless recentf-mode
-  ;;                            (recentf-mode)
-  ;;                            (recentf-track-opened-file))))
+  :hook (find-file . (lambda () (unless recentf-mode
+                              (recentf-mode)
+                              (recentf-track-opened-file))))
   :init
   (add-hook 'after-init-hook #'recentf-mode)
-  (setq recentf-max-saved-items 200)
+  (setq recentf-max-saved-items 500)
+   (setq recentf-max-saved-items 17)
+  (setq recent-save-file "~/.emacs.d/var/recentf")
   :config
   (add-to-list 'recentf-exclude (expand-file-name package-user-dir))
   (add-to-list 'recentf-exclude ".cache")
@@ -238,7 +240,16 @@ This command is convenient when reading novel, documentation."
   (add-to-list 'recentf-exclude "persp-confs")
   (add-to-list 'recentf-exclude "recentf")
   (add-to-list 'recentf-exclude "url")
-  (add-to-list 'recentf-exclude "COMMIT_EDITMSG\\'"))
+  (add-to-list 'recentf-exclude "COMMIT_EDITMSG\\'")
+  (defun simon-recentf-exclude-p (file)
+  (let ((file-dir (file-truename (file-name-directory file))))
+    (-any-p (lamdba (dir)
+        (string-prefix-p dir file-dir))
+        (mapcar 'file-truename (list var package-user-dir)))))
+    (add-to-list 'recentf-exclude 'simon-recentf-exclude-p))
+
+
+
 
 (use-package savehist
   :ensure nil
@@ -259,7 +270,7 @@ This command is convenient when reading novel, documentation."
 ;; 设置eshell历史记录
 (setq eshell-history-file-name "~/.emacs.d/var/eshell/history")
   
-(setq recent-save-file "~/.emacs.d/var/recentf")
+
 
 
 (setq system-time-locale "C")
