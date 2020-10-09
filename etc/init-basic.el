@@ -263,7 +263,8 @@ With the prefix argument UNFILL, unfill it instead."
 ;;                                               search-ring
 ;;                                               regexp-search-ring
 ;;                                               extended-command-history)
-;;               savehist-autosave-interval 300))
+;;               savehist-autosave-interval 300
+;;               savehist-file "~/.emacs.d/var/history))
 
 ; 设置amx保存文件的路径
 (setq amx-save-file "~/.emacs.d/var/amx-items")
