@@ -76,8 +76,8 @@
 ;; `pyim-create-word-from-selection', 选择一个词条，运行这个命令后，就 可以将这个词条添加到个人词库。
 ;; `pyim-delete-word' 从个人词库中删除当前高亮选择的词条。
 
-;; 选词框显示5个候选词
-(setq pyim-page-length 5)
+;; 选词框显示3个候选词
+(setq pyim-page-length 3)
 
 ;; 让 Emacs 启动时自动加载 pyim 词库
 ;;(add-hook 'emacs-startup-hook
@@ -89,7 +89,7 @@
 (global-set-key (kbd "C-\\") 'toggle-input-method)
 ;; 将光标处的拼音或者五笔字符串转换为中文 (与 vimim 的 “点石成金” 功能类似)
 (global-set-key (kbd "M-i") 'pyim-convert-code-at-point)
-;;(global-set-key (kbd "C-;") 'pyim-delete-word-from-personal-buffer)
+(global-set-key (kbd "C-;") 'pyim-delete-word-from-personal-buffer)
 
 ;; 中文词语没有强制用空格分词，所以 Emacs 内置的命令 `forward-word' 和 `backward-word'
 ;; 在中文环境不能按用户预期的样子执行，而是 forward/backward “句子” ，pyim
@@ -147,7 +147,7 @@
 
 
 (defun pyim-autoselector-xingma (&rest args)
-  "适用于型码输入法的自动上屏器.
+  "适用于型码输入法的自动上屏器.ARGS.
 
 比如：五笔等型码输入法，重码率很低，90%以上的情况都是选择第一个词
 条，自动选择可以减少按空格强制选词的机会。"

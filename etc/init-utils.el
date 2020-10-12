@@ -283,13 +283,12 @@
 ;; apt install libvterm
 ;; ArchLinux
 ;; pacman -S libvterm
-(use-package 
-  vterm
-  :ensure t
-  :defer 2 
-  :bind (:map leader-key
-              ("o t" . 'vterm)))
-
+(when sys/linuxp
+  (use-package vterm
+	:ensure t
+	:defer 2 
+	:bind (:map leader-key
+				("o t" . 'vterm))))
 
 
 ;; Emacs下的pdf查看工具，默认非图形化不开启

@@ -134,7 +134,9 @@
     )
   )
 
-;; 竖线
+;; 这是 purcell 写的一个插件，按照描述来看就是把 ^L显示为一个整洁的水平线。
+;; 这个^L其实并不是^与L的组合，而是一个单一的字符。我查了一下，很可能这个代表的
+;; 意思是软回车。C-q C-L 来输入。
 (use-package page-break-lines
   :ensure t
   :config (page-break-lines-mode))
@@ -172,19 +174,20 @@
 (use-package posframe
   :ensure t)
 
+;;; 感觉变得凌乱，还是正常使用好。
 ;; 缩进线
-(use-package indent-guide
-  :ensure t
-  :hook (prog-mode . indent-guide-mode))
+;; (use-package indent-guide
+;;   :ensure t
+;;   :hook (prog-mode . indent-guide-mode))
 
 ;; Highlight indentions
-(when (display-graphic-p)
-  (use-package highlight-indent-guides
-    :diminish
-    :hook (prog-mode . highlight-indent-guides-mode)
-    :config
-    (setq highlight-indent-guides-method 'character)
-    (setq highlight-indent-guides-responsive t)))
+;; (when (display-graphic-p)
+;;   (use-package highlight-indent-guides
+;;     :diminish
+;;     :hook (prog-mode . highlight-indent-guides-mode)
+;;     :config
+;;     (setq highlight-indent-guides-method 'character)
+;;     (setq highlight-indent-guides-responsive t)))
 
 ;; Highlight uncommitted changes
 (use-package diff-hl

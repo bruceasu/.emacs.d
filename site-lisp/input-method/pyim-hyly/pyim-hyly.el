@@ -4,7 +4,6 @@
 ;; Copyright (C) 2016 Suk Honzeon <sukhonzeon@gmail.com>
 
 ;; Author: Suk Honzeon <sukhonzeon@gmail.com>
-;; URL: 
 ;; Version: 0.0.1
 ;; Package-Requires: ((pyim "1.0"))
 ;; Keywords: convenience, Chinese, pinyin, input-method, complete
@@ -31,7 +30,6 @@
 ;;; Commentary:
 
 ;;; Code:
-;; * ä»£ç                                                                :code:
 
 ;;;###autoload
 (defun pyim-hyly-enable ()
@@ -44,7 +42,7 @@
       (if (featurep 'pyim)
           (pyim-extra-dicts-add-dict
            `(:name "hyly-elpa" :file ,file :elpa t))
-        (message "pyim æ²¡æœ‰å®‰è£…ï¼Œpyim-hyly å¯ç”¨å¤±è´¥ã€‚")))))
+        (message "pyim Ã»ÓĞ°²×°£¬pyim-hyly ÆôÓÃÊ§°Ü¡£")))))
 
 ;; * Footer
 
