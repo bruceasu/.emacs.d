@@ -36,6 +36,7 @@
 ;; Git
 (use-package magit
   :ensure t
+  :defer 3
   :commands (magit-define-popup-switch magit-refresh-buffer)
   :functions (all-the-icons-faicon all-the-icons-alltheicon)
   :bind (("C-x g" . magit-status)
@@ -54,7 +55,7 @@
                               ,icon ,props))
          (unless ,no-prompt?
            (add-to-list 'pretty-magit-prompt (concat ,word ": ")))))
-
+  
   (defun add-magit-faces ()
       "Add face properties and compose symbols for buffer from pretty-magit."
       (interactive)
@@ -70,13 +71,7 @@
                   (add-face-text-property
                    (match-beginning 1) (match-end 1) props))))))))
 	
-  :init (use-package ghub+ :commands ghubp-get-notifications)
-  ;; comment config
-  (when sys/win32p
-    (setenv "GIT_ASKPASS" "git-gui--askpass"))
-  (magit-define-popup-switch 'magit-fetch-popup
-    ?t "Fetch all tags" "--tags")
-
+  :init
   (when suk-ivy-icon
     (with-eval-after-load 'all-the-icons
       (setq pretty-magit-alist nil)
@@ -140,62 +135,62 @@
         (add-hook 'git-commit-setup-hook 'magit-commit-prompt)))))
 
 ;; Magit interfaces for GitHub
-(use-package magithub
-  :after magit
-  :init
-  (setq magithub-api-timeout 5)
-  (magithub-feature-autoinject t))
+;; (use-package magithub
+;;   :after magit
+;;   :init
+;;   (setq magithub-api-timeout 5)
+;;   (magithub-feature-autoinject t))
 
 ;; Gitflow externsion for Magit
-(use-package magit-gitflow
-  :diminish magit-gitflow-mode
-  :functions magit-define-popup-action
-  :bind (:map magit-status-mode-map
-              ("G" . magit-gitflow-popup))
-  :hook (magit-mode . turn-on-magit-gitflow)
-  :config
-  (magit-define-popup-action 'magit-dispatch-popup
-    ?G "GitFlow" #'magit-gitflow-popup ?!))
+;; (use-package magit-gitflow
+;;   :diminish magit-gitflow-mode
+;;   :functions magit-define-popup-action
+;;   :bind (:map magit-status-mode-map
+;;               ("G" . magit-gitflow-popup))
+;;   :hook (magit-mode . turn-on-magit-gitflow)
+;;   :config
+;;   (magit-define-popup-action 'magit-dispatch-popup
+;;     ?G "GitFlow" #'magit-gitflow-popup ?!))
 
 ;; Git-Svn extension for Magit
-(use-package magit-svn
-  :diminish magit-svn-mode
-  :hook (magit-mode . magit-svn-mode))
+;; (use-package magit-svn
+;;   :diminish magit-svn-mode
+;;   :hook (magit-mode . magit-svn-mode))
 
 ;; Show source file TODOs in Magit
-(use-package magit-todos
-  :hook (magit-status-mode . magit-todos-mode))
+;; (use-package magit-todos
+;;   :hook (magit-status-mode . magit-todos-mode))
 
 ;;; Pop up last commit information of current line
-(use-package git-messenger
-  :commands git-messenger:copy-message
-  :bind (:map vc-prefix-map
-              ("p" . git-messenger:popup-message)
-              :map git-messenger-map
-              ("m" . git-messenger:copy-message))
-  :init
-  ;; Use magit-show-commit for showing status/diff commands
-  (setq git-messenger:use-magit-popup t))
+;; (use-package git-messenger
+;;   :commands git-messenger:copy-message
+;;   :bind (:map vc-prefix-map
+;;               ("p" . git-messenger:popup-message)
+;;               :map git-messenger-map
+;;               ("m" . git-messenger:copy-message))
+;;   :init
+;;   ;; Use magit-show-commit for showing status/diff commands
+;;   (setq git-messenger:use-magit-popup t))
 
 ;; Walk through git revisions of a file
-(use-package git-timemachine
-  :bind (:map vc-prefix-map
-              ("t" . git-timemachine)))
+;; (use-package git-timemachine
+;;   :bind (:map vc-prefix-map
+;;               ("t" . git-timemachine)))
 
 ;; Highlighting regions by last updated time
-(use-package smeargle
-  :bind (:map vc-prefix-map
-              ("S" . smeargle)
-              ("C" . smeargle-commits)
-              ("R" . smeargle-clear)))
+;; (use-package smeargle
+;;   :bind (:map vc-prefix-map
+;;               ("S" . smeargle)
+;;               ("C" . smeargle-commits)
+;;               ("R" . smeargle-clear)))
 
 ;; Git related modes
-(use-package gitattributes-mode)
-(use-package gitconfig-mode)
-(use-package gitignore-mode)
+;; (use-package gitattributes-mode)
+;; (use-package gitconfig-mode)
+;; (use-package gitignore-mode)
 
 ;; Open github/gitlab/bitbucket page
-(use-package browse-at-remote)
+;; (use-package browse-at-remote)
 
 (provide 'init-vcs)
 

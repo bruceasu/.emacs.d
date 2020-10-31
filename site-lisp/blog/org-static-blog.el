@@ -41,9 +41,9 @@
   (package-initialize))
 (require 'org)
 (require 'ox-html)
-(require 'ox-beamer)
-(require 'ox-latex)
-(require 'ox-ascii)
+;;(require 'ox-beamer)
+;;(require 'ox-latex)
+;;(require 'ox-ascii)
 
 (defgroup org-static-blog nil
   "Settings for a static blog generator using org-mode"

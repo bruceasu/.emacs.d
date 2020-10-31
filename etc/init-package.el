@@ -75,6 +75,7 @@
   (message "Set package archives to '%s'." archives))
 
 (set-package-archives suk-package-archives)
+(setq package-check-signature nil) ; 个别时候会出现签名校验失败
 
 ;; Initialize packages
 (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
@@ -87,10 +88,11 @@
   (package-install 'use-package))
 
 ;; Should set before loading `use-package'
-(setq use-package-always-ensure t)
-(setq use-package-always-defer t)
-(setq use-package-expand-minimally t)
-(setq use-package-enable-imenu-support t)
+(eval-and-compile
+  (setq use-package-always-ensure t)
+  (setq use-package-always-defer t)
+  (setq use-package-expand-minimally t)
+  (setq use-package-enable-imenu-support t))
 
 (eval-when-compile
   (require 'use-package))

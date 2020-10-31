@@ -118,18 +118,6 @@
     (advice-add #'ibuffer-find-file :override #'my-ibuffer-find-file)))
 
 
-;; Hideshow
-;; 折叠和收缩代码
-(use-package hideshow 
-  :ensure t 
-  :diminish hs-minor-mode 
-  :bind (:map prog-mode-map
-              ("C-c TAB" . hs-toggle-hiding) 
-              ("C-c p +" . hs-show-all)
-              ) 
-  :hook (prog-mode . hs-minor-mode))
-
-
 ;; Display available keybindings in popup
 (use-package which-key
   :diminish which-key-mode
@@ -141,11 +129,12 @@
   :bind (:map help-map ("C-h" . which-key-C-h-dispatch))
   :hook (after-init . which-key-mode))
 
-(use-package which-key-posframe
-  :ensure t
-  :load-path "~/.emacs.d/site-lisp/which-key-posframe/which-key-posframe.el"
-  :config
-  (which-key-posframe-mode))
+;; 飘，晃眼
+;; (use-package which-key-posframe
+;;   :ensure t
+;;   :load-path "~/.emacs.d/site-lisp/which-key-posframe/which-key-posframe.el"
+;;   :init
+;;   (which-key-posframe-mode))
 
 ;; Youdao Dictionay
 (use-package youdao-dictionary
@@ -193,6 +182,7 @@
 (use-package diffview)                  ; side-by-side diff view
 (use-package htmlize)                   ; covert to html
 (use-package list-environment)
+;;(use-package restart-emacs)
 
 ;; emacs 调用 rime输入法的前端，强烈推荐
 ;; 		 (use-package rime

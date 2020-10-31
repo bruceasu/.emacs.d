@@ -260,7 +260,7 @@
 
 ;; Fonts
 (when (or sys/mac-x-p sys/linux-x-p)
-  (set-frame-font "AR PL UKai CN-12"))
+  (set-frame-font "Noto Sans CJK SC-12"))
 
 (when sys/win32p
   (set-frame-font "Simsun 12"))

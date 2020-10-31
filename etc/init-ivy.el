@@ -198,31 +198,12 @@
   (use-package counsel-tramp
     :bind (:map counsel-mode-map
                 ("C-c c v" . counsel-tramp)))
-
-  ;; Improve `counsel-ag', also impact `counsel-rg', `counsel-pt'.
-  ;; search the selection or current symbol by default
-  (eval-and-compile
-    (declare-function ivy-thing-at-point "ivy")
-    (defun my-counsel-ag(-counsel-ag &optional initial-input initial-directory extra-ag-args ag-prompt)
-      "Search the selection or current symbol via `ag' by default."
-      (unless initial-input
-        (if (region-active-p)
-            (setq initial-input (buffer-substring-no-properties
-                                 (region-beginning) (region-end)))
-          (setq initial-input (ivy-thing-at-point))))
-      (unless initial-directory
-        (setq initial-directory default-directory))
-      (message "input: %s" initial-input)
-      (funcall -counsel-ag initial-input initial-directory extra-ag-args ag-prompt))
-
-    (advice-add 'counsel-ag :around #'my-counsel-ag))
-
 )
 
 ;; 美化ivy(swiper和counsel)
 (when (display-graphic-p)
   (progn
-	(use-package all-the-icons-ivy-rich 
+	(use-package all-the-icons-ivy-rich
 	  :ensure t 
 	  :init (all-the-icons-ivy-rich-mode 1))
 	
@@ -318,17 +299,17 @@
 	  :hook (ivy-rich-mode . (lambda () (setq ivy-virtual-abbreviate (or (and ivy-rich-mode 'abbreviate) 'name))))
 	  )
 	
-	;; 美化
-	(use-package ivy-posframe
-	  ;; :disabled
-	  :ensure t 
-	  :init (ivy-posframe-mode 1)
-	  :custom
-	  (ivy-posframe-parameters
-	   '((left-fringe . 8) (right-fringe . 8)))
-	  (ivy-posframe-display-functions-alist
-	   '((t . ivy-posframe-display-at-frame-center)))
-	  )
+	;; 美化 到处飘，晃眼。
+	;; (use-package ivy-posframe-mode
+	;;   ;; :disabled
+	;;   :ensure t 
+	;;   :init (ivy-posframe-mode 1)
+	;;   :custom
+	;;   (ivy-posframe-parameters
+	;;    '((left-fringe . 8) (right-fringe . 8)))
+	;;   (ivy-posframe-display-functions-alist
+	;;    '((t . ivy-posframe-display-at-frame-center)))
+	;;   )
 	)
   )
 
