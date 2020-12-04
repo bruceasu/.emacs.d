@@ -73,26 +73,8 @@
 (set-charset-priority 'unicode)
 
 
-;; ===============================================================
-;; 重新读取文件
-;; Revert buffer
-;; ---------------------------------------------------------------
-(defun suk/revert-current-buffer ()
-  "Revert the current buffer. key \\[suk/revert-current-buffer]."
-  (interactive)
-  (message "Revert this buffer.")
-  (revert-buffer t t))
-
-(defun suk/revert-buffer-no-confirm ()
-  "执行`revert-buffer'时不需要确认. key \\[suk/revert-current-buffer]."
-  (interactive)
-  (when (buffer-file-name)
-    (revert-buffer buffer-file-name t)
-   )
-  )
-
 ;; =========================================================
-;; 换行符设置(只是设定保存文件的换行符，并不是转换文件)
+;; 换行符设置(只是设定保存文件的换行符，并不是用这种换行符重新读取文件)
 ;; Dos/Unix
 ;; ---------------------------------------------------------
 (defun set2unix ()
@@ -112,6 +94,26 @@
 ;; insert a ^M character. Typing ‘C-m’ won’t work – you have to
 ;; hold down ‘Control’ while hitting ‘q’ followed by ‘m’.
 ;; ---------------------------------------------------------------
+
+;; ===============================================================
+;; 重新读取文件
+;; Revert buffer
+;; ---------------------------------------------------------------
+(defun suk/revert-current-buffer ()
+  "Revert the current buffer. key \\[suk/revert-current-buffer]."
+  (interactive)
+  (message "Revert this buffer.")
+  (revert-buffer t t))
+
+(defun suk/revert-buffer-no-confirm ()
+  "执行`revert-buffer'时不需要确认. key \\[suk/revert-buffer-no-confirm]."
+  (interactive)
+  (when (buffer-file-name)
+    (revert-buffer buffer-file-name t)
+   )
+  )
+
+
 
 ;;; =========================================================
 ;;; 用新编码重新读取文件

@@ -1,4 +1,4 @@
-;; init-buffers.el --- Initialize buffers configurations. -*- lexical-binding: t -*-
+;;; init-buffers.el --- Initialize buffers configurations. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -164,7 +164,7 @@ It returns the buffer (for elisp programing)."
   (interactive)
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (lisp-interaction-mode))
-(global-set-key "\C-cs" 'suk/create-scratch-buffer) ;; Bind to `C-c s'
+;; (global-set-key "\C-cs" 'suk/create-scratch-buffer) ;; Bind to `C-c s'
 
 (defun suk/switch-to-minibuffer ()
   "Switch to minibuffer window."

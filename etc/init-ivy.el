@@ -203,101 +203,106 @@
 ;; 美化ivy(swiper和counsel)
 (when (display-graphic-p)
   (progn
-	(use-package all-the-icons-ivy-rich
-	  :ensure t 
-	  :init (all-the-icons-ivy-rich-mode 1))
+	;; (use-package all-the-icons-ivy-rich
+	;;   :ensure t
+	;;   :defer 2
+	;;   :init (all-the-icons-ivy-rich-mode 1))
 	
-	(use-package ivy-rich 
-	  :ensure t
-	  :defines all-the-icons-mode-icon-alist
-	  :functions (all-the-icons-icon-family-for-mode all-the-icons-icon-family-for-file)
-	  :init (ivy-rich-mode 1) 
-	  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
-	  :preface
-	  (with-eval-after-load 'all-the-icons
-		(add-to-list 'all-the-icons-mode-icon-alist
-					 '(gfm-mode  all-the-icons-octicon "markdown" :v-adjust 0.0 :face all-the-icons-lblue)))
-	  (defun ivy-rich-switch-buffer-icon (candidate)
-		"Show buffer icons in `ivy-rich'."
-		;; Only on GUI
-		(when (and suk-ivy-icon
-				   (display-graphic-p)
-				   (featurep 'all-the-icons))
-		  (with-current-buffer (get-buffer candidate)
-			(let ((icon (all-the-icons-icon-for-mode major-mode)))
-              (propertize
-               (if (symbolp icon)
-                   (all-the-icons-icon-for-mode 'text-mode)
-				 icon)
-               'face `(
-                       :height 1.1
-                       :family ,(all-the-icons-icon-family-for-mode
-								 (if (symbolp icon)
-									 'text-mode
-                                   major-mode))
-                       :inherit
-                       ))))))
+	;; (use-package ivy-rich 
+	;;   :ensure t
+	;;   :defer 2
+	;;   :defines all-the-icons-mode-icon-alist
+	;;   :functions (all-the-icons-icon-family-for-mode all-the-icons-icon-family-for-file)
+	;;   :init (ivy-rich-mode 1) 
+	;;   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+	;;   :preface
+	;;   (with-eval-after-load 'all-the-icons
+	;; 	(add-to-list 'all-the-icons-mode-icon-alist
+	;; 				 '(gfm-mode  all-the-icons-octicon "markdown" :v-adjust 0.0 :face all-the-icons-lblue)))
 
-      (defun ivy-rich-file-icon (candidate)
-		"Show file icons in `ivy-rich'."
-		;; Only on GUI
-		(when (and suk-ivy-icon
-                   (display-graphic-p)
-                   (featurep 'all-the-icons))
-          (let ((icon (all-the-icons-icon-for-file candidate)))
-			(propertize
-			 (if (symbolp icon)
-				 (all-the-icons-icon-for-mode 'text-mode)
-               icon)
-			 'face `(
-					 :height 1.1
-					 :family ,(all-the-icons-icon-family-for-file candidate)
-					 :inherit
-					 ))))
-		)
-	  :config
-	  (setq ivy-rich-display-transformers-list
-			'(ivy-switch-buffer
-			  (:columns
-			   ((ivy-rich-switch-buffer-icon (:width 2))
-				(ivy-rich-candidate (:width 30))
-				(ivy-rich-switch-buffer-size (:width 7))
-				(ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-				(ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-				(ivy-rich-switch-buffer-project (:width 15 :face success))
-				(ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3)))))) :predicate (lambda (cand) (get-buffer cand)))
-			  ivy-switch-buffer-other-window
-			  (:columns
-			   ((ivy-rich-switch-buffer-icon :width 2)
-				(ivy-rich-candidate (:width 30))
-				(ivy-rich-switch-buffer-size (:width 7))
-				(ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-				(ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-				(ivy-rich-switch-buffer-project (:width 15 :face success))
-				(ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3)))))) :predicate (lambda (cand) (get-buffer cand)))
-			  counsel-find-file
-			  (:columns
-			   ((ivy-read-file-transformer)
-				(ivy-rich-counsel-find-file-truename (:face font-lock-doc-face))))
-			  counsel-M-x
-			  (:columns
-			   ((counsel-M-x-transformer (:width 40))
-				(ivy-rich-counsel-function-docstring (:face font-lock-doc-face)))) ; return docstring of the command
-			  counsel-recentf 
-			  (:columns
-			   ((ivy-rich-candidate (:width 0.8))
-				(ivy-rich-file-last-modified-time (:face font-lock-comment-face)))) ; return last modified time of the file
-			  counsel-describe-function 
-			  (:columns
-			   ((counsel-describe-function-transformer (:width 40))
-				(ivy-rich-counsel-function-docstring (:face font-lock-doc-face)))) ; return docstring of the function
-			  counsel-describe-variable 
-			  (:columns
-			   ((counsel-describe-variable-transformer (:width 40))
-				(ivy-rich-counsel-variable-docstring (:face font-lock-doc-face)))) ; return docstring of the variable
-			  ))
-	  :hook (ivy-rich-mode . (lambda () (setq ivy-virtual-abbreviate (or (and ivy-rich-mode 'abbreviate) 'name))))
-	  )
+	;;   (defun ivy-rich-switch-buffer-icon (candidate)
+	;; 	"Show buffer icons in `ivy-rich'."
+	;; 	;; Only on GUI
+	;; 	(when (and suk-ivy-icon
+	;; 			   (display-graphic-p)
+	;; 			   (featurep 'all-the-icons))
+	;; 	  (with-current-buffer (get-buffer candidate)
+	;; 		(let ((icon (all-the-icons-icon-for-mode major-mode)))
+    ;;           (propertize
+    ;;            (if (symbolp icon)
+    ;;                (all-the-icons-icon-for-mode 'text-mode)
+	;; 			 icon)
+    ;;            'face `(
+    ;;                    :height 1.1
+    ;;                    :family ,(all-the-icons-icon-family-for-mode
+	;; 							 (if (symbolp icon)
+	;; 								 'text-mode
+    ;;                                major-mode))
+    ;;                    :inherit
+    ;;                    ))))))
+
+    ;;   (defun ivy-rich-file-icon (candidate)
+	;; 	"Show file icons in `ivy-rich'."
+	;; 	;; Only on GUI
+	;; 	(when (and suk-ivy-icon
+    ;;                (display-graphic-p)
+    ;;                (featurep 'all-the-icons))
+    ;;       (let ((icon (all-the-icons-icon-for-file candidate)))
+	;; 		(propertize
+	;; 		 (if (symbolp icon)
+	;; 			 (all-the-icons-icon-for-mode 'text-mode)
+    ;;            icon)
+	;; 		 'face `(
+	;; 				 :height 1.1
+	;; 				 :family ,(all-the-icons-icon-family-for-file candidate)
+	;; 				 :inherit
+	;; 				 ))))
+	;; 	)
+	;;   :config
+	;;   (setq ivy-rich-display-transformers-list
+	;; 		'(ivy-switch-buffer
+	;; 		  (:columns
+	;; 		   ((ivy-rich-switch-buffer-icon (:width 2))
+	;; 			(ivy-rich-candidate (:width 30))
+	;; 			(ivy-rich-switch-buffer-size (:width 7))
+	;; 			(ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+	;; 			(ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+	;; 			(ivy-rich-switch-buffer-project (:width 15 :face success))
+	;; 			(ivy-rich-switch-buffer-path
+	;; 			   (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
+	;; 		        :predicate (lambda (cand) (get-buffer cand)))
+	;; 		  ivy-switch-buffer-other-window
+	;; 		  (:columns
+	;; 		   ((ivy-rich-switch-buffer-icon :width 2)
+	;; 			(ivy-rich-candidate (:width 30))
+	;; 			(ivy-rich-switch-buffer-size (:width 7))
+	;; 			(ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+	;; 			(ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+	;; 			(ivy-rich-switch-buffer-project (:width 15 :face success))
+	;; 			(ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3)))))) :predicate (lambda (cand) (get-buffer cand)))
+	;; 		  counsel-find-file
+	;; 		  (:columns
+	;; 		   ((ivy-read-file-transformer)
+	;; 			(ivy-rich-counsel-find-file-truename (:face font-lock-doc-face))))
+	;; 		  counsel-M-x
+	;; 		  (:columns
+	;; 		   ((counsel-M-x-transformer (:width 40))
+	;; 			(ivy-rich-counsel-function-docstring (:face font-lock-doc-face)))) ; return docstring of the command
+	;; 		  counsel-recentf 
+	;; 		  (:columns
+	;; 		   ((ivy-rich-candidate (:width 0.8))
+	;; 			(ivy-rich-file-last-modified-time (:face font-lock-comment-face)))) ; return last modified time of the file
+	;; 		  counsel-describe-function 
+	;; 		  (:columns
+	;; 		   ((counsel-describe-function-transformer (:width 40))
+	;; 			(ivy-rich-counsel-function-docstring (:face font-lock-doc-face)))) ; return docstring of the function
+	;; 		  counsel-describe-variable 
+	;; 		  (:columns
+	;; 		   ((counsel-describe-variable-transformer (:width 40))
+	;; 			(ivy-rich-counsel-variable-docstring (:face font-lock-doc-face)))) ; return docstring of the variable
+	;; 		  ))
+	;;   :hook (ivy-rich-mode . (lambda () (setq ivy-virtual-abbreviate (or (and ivy-rich-mode 'abbreviate) 'name))))
+	;;   )
 	
 	;; 美化 到处飘，晃眼。
 	;; (use-package ivy-posframe-mode

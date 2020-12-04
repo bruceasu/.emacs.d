@@ -45,13 +45,21 @@
   ;; Speed up startup
   (defvar default-file-name-handler-alist file-name-handler-alist)
   (setq file-name-handler-alist nil)
+  ;; Make startup faster by reducing the frequency of garbage
+;; collection.  The default is 0.8MB.  Measured in bytes.
   (setq gc-cons-threshold 80000000)
+  (setq gc-cons-percentage 0.6)
   (add-hook 'emacs-startup-hook
-			(lambda ()
-              "Restore defalut values after init."
-              (setq file-name-handler-alist default-file-name-handler-alist)
-              (setq gc-cons-threshold 800000)
-              (add-hook 'focus-out-hook 'garbage-collect)))
+    (lambda ()
+      "Restore defalut values after init."
+      (setq file-name-handler-alist default-file-name-handler-alist)
+      (setq gc-cons-threshold 800000000)
+      (message "Emacs ready in %s with %d garbage collections."
+		(format "%.2f seconds"
+		  (float-time
+			(time-subtract after-init-time before-init-time)))
+         gcs-done)
+      (add-hook 'focus-out-hook 'garbage-collect)))
 
   ;; Load path
   ;; Optimize: Force "etc"" and "site-lisp" at the head to reduce the startup time.
@@ -77,12 +85,20 @@
 
   ;; Customization
   (require '+custom)
-
+  
   ;; Packages
   ;; Without this comment Emacs25 adds (package-initialize) here
   (require 'init-package)
+  (use-package esup
+  :ensure t
+  ;; To use MELPA Stable use ":pin melpa-stable",
+  :pin melpa
+  :commands (esup))
+  (require 'lazy-load)
+  (require 'init-key)
+  
   (require 'init-treemacs)
-  (require 'init-music)  
+  
   ;; Preferences
   (require 'init-basic)
   (require 'init-ui)
@@ -90,7 +106,7 @@
   (require 'init-utils)
   (require 'init-ivy)
   
-  (require 'init-org)
+  ;;(require 'init-org)
   (require 'init-file-encoding)
   (require 'init-buffers)
   (require 'init-sudo)
@@ -107,8 +123,12 @@
 
   ;; 个人的一些特别设置
   (require 'init-suk)
+  (require 'init-im)
   )
 
+
+;; Make gc pauses faster by decreasing the threshold.
+(setq gc-cons-threshold (* 2 1000 1000))
 (put 'scroll-left 'disabled nil)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here

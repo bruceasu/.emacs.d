@@ -1,4 +1,4 @@
-;; init-ui.el --- Initialize ui configurations.	-*- lexical-binding: t -*-
+;;; init-ui.el --- Initialize ui configurations.	-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -33,16 +33,9 @@
   (require '+const)
   (require '+custom))
 
-;; 关闭工具栏
-(tool-bar-mode -1)
-
-;; 关闭菜单栏
-(menu-bar-mode -1)
-
-;; 设置光标样式
-(setq-default cursor-type 'box)
 ;; 去除默认启动界面
 (setq inhibit-startup-message nil)
+(setq inhibit-startup-screen t)
 
 ;; 高亮当前行
 (global-hl-line-mode 1)
@@ -105,6 +98,7 @@
     (progn
       (use-package doom-themes
         :init (suk-load-theme suk-theme)
+		:defer 1
         :config
         ;; Enable flashing mode-line on errors
         (doom-themes-visual-bell-config)
@@ -113,20 +107,32 @@
         ;; Enable custom treemacs theme (all-the-icons must be installed!)
         (doom-themes-treemacs-config)
         ;; Enable custom neotree theme (all-the-icons must be installed!)
-        (doom-themes-neotree-config))
+        ;;(doom-themes-neotree-config)
+		)
 
       ;; Make certain buffers grossly incandescent
-      (use-package solaire-mode
-        :hook (((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
-                (minibuffer-setup . solaire-mode-in-minibuffer)
-                (after-load-theme . solaire-mode-swap-bg)))
+       ;; (use-package solaire-mode
+	   ;; 	:defer 1
+       ;;   :hook (((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
+       ;;           (minibuffer-setup . solaire-mode-in-minibuffer)
+       ;;           (after-load-theme . solaire-mode-swap-bg)))
 
-      (use-package doom-modeline
-		:ensure t
-		:init
-		(doom-modeline-mode 1)
-		:config (setq doom-modeline-height 10)
-        :hook (after-init . doom-modeline-mode))
+      ;; (use-package doom-modeline
+	  ;; 	:ensure t
+	  ;; 	:defer 1
+      ;;   :hook (after-init . doom-modeline-mode)
+      ;;   :config
+      ;;   (set-face-attribute 'mode-line nil :font
+      ;;                 (format   "%s:size=%d"  "monofur" 14))
+      ;;   (set-face-attribute 'mode-line-inactive nil :font
+      ;;                 (format   "%s:size=%d"  "monofur" 14))
+      ;;   (setq inhibit-compacting-font-caches t
+      ;;           doom-modeline-height 1
+      ;;           doom-modeline-buffer-file-name-style 'auto
+      ;;           doom-modeline-icon nil
+      ;;           doom-modeline-project-detection 'project)
+	  ;; 	(setq doom-modeline-height 10)
+      ;;   :hook (after-init . doom-modeline-mode))
     )
   (progn
     (ignore-errors
@@ -142,20 +148,20 @@
   :config (page-break-lines-mode))
 
 ;; 启动界面
-(use-package dashboard
-  :ensure t
-  :config (dashboard-setup-startup-hook)
-  (dashboard-modify-heading-icons '((recents . "file-text")
-									(bookmarks . "book")))
-  ;; 设置标题
-  (setq dashboard-banner-logo-title
-		"欢迎您使用此Emacs配置文件")
-  ;; 设置banner
-  (setq dashboard-startup-banner fancy-splash-image)
-  (setq dashboard-center-content t)
-  (setq dashboard-set-heading-icons t)
-  ;; (setq dashboard-set-file-icons t)
-  (setq dashboard-set-navigator t))
+;; (use-package dashboard
+;;   :ensure t
+;;   :config (dashboard-setup-startup-hook)
+;;   (dashboard-modify-heading-icons '((recents . "file-text")
+;; 									(bookmarks . "book")))
+;;   ;; 设置标题
+;;   (setq dashboard-banner-logo-title
+;; 		"欢迎您使用此Emacs配置文件")
+;;   ;; 设置banner
+;;   (setq dashboard-startup-banner fancy-splash-image)
+;;   (setq dashboard-center-content t)
+;;   (setq dashboard-set-heading-icons t)
+;;   ;; (setq dashboard-set-file-icons t)
+;;   (setq dashboard-set-navigator t))
 
 ;; 图标支持
 (use-package all-the-icons
@@ -332,6 +338,7 @@
 (setq line-number-mode t)
 
 (defun buffer-too-big-p ()
+  "Check whether the buffer is too big."
   (or (> (buffer-size) (* 5000 80))
       (> (line-number-at-pos (point-max)) 5000)))
 
@@ -370,15 +377,6 @@
       scroll-margin 0
       scroll-conservatively 100000)
 
-;; Misc
-(fset 'yes-or-no-p 'y-or-n-p)
-(setq inhibit-startup-screen t)
-(setq visible-bell t)
-(size-indication-mode 1)
-(blink-cursor-mode -1)
-(setq track-eol t)                      ; Keep cursor at end of lines. Require line-move-visual is nil.
-(setq line-move-visual nil)
-(setq inhibit-compacting-font-caches t) ; Don’t compact font caches during GC.
 
 ;; Don't open a file in a new frame
 (when (boundp 'ns-pop-up-frames)

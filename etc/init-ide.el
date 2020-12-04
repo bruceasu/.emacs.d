@@ -160,8 +160,8 @@
   yasnippet-snippets 
   :ensure t)
 
-(require 'init-flycheck)
-(require 'init-vcs)
+;;(require 'init-flycheck)
+;;(require 'init-vcs)
 ;; 项目管理
 (require 'init-projectile)
 (require 'init-program-c)

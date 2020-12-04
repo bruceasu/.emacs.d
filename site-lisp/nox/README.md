@@ -21,7 +21,7 @@ My favorite a word from Nox:
 
 Nox depend on [company-mode](https://github.com/company-mode/company-mode) and [posframe](https://github.com/tumashu/posframe)
 
-# Install
+# Install Nox
 
 1. Clone this repository and put nox.el in your load-path
 
@@ -40,12 +40,15 @@ Nox depend on [company-mode](https://github.com/company-mode/company-mode) and [
                'php-mode-hook
                'c-mode-common-hook
                'c-mode-hook
+               'csharp-mode-hook
                'c++-mode-hook
                'haskell-mode-hook
                ))
   (add-hook hook '(lambda () (nox-ensure))))
 ```
 3. Open file, that's all.
+
+Note: suggestion upgrade emacs to 27.x or 28.x, JSON parser much faster, and Nox completion will much smooth.
 
 <a name="connecting"></a>
 # Connecting to a server
@@ -54,12 +57,13 @@ Nox depend on [company-mode](https://github.com/company-mode/company-mode) and [
 
 * Javascript's [javascript-typescript-stdio][javascript-typescript-langserver]
 * Rust's [rls][rls]
-* Python's [pyls][pyls]
+* Python's [mspyls][mspyls], [pyls][pyls] or [pyright][pyright]
 * Ruby's [solargraph][solargraph]
 * Java's [Eclipse JDT Language Server][eclipse-jdt]
 * Bash's [bash-language-server][bash-language-server]
-* PHP's [php-language-server][php-language-server]
-* C/C++'s [ccls][ccls]  ([cquery][cquery] and [clangd][clangd] also work)
+* PHP's [intelephense][intelephense] or [php-language-server][php-language-server]
+* C/C++'s [ccls][ccls] ([cquery][cquery] and [clangd][clangd] also work)
+* CSharp [OmniSharp][OmniSharp]
 * Haskell's [IDE engine][haskell-ide-engine]
 * Elm's [elm-language-server][elm-language-server]
 * Kotlin's [kotlin-language-server][kotlin-language-server]
@@ -265,13 +269,13 @@ Here's a quick summary of the customization options.  In Nox's
 customization group (`M-x customize-group`) there is more
 documentation on what these do.
 
-- `nox-doc-tooltip-font-size`: The font size for documentation tooltip.
+- `nox-doc-tooltip-font`: The font for documentation tooltip, font format follow rule ```fontname-fontsize```.
 
 - `nox-doc-tooltip-border-width`: The border width of documentation tooltip.
 
 - `nox-doc-tooltip-timeout`: The timeout of documentation tooltip show time, default is 30 seconds, tooltip will hide after you change cursor point.
 
-- `nox-doc-tooltip-name`: The name of documentation tooltip.
+- `nox-doc-name`: The name of documentation tooltip.
 
 - `nox-candidate-annotation-limit`: The width limit of candidate annotation.
 
@@ -288,12 +292,6 @@ documentation on what these do.
 
 - `nox-ignored-server-capabilites`: LSP server capabilities that
   Nox could use, but won't;
-
-- `nox-put-doc-in-help-buffer`: If non-nil, put eldoc docstrings in
-  separate `*nox-help*` buffer;
-
-- `nox-auto-display-help-buffer`: If non-nil, automatically display
-  `*nox-help*` buffer;
 
 - `nox-confirm-server-initiated-edits`: If non-nil, ask for confirmation
   before allowing server to edit the source buffer's text;
@@ -315,15 +313,34 @@ lisp:
   managing a buffer.  Use `nox-managed-p` to tell if current buffer
   is still being managed.
 
+- `nox-php-server`: Language server for PHP, default is ```intelephense```, you can set with other value: ```php-language-server```
+
+- `nox-omni-sharp-path`: Language server path for OmniSharp, default is ```~/.emacs.d/.cache/omnisharp/server/v1.34.5/OmniSharp.exe```, you can set with other value.
+
+- `nox-python-server`: Language server for Python, default is ```mspyls```, you can set with other value: ```pyls``` or ```pyright```.
+
+If you choose ```mspyls```:
+1. Execute command ```nox-print-mspyls-download-url``` get download url of mspyls.
+2. Then extract to the directory ~/.emacs.d/nox/mspyls/
+3. Permission: ```sudo chmod -R +x ~/.emacs.d/nox/mspyls/
+
+Note mspyls need index file before respond completion request, so please don't test single file under HOME directory, that will cost few minutes to index file, and ```pyls``` haven't this problem.
+
+- `nox-optimization-p`: Improve performance by adjust GC limit and disable ```bidi-display-reordering```. If you don't need Nox set this, change this option to nil.
+
 [lsp]: https://microsoft.github.io/language-server-protocol/
 [rls]: https://github.com/rust-lang-nursery/rls
 [pyls]: https://github.com/palantir/python-language-server
+[mspyls]: https://github.com/microsoft/python-language-server
+[pyright]: https://github.com/microsoft/pyright
 [gnuelpa]: https://elpa.gnu.org/packages/eglot.html
 [melpa]: http://melpa.org/#/eglot
 [javascript-typescript-langserver]: https://github.com/sourcegraph/javascript-typescript-langserver
 [emacs-lsp]: https://github.com/emacs-lsp/lsp-mode
 [emacs-lsp-plugins]: https://github.com/emacs-lsp
 [bash-language-server]: https://github.com/mads-hartmann/bash-language-server
+[intelephense]: https://github.com/bmewburn/vscode-intelephense
+[OmniSharp]: http://www.omnisharp.net/
 [php-language-server]: https://github.com/felixfbecker/php-language-server
 [company-mode]: https://github.com/company-mode/company-mode
 [cquery]: https://github.com/cquery-project/cquery

@@ -73,6 +73,7 @@
   (setq socks-noproxy nil)
   (message "Disable socks proxy."))
 
+(autoload 'calendar "init-calendar" "Config Chinese calendar " t)
 
 (provide '+autoload)
 ;;; +autoload.el ends here

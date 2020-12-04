@@ -129,9 +129,5 @@
 
 (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 
-(run-at-time "00:59" 3600 'org-save-all-org-buffers)
-
-
-
 (provide 'suk-org)
 ;;; suk-org.el ends here

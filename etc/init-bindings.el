@@ -72,13 +72,13 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 					   
 					   '([S-f6]               hs-minor-mode)
 					   '([f5]                 toggle-truncate-lines)
-					   '([S-f11]              insert-translated-name-insert) ;; Chinese to English
-					   '([S-f12]              toggle-company-english-helper) ;; popup English tips
-					   '([M-f12]              aweshell-dedicated-toggle)
-					   ;;'([M-f11]            aweshell-sudo-toggle)
-					   '([M-f10]              aweshell-prev)
-					   '([M-f11]              aweshell-next)
-					   '([M-f9]               aweshell-new)
+					   ;; '([S-f11]              insert-translated-name-insert) ;; Chinese to English
+					   ;; '([S-f12]              toggle-company-english-helper) ;; popup English tips
+					   ;; '([M-f12]              aweshell-dedicated-toggle)
+					   ;; '([M-f11]            aweshell-sudo-toggle)
+					   ;; '([M-f10]              aweshell-prev)
+					   ;; '([M-f11]              aweshell-next)
+					   ;; '([M-f9]               aweshell-new)
 					   ;; '([S-f2]               suk/new-empty-buffer)
 					   '([f2]             hs-toggle-hiding)
 					   ;; '([C-f2]            gnus)
@@ -93,13 +93,13 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;; (global-set-key [?\C-x ?\C-\\] 'next-line)
 ;; (global-set-key [(control ?x) (control ?\\)] 'next-line)
 
+;; has set to f7, c-f7
+;;(global-set-key (kbd "<C-f6>") '(lambda () (interactive) (bookmark-set "SAVED")))
+;;(global-set-key (kbd "<f6>") '(lambda () (interactive) (bookmark-jump "SAVED")))
 
-;; 下面这两个键模拟Vi的光标不动屏幕动效果, 我很喜欢, 几乎总在使用.
-(global-set-key [(meta N)] 'window-move-up)        
-(global-set-key [(meta P)] 'window-move-DOWN)
-;; 同上, 但是是另一个buffer窗口上下移动. 常常查看帮助用这个.
-(global-set-key [(control N)] 'other-window-move-up)
-(global-set-key [(control P)] 'other-window-move-down)
+;; C-x LEFT/RIGHT
+;;(global-set-key (kbd "C-<f9>") 'previous-buffer)
+;;(global-set-key (kbd "C-<f10>") 'next-buffer)
 
 ;;;
 ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
@@ -133,32 +133,7 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 			 (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
 			 ))
 
-;; ------------------------------下面是上面用到的函数定义------------------------------
-(defun window-move-up (&optional arg)
-  "Current window move-up 2 lines."
-  (interactive "P")
-  (if arg
-	  (scroll-up arg)
-	(scroll-up 2)))
 
-(defun window-move-down (&optional arg)
-  "Current window move-down 3 lines."
-  (interactive "P")
-  (if arg
-	  (scroll-down arg)
-	(scroll-down 3)))
-
-(defun other-window-move-up (&optional arg)
-  "Other window move-up 1 lines."
-  (interactive "p")
-  (scroll-other-window arg))
-
-(defun other-window-move-down (&optional arg)
-  "Other window move-down 2 lines."
-  (interactive "P")
-  (if arg
-	  (scroll-other-window-down arg)
-	(scroll-other-window-down 2)))
 
 ;;Emacs 自动排版
 ;;很简单：C-x h C-M-\
@@ -216,49 +191,12 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
 
 (define-prefix-command 'leader-key)
-(which-key-add-key-based-replacements
-  "M-SPC b" "音乐"
-  "M-SPC o" "开启"
-  "M-SPC t" "切换"
-  "M-SPC w" "窗口"
-  "M-SPC c" "代码"
-  "M-SPC p" "项目"
-  "M-SPC w P" "交换窗口-上"
-  "M-SPC w N" "交换窗口-下"
-  "M-SPC w F" "交换窗口-右"
-  "M-SPC w B" "交换窗口-左")
-(bind-key "t T" #'+suk/toggle-transparency leader-key)
-(bind-key "t p" #'+suk/toggle-proxy leader-key)
-(global-set-key (kbd "M-SPC") 'leader-key)
+(global-set-key (kbd "M-s-SPC") 'leader-key)
+
 (global-set-key (kbd "C-(") 'backward-sexp) 
 (global-set-key (kbd "C-)") 'forward-sexp)
 
 
-;; Bongo 音乐播放器
-(defhydra suk/hydra-music-menu (:color blue)
-  "
-								^音乐^
-----------------------------------------------------------------------
-[_RET_] ^播放曲目	[_i_] ^一键播放^		[_x_] ^删除曲目(区域)^	[_d_] ^删除曲目(行内)^
-[_\__] ^撤回操作		[_SPC_] ^暂停/播放^	[_TAB_] ^收起专辑^		[_h_] ^回退10s^
-[_l_] ^前进10s		[_a_] ^加入列表^		[_n_] ^下一首^			[_p_] ^上一首^
-[_r_] ^随机播放		[_k_] ^关闭播放器^
-"
-  ("RET" bongo-dwim nil)
-  ("i" bongo-init nil)
-  ("x" bongo-kill-region nil)
-  ("d" bongo-kill-line nil) 
-  ("_" bongo-undo nil)
-  ("SPC" bongo-pause/resume nil) 
-  ("TAB" bongo-toggle-collapsed nil) 
-  ("h" bongo-seek-backward-10 nil :color red) 
-  ("l" bongo-seek-forward-10 nil :color red) 
-  ("a" bongo-insert-enqueue nil) 
-  ("n" bongo-play-next nil)
-  ("p" bongo-play-previous nil) 
-  ("r" bongo-play-random nil)
-  ("k" bongo-stop nil)
-  ("q" nil "QUIT" :color blue))
 ;; 启动点er啥
 (defhydra suk/hydra-open-menu ()
   "
@@ -275,8 +213,8 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 -----------------------------------------------------------------
 [_T_] ^透明^		[_p_] ^代理^		[_f_] ^FlyCheck^
 "
-  ("T" +suk/toggle-transparency nil)
-  ("p" +suk/toggle-proxy nil)
+  ("T" suk/toggle-transparency nil)
+  ("p" suk/toggle-proxy nil)
   ("f" global-flycheck-mode nil)
   ("q" nil "QUIT" :color blue))
 ;; 窗格
@@ -284,15 +222,15 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
   "
 							^窗口管理器^
 -----------------------------------------------------------------
-[_0_] ^关闭窗格^				[_F_] ^全屏模式^		[_K_] ^↑+^		[_k_] ^go ↑^    
-[_1_] ^关闭其他窗格^			[_r_] ^旋转交换^		[_J_] ^↓+^		[_j_] ^go ↓^ 
-[_2_] ^新建窗格(垂直)^		[_s_] ^选择交换^		[_H_] ^←+^		[_h_] ^go ←^
-[_3_] ^新建窗格(水平)^		[_b_] ^平均铺开^		[_L_] ^→+^		[_l_] ^go →^
+[_x_] ^关闭窗格^			[_F_] ^全屏模式^		[_K_] ^↑+^		[_k_] ^go ↑^    
+[_;_] ^关闭其他窗格^		[_r_] ^旋转交换^		[_J_] ^↓+^		[_j_] ^go ↓^ 
+[_:_] ^新建窗格(垂直)^		[_s_] ^选择交换^		[_H_] ^←+^		[_h_] ^go ←^
+[_|_] ^新建窗格(水平)^		[_b_] ^平均铺开^		[_L_] ^→+^		[_l_] ^go →^
 "
-  ("0" delete-window nil)
-  ("1" delete-other-window nil :color blue)
-  ("2" split-window-vertically nil)
-  ("3" split-window-horizontally nil)
+  ("x" delete-window nil)
+  (";" delete-other-window nil :color blue)
+  (":" split-window-vertically nil)
+  ("|" split-window-horizontally nil)
   ("F" toggle-frame-fullscreen nil :color blue)
   ("r" rotate-window nil)
   ("s" ace-swap-window nil :color blue)
@@ -306,52 +244,7 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
   ("k" windmove-up nil)
   ("l" windmove-right nil)
   ("q" nil "QUIT" :color blue))
-;; 代码
-(defhydra suk/hydra-code-menu ()
-  "
-				^代码^
-----------------------------------
-[_r_] ^quickrun^	[_s_] company-yasnippet
-"
-  ("s" company-yasnippet nil :color blue)
-  ("r" quickrun nil :color blue)
-  ("q" nil "QUIT" :color blue))
-;; 项目
-(defhydra suk/hydra-project-menu ()
-  ""
-  ("q" nil "QUIT" :color blue))
-;; 各种插件的键绑定
-(pretty-hydra-define suk/hydra-app-menu (:color blue)
-  (
-   "EAF"
-   (("e" suk/eaf-hydra/body "EAF"))
-   "Telega"
-   (("t" telega "启动Telega")
-	("c" ivy-telega-chat-with "选择联系人")
-	("n" (lambda () (message "占位"))))))
 
-;; EAF键绑定
-(pretty-hydra-define suk/eaf-hydra (:color blue)
-  (
-   "Emacs"
-   (("s" eaf-search-it "立即搜索")
-	("b" eaf-open-browser "打开网页")
-	("h" eaf-open-browser-with-history "历史记录")
-	("e" eaf-proxy-open_download_manage_page "下载管理")
-	("m" eaf-open-bookmark "打开书签"))
-   "Application"
-   (("o" eaf-open "智能Open")
-	("c" eaf-open-camera "打开摄像")
-	("p" eaf-open-mindmap "思维导图(O)")
-	("l" eaf-create-mindmap "思维导图(N)")
-	("r" eaf-restart-process "刷新EAF"))
-   "Framwork"
-   (("t" eaf-open-terminal "打开终端")
-	("f" eaf-file-send-qrcode "隔空投送(F)")
-	("d" eaf-file-browser-qrcode "隔空投送(D)")
-	("i" eaf-open-airshare "隔空投送(S)")
-	("a" eaf-open-rss-reader "RSS阅读器"))
-   ))
 ;; 常用的命令
 (defhydra suk/hydra-common-menu ()
   "
@@ -378,20 +271,15 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
   "
 							^主菜单^
 ————————————————————————————————————————————————————————————
-[_b_] ^音乐^	[_o_] ^开启^ 	[_t_] ^开关^ 	[_w_] ^窗格^
-[_c_] ^代码^	[_p_] ^项目^ 	[_a_] ^应用^ 	[_2_] ^常用^
+[_o_] ^开启^ 	[_t_] ^开关^ 	[_w_] ^窗格^ 	[_c_] ^常用^
 "
-  ("b" suk/hydra-music-menu/body nil :color blue)
   ("o" suk/hydra-open-menu/body nil :color blue)
   ("t" suk/hydra-toggle-menu/body nil :color blue)
   ("w" suk/hydra-window-menu/body nil :color blue)
-  ("c" suk/hydra-code-menu/body nil :color blue)
-  ("p" suk/hydra-project-menu/body nil :color blue)
-  ("2" suk/hydra-common-menu/body nil :color blue)
-  ("a" suk/hydra-app-menu/body nil :color blue)
+  ("c" suk/hydra-common-menu/body nil :color blue)
   ("q" nil "QUIT" :color blue))
 
-(global-set-key (kbd "s-,") #'suk/hydra-main-menu/body)
+(global-set-key (kbd "C-M-,") #'suk/hydra-main-menu/body)
 
 
 

@@ -30,6 +30,7 @@
 ;;; Code:
 
 (eval-when-compile
+  (require '+const)
   (require '+custom))
 
 ;; HACK: DO NOT copy package-selected-packages to init/custom file forcibly.
@@ -78,9 +79,14 @@
 (setq package-check-signature nil) ; 个别时候会出现签名校验失败
 
 ;; Initialize packages
-(unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
-  (setq package-enable-at-startup nil)          ; To prevent initializing twice
-  (package-initialize))
+;;(unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
+;;  (setq package-enable-at-startup nil)          ; To prevent initializing twice
+;;  (package-initialize))
+
+;;(when (< emacs-major-version 27)
+;;  (package-initialize))
+
+(package-initialize)
 
 ;; Setup `use-package'
 (unless (package-installed-p 'use-package)
@@ -98,8 +104,8 @@
   (require 'use-package))
 
 ;; Required by `use-package'
-(use-package diminish)
-(use-package bind-key)
+;;(use-package diminish)
+;;(use-package bind-key)
 
 ;; Initialization benchmark
 (when suk-benchmark
@@ -107,12 +113,6 @@
     :commands (benchmark-init/activate)
     :hook (after-init . benchmark-init/deactivate)
     :init (benchmark-init/activate)))
-
-;; Extensions
-(use-package package-utils
-  :init
-  (defalias 'upgrade-packages 'package-utils-upgrade-all)
-  (defalias 'upgrade-packages-and-restart 'package-utils-upgrade-all-and-restart))
 
 (provide 'init-package)
 

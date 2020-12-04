@@ -48,13 +48,10 @@
 
 (use-package org
   :ensure nil
-  :commands org-try-structure-completion
-  :functions hydra-org-template/body
   :bind (("C-c a" . org-agenda)
          ("C-c b" . org-switchb)
          ("C-c l" . org-store-link)
-         ("C-c C" . org-capture)
-         )
+         ("C-c C" . org-capture))
   :hook ((org-indent-mode . (lambda() (diminish 'org-indent-mode)))
          (org-mode-hook . (lambda ()
                             (abbrev-mode 1)
@@ -198,7 +195,6 @@
  (setq org-export-coding-system 'utf-8)
  (setq org-table-export-default-format "orgtbl-to-csv")
  
- 
 
  ;; Targets include this file and any file contributing to the agenda - up to 9 levels deep
  (setq org-refile-targets (quote ((nil :maxlevel . 9) (org-agenda-files :maxlevel . 9))))
@@ -219,34 +215,17 @@
  (setq org-hide-emphasis-markers t)
  (setq org-hide-leading-stars nil)
  (setq org-startup-indented t)
- (setq org-cycle-include-plain-lists t)
- (setq org-cycle-separator-lines 0)
- (setq org-cycle-include-plain-lists t)
- (setq org-cycle-separator-lines 0)
- (setq org-clone-delete-id t)
- ;; Targets complete directly with IDO
- (setq org-outline-path-complete-in-steps nil)
  ;; global Effort estimate values
  ;; global STYLE property values for completion
  (setq org-global-properties (quote (("Effort_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00") ("STYLE_ALL" . "habit"))))
- ;; (setq org-alphabetical-lists t)
- (setq org-read-date-prefer-future 'time)
- (setq org-table-use-standard-references (quote from))
- (setq org-src-fontify-natively t)
- (setq org-src-preserve-indentation nil)
- (setq org-edit-src-content-indentation 0)
- (setq org-catch-invisible-edits 'error)
  (setq org-blank-before-new-entry (quote ((heading) (plain-list-item . auto))))
  (setq org-insert-heading-respect-content nil)
- (setq org-reverse-note-order nil)
  (setq org-yank-adjusted-subtrees t)
  ;; Use the current window for C-c ' source editing
  (setq org-src-window-setup 'current-window)
  ;; Use the current window for indirect buffer display
  (setq org-indirect-buffer-display (quote current-window))
- 
  (add-to-list 'org-export-backends 'md)
-
  )
   
 ;; More fancy UI
@@ -280,52 +259,29 @@
 ;; (global-set-key (kbd "C-c C") 'org-capture)
 ;; (global-set-key "\C-cc" 'org-capture)
 ;; (global-set-key "\C-cl" 'org-store-link)
-;; (global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-ca" 'org-agenda)
 ;; (global-set-key "\C-cb" 'org-iswitchb)
 
 
-(global-set-key (kbd "<f12>") 'org-agenda)
-(global-set-key (kbd "C-s-<f12>") 'bh/save-then-publish)
-(global-set-key (kbd "C-<f9>") 'previous-buffer)
-(global-set-key (kbd "C-<f10>") 'next-buffer)
-(global-set-key (kbd "M-<f9>") 'org-toggle-inline-images)
+;;(global-set-key (kbd "M-<f9>") 'org-toggle-inline-images)
 
-
-;; 然后使用define-key来为org-mode定义一个简单的按键绑定，如下：
-;;(defun my-org-func ()
-;;  (interactive)
-;;  (message "hello, org!"))
-;;(define-key org-mode-map (kbd "<S-f6>") 'bh/widen)
-
-;; (global-set-key (kbd "<f6>") 'bh/org-todo)
-;; (global-set-key (kbd "<S-f6>") 'bh/widen)
-
-; has set to f7, c-f7
-;(global-set-key (kbd "<C-f6>") '(lambda () (interactive) (bookmark-set "SAVED")))
-;(global-set-key (kbd "<f6>") '(lambda () (interactive) (bookmark-jump "SAVED")))
-
-;; (glbal-set-key (kbd "<f7>") 'bh/set-truncate-lines)
 ;; C-',  C-, is org-cycle-agenda-files keys
-;; (global-set-key (kbd "<f8>") 'org-cycle-agenda-files)
 
-
-(define-prefix-command 'f9-map)
-(global-set-key (kbd "<f9>") 'f9-map)
-(global-set-key (kbd "<f9> <f9>") 'bh/show-org-agenda)
-
-(global-set-key (kbd "<f9> a") 'org-capture)
-(global-set-key (kbd "<f9> c") 'calendar)
-(global-set-key (kbd "<f9> f") 'boxquote-insert-file)
-(global-set-key (kbd "<f9> r") 'boxquote-region)
-(global-set-key (kbd "<f9> v") 'visible-mode)
-(global-set-key (kbd "<f9> l") 'org-toggle-link-display)
+;;(define-prefix-command 'f9-map)
+;;(global-set-key (kbd "<f9>") 'f9-map)
+;;(global-set-key (kbd "<f9> a") 'org-agenda)
+;;(global-set-key (kbd "<f9> s") 'show-org-agenda)
+;;(global-set-key (kbd "<f9> c") 'org-capture)
+;;(global-set-key (kbd "<f9> d") 'calendar)
+;;(global-set-key (kbd "<f9> f") 'boxquote-insert-file)
+;;(global-set-key (kbd "<f9> r") 'boxquote-region)
+;;(global-set-key (kbd "<f9> v") 'visible-mode)
+;;(global-set-key (kbd "<f9> l") 'org-toggle-link-display)
 
 (setq org-time-stamp-rounding-minutes (quote (1 1)))
-(defun bh/show-org-agenda ()
+(defun show-org-agenda ()
   (interactive)
-  (if org-agenda-sticky
-      (switch-to-buffer "*Org Agenda( )*")
-    (switch-to-buffer "*Org Agenda*"))
+  (switch-to-buffer "*Org Agenda*")
   (delete-other-windows))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

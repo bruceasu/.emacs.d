@@ -34,35 +34,31 @@
   (require '+custom))
 
 (use-package hydra
-  :ensure t)
+  :ensure t
+  :defer 1)
 
 (use-package hydra-posframe
    :load-path "~/.emacs.d/site-lisp/hydra-posframe/hydra-posframe.el"
+   :defer 1
    :hook (after-init . hydra-posframe-mode))
 
 (use-package major-mode-hydra
   :ensure t
+  :defer 1
   :after hydra)
 
 ;; Rectangle
 (use-package rect
   :ensure nil
+  :defer 2
   :bind (("<C-return>" . rectangle-mark-mode)))
 
-;; 跳转窗口
-;; (use-package ace-window
-;;   :ensure t
-;;   :init
-;;   (progn
-;;     (global-set-key [remap other-window] 'ace-window)
-;; 	;; 设置标记
-;;     (custom-set-faces
-;;      '(aw-leading-char-face
-;;        ((t (:inherit ace-jump-face-foreground :height 3.0 :foreground "magenta")))))))
+
 
 ;; On-the-fly spell checker
 (use-package flyspell
   :ensure nil
+  :defer 2
   :diminish flyspell-mode
   :if (executable-find "aspell")
   :hook (((text-mode outline-mode) . flyspell-mode)
@@ -79,11 +75,13 @@
 ;; Framework for mode-specific buffer indexes
 (use-package imenu
   :ensure nil
+  :defer 1
   :bind (("C-." . imenu)))
 
 ;; Treat undo history as a tree
 (use-package undo-tree
   :ensure t
+  :defer 2
   :diminish undo-tree-mode
   :hook (after-init . global-undo-tree-mode)
   :init
@@ -98,6 +96,7 @@
 ;; Group ibuffer's list by project root
 (use-package ibuffer-projectile
   :bind ("C-x C-b" . ibuffer)
+  :defer 1
   :hook ((ibuffer . (lambda ()
                       (ibuffer-projectile-set-filter-groups)
                       (unless (eq ibuffer-sorting-mode 'alphabetic)
@@ -121,6 +120,7 @@
 ;; Display available keybindings in popup
 (use-package which-key
   :diminish which-key-mode
+  :defer 2
   :custom
   ;; 弹出方式，底部弹出
   (which-key-popup-type 'side-window)
@@ -163,6 +163,7 @@
 
 ;; Persistent the scratch buffer
 (use-package persistent-scratch
+  :defer 2
   :preface
   (defun my-save-buffer ()
     "Save scratch and other buffer."
@@ -178,10 +179,14 @@
   :bind (:map lisp-interaction-mode-map
               ("C-x C-s" . my-save-buffer)))
 
-(use-package daemons)                   ; system services/daemons
-(use-package diffview)                  ; side-by-side diff view
-(use-package htmlize)                   ; covert to html
-(use-package list-environment)
+(use-package daemons
+  :defer 1)                   ; system services/daemons
+(use-package diffview
+  :defer 2)                  ; side-by-side diff view
+(use-package htmlize
+  :defer 2)                   ; covert to html
+(use-package list-environment
+  :defer 2)
 ;;(use-package restart-emacs)
 
 ;; emacs 调用 rime输入法的前端，强烈推荐
@@ -285,30 +290,14 @@
 (when (display-graphic-p)
   (use-package pdf-tools 
 	:ensure t
+	:defer 2
 	:hook ('doc-view-mode 'pdf-view-mode)))
 
 
-;; 窗口管理器
-(use-package windmove 
-  :ensure t 
-  :init (windmove-default-keybindings) 
-  :config 
-  :bind (:map leader-key
-              ("w f" . #'windmove-right) 
-              ("w b" . #'windmove-left) 
-              ("w p" . #'windmove-up) 
-              ("w n" . #'windmove-down) 
-              ("w F" . #'window-move-right) 
-              ("w B" . #'window-move-left) 
-              ("w P" . #'window-move-up) 
-              ("w N" . #'window-move-down)
-              ("w h" . #'enlarge-window-horizontally)
-              ("w l" . #'shrink-window-horizontally)
-              ("w j" . #'enlarge-window)
-              ("w k" . #'shrink-window)))
 ;; 折叠和收缩代码
 (use-package hideshow 
-  :ensure t 
+  :ensure t
+  :defer 1
   :diminish hs-minor-mode 
   :bind (:map prog-mode-map
               ("C-c TAB" . hs-toggle-hiding) 
@@ -317,23 +306,27 @@
   :hook (prog-mode . hs-minor-mode))
 
 ;; 一个可以临时安装使用插件的插件
-(use-package try 
-  :ensure t)
+;; (use-package try
+;;   :ensure t
+;;   :defer 2)
 
 
 ;; 谷歌翻译，
 (use-package google-translate
   :disabled
   ;;:ensure t
+  :defer 2
   :config (setq google-translate--tkk-url "http://translate.google.cn/" google-translate-base-url "http://translate.google.cn/translate\_a/single" google-translate-listen-url "https://translate.google.cn/translate\_tts" google-translate-default-target-language "zh-CN" google-translate-default-source-language "en"))
 
 (use-package eww 
-  :ensure t 
+  :ensure t
+  :defer 2
   :custom (eww-search-prefix "https://google.com/search?q="))
 
 ;; 看英语文档神器
 (use-package english-teacher
   :load-path "~/.emacs.d/site-lisp/english-teacher"
+  :defer 2
   :custom
   (english-teacher-backend 'baidu)
   (english-teacher-show-result-function 'english-teacher-eldoc-show-result-function)

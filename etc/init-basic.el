@@ -33,10 +33,6 @@
   (require '+const)
   (require '+custom))
 
-;; Personal information
-(setq user-full-name suk-full-name)
-(setq user-mail-address suk-mail-address)
-
 ;; Key Modifiers
 (when sys/win32p
   ;; make PC keyboard's Win key or other to type Super or Hyper
@@ -57,11 +53,15 @@
     (setq exec-path-from-shell-arguments '("-l"))
     (exec-path-from-shell-initialize)))
 
+;; Personal information
+(setq user-full-name suk-full-name)
+(setq user-mail-address suk-mail-address)
 
 ;; =========================================================
 ;; Start server
 (use-package server
   :ensure nil
+  :defer 1
   :hook (after-init . server-mode))
 
 ;; Emacs可以做为一个server, 然后用emacsclient连接这个server,
@@ -219,10 +219,12 @@ With the prefix argument UNFILL, unfill it instead."
 ;; 回到关闭文件前光标的位置
 (use-package saveplace
   :ensure nil
+  :defer 1
   :hook (after-init . save-place-mode))
 
 (use-package recentf
   :ensure nil
+  :defer 1
   ;; lazy load recentf
   :hook (find-file . (lambda () (unless recentf-mode
                               (recentf-mode)
@@ -253,18 +255,18 @@ With the prefix argument UNFILL, unfill it instead."
 
 
 ;; maybe cause slowly, so disabled.
-;; (use-package savehist
-;;   :ensure nil
-;;   :hook (after-init . savehist-mode)
-;;   :init (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
-;;               history-length 1000
-;;               savehist-additional-variables '(mark-ring
-;;                                               global-mark-ring
-;;                                               search-ring
-;;                                               regexp-search-ring
-;;                                               extended-command-history)
-;;               savehist-autosave-interval 300
-;;               savehist-file "~/.emacs.d/var/history))
+(use-package savehist
+  :ensure nil
+  :hook (after-init . savehist-mode)
+  :init (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
+              history-length 1000
+              savehist-additional-variables '(mark-ring
+                                              global-mark-ring
+                                              search-ring
+                                              regexp-search-ring
+                                              extended-command-history)
+               savehist-autosave-interval 300
+               savehist-file "~/.emacs.d/var/history"))
 
 ; 设置amx保存文件的路径
 (setq amx-save-file "~/.emacs.d/var/amx-items")
@@ -274,91 +276,21 @@ With the prefix argument UNFILL, unfill it instead."
 (setq eshell-history-file-name "~/.emacs.d/var/eshell/history")
   
 
-
-
-(setq system-time-locale "C")
-(auto-compression-mode 1)
-
-;; 当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
-(setq suggest-key-bindings 1)
-;;只渲染当前屏幕语法高亮，加快显示速度
-(setq font-lock-maximum-decoration t)
-;; 选中文本后输入会覆盖
-(delete-selection-mode 1)
-
-;; --------------------------------------------------------------
-;;备份策略
-;; --------------------------------------------------------------
-(setq backup-directory-alist '(("" . "~/tmp/emacs/backup")))
-(setq make-backup-files t)
-(setq version-control t)
-(setq kept-old-versions 2)
-(setq kept-new-versions 10)
-(setq delete-old-versions t)
-
 ;; 开启行号显示
 ;; (global-linum-mode t)
 ;;(display-time-mode 1)
 
+;; 如果有两个重名buffer, 则再前面加上路径区别
 (require 'uniquify)
-(setq uniquify-buffer-name-style 'forward)
-
-;; 高亮对应的括号
-(show-paren-mode 1)
-
-;; 更友好及平滑的滚动
-(setq scroll-step 2
-      scroll-margin 2
-      hscroll-step 2
-      hscroll-margin 2
-      scroll-conservatively 101
-      scroll-up-aggressively 0.01
-      scroll-down-aggressively 0.01
-      scroll-preserve-screen-position 'always)
-
-
-;; (setq initial-scratch-message nil)
-(setq uniquify-buffer-name-style 'post-forward-angle-brackets) ; Show path if names are same
-(setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
-(setq adaptive-fill-first-line-regexp "^* *$")
-(setq kill-whole-line t)                   ; C-k deletes the end of line
-(setq delete-by-moving-to-trash t)         ; Deleting files go to OS's trash folder
-(setq auto-save-default nil)               ; Disable auto save
-(setq set-mark-command-repeat-pop t)       ; Repeating C-SPC after popping mark pops it again
-(setq-default major-mode 'text-mode)
-
-;; 设置 sentence-end 可以识别中文标点。不用在 fill 时在句号后插 入两个空格。
-(setq sentence-end "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
-(setq sentence-end-double-space nil)
-(setq kill-ring-max 200)
-;; 关闭自动调节行高
-(setq auto-window-vscroll nil)
-;; 让光标无法离开视线
-(setq mouse-yank-at-point nil)
-;; Save clipboard contents into kill-ring before replace them
-(setq save-interprogram-paste-before-kill t)
-;; Tab and Space
-;; Permanently indent with spaces, never with TABs
-(setq-default c-basic-offset   4
-              tab-width        4
-              indent-tabs-mode t)
-
-;; 创建新行的动作
-;; 回车时创建新行并且对齐
-(global-set-key (kbd "RET") 'newline-and-indent)
-;; 取消对齐创建的新行
-(global-set-key (kbd "S-<return>") 'comment-indent-new-line)
+;; (setq uniquify-buffer-name-style 'forward)
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+     
 
 ;; chmod +x
 ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
 (add-hook 'after-save-hook
           'executable-make-buffer-file-executable-if-script-p)
-;; 让'_'被视为单词的一部分
-(add-hook 'after-change-major-mode-hook (lambda () 
-                                          (modify-syntax-entry ?_ "w")))
-;; "-" 同上)
-(add-hook 'after-change-major-mode-hook (lambda () 
-                                          (modify-syntax-entry ?- "w")))
+
 
 ;; =========================================================
 ;; 通过编辑配置文件使其可以调用外部程序，来为其添加功能。

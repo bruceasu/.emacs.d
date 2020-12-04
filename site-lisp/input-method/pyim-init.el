@@ -141,9 +141,9 @@
 (require 'pyim-hyly)
 (pyim-hyly-enable)
 
-'(pyim-dicts
-  (quote
-   ((:name "hyly" :file "~/.emacs.d/site-lisp/input-method/pyim-hyly/pyim-hyly.pyim"))))
+;;'(pyim-dicts
+;;  (quote
+;;   ((:name "hyly" :file "~/.emacs.d/site-lisp/input-method/pyim-hyly/pyim-hyly-min.pyim"))))
 
 
 (defun pyim-autoselector-xingma (&rest args)

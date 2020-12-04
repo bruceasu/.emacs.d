@@ -1,4 +1,4 @@
-(provide 'load-calendar)
+(provide 'init-calendar)
 ;;; 设置日历 ;;;;;;
 
 
@@ -86,6 +86,8 @@
                        (holiday-chinese 9 1   "細佬生日 (九月初一)") ;阴历生日
                        (holiday-chinese 3 2   "女儿生日 (三月初二)") ;阴历生日
                        (holiday-fixed   4 8   "女儿生日 (4月8日)")   ;阳历生日
+                       (holiday-fixed   10 12  "女儿生日 (10月12日)") ;阳历生日
+                       (holiday-chinese 9 14   "女儿生日 (九月十四)") ;阴历生日
                        (holiday-chinese 6 21  "老婆生日 (六月廿一)") ;阴历生日
                        ))
 

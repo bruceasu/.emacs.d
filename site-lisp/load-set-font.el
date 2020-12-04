@@ -184,7 +184,7 @@
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
-(eval-when-compile (require 'cl))
+;;(eval-when-compile (require 'cl))
 
 
 

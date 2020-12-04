@@ -37,7 +37,7 @@
   (interactive)
   (let* ((dir (file-name-directory
                (locate-library "pyim-hyly.el")))
-         (file (concat dir "pyim-hyly.pyim")))
+         (file (concat dir "pyim-hyly-min.pyim")))
     (when (file-exists-p file)
       (if (featurep 'pyim)
           (pyim-extra-dicts-add-dict

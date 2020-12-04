@@ -8,8 +8,8 @@
 ;; Copyright (C) 2018, João Távora, all rights reserved.
 ;; Copyright (C) 2020, Andy Stewart, all rights reserved.
 ;; Created: 2020-03-28 16:27:25
-;; Version: 0.1
-;; Last-Updated: 2020-03-28 16:27:25
+;; Version: 0.3
+;; Last-Updated: 2020-04-05 01:20:41
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/nox.el
 ;; Keywords:
@@ -67,6 +67,12 @@
 
 ;;; Change log:
 ;;
+;; 2020/04/05
+;;      * Fix `posframe-hide' error
+;;
+;; 2020/03/30
+;;      * Make `nox-show-doc' works with terminal environment.
+;;
 ;; 2020/03/28
 ;;      * First released.
 ;;
@@ -108,16 +114,18 @@
   :prefix "nox-"
   :group 'applications)
 
+(defvar nox-omni-sharp-path "~/.emacs.d/.cache/omnisharp/server/v1.34.5/OmniSharp.exe")
+
 (defvar nox-server-programs
   '((rust-mode . (nox-rls "rls"))
-    (python-mode . ("pyls"))
+    (python-mode . nox--python-contact)
     ((js-mode typescript-mode) . ("javascript-typescript-stdio"))
     (sh-mode . ("bash-language-server" "start"))
-    ((php-mode phps-mode) . ("php" "vendor/felixfbecker/anguage-server/bin/php-language-server.php"))
+    ((php-mode phps-mode) . nox--php-contact)
     ((c++-mode c-mode) . ("ccls"))
     ((caml-mode tuareg-mode reason-mode) . ("ocaml-language-server" "--stdio"))
     (ruby-mode . ("solargraph" "socket" "--port" :autoport))
-    (haskell-mode . ("hie-wrapper"))
+    (haskell-mode . (nox-hie "hie-wrapper" "--lsp"))
     (elm-mode . ("elm-language-server"))
     (kotlin-mode . ("kotlin-language-server"))
     (go-mode . ("gopls"))
@@ -129,6 +137,7 @@
     (scala-mode . ("metals-emacs"))
     ((tex-mode context-mode texinfo-mode bibtex-mode) . ("digestif"))
     (dockerfile-mode . ("docker-langserver" "--stdio"))
+    (csharp-mode . (nox-omni-sharp-path "-lsp"))
     (css-mode "css-languageserver" "--stdio")
     (html-mode "html-languageserver" "--stdio")
     (json-mode "json-languageserver" "--stdio"))
@@ -248,8 +257,10 @@ under cursor."
            (const :tag "Execute custom commands" :executeCommandProvider)
            (symbol :tag "Other"))))
 
-(defcustom nox-doc-tooltip-font-size "14"
-  "The font size of documentation tooltip."
+(defcustom nox-doc-tooltip-font nil
+  "The font of documentation tooltip.
+
+Font format follow rule: fontname-fontsize."
   :type 'string)
 
 (defcustom nox-doc-tooltip-border-width 15
@@ -260,13 +271,32 @@ under cursor."
   "The timeout of nox tooltip show time, in seconds."
   :type 'integer)
 
-(defcustom nox-doc-tooltip-name "*nox doc*"
+(defcustom nox-doc-name "*nox doc*"
   "The name of nox tooltip name."
   :type 'string)
 
 (defcustom nox-candidate-annotation-limit 80
   "The limit of annotation."
   :type 'integer)
+
+(defcustom nox-php-server "intelephense"
+  "The default server for PHP mode.
+Can set with `intelephense' or `php-language-server'."
+  :type 'string)
+
+(defcustom nox-python-server "mspyls"
+  "The default server for Python mode.
+Can set with `pyls', `mspyls' or `pyright'.
+
+If you choose `mspyls', you need execute command `nox-print-mspyls-download-url' get download url of mspyls.
+Then extract the contents of the file to the directory ~/.emacs.d/nox/mspyls/ ."
+  :type 'string)
+
+(defcustom nox-python-server-dir (concat user-emacs-directory
+                                         (file-name-as-directory "nox")
+                                         (file-name-as-directory "mspyls"))
+  "The dir to store mspyls files."
+  :type 'string)
 
 ;;; Constants
 ;;;
@@ -556,7 +586,7 @@ treated as in `nox-dbind'."
                                :willSave t :willSaveWaitUntil t :didSave t)
              :completion      (list :dynamicRegistration :json-false
                                     :completionItem
-                                    `(:snippetSupport t)
+                                    `(:snippetSupport :json-false)
                                     :contextSupport t)
              :hover              (list :dynamicRegistration :json-false
                                        :contentFormat ["markdown" "plaintext"])
@@ -651,9 +681,8 @@ SERVER.  ."
   (unwind-protect
       (progn
         (setf (nox--shutdown-requested server) t)
-        (jsonrpc-request server :shutdown nox--{}
-                         :timeout (or timeout 1.5))
-        (jsonrpc-notify server :exit nox--{}))
+        (jsonrpc-request server :shutdown nil :timeout (or timeout 1.5))
+        (jsonrpc-notify server :exit nil))
     ;; Now ask jsonrpc.el to shut down the server.
     (jsonrpc-shutdown server (not preserve-buffers))
     (unless preserve-buffers (kill-buffer (jsonrpc-events-buffer server)))))
@@ -921,8 +950,7 @@ This docstring appeases checkdoc, that's all."
                                          (emacs-pid))
                             :rootPath (expand-file-name default-directory)
                             :rootUri (nox--path-to-uri default-directory)
-                            :initializationOptions (nox-initialization-options
-                                                    server)
+                            :initializationOptions (nox-initialization-options server)
                             :capabilities (nox-client-capabilities server))
                       :success-fn
                       (nox--lambda ((InitializeResult) capabilities serverInfo)
@@ -1207,33 +1235,8 @@ and just return it.  PROMPT shouldn't end with a question mark."
 (defvar-local nox--saved-bindings nil
   "Bindings saved by `nox--setq-saving'.")
 
-(defvar nox-stay-out-of '()
-  "List of Emacs things that Nox should try to stay of.
-Before Nox starts \"managing\" a particular buffer, it
-opinionatedly sets some peripheral Emacs facilites.
-Xref and Company.  These overriding settings help ensure
-consistent Nox behaviour and only stay in place until
-\"managing\" stops (usually via `nox-shutdown'), whereupon the
-previous settings are restored.
-
-However, if you wish for Nox to stay out of a particular Emacs
-facility that you'd like to keep control of, add a string, a
-symbol, or a regexp here that will be matched against the
-variable's name, and Nox will refrain from setting it.
-
-For example, to keep your Company customization use
-
-(add-to-list 'nox-stay-out-of 'company)")
-
-(defun nox--stay-out-of-p (symbol)
-  "Tell if NOX should stay of of SYMBOL."
-  (cl-find (symbol-name symbol) nox-stay-out-of
-           :test (lambda (s thing)
-                   (let ((re (if (symbolp thing) (symbol-name thing) thing)))
-                     (string-match re s)))))
-
 (defmacro nox--setq-saving (symbol binding)
-  `(unless (or (not (boundp ',symbol)) (nox--stay-out-of-p ',symbol))
+  `(unless (or (not (boundp ',symbol)) )
      (push (cons ',symbol (symbol-value ',symbol)) nox--saved-bindings)
      (setq-local ,symbol ,binding)))
 
@@ -1270,7 +1273,6 @@ Use `nox-managed-p' to determine if current buffer is managed.")
     (add-hook 'change-major-mode-hook #'nox--managed-mode-off nil t)
     (add-hook 'post-self-insert-hook 'nox--post-self-insert-hook nil t)
     (add-hook 'pre-command-hook 'nox--pre-command-hook nil t)
-    (add-hook 'post-command-hook 'nox-monitor-cursor-change 'append nil)
     (nox--setq-saving xref-prompt-for-identifier nil)
     (nox--setq-saving company-backends '(company-capf))
     (nox--setq-saving company-tooltip-align-annotations t)
@@ -1289,7 +1291,6 @@ Use `nox-managed-p' to determine if current buffer is managed.")
     (remove-hook 'change-major-mode-hook #'nox--managed-mode-off t)
     (remove-hook 'post-self-insert-hook 'nox--post-self-insert-hook t)
     (remove-hook 'pre-command-hook 'nox--pre-command-hook t)
-    (remove-hook 'post-command-hook 'nox-monitor-cursor-change nil)
     (cl-loop for (var . saved-binding) in nox--saved-bindings
              do (set (make-local-variable var) saved-binding))
     (let ((server nox--cached-server))
@@ -2021,15 +2022,16 @@ is not active."
 C1 and C2 are hexidecimal strings.
 ALPHA is a number between 0.0 and 1.0 which corresponds to the
 influence of C1 on the result."
-  (apply #'(lambda (r g b)
-             (format "#%02x%02x%02x"
-                     (ash r -8)
-                     (ash g -8)
-                     (ash b -8)))
-         (cl-mapcar
-          (lambda (x y)
-            (round (+ (* x alpha) (* y (- 1 alpha)))))
-          (color-values c1) (color-values c2))))
+  (ignore-errors
+    (apply #'(lambda (r g b)
+               format "#%02x%02x%02x"
+               (ash r -8)
+               (ash g -8)
+               (ash b -8))
+           (cl-mapcar
+            (lambda (x y)
+              (round (+ (* x alpha) (* y (- 1 alpha)))))
+            (color-values c1) (color-values c2)))))
 
 (defun nox--show-doc (string)
   (let* ((bg-mode (frame-parameter nil 'background-mode))
@@ -2038,15 +2040,47 @@ influence of C1 on the result."
                  (nox-color-blend (face-background 'default) "#000000" 0.5))
                 ((eq bg-mode 'light)
                  (nox-color-blend (face-background 'default) "#000000" 0.9)))))
-    (posframe-show
-     nox-doc-tooltip-name
-     :string string
-     :font (format "%s-%s" (frame-parameter nil 'font-parameter) nox-doc-tooltip-font-size)
-     :position (point)
-     :timeout nox-doc-tooltip-timeout
-     :background-color background-color
-     :foreground-color (face-attribute 'default :foreground)
-     :internal-border-width nox-doc-tooltip-border-width)))
+    (cond
+     ((featurep 'posframe)
+      (require 'posframe)
+      (if nox-doc-tooltip-font
+          (posframe-show
+           nox-doc-name
+           :string string
+           :font nox-doc-tooltip-font
+           :position (point)
+           :timeout nox-doc-tooltip-timeout
+           :background-color background-color
+           :foreground-color (face-attribute 'default :foreground)
+           :internal-border-width nox-doc-tooltip-border-width)
+        (posframe-show
+         nox-doc-name
+         :string string
+         :position (point)
+         :timeout nox-doc-tooltip-timeout
+         :background-color background-color
+         :foreground-color (face-attribute 'default :foreground)
+         :internal-border-width nox-doc-tooltip-border-width)
+        (sit-for most-positive-fixnum t)
+        (posframe-hide nox-doc-name)))
+     ((featurep 'popup)
+      (require 'popup)
+      (let ((pop (popup-tip string :nowait t :margin 1)))
+        (sit-for most-positive-fixnum t)
+        (popup-delete pop)))
+     (t
+      (let ((win-cfg (current-window-configuration)))
+        (switch-to-buffer-other-window nox-doc-name)
+        (with-current-buffer nox-doc-name
+          (erase-buffer)
+          (insert string)
+          (beginning-of-buffer)
+          (read-only-mode t)
+          (local-set-key (kbd "q") 'kill-buffer-and-window)
+          (local-set-key (kbd "n") 'forward-line)
+          (local-set-key (kbd "j") 'forward-line)
+          (local-set-key (kbd "p") 'previous-line)
+          (local-set-key (kbd "k") 'previous-line)))))))
 
 (defun nox-show-doc ()
   "Show documentation at point, use by `posframe'."
@@ -2080,14 +2114,6 @@ influence of C1 on the result."
                                                                 range)))
                             (nox--show-doc info)))))
          :deferred :textDocument/hover)))))
-
-(defvar nox-last-position 0
-  "Holds the cursor position from the last run of post-command-hooks.")
-
-(defun nox-monitor-cursor-change ()
-  (unless (equal (point) nox-last-position)
-    (posframe-hide nox-doc-tooltip-name))
-  (setq nox-last-position (point)))
 
 (defun nox--apply-text-edits (edits &optional version)
   "Apply EDITS for current buffer if at VERSION, or if it's nil."
@@ -2269,6 +2295,59 @@ influence of C1 on the result."
   "Handle notification window/progress"
   (setf (nox--spinner server) (list id title done message)))
 
+;;; python specific
+;;;
+
+(defvar nox-python-path "/usr/bin/python")
+(defvar nox-mspyls-search-paths [])
+
+(defclass nox-mspyls (nox-lsp-server) ()
+  :documentation
+  "MS Python Language Server.")
+
+(defclass nox-mspyls (nox-lsp-server) () :documentation "Python's mspyls.")
+
+(cl-defmethod nox-initialization-options ((server nox-mspyls))
+  "Pass dataPaths parameter require by intelephense."
+  `(:interpreter
+    (:properties
+     (:InterpreterPath ,nox-python-path))
+    :searchPaths ,nox-mspyls-search-paths
+    :asyncStartup t
+    :analysisUpdates t
+    :logLevel "Error"
+    :typeDefinitionProvider ,(concat nox-python-server-dir "Typeshed")))
+
+(defun nox--python-contact (interactive)
+  (cond ((string-equal nox-python-server "mspyls")
+         (setq-default nox-workspace-configuration
+                       '((:python :autoComplete (:extraPaths nil)
+                                  :analysis (:autoSearchPaths :json-false :usePYTHONPATH :json-false))))
+         (cons 'nox-mspyls (list (concat nox-python-server-dir
+                                         (if (eq system-type 'windows-nt)
+                                             "Microsoft.Python.LanguageServer.exe"
+                                           "Microsoft.Python.LanguageServer")))))
+        ((string-equal nox-python-server "pyls")
+         (list "pyls"))
+        ((string-equal nox-python-server "pyright")
+         (list "pyright-langserver" "--stdio"))
+        ))
+
+;;; php specific
+;;;
+(defclass nox-php (nox-lsp-server) () :documentation "PHP's intelephense.")
+
+(cl-defmethod nox-initialization-options ((server nox-php))
+  "Pass dataPaths parameter require by intelephense."
+  (list :dataPaths ""))
+
+(defun nox--php-contact (interactive)
+  (cond ((string-equal nox-php-server "intelephense")
+         (cons 'nox-php (list "intelephense" "--stdio")))
+        ((string-equal nox-php-server "php-language-server")
+         (list "php" "vendor/felixfbecker/language-server/bin/php-language-server.php"))
+        ))
+
 ;;; eclipse-jdt-specific
 ;;;
 (defclass nox-eclipse-jdt (nox-lsp-server) ()
@@ -2364,6 +2443,73 @@ If INTERACTIVE, prompt user for details."
   ((_server nox-eclipse-jdt) (_cmd (eql java.apply.workspaceEdit)) arguments)
   "Eclipse JDT breaks spec and replies with edits as arguments."
   (mapc #'nox--apply-workspace-edit arguments))
+
+;;; HIE specific
+;;;
+(defclass nox-hie (nox-lsp-server) () :documentation "A custom class for HIE.")
+
+(cl-defmethod nox-initialization-options ((server nox-hie))
+  (list :languageServerHaskell (list :completionSnippetsOn :json-false)))
+
+;;; Utils
+;;;
+(defun nox-print-mspyls-download-url (&optional channel)
+  "Get the nupkg url of the latest Microsoft Python Language Server."
+  (let ((channel (or channel "stable")))
+    (unless (member channel '("stable" "beta" "daily"))
+      (user-error "Unknown channel: %s" channel))
+    (with-current-buffer
+        (url-retrieve-synchronously
+         (format "%s/python-language-server-%s?restype=container&comp=list&prefix=Python-Language-Server-%s-x64"
+                 "https://pvsc.blob.core.windows.net"
+                 channel
+                 (cond ((eq system-type 'darwin)  "osx")
+                       ((eq system-type 'gnu/linux) "linux")
+                       ((eq system-type 'windows-nt) "win")
+                       (t (user-error "Unsupported system: %s" system-type)))))
+      (goto-char (point-min))
+      (re-search-forward "\n\n")
+      (pcase (xml-parse-region (point) (point-max))
+        (`((EnumerationResults
+            ((ContainerName . ,_))
+            (Prefix nil ,_)
+            (Blobs nil . ,blobs)
+            (NextMarker nil)))
+         (cdar
+          (sort
+           (mapcar (lambda (blob)
+                     (pcase blob
+                       (`(Blob
+                          nil
+                          (Name nil ,_)
+                          (Url nil ,url)
+                          (Properties nil (Last-Modified nil ,last-modified) . ,_))
+                        (cons (apply #'encode-time (parse-time-string last-modified)) url))))
+                   blobs)
+           (lambda (t1 t2)
+             (time-less-p (car t2) (car t1))))))))))
+
+;;; Improve performance
+;;;
+(defcustom nox-optimization-p t
+  "Improve performance by adjust GC limit and disable `bidi-display-reordering'.
+
+If you don't need Nox set this, change this option to nil."
+  :type 'boolean)
+
+(when nox-optimization-p
+  ;; Disable garbage collection when entering commands.
+  (defun max-gc-limit ()
+    (setq gc-cons-threshold most-positive-fixnum))
+
+  (defun reset-gc-limit ()
+    (setq gc-cons-threshold 2000000))
+
+  (add-hook 'minibuffer-setup-hook #'max-gc-limit)
+  (add-hook 'minibuffer-exit-hook #'reset-gc-limit)
+
+  ;; Improve the performance of rendering long lines.
+  (setq-default bidi-display-reordering nil))
 
 (provide 'nox)
 ;;; nox.el ends here

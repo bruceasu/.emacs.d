@@ -2,30 +2,15 @@
   (require '+custom))
 
 ;; 英语自动补全
-(require 'company-english-helper)
-;; 中文自动翻译为英语
-;; youdao / google
-(setq insert-translated-name-translate-engine "youdao")
-(require 'insert-translated-name)
-
+;; (require 'company-english-helper)
 
 ;; bbyac
 (require 'bbyac)
 (bbyac-global-mode 1)
 
-;; 输入法
-;;(require 'zyoy)
-;;(require 'rain)
-;;(require 'he)
-;;(require 'he-quick)
-;; (require 'flypy)
-(require 'pyim-init)
-
 (require 'load-abbrev)
-(require 'load-calendar)
-(require 'load-epa)
-
-;; (require 'ox-html5presentation)
+;;(require 'init-calendar)
+;;(require 'load-epa)
 ;;(require 'redo)
 ;;(require 'tabbar)
 ;;(require 'load-tabbar)
@@ -35,8 +20,7 @@
 ;;(color-theme-molokai)
 
 
-
-(require 'load-awsome-pair)
+(require 'init-awsome-pair)
 (require 'auto-save)
 
 (setq auto-save-silent t)   ; quietly save
