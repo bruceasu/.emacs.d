@@ -42,9 +42,7 @@
 
   ;; 图形界面插件的设置
   (setq graphic-only-plugins-setting ())
-  ;; Speed up startup
-  (defvar default-file-name-handler-alist file-name-handler-alist)
-  (setq file-name-handler-alist nil)
+  
   ;; Make startup faster by reducing the frequency of garbage
 ;; collection.  The default is 0.8MB.  Measured in bytes.
   (setq gc-cons-threshold 80000000)
@@ -95,7 +93,7 @@
   :pin melpa
   :commands (esup))
   (require 'lazy-load)
-  (require 'init-key)
+
   
   (require 'init-treemacs)
   
@@ -124,6 +122,7 @@
   ;; 个人的一些特别设置
   (require 'init-suk)
   (require 'init-im)
+  (require 'init-key)
   )
 
 

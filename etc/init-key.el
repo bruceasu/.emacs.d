@@ -6,16 +6,19 @@
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
- '("C-z" "s-W" "C-c s"))
+ '("C-z" "s-W"))
 
- ;;; ### Sdcv ###
+;;; ### Sdcv ###
 ;;; --- 星际译王命令行
 (lazy-load-global-keys
  '(("p" . sdcv-search-pointer)          ;光标处的单词, buffer显示
-   ("y" . sdcv-search-pointer+)         ;光标处的单词, tooltip显示
+   ("P" . sdcv-search-pointer+)         ;光标处的单词, tooltip显示
    ("i" . sdcv-search-input)            ;输入的单词, buffer显示
-   (";" . sdcv-search-input+))
- "init-sdcv"
+   (";" . sdcv-search-input+)
+   ("y" . youdao-dictionary-search-at-point)
+   ("Y" . youdao-dictionary-search-at-point-tooltip)
+   )
+ "init-translate"
  "C-z")
 
 ;;; ### Insert translated name ###
@@ -33,7 +36,8 @@
     ("s-i" . insert-translated-name-insert)
  )
  "init-insert-translated-name")
- 
+
+
 ;;; ### Toolkit ###
 ;;; --- 工具函数
 (lazy-load-set-keys
@@ -46,7 +50,6 @@
    ("M-h" . set-mark-command) ;Instead C-Space for Chinese input method
    ("M-H" . set-mark-command) ;Instead C-Space for Chinese input method
    ))
-   
  
 ;;; ### Color-Rg ###
 ;;; --- 搜索重构
@@ -61,8 +64,6 @@
    )
  "color-rg")
  
-
-
 
 ;;; ### Watch other window ###
 ;;; --- 滚动其他窗口
@@ -94,8 +95,8 @@
  
 (lazy-load-global-keys
  '(
-   ("s-N" . move-text-down)      ;把光标所在的整行文字(或标记)下移一行
-   ("s-P" . move-text-up)        ;把光标所在的整行文字(或标记)上移一行
+   ("s-n" . move-text-down)      ;把光标所在的整行文字(或标记)下移一行
+   ("s-p" . move-text-up)        ;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
  
@@ -141,8 +142,8 @@
 ;;; --- 字体命令
 (lazy-load-set-keys
  '(
-   ("s--" . text-scale-decrease)        ;减小字体大小
-   ("s-=" . text-scale-increase)        ;增加字体大小
+   ("s-_" . text-scale-decrease)        ;减小字体大小
+   ("s-+" . text-scale-increase)        ;增加字体大小
    ))
    
 

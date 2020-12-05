@@ -101,7 +101,7 @@
 		:defer 1
         :config
         ;; Enable flashing mode-line on errors
-        (doom-themes-visual-bell-config)
+        ;;(doom-themes-visual-bell-config)
         ;; Corrects (and improves) org-mode's native fontification.
         (doom-themes-org-config)
         ;; Enable custom treemacs theme (all-the-icons must be installed!)
@@ -117,22 +117,22 @@
        ;;           (minibuffer-setup . solaire-mode-in-minibuffer)
        ;;           (after-load-theme . solaire-mode-swap-bg)))
 
-      ;; (use-package doom-modeline
-	  ;; 	:ensure t
-	  ;; 	:defer 1
-      ;;   :hook (after-init . doom-modeline-mode)
-      ;;   :config
-      ;;   (set-face-attribute 'mode-line nil :font
-      ;;                 (format   "%s:size=%d"  "monofur" 14))
-      ;;   (set-face-attribute 'mode-line-inactive nil :font
-      ;;                 (format   "%s:size=%d"  "monofur" 14))
-      ;;   (setq inhibit-compacting-font-caches t
-      ;;           doom-modeline-height 1
-      ;;           doom-modeline-buffer-file-name-style 'auto
-      ;;           doom-modeline-icon nil
-      ;;           doom-modeline-project-detection 'project)
-	  ;; 	(setq doom-modeline-height 10)
-      ;;   :hook (after-init . doom-modeline-mode))
+      (use-package doom-modeline
+		:ensure t
+		:defer 1
+        :hook (after-init . doom-modeline-mode)
+        :config
+        (set-face-attribute 'mode-line nil :font
+                      (format   "%s:size=%d"  "monofur" 16))
+        (set-face-attribute 'mode-line-inactive nil :font
+                      (format   "%s:size=%d"  "monofur" 16))
+        (setq inhibit-compacting-font-caches t
+                doom-modeline-height 1
+                doom-modeline-buffer-file-name-style 'auto
+                doom-modeline-icon nil
+                doom-modeline-project-detection 'project)
+		(setq doom-modeline-height 10)
+        :hook (after-init . doom-modeline-mode))
     )
   (progn
     (ignore-errors

@@ -57,19 +57,15 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;;    )
 ;; )
 
-
-
-
 (suk-set-key-bindings 'global-set-key
 					  (list
 					   (list (kbd "C-x l")   'suk/count-brf-lines)
 					   (list (kbd "C-x M-a") 'align-regexp)
 					   (list (kbd "C-x x")   'suk/switch-major-mode)
 					   (list (kbd "C-x X")   'suk/get-mode-name)
-					   (list (kbd "C-x U")   'suk/revert-buffer-with-utf8)
-					   (list (kbd "C-x K")   'suk/revert-buffer-with-gbk)
+					   ;;(list (kbd "C-x U")   'suk/revert-buffer-with-utf8)
+					   ;;(list (kbd "C-x K")   'suk/revert-buffer-with-gbk)
 					   '([C-t]                transpose-chars)
-					   
 					   '([S-f6]               hs-minor-mode)
 					   '([f5]                 toggle-truncate-lines)
 					   ;; '([S-f11]              insert-translated-name-insert) ;; Chinese to English
@@ -108,30 +104,30 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;; (global-set-key [(meta c)] 'meta-c-map)
 
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
-(add-hook 'isearch-mode-hook
-		  '(lambda ()
-			 ;; 搜索下一个结果
-			 (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
-			 ;; 搜索前一个结果
-			 (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
-			 ;; 替换
-			 (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
-			 ;; 正则替换
-			 (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
-			 (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
-			 ;; 剪切板作为搜索内容
-			 (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
-			 ;; 将光标到行尾作为搜索内容
-			 (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
-			 (define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
-			 ;; 向左或向右(选择/取消)单个字符作为搜索内容
-			 (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
-			 ;; 显示occur视图
-			 (define-key isearch-mode-map [(meta o)] 'isearch-occur)
-			 ;; 单词搜索
-			 (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
-			 (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
-			 ))
+;; (add-hook 'isearch-mode-hook
+;; 		  '(lambda ()
+;; 			 ;; 搜索下一个结果
+;; 			 (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
+;; 			 ;; 搜索前一个结果
+;; 			 (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
+;; 			 ;; 替换
+;; 			 (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
+;; 			 ;; 正则替换
+;; 			 (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
+;; 			 (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
+;; 			 ;; 剪切板作为搜索内容
+;; 			 (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
+;; 			 ;; 将光标到行尾作为搜索内容
+;; 			 (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
+;; 			 (define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
+;; 			 ;; 向左或向右(选择/取消)单个字符作为搜索内容
+;; 			 (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
+;; 			 ;; 显示occur视图
+;; 			 (define-key isearch-mode-map [(meta o)] 'isearch-occur)
+;; 			 ;; 单词搜索
+;; 			 (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
+;; 			 (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
+;; 			 ))
 
 
 
@@ -197,15 +193,6 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 (global-set-key (kbd "C-)") 'forward-sexp)
 
 
-;; 启动点er啥
-(defhydra suk/hydra-open-menu ()
-  "
-							^启动点er啥^
------------------------------------------------------------------
-[_t_] ^vterm^
-"
-  ("t" vterm nil :color blue)
-  ("q" nil "QUIT" :color blue))
 ;; 开关
 (defhydra suk/hydra-toggle-menu ()
   "
@@ -245,41 +232,19 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
   ("l" windmove-right nil)
   ("q" nil "QUIT" :color blue))
 
-;; 常用的命令
-(defhydra suk/hydra-common-menu ()
-  "
-						^常用^
-------------------------------------------------------
-[_g_] ^counsel-rg^					[_y_] ^counsel-yank-pop^
-[_f_] ^counsel-fzf^					[_d_] ^counsel-dired^	   
-[_r_] ^counsel-recentf^				[_m_] ^counsel-bookmark^ 
-[_b_] ^counsel-switch-buffer^		[_l_] ^counsel-linux-app^
-[_w_] ^capture-word^
-"
-  ("g" counsel-rg nil :color blue)
-  ("f" counsel-fzf nil :color blue)
-  ("r" counsel-recentf nil :color blue)
-  ("b" counsel-switch-buffer nil :color blue)
-  ("y" counsel-yank-pop nil :color blue)
-  ("d" counsel-dired nil :color blue)
-  ("m" counsel-bookmark nil :color blue)
-  ("l" counsel-linux-app nil :color blue)
-  ("w" suk/capture-get-word-point nil :color blue)
-  ("q" nil "QUIT" :color blue))
+
 ;; 主菜单
 (defhydra suk/hydra-main-menu ()
   "
 							^主菜单^
 ————————————————————————————————————————————————————————————
-[_o_] ^开启^ 	[_t_] ^开关^ 	[_w_] ^窗格^ 	[_c_] ^常用^
+[_s_] ^开关^ 	[_w_] ^窗格^ 
 "
-  ("o" suk/hydra-open-menu/body nil :color blue)
-  ("t" suk/hydra-toggle-menu/body nil :color blue)
+  ("s" suk/hydra-toggle-menu/body nil :color blue)
   ("w" suk/hydra-window-menu/body nil :color blue)
-  ("c" suk/hydra-common-menu/body nil :color blue)
   ("q" nil "QUIT" :color blue))
 
-(global-set-key (kbd "C-M-,") #'suk/hydra-main-menu/body)
+(global-set-key (kbd "C-x C-h") #'suk/hydra-main-menu/body)
 
 
 

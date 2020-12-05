@@ -39,26 +39,29 @@
 (setq package-enable-at-startup nil)
 
 ;; Faster to disable these here (before they've been initialized)
-;(unless (and (display-graphic-p) (eq system-type 'darwin))
-;  (setq menu-bar-mode nil))
+;;(unless (and (display-graphic-p) (eq system-type 'darwin))
+;;(setq menu-bar-mode nil))
+
 (setq tool-bar-mode nil)
+;; 关闭工具栏
+(tool-bar-mode -1)
+;; 关闭菜单栏
+(menu-bar-mode -1)
 ;(setq scroll-bar-mode nil)
-(modify-all-frames-parameters '((vertical-scroll-bars)))
-
-
-
-(setq system-time-locale "C")
-;; 当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
-(setq suggest-key-bindings 1)
-;;只渲染当前屏幕语法高亮，加快显示速度
-(setq font-lock-maximum-decoration t)
-;; 选中文本后输入会覆盖
+;;; 选中文本后输入会覆盖
 (delete-selection-mode 1)
 (auto-compression-mode 1)
 (size-indication-mode 1)
 (blink-cursor-mode -1)
 ;; 高亮对应的括号
 (show-paren-mode 1)
+
+(modify-all-frames-parameters '((vertical-scroll-bars)))
+(setq system-time-locale "C")
+;; 当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
+(setq suggest-key-bindings 1)
+;;只渲染当前屏幕语法高亮，加快显示速度
+(setq font-lock-maximum-decoration t)
 ;; --------------------------------------------------------------
 ;;备份策略
 ;; --------------------------------------------------------------
@@ -126,15 +129,12 @@
 (setq track-eol t)                      ; Keep cursor at end of lines. Require line-move-visual is nil.
 (setq line-move-visual nil)
 (setq inhibit-compacting-font-caches t) ; Don’t compact font caches during GC.
-;; 关闭工具栏
-(tool-bar-mode -1)
-
-;; 关闭菜单栏
-(menu-bar-mode -1)
 
 ;; 设置光标样式
 (setq-default cursor-type 'box)
-
+;; Speed up startup
+  (defvar default-file-name-handler-alist file-name-handler-alist)
+  (setq file-name-handler-alist nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; early-init.el ends here

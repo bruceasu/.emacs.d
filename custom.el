@@ -15,11 +15,6 @@
 (setq suk-ivy-icon t)                         ; Display icons in ivy or not: t or nil
 (setq suk-benchmark t)                        ; Enable initialization benchmark or not: t or nil
 
-;; For Emacs devel
-;; (setq package-user-dir (locate-user-emacs-file (format "elpa-%s" emacs-major-version)))
-;; (setq desktop-base-file-name (format ".emacs-%s.desktop" emacs-major-version))
-;; (setq desktop-base-lock-name (format ".emacs-%s.desktop.lock" emacs-major-version))
-
 ;; Misc.
 (setq confirm-kill-emacs 'y-or-n-p)
 

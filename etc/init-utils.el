@@ -31,7 +31,8 @@
 
 (eval-when-compile
   (require '+const)
-  (require '+custom))
+  (require '+custom)
+  (require 'init-package))
 
 (use-package hydra
   :ensure t
@@ -90,7 +91,6 @@
   (with-no-warnings
 	(make-variable-buffer-local 'undo-tree-visualizer-diff)
 	(setq-default undo-tree-visualizer-diff t))
-
   )
 
 ;; Group ibuffer's list by project root
@@ -136,22 +136,6 @@
 ;;   :init
 ;;   (which-key-posframe-mode))
 
-;; Youdao Dictionay
-(use-package youdao-dictionary
-  :defer 2 
-  :ensure t 
-  :bind (("C-x y y" . youdao-dictionary-search-at-point)
-		 ("C-x y Y" . youdao-dictionary-search-at-point-tooltip)
-		 ("C-x y g" . 'youdao-dictionary-search-at-point-posframe)
-		 ("C-x y p" . 'youdao-dictionary-play-voice-at-point)
-		 ("C-x y r" . 'youdao-dictionary-search-and-replace)
-		 ("C-x y i" . 'youdao-dictionary-search-from-input))
-  :config
-  ;; Cache documents
-  (setq url-automatic-caching t)
-  (which-key-add-key-based-replacements "C-x y" "有道翻译") 
-  ;; Enable Chinese word segmentation support (支持中文分词)
-  (setq youdao-dictionary-use-chinese-word-segmentation t))
 
 ;; Open files as another user
 (unless sys/win32p
@@ -282,8 +266,7 @@
   (use-package vterm
 	:ensure t
 	:defer 2 
-	:bind (:map leader-key
-				("o t" . 'vterm))))
+	:bind ("C-x C-v" . 'vterm)))
 
 
 ;; Emacs下的pdf查看工具，默认非图形化不开启
@@ -311,33 +294,11 @@
 ;;   :defer 2)
 
 
-;; 谷歌翻译，
-(use-package google-translate
-  :disabled
-  ;;:ensure t
-  :defer 2
-  :config (setq google-translate--tkk-url "http://translate.google.cn/" google-translate-base-url "http://translate.google.cn/translate\_a/single" google-translate-listen-url "https://translate.google.cn/translate\_tts" google-translate-default-target-language "zh-CN" google-translate-default-source-language "en"))
-
+;;; browser
 (use-package eww 
   :ensure t
   :defer 2
   :custom (eww-search-prefix "https://google.com/search?q="))
-
-;; 看英语文档神器
-(use-package english-teacher
-  :load-path "~/.emacs.d/site-lisp/english-teacher"
-  :defer 2
-  :custom
-  (english-teacher-backend 'baidu)
-  (english-teacher-show-result-function 'english-teacher-eldoc-show-result-function)
-  :hook ((Info-mode
-		  elfeed-show-mode
-		  eww-mode
-		  Man-mode
-		  Woman-mode
-		  help-mode) . english-teacher-follow-mode))
-
-
 
 (provide 'init-utils)
 
