@@ -192,27 +192,20 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 (global-set-key (kbd "C-(") 'backward-sexp) 
 (global-set-key (kbd "C-)") 'forward-sexp)
 
+(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
+(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
+(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
 
-;; 开关
-(defhydra suk/hydra-toggle-menu ()
-  "
-							^开关^
------------------------------------------------------------------
-[_T_] ^透明^		[_p_] ^代理^		[_f_] ^FlyCheck^
-"
-  ("T" suk/toggle-transparency nil)
-  ("p" suk/toggle-proxy nil)
-  ("f" global-flycheck-mode nil)
-  ("q" nil "QUIT" :color blue))
+
 ;; 窗格
 (defhydra suk/hydra-window-menu ()
   "
-							^窗口管理器^
+			^窗口管理器^
 -----------------------------------------------------------------
-[_x_] ^关闭窗格^			[_F_] ^全屏模式^		[_K_] ^↑+^		[_k_] ^go ↑^    
-[_;_] ^关闭其他窗格^		[_r_] ^旋转交换^		[_J_] ^↓+^		[_j_] ^go ↓^ 
-[_:_] ^新建窗格(垂直)^		[_s_] ^选择交换^		[_H_] ^←+^		[_h_] ^go ←^
-[_|_] ^新建窗格(水平)^		[_b_] ^平均铺开^		[_L_] ^→+^		[_l_] ^go →^
+[_x_] ^关闭窗格^	[_F_] ^全屏模式^	[_K_] ^↑+^	[_k_] ^go ↑^    
+[_;_] ^关闭其他窗格^	[_r_] ^旋转交换^	[_J_] ^↓+^	[_j_] ^go ↓^ 
+[_:_] ^新建窗格(垂直)^	[_s_] ^选择交换^	[_H_] ^←+^	[_h_] ^go ←^
+[_|_] ^新建窗格(水平)^	[_b_] ^平均铺开^	[_L_] ^→+^	[_l_] ^go →^
 "
   ("x" delete-window nil)
   (";" delete-other-window nil :color blue)
@@ -233,18 +226,7 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
   ("q" nil "QUIT" :color blue))
 
 
-;; 主菜单
-(defhydra suk/hydra-main-menu ()
-  "
-							^主菜单^
-————————————————————————————————————————————————————————————
-[_s_] ^开关^ 	[_w_] ^窗格^ 
-"
-  ("s" suk/hydra-toggle-menu/body nil :color blue)
-  ("w" suk/hydra-window-menu/body nil :color blue)
-  ("q" nil "QUIT" :color blue))
-
-(global-set-key (kbd "C-x C-h") #'suk/hydra-main-menu/body)
+(global-set-key (kbd "C-x C-h") #'suk/hydra-window-menu/body)
 
 
 

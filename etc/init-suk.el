@@ -4,9 +4,11 @@
 ;; Ó¢Óï×Ô¶¯²¹È«
 ;; (require 'company-english-helper)
 
-;; bbyac
-(require 'bbyac)
-(bbyac-global-mode 1)
+(when sys/linuxp
+  ;; bbyac
+  (require 'bbyac)
+  (bbyac-global-mode 1)
+)
 
 (require 'load-abbrev)
 ;;(require 'init-calendar)

@@ -42,7 +42,9 @@
   ;; (w32-register-hot-key [s-])
   (w32-register-hot-key [s-t])
   ;; scroll-bar
-  (set-scroll-bar-mode 'right))
+  (set-scroll-bar-mode 'right)
+  )
+
 
 ;; Environment
 (when (or sys/mac-x-p sys/linux-x-p)

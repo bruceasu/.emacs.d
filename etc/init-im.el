@@ -8,7 +8,11 @@
 ;;(require 'he)
 ;;(require 'he-quick)
 ;; (require 'flypy)
+
 ;; pyim
-(require 'pyim-init)
+;; 在windows下输入法都是正常的，就是linux比较恶心了。
+(when sys/linuxp
+(require 'pyim-init))
+
 
 (provide 'init-im)

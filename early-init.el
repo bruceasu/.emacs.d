@@ -41,12 +41,13 @@
 ;; Faster to disable these here (before they've been initialized)
 ;;(unless (and (display-graphic-p) (eq system-type 'darwin))
 ;;(setq menu-bar-mode nil))
-
+;;
+(setq menu-bar-mode nil)
 (setq tool-bar-mode nil)
 ;; 关闭工具栏
-(tool-bar-mode -1)
+;;(tool-bar-mode -1)
 ;; 关闭菜单栏
-(menu-bar-mode -1)
+;;(menu-bar-mode -1)
 ;(setq scroll-bar-mode nil)
 ;;; 选中文本后输入会覆盖
 (delete-selection-mode 1)

@@ -231,7 +231,7 @@
 (lazy-load-global-keys
  '(
    ("<f8>" . dired-jump)
-   ("C-x C-f" . find-file)
+;;   ("C-x C-f" . find-file)
    )
  "init-dired")
 
@@ -296,13 +296,14 @@
  "company-english-helper")
 ;;; ### Ido ###
 ;;; --- 交互式管理文件和缓存
-(lazy-load-set-keys
- '(
-   ("C-x C-f" . ido-find-file)          ;交互式查找文件
-   ("C-x b" . ido-switch-buffer)        ;交互式切换buffer
-   ("C-x i" . ido-insert-buffer)        ;插入缓存
-   ("C-x I" . ido-insert-file)          ;插入文件
-   ))
+;; (lazy-load-set-keys
+;;  '(
+;;    ("C-x C-f" . ido-find-file)          ;交互式查找文件
+;;    ("C-x b" . ido-switch-buffer)        ;交互式切换buffer
+;;    ("C-x i" . ido-insert-buffer)        ;插入缓存
+;;    ("C-x I" . ido-insert-file)          ;插入文件
+;;    ))
+
 (add-hook 'ido-setup-hook
           '(lambda ()
              (interactive)

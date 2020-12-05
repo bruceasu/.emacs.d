@@ -36,9 +36,12 @@
 ;; 去除默认启动界面
 (setq inhibit-startup-message nil)
 (setq inhibit-startup-screen t)
+;; 关闭工具栏
+(tool-bar-mode -1)
+;; 关闭菜单栏
+(menu-bar-mode -1)
 
 ;; 高亮当前行
-(global-hl-line-mode 1)
 ;; Highlight the current line
 (use-package hl-line
   :ensure nil
@@ -98,42 +101,48 @@
     (progn
       (use-package doom-themes
         :init (suk-load-theme suk-theme)
-		:defer 1
+	:defer 1
         :config
-        ;; Enable flashing mode-line on errors
-        ;;(doom-themes-visual-bell-config)
-        ;; Corrects (and improves) org-mode's native fontification.
+        (when sys/linuxp
+	  ;; Enable flashing mode-line on errors
+          ;;(doom-themes-visual-bell-config)
+          ;; Corrects (and improves) org-mode's native fontification.
         (doom-themes-org-config)
-        ;; Enable custom treemacs theme (all-the-icons must be installed!)
-        (doom-themes-treemacs-config)
-        ;; Enable custom neotree theme (all-the-icons must be installed!)
-        ;;(doom-themes-neotree-config)
-		)
+	  ;; Enable custom treemacs theme (all-the-icons must be installed!)
+	  (doom-themes-treemacs-config)
+          ;; Enable custom neotree theme (all-the-icons must be installed!)
+          ;;(doom-themes-neotree-config)
+	  ;;
+	  ;; Make certain buffers grossly incandescent
+          ;; (use-package solaire-mode
+	  ;; 	:defer 1
+          ;;   :hook (((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
+          ;;           (minibuffer-setup . solaire-mode-in-minibuffer)
+          ;;           (after-load-theme . solaire-mode-swap-bg)))
+	  )
+      )
 
-      ;; Make certain buffers grossly incandescent
-       ;; (use-package solaire-mode
-	   ;; 	:defer 1
-       ;;   :hook (((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
-       ;;           (minibuffer-setup . solaire-mode-in-minibuffer)
-       ;;           (after-load-theme . solaire-mode-swap-bg)))
-
-      (use-package doom-modeline
+      (when sys/linuxp
+	(use-package doom-modeline
 		:ensure t
 		:defer 1
-        :hook (after-init . doom-modeline-mode)
-        :config
-        (set-face-attribute 'mode-line nil :font
-                      (format   "%s:size=%d"  "monofur" 16))
-        (set-face-attribute 'mode-line-inactive nil :font
-                      (format   "%s:size=%d"  "monofur" 16))
-        (setq inhibit-compacting-font-caches t
-                doom-modeline-height 1
-                doom-modeline-buffer-file-name-style 'auto
-                doom-modeline-icon nil
-                doom-modeline-project-detection 'project)
+		:hook (after-init . doom-modeline-mode)
+		:config
+		(set-face-attribute 'mode-line nil :font
+				    (format   "%s:size=%d"  "monofur" 16))
+		(set-face-attribute 'mode-line-inactive nil :font
+				    (format   "%s:size=%d"  "monofur" 16))
+		(setq inhibit-compacting-font-caches t
+                      doom-modeline-height 1
+                      doom-modeline-buffer-file-name-style 'auto
+                      doom-modeline-icon nil
+                      doom-modeline-project-detection 'project)
 		(setq doom-modeline-height 10)
-        :hook (after-init . doom-modeline-mode))
-    )
+		:hook (after-init . doom-modeline-mode)))
+      (when sys/win32p
+	;; 简洁的mode-line
+	(require 'awesome-tray)
+	(awesome-tray-mode 1)))
   (progn
     (ignore-errors
       (suk-load-theme suk-theme))
@@ -245,8 +254,6 @@
 ;; (require 'awesome-tab)
 ;; (awesome-tab-mode t)
 
-;;(require 'awesome-tray)
-;; (awesome-tray-mode 1)
 
 ;; Mode-line
 (defun mode-line-height ()

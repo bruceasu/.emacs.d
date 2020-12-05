@@ -36,6 +36,10 @@
 ;; (set-fontset-font (frame-parameter nil 'font) 'symbol '("Console" . "unicode-bmp"))
 ;; (set-fontset-font (frame-parameter nil 'font) 'japanese-jisx0208 '("Meiryo" ."unicode-bmp"))
 
+(eval-when-compile
+  (require '+const)
+  (require '+custom))
+
 (defvar loaded-font-type 0)
 (defvar loaded-font-type-num 3)
 
@@ -43,27 +47,40 @@
 (defun load-program-font ()
   "加载开发字体。"
   (interactive)
-  ;; Set a default font
-  ;;(set-face-attribute 'default nil :font "Victor Mono 12")
-  (set-face-attribute 'default nil :font "Victor Mono Light-12");; linux
-  ;;(set-face-attribute 'default nil :font "Source Code Pro"))
-  ;;(set-face-attribute 'default nil :font "Menlo"))
-  ;;(set-face-attribute 'default nil :font "Monaco"))
-  ;;(set-face-attribute 'default nil :font "DejaVu Sans Mono"))
-  ;;(set-face-attribute 'default nil :font "Consolas")))
-
-  ;; Specify font for chinese characters
-  (set-fontset-font (frame-parameter nil 'font) 
-  	;;'han  '("Simsun" . "unicode-bmp"))	
-  	;;'han  '("PMingliU" . "unicode-bmp"))
-  	;;'han  '("AR PL UKai CN" . "unicode-bmp"))
-  	;;'han  '("AR PL UMing CN" . "unicode-bmp"))
-  	;;'han  '("WenQuanYi Micro Hei" . "unicode-bmp"))
-  					;;'han  '("Microsoft Yahei" . "unicode-bmp"))
-	  'han  '("Noto Sans CJK SC" . "unicode-bmp"))
+  (when sys/linuxp
+    ;; Set a default font
+    ;;(set-face-attribute 'default nil :font "Victor Mono 12")
+    (set-face-attribute 'default nil :font "Victor Mono Light-12");; linux
+    ;;(set-face-attribute 'default nil :font "Source Code Pro"))
+    ;;(set-face-attribute 'default nil :font "Menlo"))
+    ;;(set-face-attribute 'default nil :font "Monaco"))
+    ;;(set-face-attribute 'default nil :font "DejaVu Sans Mono"))
+    ;;(set-face-attribute 'default nil :font "Consolas")))
+    
+    ;; Specify font for chinese characters
+    (set-fontset-font (frame-parameter nil 'font) 
+  		    ;;'han  '("Simsun" . "unicode-bmp"))	
+  		    ;;'han  '("PMingliU" . "unicode-bmp"))
+  		    ;;'han  '("AR PL UKai CN" . "unicode-bmp"))
+  		    ;;'han  '("AR PL UMing CN" . "unicode-bmp"))
+  		    ;;'han  '("WenQuanYi Micro Hei" . "unicode-bmp"))
+  		    ;;'han  '("Microsoft Yahei" . "unicode-bmp"))
+		    'han  '("Noto Sans CJK SC" . "unicode-bmp")))
+  
+  (when (string-equal system-type "windows-nt")
+    ;; 下面是用于Windows的配置。
+    (progn
+      ;; 设置英文字体并指定字号。
+      ;; 因为不同操作系统下字体显示的大小不一样(DPI的问题)，所以分开设置。
+      (set-face-attribute 'default nil :font "Migu 1M Less 12")
+      ;; 给相应的字符集设置中文字体。
+      (dolist (charset '(han cjk-misc chinese-gbk))
+        (set-fontset-font "fontset-default"
+			  charset (font-spec :family "Simsun")
+			  ))))
   
   (setq loaded-font-type 1)
-  (message "設置開發字體 ")
+  (message "Set program font")
 )
 ;----------------------------------------------------------
 
@@ -75,7 +92,7 @@
             'han '("PMingliU" . "unicode-bmp"))
   (setq loaded-font-type 2)
   (setq-default line-spacing 5)
-  (message "設置文章字體 ")
+  (message "Set article fonts")
 )
 
 
@@ -86,7 +103,7 @@
   (load-program-font)
   (setq loaded-font-type 0)
   (setq-default line-spacing 1)
-  (message "設置默認字體 ")
+  (message "set default fonts")
 )
 
 ;;; ----------------------------------------------------------
