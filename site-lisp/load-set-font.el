@@ -72,12 +72,15 @@
     (progn
       ;; 设置英文字体并指定字号。
       ;; 因为不同操作系统下字体显示的大小不一样(DPI的问题)，所以分开设置。
-      (set-face-attribute 'default nil :font "Migu 1M Less 12")
+      (set-face-attribute 'default nil :font "Migu 1M Less 11")
       ;; 给相应的字符集设置中文字体。
       (dolist (charset '(han cjk-misc chinese-gbk))
         (set-fontset-font "fontset-default"
 			  charset (font-spec :family "Simsun")
-			  ))))
+			  ))
+      (setq face-font-rescale-alist
+	    '(("宋体" . 1.0)
+	      ("微软雅黑" . 1.0)))))
   
   (setq loaded-font-type 1)
   (message "Set program font")
