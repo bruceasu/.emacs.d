@@ -1,6 +1,29 @@
- ;;; Commentary: load-set-font.el --- load my fonts.
-
-
+;;; load-set-font.el --- load my fonts.
+;;
+;; Copyright (C) 2018 Suk
+;;
+;; Author: Suk
+;;
+;; This file is not part of GNU Emacs.
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2, or
+;; (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; see the file COPYING.  If not, write to
+;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+;; Floor, Boston, MA 02110-1301, USA.
+;;
+;;; Commentary:
+;; Fonts Setting
+;;
 ;;; Code:
 ;;; --------------------fonts--------------------------------
 ;;; we using cnfonts
@@ -112,19 +135,18 @@
 ;;; ----------------------------------------------------------
 
 (with-eval-after-load 'org
-
-	(defun load-org-font ()
-	  "加载org-mode字体。"
-	  (interactive)
-	  (make-face 'width-font-face)
-	  ;;(set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC 12")
-	  (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC" :size 12) ;; linux
-	  (setq buffer-face-mode-face 'width-font-face)
-	  (buffer-face-mode)
-	  (setq loaded-font-type 3)
-	  (setq-default line-spacing 5)
-	  (message "設置org-mode字體")
-	)
+  (defun load-org-font ()
+    "加载org-mode字体。"
+    (interactive)
+    (make-face 'width-font-face)
+    ;;(set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC 12")
+    (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC" :size 12) ;; linux
+    (setq buffer-face-mode-face 'width-font-face)
+    (buffer-face-mode)
+    (setq loaded-font-type 3)
+    (setq-default line-spacing 5)
+    (message "設置org-mode字體")
+    )
   (add-hook 'org-mode-hook 'load-org-font))
   
 (defun toggle-font ()
@@ -203,10 +225,6 @@
 ;; For Windows
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
-
-;;(eval-when-compile (require 'cl))
-
-
 
 (provide 'load-set-font)
 ;;; load-set-font.el ends here.

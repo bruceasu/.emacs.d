@@ -70,17 +70,17 @@
 ;; 无需再打开两个Emacs，windows下还不支持daemon的方式。
 
 ;;(server-force-delete)
-;; (server-start)
+;;(server-start)
 
 ;; 图形化插件特殊设置
 (if (not (display-graphic-p))
-	(add-hook 'after-make-frame-functions
-			  (lambda (new-frame)
-				(select-frame new-frame)
-				(dolist (elisp-code graphic-only-plugins-setting)
-				  (eval elisp-code))))
-	(dolist (elisp-code graphic-only-plugins-setting)
-				  (eval elisp-code)))
+    (add-hook 'after-make-frame-functions
+	      (lambda (new-frame)
+		(select-frame new-frame)
+		(dolist (elisp-code graphic-only-plugins-setting)
+		  (eval elisp-code))))
+  (dolist (elisp-code graphic-only-plugins-setting)
+    (eval elisp-code)))
 
 
 ;; ==============================================================
@@ -88,7 +88,7 @@
 ;; 而对于include-list中的dirs，它将添加该dir的所有第一级dirs。
 ;; (add-to-list 'load-path "~/.emacs.d/elpa/company-20170715.1035")
 ;; (add-to-list 'load-path "~/.local/site-lisp")
-;;(suk/add-to-list-with-subdirs "~/.local/site-lisp"
+;; (suk/add-to-list-with-subdirs "~/.local/site-lisp"
 ;;                          '(".", "..")
 ;;                          '())
 ;; --------------------------------------------------------------
@@ -254,8 +254,6 @@ With the prefix argument UNFILL, unfill it instead."
         (mapcar 'file-truename (list var package-user-dir)))))
     (add-to-list 'recentf-exclude 'simon-recentf-exclude-p))
 
-
-
 ;; maybe cause slowly, so disabled.
 (use-package savehist
   :ensure nil
@@ -276,7 +274,20 @@ With the prefix argument UNFILL, unfill it instead."
 (setq auto-save-list-file-prefix "~/.emacs.d/var/auto-save-list/.saves-")
 ;; 设置eshell历史记录
 (setq eshell-history-file-name "~/.emacs.d/var/eshell/history")
-  
+
+;; --------------------------------------------------------------
+;;备份策略
+;; --------------------------------------------------------------
+(setq backup-directory-alist '(("" . "~/tmp/emacs/backup")))
+(setq make-backup-files t)
+;; 允许多次备份
+(setq version-control t)
+;; 保留最早的2个备份文件
+(setq kept-old-versions 2)
+;; 保留最近的10个备份文件
+(setq kept-new-versions 100)
+;; 自动删除旧的备份文件
+(setq delete-old-versions t)
 
 ;; 开启行号显示
 ;; (global-linum-mode t)
@@ -286,7 +297,6 @@ With the prefix argument UNFILL, unfill it instead."
 (require 'uniquify)
 ;; (setq uniquify-buffer-name-style 'forward)
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
-     
 
 ;; chmod +x
 ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod

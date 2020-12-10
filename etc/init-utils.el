@@ -129,21 +129,11 @@
   :bind (:map help-map ("C-h" . which-key-C-h-dispatch))
   :hook (after-init . which-key-mode))
 
-;; 飘，晃眼
-;; (use-package which-key-posframe
-;;   :ensure t
-;;   :load-path "~/.emacs.d/site-lisp/which-key-posframe/which-key-posframe.el"
-;;   :init
-;;   (which-key-posframe-mode))
 
 
 ;; Open files as another user
 (unless sys/win32p
   (use-package sudo-edit))
-
-;; Tramp
-;;(use-package docker-tramp)
-
 
 ;; Persistent the scratch buffer
 (use-package persistent-scratch
@@ -172,6 +162,35 @@
 (use-package list-environment
   :defer 2)
 ;;(use-package restart-emacs)
+
+
+
+;; Emacs下的pdf查看工具，默认非图形化不开启
+(push '(progn
+	 ;; Emacs下最好用的终端仿真器，需要编译库，默认不开启
+	 ;; libvterm
+	 ;; Ubuntu/Debian
+	 ;; apt install libvterm
+	 ;; ArchLinux
+	 ;; pacman -S libvterm
+	 (when sys/linuxp
+	   (use-package vterm
+	     :ensure t
+	     :defer 2 
+	     :bind ("C-x C-v" . 'vterm)))
+
+	 (use-package pdf-tools 
+	   :ensure t
+	   :defer 2
+	   :hook ('doc-view-mode 'pdf-view-mode))
+
+	 ;; 飘，晃眼
+	 (use-package which-key-posframe
+	   :ensure nil
+	   :disabled
+	   :load-path "~/.emacs.d/site-lisp/which-key-posframe/which-key-posframe.el"
+	   :init
+	   (which-key-posframe-mode))
 
 ;; emacs 调用 rime输入法的前端，强烈推荐
 ;; 		 (use-package rime
@@ -255,26 +274,10 @@
  ;;  (telega-notifications-mode 1) 
  ;;  (telega-mode-line-mode 1))
 
- 
-;; Emacs下最好用的终端仿真器，需要编译库，默认不开启
-;; libvterm
-;; Ubuntu/Debian
-;; apt install libvterm
-;; ArchLinux
-;; pacman -S libvterm
-(when sys/linuxp
-  (use-package vterm
-	:ensure t
-	:defer 2 
-	:bind ("C-x C-v" . 'vterm)))
 
-
-;; Emacs下的pdf查看工具，默认非图形化不开启
-(when (display-graphic-p)
-  (use-package pdf-tools 
-	:ensure t
-	:defer 2
-	:hook ('doc-view-mode 'pdf-view-mode)))
+	 
+	 )
+      graphic-only-plugins-setting)
 
 
 ;; 折叠和收缩代码
@@ -289,9 +292,10 @@
   :hook (prog-mode . hs-minor-mode))
 
 ;; 一个可以临时安装使用插件的插件
-;; (use-package try
-;;   :ensure t
-;;   :defer 2)
+(use-package try
+  :disabled
+  :ensure t
+  :defer 2)
 
 
 ;;; browser

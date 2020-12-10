@@ -63,19 +63,7 @@
 (setq suggest-key-bindings 1)
 ;;只渲染当前屏幕语法高亮，加快显示速度
 (setq font-lock-maximum-decoration t)
-;; --------------------------------------------------------------
-;;备份策略
-;; --------------------------------------------------------------
-(setq backup-directory-alist '(("" . "~/tmp/emacs/backup")))
-(setq make-backup-files t)
-;; 允许多次备份
-(setq version-control t)
-;; 保留最早的2个备份文件
-(setq kept-old-versions 2)
-;; 保留最近的6个备份文件
-(setq kept-new-versions 10)
-;; 自动删除旧的备份文件
-(setq delete-old-versions t)
+
 
 ;; 更友好及平滑的滚动
 (setq scroll-step 2
@@ -137,5 +125,7 @@
   (defvar default-file-name-handler-alist file-name-handler-alist)
   (setq file-name-handler-alist nil)
 
+;; 忽略 cl 过期警告
+(setq byte-compile-warnings '(cl-function))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; early-init.el ends here

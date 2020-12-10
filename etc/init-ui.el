@@ -1,9 +1,9 @@
 ;;; init-ui.el --- Initialize ui configurations.	-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
-
+;;
 ;; Author: Suk
-
+;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or
@@ -139,10 +139,8 @@
                       doom-modeline-project-detection 'project)
 		(setq doom-modeline-height 10)
 		:hook (after-init . doom-modeline-mode)))
-      (when sys/win32p
-	;; 简洁的mode-line
-	(require 'awesome-tray)
-	(awesome-tray-mode 1)))
+
+      )
   (progn
     (ignore-errors
       (suk-load-theme suk-theme))
@@ -154,55 +152,81 @@
 ;; 意思是软回车。C-q C-L 来输入。
 (use-package page-break-lines
   :ensure t
-  :config (page-break-lines-mode))
+  :hook ('after-init .  'page-break-lines-mode))
 
-;; 启动界面
-;; (use-package dashboard
-;;   :ensure t
-;;   :config (dashboard-setup-startup-hook)
-;;   (dashboard-modify-heading-icons '((recents . "file-text")
-;; 									(bookmarks . "book")))
-;;   ;; 设置标题
-;;   (setq dashboard-banner-logo-title
-;; 		"欢迎您使用此Emacs配置文件")
-;;   ;; 设置banner
-;;   (setq dashboard-startup-banner fancy-splash-image)
-;;   (setq dashboard-center-content t)
-;;   (setq dashboard-set-heading-icons t)
-;;   ;; (setq dashboard-set-file-icons t)
-;;   (setq dashboard-set-navigator t))
+;; 图形界面插件的设置
+(push '(progn
+	 ;; 启动界面
+	 (use-package dashboard
+	   :ensure t
+	   :config (dashboard-setup-startup-hook)
+	   (dashboard-modify-heading-icons '((recents . "file-text")
+					     (bookmarks . "book")))
+	   ;; 设置标题
+	   (setq dashboard-banner-logo-title
+		 "欢迎您使用此Emacs配置文件")
+	   ;; 设置banner
+	   (setq dashboard-startup-banner fancy-splash-image)
+	   (setq dashboard-center-content t)
+	   (setq dashboard-set-heading-icons t)
+	   ;; (setq dashboard-set-file-icons t)
+	   (setq dashboard-set-navigator t))
 
-;; 图标支持
-(use-package all-the-icons
-  :ensure t)
-;; dired模式图标支持
-(use-package all-the-icons-dired
-  :ensure t
-  :hook ('dired-mode . 'all-the-icons-dired-mode))
-;; 表情符号
-(use-package emojify
-  :after telega
-  :custom (emojify-emojis-dir "~/.emacs.d/var/emojis")
-  :config
-  (global-emojify-mode))
-;; 浮动窗口支持
-(use-package posframe
-  :ensure t)
+	 
+	 ;; 图标支持
+	 (use-package all-the-icons
+	   :ensure t)
+	 ;; dired模式图标支持
+	 (use-package all-the-icons-dired
+	   :ensure t
+	   :hook ('dired-mode . 'all-the-icons-dired-mode))
+	 ;; 表情符号
+	 (use-package emojify
+	   :after telega
+	   :custom (emojify-emojis-dir "~/.emacs.d/var/emojis")
+	   :config
+	   (global-emojify-mode))
+	 ;; 浮动窗口支持
+	 (use-package posframe
+	   :ensure t)
 
-;;; 感觉变得凌乱，还是正常使用好。
-;; 缩进线
-;; (use-package indent-guide
-;;   :ensure t
-;;   :hook (prog-mode . indent-guide-mode))
+	 ;; 感觉变得凌乱，还是正常使用好。
+	 ;; 缩进线
+	 ;; (use-package indent-guide
+	 ;;   :ensure t
+	 ;;   :hook (prog-mode . indent-guide-mode))
+	 
+	 ;; Highlight indentions
+	 (use-package highlight-indent-guides
+	   :disabled
+	   :diminish
+	   :hook (prog-mode . highlight-indent-guides-mode)
+	   :config
+	   (setq highlight-indent-guides-method 'character)
+	   (setq highlight-indent-guides-responsive t))
 
-;; Highlight indentions
+	 ;; 标签页
+	 ;; (require 'awesome-tab)
+	 ;; (awesome-tab-mode t)
+	 (use-package awesome-tab
+	   :disabled
+	   :load-path "~/.emacs.d/site-lisp/awesome-tab"
+	   :hook (after-init . awesome-tab-mode)
+	   :bind
+	   (("C-c l" . awesome-tab-backward-tab)
+	    ("C-c h" . awesome-tab-forward-tab)
+	    ("C-c L" . awesome-tab-backward-tab-other-window)
+	    ("C-c H" . awesome-tab-forward-tab-other-window)
+	    ("C-c b" . awesome-tab-switch-group)
+	    ("C-c g" . awesome-tab-ace-jump)))
+
+	 )
+      graphic-only-plugins-setting)
+
+
 ;; (when (display-graphic-p)
-;;   (use-package highlight-indent-guides
-;;     :diminish
-;;     :hook (prog-mode . highlight-indent-guides-mode)
-;;     :config
-;;     (setq highlight-indent-guides-method 'character)
-;;     (setq highlight-indent-guides-responsive t)))
+
+;;     )
 
 ;; Highlight uncommitted changes
 (use-package diff-hl
@@ -250,11 +274,6 @@
   :ensure t
   :hook ('prog-mode . 'smartparens-global-mode))
 
-;; 标签页
-;; (require 'awesome-tab)
-;; (awesome-tab-mode t)
-
-
 ;; Mode-line
 (defun mode-line-height ()
    "Get current height of mode-line."
@@ -278,8 +297,10 @@
 (when sys/win32p
   (set-frame-font "Simsun 12"))
 
-
 (require 'load-set-font)
+;;(use-package load-set-font
+;;   :load-path "~/.emacs.d/site-lisp/"
+;;   :config (load-default-font))
 
 (when (and suk-cnfonts (display-graphic-p))
   ;; cnfonts doesn't support terminal
@@ -333,16 +354,17 @@
 ;;     (set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")))
 ;;   )
 
-(when (eq system-type 'windows-nt)
-  (setq locale-coding-system 'gb18030)  ;此句保证中文字体设置有效
-  (setq w32-unicode-filenames 'nil)     ; 确保file-name-coding-system变量的设置不会无效
-  (setq file-name-coding-system 'gb18030) ; 设置文件名的编码为gb18030
-  )
 
 ;; Line and Column
 (setq-default fill-column 80)
 (setq column-number-mode t)
-(setq line-number-mode t)
+;; (setq line-number-mode t)
+
+;; 相对行号，默认未开启
+(use-package linum-relative
+  :ensure t
+  ;;:disabled
+  :hook ('prog-mode . 'linum-relative-mode))
 
 (defun buffer-too-big-p ()
   "Check whether the buffer is too big."
@@ -354,49 +376,58 @@
             ;; turn off `linum-mode' when there are more than 5000 lines
             (if (buffer-too-big-p) (linum-mode -1))))
 
-;; Show native line numbers if possible, otherwise use linum
-(if (fboundp 'display-line-numbers-mode)
-    (use-package display-line-numbers
-      :ensure nil
-      :hook (prog-mode . display-line-numbers-mode))
-  (use-package linum-off
-    :demand
-    :defines linum-format
-    :hook (after-init . global-linum-mode)
-    :config
-    (setq linum-format "%4d ")
+;; ;; Show native line numbers if possible, otherwise use linum
+;; (if (fboundp 'display-line-numbers-mode)
+;;     (use-package display-line-numbers
+;;       :ensure nil
+;;       :hook (prog-mode . display-line-numbers-mode))
+;;   (use-package linum-off
+;;     :demand
+;;     :defines linum-format
+;;     :hook (after-init . global-linum-mode)
+;;     :config
+;;     (setq linum-format "%4d ")
 
-    ;; Highlight current line number
-    (use-package hlinum
-      :defines linum-highlight-in-all-buffersp
-      :hook (global-linum-mode . hlinum-activate)
-      :init
-      (setq linum-highlight-in-all-buffersp t)
-      (custom-set-faces
-       `(linum-highlight-face
-         ((t (:inherit 'default :background ,(face-background 'default) :foreground ,(face-foreground 'default)))))))))
+;;     ;; Highlight current line number
+;;     (use-package hlinum
+;;       :disabled
+;;       :ensure nil
+;;       :defines linum-highlight-in-all-buffersp
+;;       :hook (global-linum-mode . hlinum-activate)
+;;       :init
+;;       (setq linum-highlight-in-all-buffersp t)
+;;       (custom-set-faces
+;;        `(linum-highlight-face
+;;          ((t (:inherit 'default :background ,(face-background 'default) :foreground ,(face-foreground 'default)))))))
+;;     ))
 
 ;; Mouse & Smooth Scroll
 ;; Scroll one line at a time (less "jumpy" than defaults)
-(setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
-(setq mouse-wheel-progressive-speed nil)
-(setq scroll-step 1
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))
+      mouse-wheel-progressive-speed nil
+      scroll-step 1
       scroll-margin 0
       scroll-conservatively 100000)
-
-
-;; Don't open a file in a new frame
-(when (boundp 'ns-pop-up-frames)
-  (setq ns-pop-up-frames nil))
-
-;; Don't use GTK+ tooltip
-(when (boundp 'x-gtk-use-system-tooltips)
-  (setq x-gtk-use-system-tooltips nil))
 
 ;; Toggle fullscreen
 (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
            ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
            ("M-S-<return>" . toggle-frame-fullscreen))
+
+;; for windows settings
+(when (eq system-type 'windows-nt)
+  (setq locale-coding-system 'gb18030)    ; 此句保证中文字体设置有效
+  (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
+  (setq file-name-coding-system 'gb18030) ; 设置文件名的编码为gb18030
+
+  ;; 简洁的mode-line
+  ;;(require 'awesome-tray)
+  ;;(awesome-tray-mode 1)
+  ;; 懒猫(王勇)的超简洁modeline
+  (use-package awesome-tray
+    ;;:disabled
+    :load-path "~/.emacs.d/site-lisp/awesome-tray"
+    :hook (after-init . awesome-tray-mode)))
 
 (provide 'init-ui)
 

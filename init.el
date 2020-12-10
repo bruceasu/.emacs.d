@@ -44,7 +44,7 @@
   (setq graphic-only-plugins-setting ())
   
   ;; Make startup faster by reducing the frequency of garbage
-;; collection.  The default is 0.8MB.  Measured in bytes.
+  ;; collection.  The default is 0.8MB.  Measured in bytes.
   (setq gc-cons-threshold 80000000)
   (setq gc-cons-percentage 0.6)
   (add-hook 'emacs-startup-hook
@@ -56,7 +56,7 @@
 		(format "%.2f seconds"
 		  (float-time
 			(time-subtract after-init-time before-init-time)))
-         gcs-done)
+		gcs-done)
       (add-hook 'focus-out-hook 'garbage-collect)))
 
   ;; Load path
@@ -77,7 +77,9 @@
 
   (update-load-path)
 
+  ;; autoload functions
   (require '+autoload)
+  
   ;; Constants
   (require '+const)
 
@@ -85,15 +87,15 @@
   (require '+custom)
   
   ;; Packages
-  ;; Without this comment Emacs25 adds (package-initialize) here
   (require 'init-package)
+  
   (use-package esup
   :ensure t
   ;; To use MELPA Stable use ":pin melpa-stable",
   :pin melpa
   :commands (esup))
-  (require 'lazy-load)
 
+  (require 'lazy-load)
   
   (require 'init-treemacs)
   
