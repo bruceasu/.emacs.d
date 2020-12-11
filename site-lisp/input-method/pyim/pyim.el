@@ -628,7 +628,7 @@ plist 来表示，比如：
      :code-maximum-length 5 ;仓颉词库中，code 的最大长度（不计算 code-prefix）
      :prefer-trigger-chars nil)
     (hyly
-     :document "胡言乱语输入法，采用小鹤双拼+快手辅助码。"
+     :document "胡言乱语输入法，采用小鹤双拼+小雨点辅助码。"
      :class xingma
      :first-chars "abcdefghijklmnopqrstuvwxyz;"
      :rest-chars "abcdefghijklmnopqrstuvwxyz;"
