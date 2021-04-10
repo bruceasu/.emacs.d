@@ -104,13 +104,6 @@
 	;; Customization
 	(require '+custom)
 
-	;; Packages
-	(require 'init-package)
-	(require 'init-basic)
-	(require 'init-ui)
-	(require 'init-utils)
-
-
 	(require 'lazy-load)
 	(require 'one-key)
 	(require 'awesome-pair)
@@ -130,21 +123,22 @@
 	(require 'init-key)
 	(require 'init-performance)
 
-
-	;; (use-package esup
-	;; :ensure t
-	;; ;; To use MELPA Stable use ":pin melpa-stable",
-	;; :pin melpa
-	;; :commands (esup))
-
-
-
-
-
+    ;; Packages
+	(require 'init-package)
+	(require 'init-basic)
+	(require 'init-ui)
+	(require 'init-utils)
 	(require 'init-file-encoding)
 	(require 'init-buffers)
 	(require 'init-sudo)
 	(require 'init-bookmark)
+
+    ;; (use-package esup
+	;;              :ensure t
+	;;              ;; To use MELPA Stable use ":pin melpa-stable",
+	;;              :pin melpa
+	;;              :commands (esup))
+
 
 	;; Programming
 	(require 'init-ide)
@@ -158,13 +152,15 @@
 	(require 'init-suk)
 	(require 'init-im)
 
-
-
 	;; 可以延后加载的
     (run-with-idle-timer
      1 nil
      #'(lambda ()
          (require 'pretty-lambdada)
+         ;; Restore session at last.
+         (require 'init-session)
+         (emacs-session-restore)
+
          (require 'init-yasnippet)
          (require 'init-company-mode)
          (require 'init-company-tabnine)
@@ -173,10 +169,6 @@
          (require 'init-idle)
          (require 'init-auto-sudoedit)
          (require 'init-nox)
-
-         ;; Restore session at last.
-         (require 'init-session)
-         (emacs-session-restore)
 
 	     ;; 暂时没有什么用。
 	     ;; (require 'init-treemacs)
@@ -195,3 +187,4 @@
 (put 'scroll-left 'disabled nil)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here
+(put 'upcase-region 'disabled nil)

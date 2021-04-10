@@ -46,10 +46,10 @@
 ;;(require 'awesome-tray)
 ;;(awesome-tray-mode 1)
 ;; 懒猫(王勇)的超简洁modeline
-(use-package awesome-tray
-   ;;:disabled
-   :load-path "~/.emacs.d/site-lisp/awesome-tray"
-   :hook (after-init . awesome-tray-mode))
+;; (use-package awesome-tray
+;;    ;;:disabled
+;;    :load-path "~/.emacs.d/site-lisp/awesome-tray"
+;;    :hook (after-init . awesome-tray-mode))
 
 ;; 高亮当前行
 ;; Highlight the current line
