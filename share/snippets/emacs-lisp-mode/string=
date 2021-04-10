@@ -1,6 +1,5 @@
-# -*- mode: snippet -*-
-# contributor: Xah Lee (XahLee.org)
-# name: string=
-# key: string=
+#contributor: Xah Lee (XahLee.org)
+#name: string=
+#key: string=
 # --
-(string= $0)
+(string= $0 )

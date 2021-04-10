@@ -6,9 +6,9 @@
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-11-11 09:27:58
-;; Version: 2.6
+;; Version: 3.4
 
-;; Last-Updated: 2019-07-20 22:26:57
+;; Last-Updated: 2020-02-27 13:29:54
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/awesome-pair.el
 ;; Keywords:
@@ -70,6 +70,27 @@
 ;;
 
 ;;; Change log:
+;;
+;; 2020/02/27
+;;      * Make `awesome-pair-wrap-round' and `awesome-pair-equal' works with script area of html file.
+;;
+;; 2019/12/23
+;;      * Re-implement `awesome-pair-in-attribute-p' and fix bug of kill line in web-mode.
+;;
+;; 2019/08/25
+;;      * Jump to internal parenthesis start position.
+;;
+;; 2019/08/23
+;;      * Fix #28 "Unbalanced parentheses" error.
+;;
+;; 2019/08/20
+;;      * Fix #23 "Unbalanced parentheses" error
+;;
+;; 2019/08/18
+;;      * Don't kill rest string if cursor position at end tag before.
+;;
+;; 2019/08/10
+;;      * Try to kill element if cursor in element area.
 ;;
 ;; 2019/07/20
 ;;      * Don't test unbalance parentheses when press `awesome-pair-close-round' in markdown-mode.
@@ -174,20 +195,18 @@
 \\<awesome-pair-mode-map>"
   )
 
+(defmacro awesome-pair-ignore-errors (body)
+  `(ignore-errors
+     ,body
+     t))
+
 ;;;;;;;;;;;;;;;;; Interactive functions ;;;;;;;;;;;;;;;;;;;;;;
 
 (defun awesome-pair-open-round ()
   (interactive)
   (cond
    ((region-active-p)
-    (let ((start (region-beginning))
-          (end (region-end)))
-      (setq mark-active nil)
-      (goto-char start)
-      (insert "(")
-      (goto-char (+ end 1))
-      (insert ")")
-      (goto-char (+ start 1))))
+    (awesome-pair-wrap-round))
    ((and (awesome-pair-in-string-p)
          (derived-mode-p 'js-mode))
     (insert "()")
@@ -204,14 +223,7 @@
   (interactive)
   (cond
    ((region-active-p)
-    (let ((start (region-beginning))
-          (end (region-end)))
-      (setq mark-active nil)
-      (goto-char start)
-      (insert "{")
-      (goto-char (+ end 1))
-      (insert "}")
-      (goto-char (+ start 1))))
+    (awesome-pair-wrap-curly))
    ((and (awesome-pair-in-string-p)
          (derived-mode-p 'js-mode))
     (insert "{}")
@@ -233,14 +245,7 @@
   (interactive)
   (cond
    ((region-active-p)
-    (let ((start (region-beginning))
-          (end (region-end)))
-      (setq mark-active nil)
-      (goto-char start)
-      (insert "[")
-      (goto-char (+ end 1))
-      (insert "]")
-      (goto-char (+ start 1))))
+    (awesome-pair-wrap-bracket))
    ((and (awesome-pair-in-string-p)
          (derived-mode-p 'js-mode))
     (insert "[]")
@@ -296,13 +301,21 @@
 
 (defun awesome-pair-double-quote ()
   (interactive)
-  (cond ((awesome-pair-in-string-p)
-         (if (and (derived-mode-p 'go-mode)
-                  (equal (save-excursion (nth 3 (awesome-pair-current-parse-state))) 96))
-             ;; When current mode is golang.
-             ;; Don't insert \" in string that wrap by `...`
-             (insert "\"")
-           (insert "\\\"")))
+  (cond ((region-active-p)
+         (awesome-pair-wrap-double-quote))
+        ((awesome-pair-in-string-p)
+         (cond
+          ((and (derived-mode-p 'python-mode)
+                (and (eq (char-before) ?\") (eq (char-after) ?\")))
+           (insert "\"\"")
+           (backward-char))
+          ;; When current mode is golang.
+          ;; Don't insert \" in string that wrap by `...`
+          ((and (derived-mode-p 'go-mode)
+                (equal (save-excursion (nth 3 (awesome-pair-current-parse-state))) 96))
+           (insert "\""))
+          (t
+           (insert "\\\""))))
         ((awesome-pair-in-comment-p)
          (insert "\""))
         (t
@@ -354,6 +367,7 @@ output: [ | ]
          )))
 
 (defun awesome-pair-web-mode-match-paren ()
+  (require 'sgml-mode)
   (cond ((looking-at "<")
          (sgml-skip-tag-forward 1))
         ((looking-back ">")
@@ -367,11 +381,15 @@ output: [ | ]
         ((awesome-pair-in-comment-p)
          (backward-delete-char 1))
         ((awesome-pair-after-close-pair-p)
-         (awesome-pair-backward-movein-or-delete-close-pair))
+         (if (and (derived-mode-p 'sh-mode)
+                  (eq ?\) (char-before)))
+             (delete-char -1)
+           (awesome-pair-backward-movein-or-delete-close-pair)))
         ((awesome-pair-in-empty-pair-p)
          (awesome-pair-backward-delete-in-pair))
         ((not (awesome-pair-after-open-pair-p))
-         (backward-delete-char 1))))
+         (backward-delete-char 1))
+        ))
 
 (defun awesome-pair-forward-delete ()
   (interactive)
@@ -383,15 +401,20 @@ output: [ | ]
          (awesome-pair-forward-movein-or-delete-open-pair))
         ((awesome-pair-in-empty-pair-p)
          (awesome-pair-backward-delete-in-pair))
+        ((and (derived-mode-p 'sh-mode)
+              (awesome-pair-before-close-pair-p)
+              (eq ?\) (char-after)))
+         (delete-char 1))
         ((not (awesome-pair-before-close-pair-p))
-         (delete-char 1)
-         )))
+         (delete-char 1))
+        ))
 
 (defun awesome-pair-kill ()
-  "It's annoying that we need re-indent line after we delete blank line with `awesome-pair-kill'.
-`paredt-kill+' fixed this problem.
+  "Intelligent soft kill.
 
-If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome-pair-kill' for smarter kill operation."
+When inside of code, kill forward S-expressions on the line, but respecting delimeters.
+When in a string, kill to the end of the string.
+When in comment, kill to the end of the line."
   (interactive)
   (cond ((derived-mode-p 'web-mode)
          (awesome-pair-web-mode-kill))
@@ -400,19 +423,34 @@ If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome
         (t
          (awesome-pair-common-mode-kill))))
 
+(defun awesome-pair-backward-kill ()
+  "Intelligent soft kill.
+When inside of code, kill backward S-expressions on the line, but respecting delimiters.
+When in a string, kill to the beginning of the string.
+When in comment, kill to the beginning of the line."
+  (interactive)
+  (cond ((derived-mode-p 'web-mode)
+         (awesome-pair-web-mode-backward-kill))
+        ((derived-mode-p 'ruby-mode)
+         (awesome-pair-ruby-mode-backward-kill))
+        (t
+         (awesome-pair-common-mode-backward-kill))))
+
 (defun awesome-pair-wrap-round ()
   (interactive)
   (cond
    ;; If in *.Vue file
    ;; In template area, call `awesome-pair-web-mode-element-wrap'
    ;; Otherwise, call `awesome-pair-wrap-round-pair'
-   ((string-equal (file-name-extension (buffer-file-name)) "vue")
+   ((and (buffer-file-name) (string-equal (file-name-extension (buffer-file-name)) "vue"))
     (if (awesome-pair-vue-in-template-area)
         (awesome-pair-web-mode-element-wrap)
       (awesome-pair-wrap-round-pair)))
    ;; If is `web-mode' but not in *.Vue file, call `awesome-pair-web-mode-element-wrap'
    ((derived-mode-p 'web-mode)
-    (awesome-pair-web-mode-element-wrap))
+    (if (awesome-pair-in-script-area)
+        (awesome-pair-wrap-round-pair)
+      (awesome-pair-web-mode-element-wrap)))
    ;; Otherwise call `awesome-pair-wrap-round-pair'
    (t
     (awesome-pair-wrap-round-pair))
@@ -420,159 +458,84 @@ If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome
 
 (defun awesome-pair-wrap-round-pair ()
   (cond ((region-active-p)
-         (let ((start (region-beginning))
-               (end (region-end)))
-           (setq mark-active nil)
-           (goto-char start)
-           (insert "(")
-           (goto-char (+ end 1))
-           (insert ")")
-           (goto-char start)))
+         (awesome-pair-wrap-region "(" ")"))
         ((awesome-pair-in-string-p)
          (let ((string-bound (awesome-pair-string-start+end-points)))
-           (save-excursion
-             (goto-char (car string-bound))
-             (insert "(")
-             (goto-char (+ (cdr string-bound) 2))
-             (insert ")"))))
+           (awesome-pair-wrap (car string-bound) (1+ (cdr string-bound))
+                              "(" ")")))
         ((awesome-pair-in-comment-p)
-         (save-excursion
-           (let ((start (beginning-of-thing 'symbol))
-                 (end (end-of-thing 'symbol)))
-             (goto-char start)
-             (insert "(")
-             (goto-char (+ end 1))
-             (insert ")"))))
+         (awesome-pair-wrap (beginning-of-thing 'symbol) (end-of-thing 'symbol)
+                            "(" ")"))
         (t
-         (save-excursion
-           (let ((start (beginning-of-thing 'sexp))
-                 (end (end-of-thing 'sexp)))
-             (goto-char start)
-             (insert "(")
-             (goto-char (+ end 1))
-             (insert ")"))
-           )))
-  ;; Forward to jump in parenthesis.
-  (forward-char)
+         (awesome-pair-wrap (beginning-of-thing 'sexp) (end-of-thing 'sexp)
+                            "(" ")")))
   ;; Indent wrap area.
-  (awesome-pair-indent-parenthesis-area))
+  (awesome-pair-indent-parenthesis-area)
+  ;; Jump to internal parenthesis start position.
+  (up-list)
+  (awesome-pair-match-paren 1)
+  (forward-char)
+  )
 
 (defun awesome-pair-wrap-bracket ()
   (interactive)
-  (cond
-   ((region-active-p)
-    (let ((start (region-beginning))
-          (end (region-end)))
-      (setq mark-active nil)
-      (goto-char start)
-      (insert "[")
-      (goto-char (+ end 1))
-      (insert "]")
-      (goto-char start)))
-   ((awesome-pair-in-string-p)
-    (let ((string-bound (awesome-pair-string-start+end-points)))
-      (save-excursion
-        (goto-char (car string-bound))
-        (insert "[")
-        (goto-char (+ (cdr string-bound) 2))
-        (insert "]"))))
-   ((awesome-pair-in-comment-p)
-    (save-excursion
-      (let ((start (beginning-of-thing 'symbol))
-            (end (end-of-thing 'symbol)))
-        (goto-char start)
-        (insert "[")
-        (goto-char (+ end 1))
-        (insert "]"))))
-   (t
-    (save-excursion
-      (let ((start (beginning-of-thing 'sexp))
-            (end (end-of-thing 'sexp)))
-        (goto-char start)
-        (insert "[")
-        (goto-char (+ end 1))
-        (insert "]"))
-      )))
-  ;; Forward to jump in parenthesis.
-  (forward-char)
+  (cond ((region-active-p)
+         (awesome-pair-wrap-region "[" "]"))
+        ((awesome-pair-in-string-p)
+         (let ((string-bound (awesome-pair-string-start+end-points)))
+           (awesome-pair-wrap (car string-bound) (1+ (cdr string-bound))
+                              "[" "]")))
+        ((awesome-pair-in-comment-p)
+         (awesome-pair-wrap (beginning-of-thing 'symbol) (end-of-thing 'symbol)
+                            "[" "]"))
+        (t
+         (awesome-pair-wrap (beginning-of-thing 'sexp) (end-of-thing 'sexp)
+                            "[" "]")))
   ;; Indent wrap area.
-  (awesome-pair-indent-parenthesis-area))
+  (awesome-pair-indent-parenthesis-area)
+  ;; Jump to internal parenthesis start position.
+  (up-list)
+  (awesome-pair-match-paren 1)
+  (forward-char))
 
 (defun awesome-pair-wrap-curly ()
   (interactive)
-  (cond
-   ((region-active-p)
-    (let ((start (region-beginning))
-          (end (region-end)))
-      (setq mark-active nil)
-      (goto-char start)
-      (insert "{")
-      (goto-char (+ end 1))
-      (insert "}")
-      (goto-char start)))
-   ((awesome-pair-in-string-p)
-    (let ((string-bound (awesome-pair-string-start+end-points)))
-      (save-excursion
-        (goto-char (car string-bound))
-        (insert "{")
-        (goto-char (+ (cdr string-bound) 2))
-        (insert "}"))))
-   ((awesome-pair-in-comment-p)
-    (save-excursion
-      (let ((start (beginning-of-thing 'symbol))
-            (end (end-of-thing 'symbol)))
-        (goto-char start)
-        (insert "{")
-        (goto-char (+ end 1))
-        (insert "}"))))
-   (t
-    (save-excursion
-      (let ((start (beginning-of-thing 'sexp))
-            (end (end-of-thing 'sexp)))
-        (goto-char start)
-        (insert "{")
-        (goto-char (+ end 1))
-        (insert "}"))
-      )))
+  (cond ((region-active-p)
+         (awesome-pair-wrap-region "{" "}"))
+        ((awesome-pair-in-string-p)
+         (let ((string-bound (awesome-pair-string-start+end-points)))
+           (awesome-pair-wrap (car string-bound) (1+ (cdr string-bound))
+                              "{" "}")))
+        ((awesome-pair-in-comment-p)
+         (awesome-pair-wrap (beginning-of-thing 'symbol) (end-of-thing 'symbol)
+                            "{" "}"))
+        (t
+         (awesome-pair-wrap (beginning-of-thing 'sexp) (end-of-thing 'sexp)
+                            "{" "}")))
   ;; Forward to jump in parenthesis.
-  (forward-char)
-  ;; Indent wrap area.
-  (awesome-pair-indent-parenthesis-area))
+  (forward-char))
 
 (defun awesome-pair-wrap-double-quote ()
   (interactive)
-  (cond
-   ((region-active-p)
-    (let ((start (region-beginning))
-          (end (region-end)))
-      (setq mark-active nil)
-      (goto-char start)
-      (insert "\"")
-      (goto-char (+ end 1))
-      (insert "\"")
-      (goto-char start)))
-   ((awesome-pair-in-string-p)
-    (goto-char (1+ (cdr (awesome-pair-string-start+end-points)))))
-   ((awesome-pair-in-comment-p)
-    (save-excursion
-      (let ((start (beginning-of-thing 'symbol))
-            (end (end-of-thing 'symbol)))
-        (goto-char start)
-        (insert "\"")
-        (goto-char (+ end 1))
-        (insert "\""))))
-   (t
-    (save-excursion
-      (let ((start (beginning-of-thing 'sexp))
-            (end (end-of-thing 'sexp)))
-        (goto-char start)
-        (insert "\"")
-        (goto-char (+ end 1))
-        (insert "\"")))))
+  (cond ((and (region-active-p)
+              (awesome-pair-in-string-p))
+         (cond ((and (derived-mode-p 'go-mode)
+                     (equal (save-excursion (nth 3 (awesome-pair-current-parse-state))) 96))
+                (awesome-pair-wrap-region "\"" "\""))
+               (t
+                (awesome-pair-wrap-region "\\\"" "\\\""))))
+        ((region-active-p)
+         (awesome-pair-wrap-region "\"" "\""))
+        ((awesome-pair-in-string-p)
+         (goto-char (1+ (cdr (awesome-pair-string-start+end-points)))))
+        ((awesome-pair-in-comment-p)
+         (awesome-pair-wrap (beginning-of-thing 'symbol) (end-of-thing 'symbol)
+                            "\"" "\""))
+        (t
+         (awesome-pair-wrap (beginning-of-thing 'sexp) (end-of-thing 'sexp)
+                            "\"" "\"")))
   ;; Forward to jump in parenthesis.
-  (forward-char)
-  ;; Indent wrap area.
-  (awesome-pair-indent-parenthesis-area))
+  (forward-char))
 
 (defun awesome-pair-unwrap (&optional argument)
   (interactive "P")
@@ -871,12 +834,36 @@ If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome
          (kill-line))
         (t (awesome-pair-kill-sexps-on-line))))
 
+(defun awesome-pair-backward-kill-internal ()
+  (cond (current-prefix-arg
+         (kill-line (if (integerp current-prefix-arg)
+                        current-prefix-arg
+                      1)))
+        ((awesome-pair-in-string-p)
+         (awesome-pair-kill-line-backward-in-string))
+        ((awesome-pair-in-single-quote-string-p)
+         (awesome-pair-kill-line-backward-in-single-quote-string))
+        ((or (awesome-pair-in-comment-p)
+             (save-excursion
+               (awesome-pair-skip-whitespace nil (point-at-bol))
+               (bolp)))
+         (if (bolp) (awesome-pair-backward-delete)
+           (kill-line 0)))
+        (t (awesome-pair-kill-sexps-backward-on-line))))
+
 (defun awesome-pair-kill-line-in-single-quote-string ()
   (let ((sexp-end (save-excursion
                     (forward-sexp)
                     (backward-char)
                     (point))))
     (kill-region (point) sexp-end)))
+
+(defun awesome-pair-kill-line-backward-in-single-quote-string ()
+  (let ((sexp-beg (save-excursion
+                    (backward-sexp)
+                    (forward-char)
+                    (point))))
+    (kill-region sexp-beg (point))))
 
 (defun awesome-pair-kill-line-in-string ()
   (cond ((save-excursion
@@ -893,6 +880,23 @@ If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome
                       (awesome-pair-in-string-p))
                (forward-char))
              (kill-region beginning (point)))
+           ))))
+
+(defun awesome-pair-kill-line-backward-in-string ()
+  (cond ((save-excursion
+           (awesome-pair-skip-whitespace nil (point-at-bol))
+           (bolp))
+         (kill-line))
+        (t
+         (save-excursion
+           (if (awesome-pair-in-string-escape-p)
+               (forward-char))
+           (let ((beginning (point)))
+             (while (save-excursion
+                      (backward-char)
+                      (awesome-pair-in-string-p))
+               (backward-char))
+             (kill-region (point) beginning))
            ))))
 
 (defun awesome-pair-skip-whitespace (trailing-p &optional limit)
@@ -914,6 +918,21 @@ If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome
                               (eq (point-at-eol) eol))
                          eol
                        (point)))))))
+
+(defun awesome-pair-kill-sexps-backward-on-line ()
+  (if (awesome-pair-in-char-p)
+      (forward-char 1))
+  (let ((beginning (point))
+        (bol (point-at-bol)))
+    (let ((beg-of-list-p (awesome-pair-backward-sexps-to-kill beginning bol)))
+      (if beg-of-list-p (progn (up-list -1) (forward-char)))
+      (if kill-whole-line
+          (awesome-pair-kill-sexps-on-whole-line beginning)
+        (kill-region (if (and (not beg-of-list-p)
+                              (eq (point-at-bol) bol))
+                         bol
+                       (point))
+                     beginning)))))
 
 (defun awesome-pair-forward-sexps-to-kill (beginning eol)
   (let ((end-of-list-p nil)
@@ -941,6 +960,32 @@ If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome
         (setq firstp nil)))
     end-of-list-p))
 
+(defun awesome-pair-backward-sexps-to-kill (beginning bol)
+  (let ((beg-of-list-p nil)
+        (lastp t))
+    (catch 'return
+      (while t
+        (if (and kill-whole-line (bobp)) (throw 'return nil))
+        (save-excursion
+          (unless (awesome-pair-ignore-errors (backward-sexp))
+            (if (awesome-pair-ignore-errors (up-list -1))
+                (progn
+                  (setq beg-of-list-p (eq (point-at-bol) bol))
+                  (throw 'return nil))))
+          (if (or (and (not lastp)
+                       (not kill-whole-line)
+                       (bobp))
+                  (not (awesome-pair-ignore-errors (forward-sexp)))
+                  (not (eq (point-at-bol) bol)))
+              (throw 'return nil)))
+        (backward-sexp)
+        (if (and lastp
+                 (not kill-whole-line)
+                 (bobp))
+            (throw 'return nil))
+        (setq lastp nil)))
+    beg-of-list-p))
+
 (defun awesome-pair-kill-sexps-on-whole-line (beginning)
   (kill-region beginning
                (or (save-excursion
@@ -967,6 +1012,15 @@ If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome
       (awesome-pair-kill-blank-line-and-reindent)
     (awesome-pair-kill-internal)))
 
+(defun awesome-pair-common-mode-backward-kill ()
+  (if (awesome-pair-is-blank-line-p)
+      (awesome-pair-ignore-errors
+       (progn
+         (awesome-pair-kill-blank-line-and-reindent)
+         (forward-line -1)
+         (end-of-line)))
+    (awesome-pair-backward-kill-internal)))
+
 (defun awesome-pair-web-mode-kill ()
   "It's a smarter kill function for `web-mode'."
   (if (awesome-pair-is-blank-line-p)
@@ -976,6 +1030,18 @@ If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome
      ((and (looking-at "<%")
            (save-excursion (search-forward-regexp "%>" nil t)))
       (kill-region (point) (search-forward-regexp "%>" nil t)))
+     ;; Kill content in {{ }} if left is {{.
+     ((and (looking-back "{{\\s-?")
+           (save-excursion (search-forward-regexp "\\s-?}}")))
+      (let ((start (save-excursion
+                     (search-backward-regexp "{{\\s-?" nil t)
+                     (forward-char 2)
+                     (point)))
+            (end (save-excursion
+                   (search-forward-regexp "\\s-?}}" nil t)
+                   (backward-char 2)
+                   (point))))
+        (kill-region start end)))
      ;; Kill content in <% ... %> if left is <% or <%=
      ((and (looking-back "<%=?\\s-?")
            (save-excursion (search-forward-regexp "%>" nil t)))
@@ -1029,12 +1095,36 @@ If current mode is `web-mode', use `awesome-pair-web-mode-kill' instead `awesome
      ;; Kill line if rest chars is whitespace.
      ((looking-at "\\s-?+\n")
       (kill-line))
+     ;; Kill region if mark is active.
+     (mark-active
+      (kill-region (region-beginning) (region-end)))
+     ;; Try to kill element if cursor in attribute area.
+     ((awesome-pair-in-attribute-p)
+      ;; Don't kill rest string if cursor position at end tag before.
+      (when (equal (point)
+                   (save-excursion
+                     (web-mode-tag-end)
+                     (point)))
+        (kill-region (point) (progn
+                               (web-mode-tag-match)
+                               (point)))))
      (t
       (unless (awesome-pair-ignore-errors
                ;; Kill all sexps in current line.
                (awesome-pair-kill-sexps-on-line))
         ;; Kill block if sexp parse failed.
         (web-mode-block-kill))))))
+
+
+(defun awesome-pair-in-attribute-p ()
+  "Return non-nil if cursor in attribute area."
+  (save-mark-and-excursion
+    (web-mode-attribute-select)
+    mark-active
+    ))
+
+(defun awesome-pair-web-mode-backward-kill ()
+  (message "Backward kill in web-mode is currently not implemented."))
 
 (defun awesome-pair-ruby-mode-kill ()
   "It's a smarter kill function for `ruby-mode'.
@@ -1047,6 +1137,35 @@ If current line is not blank, do `awesome-pair-kill' first, re-indent line if re
       (awesome-pair-kill-blank-line-and-reindent)
     ;; Do `awesome-pair-kill' first.
     (awesome-pair-kill-internal)
+
+    ;; Re-indent current line if line start with ruby keywords.
+    (when (let (in-beginning-block-p
+                in-end-block-p
+                current-symbol)
+            (save-excursion
+              (back-to-indentation)
+              (ignore-errors (setq current-symbol (buffer-substring-no-properties (beginning-of-thing 'symbol) (end-of-thing 'symbol))))
+              (setq in-beginning-block-p (member current-symbol '("class" "module" "else" "def" "if" "unless" "case" "while" "until" "for" "begin" "do")))
+              (setq in-end-block-p (member current-symbol '("end")))
+
+              (or in-beginning-block-p in-end-block-p)))
+      (indent-for-tab-command))))
+
+(defun awesome-pair-ruby-mode-backward-kill ()
+  "It's a smarter kill function for `ruby-mode'.
+
+If current line is blank line, re-indent line after kill whole line.
+
+If current line is not blank, do `awesome-pair-backward-kill' first, re-indent line if rest line start with ruby keywords.
+"
+  (if (awesome-pair-is-blank-line-p)
+      (awesome-pair-ignore-errors
+       (progn
+         (awesome-pair-kill-blank-line-and-reindent)
+         (forward-line -1)
+         (end-of-line)))
+    ;; Do `awesome-pair-kill' first.
+    (awesome-pair-backward-kill-internal)
 
     ;; Re-indent current line if line start with ruby keywords.
     (when (let (in-beginning-block-p
@@ -1090,11 +1209,19 @@ If current line is not blank, do `awesome-pair-kill' first, re-indent line if re
                  (insert "=\"\"")
                  (backward-char 1))
              (insert "=")))
+          ((awesome-pair-in-script-area)
+           (insert "="))
           (t
            (insert "=\"\"")
            (backward-char 1))))
    (t
     (insert "="))))
+
+(defun awesome-pair-in-script-area ()
+  (and (save-excursion
+         (search-backward-regexp "<script" nil t))
+       (save-excursion
+         (search-forward-regexp "</script>" nil t))))
 
 (defun awesome-pair-vue-in-template-area ()
   (and (save-excursion
@@ -1167,9 +1294,37 @@ Just like `paredit-splice-sexp+' style."
     ))
 
 ;;;;;;;;;;;;;;;;; Utils functions ;;;;;;;;;;;;;;;;;;;;;;
+
+(defun awesome-pair-wrap (beg end a b)
+  "Insert A at position BEG, and B after END. Save previous point position.
+
+A and B are strings."
+  (save-excursion
+    (goto-char beg)
+    (insert a)
+    (goto-char (1+ end))
+    (insert b))
+  )
+
+(defun awesome-pair-wrap-region (a b)
+  "When a region is active, insert A and B around it, and jump after A.
+
+A and B are strings."
+  (when (region-active-p)
+    (let ((start (region-beginning))
+          (end (region-end)))
+      (setq mark-active nil)
+      (goto-char start)
+      (insert a)
+      (goto-char (1+ end))
+      (insert b)
+      (goto-char (+ (length a) start)))))
+
 (defun awesome-pair-current-parse-state ()
   (let ((point (point)))
     (beginning-of-defun)
+    (when (equal point (point))
+      (beginning-of-line))
     (parse-partial-sexp (point) point)))
 
 (defun awesome-pair-string-start+end-points (&optional state)
@@ -1181,36 +1336,42 @@ Just like `paredit-splice-sexp+' style."
         (cons start (1- (point)))))))
 
 (defun awesome-pair-after-open-pair-p ()
-  (save-excursion
-    (let ((syn (char-syntax (char-before))))
-      (or (eq syn ?\()
-          (and (eq syn ?_)
-               (eq (char-before) ?\{)))
-      )))
+  (unless (bobp)
+    (save-excursion
+      (let ((syn (char-syntax (char-before))))
+        (or (eq syn ?\()
+            (and (eq syn ?_)
+                 (eq (char-before) ?\{)))
+        ))))
 
 (defun awesome-pair-after-close-pair-p ()
-  (save-excursion
-    (let ((syn (char-syntax (char-before))))
-      (or (eq syn ?\) )
-          (eq syn ?\" )
-          (and (eq syn ?_ )
-               (eq (char-before) ?\}))
-          ))))
+  (unless (bobp)
+    (save-excursion
+      (let ((syn (char-syntax (char-before))))
+        (or (eq syn ?\) )
+            (eq syn ?\" )
+            (and (eq syn ?_ )
+                 (eq (char-before) ?\})))
+        ))))
 
 (defun awesome-pair-before-open-pair-p ()
-  (save-excursion
-    (let ((syn (char-syntax (char-after))))
-      (or (eq syn ?\( )
-          (eq syn ?\" )
-          (and (eq syn ?_)
-               (eq (char-after) ?\{))))))
+  (unless (eobp)
+    (save-excursion
+      (let ((syn (char-syntax (char-after))))
+        (or (eq syn ?\( )
+            (eq syn ?\" )
+            (and (eq syn ?_)
+                 (eq (char-after) ?\{)))
+        ))))
 
 (defun awesome-pair-before-close-pair-p ()
-  (save-excursion
-    (let ((syn (char-syntax (char-after))))
-      (or (eq syn ?\) )
-          (and (eq syn ?_)
-               (eq (char-after) ?\}))))))
+  (unless (eobp)
+    (save-excursion
+      (let ((syn (char-syntax (char-after))))
+        (or (eq syn ?\) )
+            (and (eq syn ?_)
+                 (eq (char-after) ?\})))
+        ))))
 
 (defun awesome-pair-in-empty-pair-p ()
   (ignore-errors
@@ -1243,28 +1404,31 @@ Just like `paredit-splice-sexp+' style."
              (string-equal last-char "'"))))))
 
 (defun awesome-pair-in-string-p (&optional state)
-  (save-excursion
-    (or
-     ;; In most situation, point inside a string when 4rd state `parse-partial-sexp' is non-nil.
-     ;; but at this time, if the string delimiter is the last character of the line, the point is not in the string.
-     ;; So we need exclude this situation when check state of `parse-partial-sexp'.
-     (and
-      (nth 3 (or state (awesome-pair-current-parse-state)))
-      (not (equal (point) (line-end-position))))
-     (and
-      (eq (get-text-property (point) 'face) 'font-lock-string-face)
-      (eq (get-text-property (- (point) 1) 'face) 'font-lock-string-face))
-     (and
-      (eq (get-text-property (point) 'face) 'font-lock-doc-face)
-      (eq (get-text-property (- (point) 1) 'face) 'font-lock-doc-face))
-     )))
+  (ignore-errors
+    (unless (or (bobp) (eobp))
+      (save-excursion
+        (or
+         ;; In most situation, point inside a string when 4rd state `parse-partial-sexp' is non-nil.
+         ;; but at this time, if the string delimiter is the last character of the line, the point is not in the string.
+         ;; So we need exclude this situation when check state of `parse-partial-sexp'.
+         (and
+          (nth 3 (or state (awesome-pair-current-parse-state)))
+          (not (equal (point) (line-end-position))))
+         (and
+          (eq (get-text-property (point) 'face) 'font-lock-string-face)
+          (eq (get-text-property (- (point) 1) 'face) 'font-lock-string-face))
+         (and
+          (eq (get-text-property (point) 'face) 'font-lock-doc-face)
+          (eq (get-text-property (- (point) 1) 'face) 'font-lock-doc-face))
+         )))))
 
 (defun awesome-pair-in-comment-p (&optional state)
-  (save-excursion
-    (or (nth 4 (or state (awesome-pair-current-parse-state)))
-        (eq (get-text-property (point) 'face) 'font-lock-comment-face)
-        (and (featurep 'web-mode)
-             (eq (get-text-property (point) 'face) 'web-mode-comment-face)))))
+  (ignore-errors
+    (save-excursion
+      (or (nth 4 (or state (awesome-pair-current-parse-state)))
+          (eq (get-text-property (point) 'face) 'font-lock-comment-face)
+          (and (featurep 'web-mode)
+               (eq (get-text-property (point) 'face) 'web-mode-comment-face))))))
 
 (defun awesome-pair-in-string-escape-p ()
   (let ((oddp nil))
@@ -1314,10 +1478,10 @@ Just like `paredit-splice-sexp+' style."
                 (char-before))))
         (and (eq left-parent-char ?\{) (eq right-parent-char ?\}))))))
 
-(defmacro awesome-pair-ignore-errors (body)
-  `(ignore-errors
-     ,body
-     t))
+;; Integrate with eldoc
+(with-eval-after-load 'eldoc
+  (eldoc-add-command-completions
+   "awesome-pair-"))
 
 (provide 'awesome-pair)
 

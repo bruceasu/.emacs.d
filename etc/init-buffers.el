@@ -125,11 +125,12 @@ prompt the user to save before closing.
 (defun suk/new-empty-buffer ()
   "Create a new empty buffer.
 New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
-It returns the buffer (for elisp programing)."
+It returns the buffer."
   (interactive)
   (let (($buf (generate-new-buffer "untitled")))
     (switch-to-buffer $buf)
-    (funcall initial-major-mode)
+;;    (funcall initial-major-mode)
+    (text-mode)
     (setq buffer-offer-save t)
     $buf
     ))
@@ -164,7 +165,7 @@ It returns the buffer (for elisp programing)."
   (interactive)
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (lisp-interaction-mode))
-;; (global-set-key "\C-cs" 'suk/create-scratch-buffer) ;; Bind to `C-c s'
+(global-set-key "\C-cs" 'suk/create-scratch-buffer) ;; Bind to `C-c s'
 
 (defun suk/switch-to-minibuffer ()
   "Switch to minibuffer window."

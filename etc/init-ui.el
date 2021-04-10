@@ -40,6 +40,16 @@
 (tool-bar-mode -1)
 ;; 关闭菜单栏
 (menu-bar-mode -1)
+(require 'lazycat-theme)
+(lazycat-theme-load-dark)
+;; 简洁的mode-line
+;;(require 'awesome-tray)
+;;(awesome-tray-mode 1)
+;; 懒猫(王勇)的超简洁modeline
+(use-package awesome-tray
+   ;;:disabled
+   :load-path "~/.emacs.d/site-lisp/awesome-tray"
+   :hook (after-init . awesome-tray-mode))
 
 ;; 高亮当前行
 ;; Highlight the current line
@@ -52,18 +62,16 @@
   :ensure t
   :hook (after-init . beacon-mode))
 
-;; Logo
-(setq fancy-splash-image suk-logo)
-
 ;; Title
 (setq frame-title-format
       '("Emacs - "
         (:eval (if (buffer-file-name)
                    (abbreviate-file-name (buffer-file-name))
                  "%b"))))
-(setq icon-title-format frame-title-format)
 
+;; ===================================
 ;; Theme
+;; -----------------------------------
 (defvar after-load-theme-hook nil
   "Hook run after a color theme is loaded using `load-theme'.")
 
@@ -71,81 +79,19 @@
   "Run `after-load-theme-hook'."
   (run-hooks 'after-load-theme-hook))
 
-(defun standardize-theme (theme)
-  "Standardize THEME."
-  (pcase theme
-    ('default 'doom-one)
-    ('classic 'doom-molokai)
-    ('doom 'doom-one)
-    ('dark 'doom-Iosvkem)
-    ('light 'doom-one-light)
-    ('daylight 'doom-tomorrow-day)
-    (_ theme)))
-
 (defun is-doom-theme-p (theme)
   "Check whether the THEME is a doom theme. THEME is a symbol."
-  (string-prefix-p "doom" (symbol-name (standardize-theme theme))))
+  (string-prefix-p "doom" (symbol-name theme)))
 
 (defun suk-load-theme (theme)
-  "Set color THEME."
+  "Set color THEME. Infact, only support lazycat-theme-load-dark"
   (interactive
-   (list
-    (intern (completing-read "Load theme: "
-                             '(default classic dark light daylight)))))
-  (let ((theme (standardize-theme theme)))
-    (if (boundp 'counsel-load-theme)
-        (counsel-load-theme theme)
-      (load-theme theme t))))
-
-(if (is-doom-theme-p suk-theme)
-    (progn
-      (use-package doom-themes
-        :init (suk-load-theme suk-theme)
-	:defer 1
-        :config
-        (when sys/linuxp
-	  ;; Enable flashing mode-line on errors
-          ;;(doom-themes-visual-bell-config)
-          ;; Corrects (and improves) org-mode's native fontification.
-        (doom-themes-org-config)
-	  ;; Enable custom treemacs theme (all-the-icons must be installed!)
-	  (doom-themes-treemacs-config)
-          ;; Enable custom neotree theme (all-the-icons must be installed!)
-          ;;(doom-themes-neotree-config)
-	  ;;
-	  ;; Make certain buffers grossly incandescent
-          ;; (use-package solaire-mode
-	  ;; 	:defer 1
-          ;;   :hook (((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
-          ;;           (minibuffer-setup . solaire-mode-in-minibuffer)
-          ;;           (after-load-theme . solaire-mode-swap-bg)))
-	  )
-      )
-
-      (when sys/linuxp
-	(use-package doom-modeline
-		:ensure t
-		:defer 1
-		:hook (after-init . doom-modeline-mode)
-		:config
-		(set-face-attribute 'mode-line nil :font
-				    (format   "%s:size=%d"  "monofur" 16))
-		(set-face-attribute 'mode-line-inactive nil :font
-				    (format   "%s:size=%d"  "monofur" 16))
-		(setq inhibit-compacting-font-caches t
-                      doom-modeline-height 1
-                      doom-modeline-buffer-file-name-style 'auto
-                      doom-modeline-icon nil
-                      doom-modeline-project-detection 'project)
-		(setq doom-modeline-height 10)
-		:hook (after-init . doom-modeline-mode)))
-
-      )
-  (progn
-    (ignore-errors
-      (suk-load-theme suk-theme))
-    )
+    (require 'lazycat-theme)
+	(lazycat-theme-load-dark)
+	)
   )
+
+
 
 ;; 这是 purcell 写的一个插件，按照描述来看就是把 ^L显示为一个整洁的水平线。
 ;; 这个^L其实并不是^与L的组合，而是一个单一的字符。我查了一下，很可能这个代表的
@@ -155,78 +101,45 @@
   :hook ('after-init .  'page-break-lines-mode))
 
 ;; 图形界面插件的设置
-(push '(progn
-	 ;; 启动界面
-	 (use-package dashboard
-	   :ensure t
-	   :config (dashboard-setup-startup-hook)
-	   (dashboard-modify-heading-icons '((recents . "file-text")
-					     (bookmarks . "book")))
-	   ;; 设置标题
-	   (setq dashboard-banner-logo-title
-		 "欢迎您使用此Emacs配置文件")
-	   ;; 设置banner
-	   (setq dashboard-startup-banner fancy-splash-image)
-	   (setq dashboard-center-content t)
-	   (setq dashboard-set-heading-icons t)
-	   ;; (setq dashboard-set-file-icons t)
-	   (setq dashboard-set-navigator t))
+(when (display-graphic-p)
+  ;; 图标支持
+  (use-package all-the-icons :ensure t)
 
-	 
-	 ;; 图标支持
-	 (use-package all-the-icons
-	   :ensure t)
-	 ;; dired模式图标支持
-	 (use-package all-the-icons-dired
-	   :ensure t
-	   :hook ('dired-mode . 'all-the-icons-dired-mode))
-	 ;; 表情符号
-	 (use-package emojify
-	   :after telega
-	   :custom (emojify-emojis-dir "~/.emacs.d/var/emojis")
-	   :config
-	   (global-emojify-mode))
-	 ;; 浮动窗口支持
-	 (use-package posframe
-	   :ensure t)
+  ;; dired模式图标支持
+  ;; (use-package all-the-icons-dired
+  ;; 	:ensure t
+  ;; 	:hook ('dired-mode . 'all-the-icons-dired-mode))
 
-	 ;; 感觉变得凌乱，还是正常使用好。
-	 ;; 缩进线
-	 ;; (use-package indent-guide
-	 ;;   :ensure t
-	 ;;   :hook (prog-mode . indent-guide-mode))
-	 
-	 ;; Highlight indentions
-	 (use-package highlight-indent-guides
-	   :disabled
-	   :diminish
-	   :hook (prog-mode . highlight-indent-guides-mode)
-	   :config
-	   (setq highlight-indent-guides-method 'character)
-	   (setq highlight-indent-guides-responsive t))
+  ;; 表情符号
+  ;; (use-package emojify
+  ;; 	:after telega
+  ;; 	:custom (emojify-emojis-dir "~/.emacs.d/var/emojis")
+  ;; 	:config
+  ;; 	(global-emojify-mode))
+  ;;
+  ;; 浮动窗口支持
+  (use-package posframe :ensure t)
 
-	 ;; 标签页
-	 ;; (require 'awesome-tab)
-	 ;; (awesome-tab-mode t)
-	 (use-package awesome-tab
-	   :disabled
-	   :load-path "~/.emacs.d/site-lisp/awesome-tab"
-	   :hook (after-init . awesome-tab-mode)
-	   :bind
-	   (("C-c l" . awesome-tab-backward-tab)
-	    ("C-c h" . awesome-tab-forward-tab)
-	    ("C-c L" . awesome-tab-backward-tab-other-window)
-	    ("C-c H" . awesome-tab-forward-tab-other-window)
-	    ("C-c b" . awesome-tab-switch-group)
-	    ("C-c g" . awesome-tab-ace-jump)))
+  ;; 感觉变得凌乱，还是正常使用好。
+  ;; 缩进线
+  ;; (use-package indent-guide
+  ;;   :ensure t
+  ;;   :hook (prog-mode . indent-guide-mode))
 
-	 )
-      graphic-only-plugins-setting)
+  ;; Highlight indentions
+  ;; (use-package highlight-indent-guides
+  ;; 	:disabled
+  ;; 	:diminish
+  ;; 	:hook (prog-mode . highlight-indent-guides-mode)
+  ;; 	:config
+  ;; 	(setq highlight-indent-guides-method 'character)
+  ;; 	(setq highlight-indent-guides-responsive t))
 
 
-;; (when (display-graphic-p)
 
-;;     )
+)
+
+
 
 ;; Highlight uncommitted changes
 (use-package diff-hl
@@ -298,9 +211,6 @@
   (set-frame-font "Simsun 12"))
 
 (require 'load-set-font)
-;;(use-package load-set-font
-;;   :load-path "~/.emacs.d/site-lisp/"
-;;   :config (load-default-font))
 
 (when (and suk-cnfonts (display-graphic-p))
   ;; cnfonts doesn't support terminal
@@ -356,15 +266,15 @@
 
 
 ;; Line and Column
-(setq-default fill-column 80)
+(setq-default fill-column 65)
 (setq column-number-mode t)
 ;; (setq line-number-mode t)
 
-;; 相对行号，默认未开启
-(use-package linum-relative
-  :ensure t
-  ;;:disabled
-  :hook ('prog-mode . 'linum-relative-mode))
+;; 相对行号，默认未开启，价值不是很大。
+;; (use-package linum-relative
+;;   :ensure t
+;;   :disabled
+;;   :hook ('prog-mode . 'linum-relative-mode))
 
 (defun buffer-too-big-p ()
   "Check whether the buffer is too big."
@@ -409,10 +319,11 @@
       scroll-margin 0
       scroll-conservatively 100000)
 
-;; Toggle fullscreen
+;; Toggle fullscreen <F11> also bind to fullscreen
 (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
            ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
-           ("M-S-<return>" . toggle-frame-fullscreen))
+           ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
+		   )
 
 ;; for windows settings
 (when (eq system-type 'windows-nt)
@@ -420,14 +331,7 @@
   (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
   (setq file-name-coding-system 'gb18030) ; 设置文件名的编码为gb18030
 
-  ;; 简洁的mode-line
-  ;;(require 'awesome-tray)
-  ;;(awesome-tray-mode 1)
-  ;; 懒猫(王勇)的超简洁modeline
-  (use-package awesome-tray
-    ;;:disabled
-    :load-path "~/.emacs.d/site-lisp/awesome-tray"
-    :hook (after-init . awesome-tray-mode)))
+)
 
 (provide 'init-ui)
 

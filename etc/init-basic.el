@@ -59,6 +59,88 @@
 (setq user-full-name suk-full-name)
 (setq user-mail-address suk-mail-address)
 
+
+;;; 选中文本后输入会覆盖
+(delete-selection-mode 1)
+(auto-compression-mode 1)
+(size-indication-mode 1)
+(blink-cursor-mode -1)
+;; 高亮对应的括号
+(show-paren-mode 1)
+
+(modify-all-frames-parameters '((vertical-scroll-bars)))
+(setq system-time-locale "C")
+;; 当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
+(setq suggest-key-bindings 1)
+;;只渲染当前屏幕语法高亮，加快显示速度
+(setq font-lock-maximum-decoration t)
+
+
+;; 更友好及平滑的滚动
+(setq scroll-step 2
+      scroll-margin 2
+      hscroll-step 2
+      hscroll-margin 2
+      scroll-conservatively 101
+      scroll-up-aggressively 0.01
+      scroll-down-aggressively 0.01
+      scroll-preserve-screen-position 'always)
+
+
+;; (setq initial-scratch-message nil)
+(setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
+(setq adaptive-fill-first-line-regexp "^* *$")
+(setq kill-whole-line t)                   ; C-k deletes the end of line
+(setq delete-by-moving-to-trash t)         ; Deleting files go to OS's trash folder
+(setq auto-save-default nil)               ; Disable auto save
+(setq set-mark-command-repeat-pop t)       ; Repeating C-SPC after popping mark pops it again
+(setq-default major-mode 'text-mode)
+
+;; 设置 sentence-end 可以识别中文标点。不用在 fill 时在句号后插 入两个空格。
+(setq sentence-end "\\([。！？￥%×（）—]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
+(setq sentence-end-double-space nil)
+(setq kill-ring-max 200)
+;; 关闭自动调节行高
+(setq auto-window-vscroll nil)
+;; 让光标无法离开视线
+(setq mouse-yank-at-point nil)
+;; Save clipboard contents into kill-ring before replace them
+(setq save-interprogram-paste-before-kill t)
+;; Tab and Space
+;; Permanently indent with spaces, never with TABs
+(setq-default c-basic-offset   4
+              tab-width        4
+              indent-tabs-mode t)
+
+;; 创建新行的动作
+;; 回车时创建新行并且对齐
+(global-set-key (kbd "RET") 'newline-and-indent)
+;; 取消对齐创建的新行
+(global-set-key (kbd "S-<return>") 'comment-indent-new-line)
+;; 让'_'被视为单词的一部分
+(add-hook 'after-change-major-mode-hook (lambda ()(modify-syntax-entry ?_ "w")))
+;; "-" 同上)
+(add-hook 'after-change-major-mode-hook (lambda () (modify-syntax-entry ?- "w")))
+
+;; Misc
+(fset 'yes-or-no-p 'y-or-n-p)
+
+(setq visible-bell t)
+(setq track-eol t)                      ; Keep cursor at end of lines. Require line-move-visual is nil.
+(setq line-move-visual nil)
+(setq inhibit-compacting-font-caches t) ; Don’t compact font caches during GC.
+
+;; 设置光标样式
+(setq-default cursor-type 'box)
+;; Speed up startup
+  (defvar default-file-name-handler-alist file-name-handler-alist)
+  (setq file-name-handler-alist nil)
+
+;; 忽略 cl 过期警告
+(setq byte-compile-warnings '(cl-function))
+
+
+
 ;; =========================================================
 ;; Start server
 (use-package server
@@ -71,69 +153,6 @@
 
 ;;(server-force-delete)
 ;;(server-start)
-
-;; 图形化插件特殊设置
-(if (not (display-graphic-p))
-    (add-hook 'after-make-frame-functions
-	      (lambda (new-frame)
-		(select-frame new-frame)
-		(dolist (elisp-code graphic-only-plugins-setting)
-		  (eval elisp-code))))
-  (dolist (elisp-code graphic-only-plugins-setting)
-    (eval elisp-code)))
-
-
-;; ==============================================================
-;; 这将从base添加所有第一级dirs并排除exclude-list中的dirs，
-;; 而对于include-list中的dirs，它将添加该dir的所有第一级dirs。
-;; (add-to-list 'load-path "~/.emacs.d/elpa/company-20170715.1035")
-;; (add-to-list 'load-path "~/.local/site-lisp")
-;; (suk/add-to-list-with-subdirs "~/.local/site-lisp"
-;;                          '(".", "..")
-;;                          '())
-;; --------------------------------------------------------------
-(defun suk/add-to-list-with-subdirs (base exclude-list include-list)
-  (dolist (f (directory-files base))
-    (let ((name (concat base "/" f)))
-      (when (and (file-directory-p name)
-                 (not (member f exclude-list)))
-        (add-to-list 'load-path name)
-        (when (member f include-list)
-          (add-to-list-with-subdirs name exclude-list include-list)))))
-  (add-to-list 'load-path base))
-
-;; ==============================================================
-;; Update the git of emacs configuration
-;; --------------------------------------------------------------
-(defun suk-update-config ()
-  "Update suk Emacs configurations to the latest version."
-  (interactive)
-  (let ((dir (expand-file-name user-emacs-directory)))
-    (if (file-exists-p dir)
-        (progn
-          (message "Updating Emacs configurations...")
-          (cd dir)
-          (shell-command "git pull --rebase")
-          (message "Update finished. Restart Emacs to complete the process."))
-      (message "\"%s\" doesn't exist." dir))))
-
-(declare-function upgrade-packages 'init-package)
-
-(defalias 'suk-update-packages 'upgrade-packages)
-
-(defun suk-update()
-  "Update confgiurations and packages."
-  (interactive)
-  (suk-update-config)
-  (suk-update-packages nil))
-
-(declare-function upgrade-packages-and-restart 'init-package)
-(defalias 'suk-update-packages-and-restart 'upgrade-packages-and-restart)
-(defun suk-update-and-restart ()
-  "Update configurations and packages, then restart."
-  (interactive)
-  (suk-update-config)
-  (suk-update-packages-and-restart nil))
 
 ;; =========================================================
 ;; 方便的切换major mode
@@ -197,22 +216,6 @@ With the prefix argument UNFILL, unfill it instead."
       (fill-paragraph nil region)))
 (bind-key "M-q" 'suk/fill-or-unfill-paragraph)
 
-;; ==============================================================
-;; Recompile elpa directory
-;; --------------------------------------------------------------
-(defun suk/recompile-elpa ()
-  "Recompile packages in elpa directory. Useful if you switch Emacs versions."
-  (interactive)
-  (byte-recompile-directory package-user-dir nil t))
-
-;; Recompile site-lisp directory
-;; --------------------------------------------------------------
-(defun suk/recompile-site-lisp ()
-  "Recompile packages in site-lisp directory."
-  (interactive)
-  (byte-recompile-directory
-   (concat user-emacs-directory "site-lisp") 0 t))
-
 ;; 设置缓存文件/杂七杂八的文件存放的地址
 ;; 不好的做法
 ;; (setq user-emacs-directory "~/.emacs.d/var")
@@ -222,7 +225,10 @@ With the prefix argument UNFILL, unfill it instead."
 (use-package saveplace
   :ensure nil
   :defer 1
-  :hook (after-init . save-place-mode))
+  :hook (after-init . save-place-mode)
+  :config (setq save-place-file "~/.emacs.d/var/saveplace")
+
+  )
 
 (use-package recentf
   :ensure nil
@@ -275,6 +281,9 @@ With the prefix argument UNFILL, unfill it instead."
 ;; 设置eshell历史记录
 (setq eshell-history-file-name "~/.emacs.d/var/eshell/history")
 
+;; projectitle-bookmarks
+(setq projectile-known-projects-file "~/.emacs.d/var/projectile-bookmarks.eld")
+
 ;; --------------------------------------------------------------
 ;;备份策略
 ;; --------------------------------------------------------------
@@ -284,7 +293,7 @@ With the prefix argument UNFILL, unfill it instead."
 (setq version-control t)
 ;; 保留最早的2个备份文件
 (setq kept-old-versions 2)
-;; 保留最近的10个备份文件
+;; 保留最近的100个备份文件
 (setq kept-new-versions 100)
 ;; 自动删除旧的备份文件
 (setq delete-old-versions t)

@@ -78,7 +78,7 @@
 								"~/org/trash.org"
 								"~/org/gw"
 								)))
- 
+
  ;; Set default column view headings: Task Effort Clock_Summary
  (setq org-columns-default-format "%80ITEM(Task) %10Effort(Effort){:} %10CLOCKSUM")
  (setq org-agenda-persistent-filter t)
@@ -96,7 +96,7 @@
 									 ("h" "Habit" entry (file "~/org/gtd.org") "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
 									 )))
  
- ;; TODO TASK
+ ;; TODO TASK 不要使用中文，自寻烦恼
  ;; org-archive-tag "资料库"
  ;; org-closed-string "任务关闭："
  ;; org-comment-string "备注"
@@ -104,17 +104,17 @@
  ;; org-quote-string "引用"
  ;; org-scheduled-string "计划时间："
  ;; org-time-stamp-custom-formats (quote ("<%Y年%m月%d日 %A>" . "<%Y年%m月%d日 %A %H:%M>"))
-			   
+
  (setq org-todo-interpretation (quote sequence))
  (setq org-file-apps (quote ((auto-mode . emacs)
                              ("\\.mm\\'" . system)
                              ("\\.x?html?\\'" . system)
                              ("\\.pdf\\'" . system))))
- 
+
  (setq org-todo-keywords (quote
                           ((sequence "TODO(t)" "NEXT(n!)" "|" "DONE(d!)")
                            (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
- 
+
  (setq org-todo-keyword-faces (quote (("TODO" :foreground "red" :weight bold)
                                       ("NEXT" :foreground "blue" :weight bold)
                                       ("DONE" :foreground "forest green" :weight bold)
@@ -124,7 +124,7 @@
                                       ("ABORT" :foreground "forest yellow" :weight bold)
                                       ("MEETING" :foreground "forest brown" :weight bold)
                                       ("PHONE" :foreground "forest pink" :weight bold))))
-		
+
  (setq org-use-fast-todo-selection t)
  ;; allows changing todo states with S-left and S-right skipping all of the
  ;; normal processing when entering or leaving a todo state. This cycles through
@@ -159,7 +159,7 @@
  ;; estimated values and any clocked time to date.
 
  
-		
+
  ;; Tags with fast selection keys
  (setq org-tag-alist (quote ((:startgroup)
                              ("@errand" . ?e)
@@ -194,7 +194,7 @@
  (setq org-export-headline-levels 6)
  (setq org-export-coding-system 'utf-8)
  (setq org-table-export-default-format "orgtbl-to-csv")
- 
+
 
  ;; Targets include this file and any file contributing to the agenda - up to 9 levels deep
  (setq org-refile-targets (quote ((nil :maxlevel . 9) (org-agenda-files :maxlevel . 9))))
@@ -204,9 +204,9 @@
  (setq org-outline-path-complete-in-steps nil)
  ;; Allow refile to create parent tasks with confirmation
  (setq org-refile-allow-creating-parent-nodes (quote confirm)  )
- 
+
  (setq org-refile-target-verify-function (quote suk/verify-refile-target))
- 
+
  
  (setq org-startup-indented t)
  (setq org-startup-folded t)
@@ -227,19 +227,19 @@
  (setq org-indirect-buffer-display (quote current-window))
  (add-to-list 'org-export-backends 'md)
  )
-  
+
 ;; More fancy UI
 ;; (use-package org-bullets
 ;;   :hook (org-mode . org-bullets-mode)
 ;; 	:config  (setq org-bullets-bullet-list '("■" "◆" "▲" "▶")))
-  
+
 ;; (unless sys/win32p
 ;;  (use-package org-fancy-priorities
 ;;   :diminish
 ;;   :defines org-fancy-priorities-list
 ;;   :hook (org-mode . org-fancy-priorities-mode)
 ;;	:config (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕"))))
-  
+
 (eval-and-compile
       (defun hot-expand (str &optional mod)
         "Expand org template."

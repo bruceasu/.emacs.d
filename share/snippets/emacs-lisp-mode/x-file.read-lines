@@ -1,6 +1,5 @@
-# -*- mode: snippet -*-
-# contributor: Xah Lee (XahLee.org)
-# name: read lines of a file
+#contributor: Xah Lee (XahLee.org)
+#name: read lines of a file
 # key: x-file
 # --
 (defun read-lines (filePath)
@@ -8,11 +7,11 @@
   (with-temp-buffer
     (insert-file-contents filePath)
     (split-string
-     (buffer-string) "\n" t)))
+     (buffer-string) "\n" t)) )
 
 ;; process all lines
-(mapc
- (lambda (aLine)
+(mapc 
+ (lambda (aLine) 
    (message aLine) ; do your stuff here
    )
  (read-lines "inputFilePath")

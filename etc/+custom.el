@@ -76,9 +76,6 @@
   "Display icons in `ivy' or not."
   :type 'boolean)
 
-(defcustom suk-benchmark nil
-  "Enable the init benchmark or not."
-  :type 'boolean)
 
 ;; Load `custom-file'
 ;; If it doesn't exist, copy from the template, then load it.

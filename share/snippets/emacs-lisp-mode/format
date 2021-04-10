@@ -1,6 +1,5 @@
-# -*- mode: snippet -*-
-# contributor: Xah Lee (XahLee.org)
-# name: format
-# key: f
+#contributor: Xah Lee (XahLee.org)
+#name: format
+#key: format
 # --
-(format "${1:message}" ${2:format-args})
+(format "$0" &optional OBJECTS)

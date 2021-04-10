@@ -105,13 +105,6 @@
   (use-package bind-key))
 
 
-;; Initialization benchmark
-(when (and suk-benchmark)
-  (use-package benchmark-init
-    :commands (benchmark-init/activate)
-    :hook (after-init . benchmark-init/deactivate)
-    :init (benchmark-init/activate)))
-
 (provide 'init-package)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

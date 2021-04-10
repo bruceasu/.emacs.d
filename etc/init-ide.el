@@ -72,40 +72,40 @@
 (add-hook 'perl-mode-hook       'hs-minor-mode)
 (add-hook 'sh-mode-hook         'hs-minor-mode)
 (add-hook 'python-mode-hook         'hs-minor-mode)
- 
+
 (global-set-key [f2] 'hs-toggle-hiding)
 
 
 ; 著名的Emacs补全框架
 (use-package
-  company 
-  :defer 2 
-  :hook (after-init . global-company-mode) 
+  company
+  :defer 2
+  :hook (after-init . global-company-mode)
   :init (setq company-tooltip-align-annotations t company-idle-delay 0 company-echo-delay 0
               company-minimum-prefix-length 1 company-require-match nil company-dabbrev-ignore-case
-              nil company-dabbrev-downcase nil company-show-numbers t) 
-  :config 
+              nil company-dabbrev-downcase nil company-show-numbers t)
+  :config
   :bind (:map company-active-map
-              ("M-n" . nil) 
-              ("M-p" . nil) 
-              ("C-n" . #'company-select-next) 
-              ("C-p" . #'company-select-previous)) 
+              ("M-n" . nil)
+              ("M-p" . nil)
+              ("C-n" . #'company-select-next)
+              ("C-p" . #'company-select-previous))
   (:map leader-key
-        ("c s" . #'company-yasnippet))) 
+        ("c s" . #'company-yasnippet)))
 
 ;; 人工智能补全代码
-(use-package 
+(use-package
   company-tabnine
-  :disabled 
-  :ensure t 
-  :after 'company-mode 
-  'company-tabnine-mode 
+  :disabled
+  :ensure t
+  :after 'company-mode
+  'company-tabnine-mode
   :config (add-to-list 'company-backends #'company-tabnine))
 
 
 ;; Emacs对语言服务器支持的插件
-(use-package 
-  lsp-mode 
+(use-package
+  lsp-mode
   :ensure t
   :defer t
   :commands lsp
@@ -139,35 +139,33 @@
 
 
 ;; 美化company
-(use-package 
-  company-box 
-  :ensure t 
+(use-package
+  company-box
+  :ensure t
   :hook (company-mode . company-box-mode))
 
 
 ;; 代码片段
-(use-package 
-  yasnippet 
-  :ensure t 
-  :commands (yas-reload-all) 
-  :init (autoload 'yas-minor-mode-on "yasnippet") 
-  (setq yas-snippet-dirs '("~/.emacs.d/share/snippets")) 
-  (dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook)) 
+(use-package
+  yasnippet
+  :ensure t
+  :commands (yas-reload-all)
+  :init (autoload 'yas-minor-mode-on "yasnippet")
+  (setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
+  (dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook))
     (add-hook x #'yas-minor-mode-on)))
 
 ;; 大量可用的代码片段
-(use-package 
-  yasnippet-snippets 
+(use-package
+  yasnippet-snippets
   :ensure t)
 
-;;(require 'init-flycheck)
-;;(require 'init-vcs)
 ;; 项目管理
 (require 'init-projectile)
 (require 'init-program-c)
 (require 'init-program-java)
 (require 'init-program-web)
-(require 'init-program-python)
+;;(require 'init-program-python)
 
 (provide 'init-ide)
 

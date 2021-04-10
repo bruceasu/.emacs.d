@@ -629,13 +629,59 @@ plist 来表示，比如：
      :prefer-trigger-chars nil)
     (hyly
      :document "胡言乱语输入法，采用小鹤双拼+小雨点辅助码。"
-     :class xingma
+     ;; :class xingma
+	 :class shuangpin
      :first-chars "abcdefghijklmnopqrstuvwxyz;"
      :rest-chars "abcdefghijklmnopqrstuvwxyz;"
      :code-prefix "." ; 词库中所有的 code 都以 "." 开头，防止词库冲突。
      :code-split-length 4 ; 默认将用户输入切成 4 个字符长的 code 列表（不计算 code-prefix）
      :code-maximum-length 4 ; code 的最大长度（不计算 code-prefix）
-     :prefer-trigger-chars "`")
+     :prefer-trigger-chars "`"
+	 :keymaps
+     (("a" "a" "a")
+      ("b" "b" "in")
+      ("c" "c" "ao")
+      ("d" "d" "ai")
+      ("e" "e" "e")
+      ("f" "f" "en")
+      ("g" "g" "eng")
+      ("h" "h" "ang")
+      ("i" "ch" "i")
+      ("j" "j" "an")
+      ("k" "k" "ing" "uai")
+      ("l" "l" "iang" "uang")
+      ("m" "m" "ian")
+      ("n" "n" "iao")
+      ("o" "o" "uo" "o")
+      ("p" "p" "ie")
+      ("q" "q" "iu")
+      ("r" "r" "uan")
+      ("s" "s" "iong" "ong")
+      ("t" "t" "ue" "ve")
+      ("u" "sh" "u")
+      ("v" "zh" "v" "ui")
+      ("w" "w" "ei")
+      ("x" "x" "ia" "ua")
+      ("y" "y" "un")
+      ("z" "z" "ou")
+      ("aa" "a")
+      ("an" "an")
+      ("aj" "an")
+      ("ai" "ai")
+      ("ad" "ai")
+      ("ao" "ao")
+      ("ac" "ao")
+      ("ah" "ang")
+      ("ee" "e")
+      ("ei" "ei")
+      ("ew" "ei")
+      ("en" "en")
+      ("ef" "en")
+      ("er" "er")
+      ("eg" "eng")
+      ("og" "ng")
+      ("oo" "o")
+      ("ou" "ou")))
     (pyim-shuangpin
      :document "与 pyim 配合良好的双拼输入法方案，源自小鹤双拼方案。"
      :class shuangpin

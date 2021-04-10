@@ -9,11 +9,9 @@
 ;; (setq suk-mail-address "user@email.com")   ; Email address
 ;; (setq suk-proxy "127.0.0.1:1080")          ; Network proxy
 ;; (setq suk-package-archives 'emacs-china)   ; Package repo: melpa, melpa-mirror, emacs-china netease or tuna
-;; (setq suk-theme 'classic)                  ; Color theme: default, classic, doom, dark, light or daylight
 ;; (setq suk-cnfonts t)                       ; Use cnfonts not: t or nil
 ;; (setq suk-lsp nil)                         ; Set LSP client: lsp-mode, eglot or nil
 ;; (setq suk-ivy-icon nil)                    ; Display icons in ivy or not: t or nil
-;; (setq suk-benchmark t)                     ; Enable initialization benchmark or not: t or nil
 
 ;; For Emacs devel
 ;; (setq package-user-dir (locate-user-emacs-file (format "elpa-%s" emacs-major-version)))

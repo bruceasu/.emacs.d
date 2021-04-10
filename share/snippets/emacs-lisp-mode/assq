@@ -1,6 +1,5 @@
-# -*- mode: snippet -*-
-# contributor: Xah Lee (XahLee.org)
-# name: assq
-# key: assq
+#contributor: Xah Lee (XahLee.org)
+#name: assq
+#key: assq
 # --
-(assq ${1:key} ${2:list})
+(assq KEY$0 LIST)

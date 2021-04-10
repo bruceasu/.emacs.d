@@ -1,4 +1,5 @@
-<img src="./screenshot.png">
+<img src="./dark-screenshot.png">
+<img src="./light-screenshot.png">
 
 
 Table of Contents
@@ -7,15 +8,20 @@ Table of Contents
 * [What is it?](#what-is-it)
      * [Installation](#installation)
      * [Usage](#usage)
+     * [AceJump](#acejump)
+     * [SwitchTabByIndex](#switchtabbyindex)
      * [Plugins](#plugins)
      * [Customize](#customize)
         * [Icon](#icon)
         * [Theme](#theme)
-        * [TabStyle](#tabstyle)
         * [HideRules](#hiderules)
         * [GroupRules](#grouprules)
         * [FixedWidth](#fixedwidth)
         * [DisplayFunctionName](#displayfunctionname)
+        * [ShowTabIndex](#showtabindex)
+        * [AdjustTabHeight](#adjusttabheight)
+        * [AdjustTabContrast](#adjusttabconstrast)
+        * [AdjustActiveBar](#adjustactivebar)
 
 # What is it?
 
@@ -43,14 +49,13 @@ git clone --depth=1 https://github.com/manateelazycat/awesome-tab.git
 (awesome-tab-mode t)
 ```
 
-2. If you are using [Use-packge](https://github.com/jwiegley/use-package), the configuration will look like this
+2. If you are using [Use-package](https://github.com/jwiegley/use-package), the configuration will look like this
 
 ```ELisp
 (use-package awesome-tab
-  :load-path "path/to/your/awesome-tab.el"
+  :load-path "path/to/your/awesome-tab"
   :config
-  (awesome-tab-mode t)
-)
+  (awesome-tab-mode t))
 ```
 
 3. Reload your emacs configuration using `M-x eval-buffer` or restarting emacs
@@ -77,13 +82,91 @@ git clone --depth=1 https://github.com/manateelazycat/awesome-tab.git
 | awesome-tab-keep-match-buffers-in-current-group | Keep buffers match extension of current group                                         |
 | awesome-tab-move-current-tab-to-left            | Move current tab to left                                                              |
 | awesome-tab-move-current-tab-to-right           | Move current tab to right                                                             |
+| awesome-tab-move-current-tab-to-beg             | Move current tab to the first position                                                |
 | awesome-tab-select-visible-tab                  | Select visible tab with given index                                                   |
+| awesome-tab-ace-jump                            | Jump to visible tab with 1 or 2 characters press                                      |
 
-#### Switch tab with given index
+*Tip:* When jumping to a tab far away, think if it will be frequently used. If the answer is yes, move it to the first position. By doing so you keep all your frequently used tabs to be in the first screen, so you have easy access to them.
+
+#### AceJump
+
+Call command ```awesome-tab-ace-jump```, and a sequence of 1 or 2 characters will show on tabs in the current tab group. Type them to jump to that tab.
+
+Customize ```awesome-tab-ace-keys``` to specify the used characters. The default value is `j`, `k`, `l`, `s`, `d`, `f`. Notice that this variable has the `custom-set` attribute, so `setq` won't work. Use `customize-set-variable` instead.
+
+Customize ```awesome-tab-ace-str-style``` to specify the position of ace sequences on the tab. You can choose ```'replace-icon```, ```'left``` or ```'right```.
+
+Customize ```awesome-tab-ace-quit-keys``` to specify keys used to quit from ace jumping. The default value is ```'(?\C-g ?q ?\s)```, you can press ```C-g``` ```q``` or ```SPC``` to quit from ace jumping. Anyway, you can customize any other keys you like.
+
+```Elisp
+(setq awesome-tab-ace-quit-keys '(?\C-g))
+```
+
+If you are a hydra user, you can use this to do consecutive moves between tabs and windows:
+
+```Elisp
+(defhydra awesome-fast-switch (:hint nil)
+  "
+ ^^^^Fast Move             ^^^^Tab                    ^^Search            ^^Misc
+-^^^^--------------------+-^^^^---------------------+-^^----------------+-^^---------------------------
+   ^_k_^   prev group    | _C-a_^^     select first | _b_ search buffer | _C-k_   kill buffer
+ _h_   _l_  switch tab   | _C-e_^^     select last  | _g_ search group  | _C-S-k_ kill others in group
+   ^_j_^   next group    | _C-j_^^     ace jump     | ^^                | ^^
+ ^^0 ~ 9^^ select window | _C-h_/_C-l_ move current | ^^                | ^^
+-^^^^--------------------+-^^^^---------------------+-^^----------------+-^^---------------------------
+"
+  ("h" awesome-tab-backward-tab)
+  ("j" awesome-tab-forward-group)
+  ("k" awesome-tab-backward-group)
+  ("l" awesome-tab-forward-tab)
+  ("0" my-select-window)
+  ("1" my-select-window)
+  ("2" my-select-window)
+  ("3" my-select-window)
+  ("4" my-select-window)
+  ("5" my-select-window)
+  ("6" my-select-window)
+  ("7" my-select-window)
+  ("8" my-select-window)
+  ("9" my-select-window)
+  ("C-a" awesome-tab-select-beg-tab)
+  ("C-e" awesome-tab-select-end-tab)
+  ("C-j" awesome-tab-ace-jump)
+  ("C-h" awesome-tab-move-current-tab-to-left)
+  ("C-l" awesome-tab-move-current-tab-to-right)
+  ("b" ivy-switch-buffer)
+  ("g" awesome-tab-counsel-switch-group)
+  ("C-k" kill-current-buffer)
+  ("C-S-k" awesome-tab-kill-other-buffers-in-current-group)
+  ("q" nil "quit"))
+```
+
+where ```my-select-window``` is a command that automatically recognizes the number in your keystroke and switch to that window. Below is an implementation using ```ace-window```:
+
+```Elisp
+;; winum users can use `winum-select-window-by-number' directly.
+(defun my-select-window-by-number (win-id)
+  "Use `ace-window' to select the window by using window index.
+WIN-ID : Window index."
+  (let ((wnd (nth (- win-id 1) (aw-window-list))))
+    (if wnd
+        (aw-switch-to-window wnd)
+      (message "No such window."))))
+
+(defun my-select-window ()
+  (interactive)
+  (let* ((event last-input-event)
+         (key (make-vector 1 event))
+         (key-desc (key-description key)))
+    (my-select-window-by-number
+     (string-to-number (car (nreverse (split-string key-desc "-"))))))))
+```
+
+#### SwitchTabByIndex
 
 You can bind the number keys to the command ```awesome-tab-select-visible-tab```, such as s-1, s-2, s-3 ... etc.
 
-```
+```Elisp
 (global-set-key (kbd "s-1") 'awesome-tab-select-visible-tab)
 (global-set-key (kbd "s-2") 'awesome-tab-select-visible-tab)
 (global-set-key (kbd "s-3") 'awesome-tab-select-visible-tab)
@@ -102,14 +185,15 @@ and switches to the tab of the corresponding index.
 Note that this function switches to the visible range,
 not the actual logical index position of the current group.
 
+To show the current index on tabs, set `awesome-tab-show-tab-index` to non-nil.
+You can also change its format by customizing `awesome-tab-index-format-str`.
+
 ### Plugins
 If you're a helm fan, you need to add below code in your helm config,
 
 ```Elisp
 (awesome-tab-build-helm-source)
 ```
-
-Then add ```helm-source-awesome-tab-group``` to ```helm-source-list```.
 
 Ivy fans can use the ```awesome-tab-counsel-switch-group``` function instead.
 
@@ -133,32 +217,23 @@ You may need to set `frame-background-mode` manually to have correct tab (and te
   (setq frame-background-mode 'dark))
 ```
 
-#### TabStyle
-Default tab style is "wave", you can customize option ```awesome-tab-style``` follow your preferences, below are the different tab style screenshots:
+or you like light theme more:
 
-##### alternate
-<img src="./theme/alternate.png">
+```Elisp
+(when (not (display-graphic-p))
+  (setq frame-background-mode light))
+```
 
-##### bar
-<img src="./theme/bar.png">
+You can customize terminal tab face by below options:
 
-##### box
-<img src="./theme/box.png">
-
-##### chamfer
-<img src="./theme/chamfer.png">
-
-##### rounded
-<img src="./theme/rounded.png">
-
-##### slant
-<img src="./theme/slant.png">
-
-##### wave
-<img src="./theme/wave.png">
-
-##### zigzag
-<img src="./theme/zigzag.png">
+* ```awesome-tab-terminal-dark-select-background-color```
+* ```awesome-tab-terminal-dark-select-foreground-color```
+* ```awesome-tab-terminal-dark-unselect-background-color```
+* ```awesome-tab-terminal-dark-unselect-foreground-color```
+* ```awesome-tab-terminal-light-select-background-color```
+* ```awesome-tab-terminal-light-select-foreground-color```
+* ```awesome-tab-terminal-light-unselect-background-color```
+* ```awesome-tab-terminal-light-unselect-foreground-color```
 
 
 ##### HideRules
@@ -218,54 +293,6 @@ Other buffer group by `awesome-tab-get-group-name' with project name."
 
 This function is very simple switch logic, you can write your own code to group tabs.
 
-##### OrderRules
-When switch tabs, if the two tabs are not adjacent before and after the switching action,
-AwesomeTab will aggregate the two tabs by ```awesome-tab-adjust-buffer-order-function``` for the next quick switch.
-
-Default functions is ```awesome-tab-adjust-buffer-order``` , you can write your own rule.
-
-```Elisp
-(defun awesome-tab-adjust-buffer-order ()
-  "Put the two buffers switched to the adjacent position after current buffer changed."
-  ;; Just continue when buffer changed.
-  (when (and (not (eq (current-buffer) awesome-tab-last-focus-buffer))
-             (not (minibufferp)))
-    (let* ((current (current-buffer))
-           (previous awesome-tab-last-focus-buffer)
-           (current-group (first (funcall awesome-tab-buffer-groups-function))))
-      ;; Record last focus buffer.
-      (setq awesome-tab-last-focus-buffer current)
-
-      ;; Just continue if two buffers are in same group.
-      (when (eq current-group awesome-tab-last-focus-buffer-group)
-        (let* ((bufset (awesome-tab-get-tabset current-group))
-               (current-group-tabs (awesome-tab-tabs bufset))
-               (current-group-buffers (mapcar 'car current-group-tabs))
-               (current-buffer-index (cl-position current current-group-buffers))
-               (previous-buffer-index (cl-position previous current-group-buffers)))
-
-          ;; If the two tabs are not adjacent, swap the positions of the two tabs.
-          (when (and current-buffer-index
-                     previous-buffer-index
-                     (> (abs (- current-buffer-index previous-buffer-index)) 1))
-            (let* ((copy-group-tabs (copy-list current-group-tabs))
-                   (previous-tab (nth previous-buffer-index copy-group-tabs))
-                   (current-tab (nth current-buffer-index copy-group-tabs))
-                   (base-group-tabs (awesome-tab-remove-nth-element previous-buffer-index copy-group-tabs))
-                   (new-group-tabs
-                    (if (> current-buffer-index previous-buffer-index)
-                        (awesome-tab-insert-before base-group-tabs current-tab previous-tab)
-                      (awesome-tab-insert-after base-group-tabs current-tab previous-tab))))
-              (set bufset new-group-tabs)
-              (awesome-tab-set-template bufset nil)
-              (awesome-tab-display-update)
-              ))))
-
-      ;; Update the group name of the last access tab.
-      (setq awesome-tab-last-focus-buffer-group current-group)
-      )))
-```
-
 ##### FixedWidth
 
 If you'd like all the tab labels using the same length, such as 14, use:
@@ -282,3 +309,30 @@ You can set variable ```awesome-tab-display-sticky-function-name``` with t,
 then function name will display in current tab.
 
 Default this feature is disable.
+
+##### ShowTabIndex
+
+If you want show index in tab, you can use below setting:
+
+```elisp
+(setq awesome-tab-show-tab-index t)
+```
+
+You can also display a personalized index by change option ```awesome-tab-index-format-str```
+
+##### AdjustTabHeight
+
+You can use below code adjust tab height:
+
+```elisp
+(setq awesome-tab-height 150)
+```
+
+##### AdjustTabContrast
+
+If you think the contrast between the label is too low, can lower both values, increase the contrast:
+
+```awesome-tab-dark-unselected-blend``` and ```awesome-tab-light-unselected-blend```
+
+##### AdjustActiveBar
+You can customize active bar with change ```awesome-tab-active-bar-width``` and ```awesome-tab-active-bar-height```

@@ -31,8 +31,45 @@
 
 ;;; Code:
 
+;; Load path
+;; Optimize: Force "etc"" and "site-lisp" at the head to reduce
+;; the startup time.
+
+;; (defun update-load-path (&rest _)
+;; 	"Update `load-path'."
+;; 	(push (expand-file-name "site-lisp" user-emacs-directory) load-path)
+;; 	(push (expand-file-name "etc" user-emacs-directory) load-path))
+
+;; (defun add-subdirs-to-load-path (&rest _)
+;; 	"Add subdirectories to `load-path'."
+;; 	(let ((default-directory
+;; 			(expand-file-name "site-lisp" user-emacs-directory)))
+;;     (normal-top-level-add-subdirs-to-load-path)))
+
+;; (advice-add #'package-initialize :after #'update-load-path)
+;; (advice-add #'package-initialize :after #'add-subdirs-to-load-path)
+;; (update-load-path)
+;;
+ ;; 定义一些启动目录，方便下次迁移修改
+(defvar suk-emacs-root-dir (file-truename user-emacs-directory))
+(defvar suk-emacs-config-dir (concat suk-emacs-root-dir "/etc"))
+(defvar suk-emacs-extension-dir (concat suk-emacs-root-dir "/site-lisp"))
+(defvar suk-emacs-share-dir (concat suk-emacs-root-dir "/share"))
+
+(defun add-subdirs-to-load-path (dir)
+  "Recursive add directories to `load-path'."
+  (let ((default-directory (file-name-as-directory dir)))
+    (add-to-list 'load-path dir)
+    (normal-top-level-add-subdirs-to-load-path)))
+
+(add-subdirs-to-load-path (expand-file-name "etc"       user-emacs-directory))
+(add-subdirs-to-load-path (expand-file-name "site-lisp" user-emacs-directory))
+(add-subdirs-to-load-path (expand-file-name "themes"    suk-emacs-share-dir))
+(require 'init-accelerate)
+
 (let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
       (gc-cons-threshold most-positive-fixnum)
+	  (gc-cons-percentage 0.6)
       ;; 清空避免加载远程文件的时候分析文件。
       (file-name-handler-alist nil))
 
@@ -40,18 +77,13 @@
   (when (version< emacs-version "25.1")
 	(error "This requires Emacs 25.1 and above!"))
 
-  ;; 图形界面插件的设置
-  (setq graphic-only-plugins-setting ())
-  
-  ;; Make startup faster by reducing the frequency of garbage
-  ;; collection.  The default is 0.8MB.  Measured in bytes.
-  (setq gc-cons-threshold 80000000)
-  (setq gc-cons-percentage 0.6)
+
   (add-hook 'emacs-startup-hook
     (lambda ()
       "Restore defalut values after init."
       (setq file-name-handler-alist default-file-name-handler-alist)
-      (setq gc-cons-threshold 800000000)
+	  ;; The default is 0.8MB
+      (setq gc-cons-threshold 800000)
       (message "Emacs ready in %s with %d garbage collections."
 		(format "%.2f seconds"
 		  (float-time
@@ -59,79 +91,107 @@
 		gcs-done)
       (add-hook 'focus-out-hook 'garbage-collect)))
 
-  ;; Load path
-  ;; Optimize: Force "etc"" and "site-lisp" at the head to reduce the startup time.
-  (defun update-load-path (&rest _)
-	"Update `load-path'."
-	(push (expand-file-name "site-lisp" user-emacs-directory) load-path)
-	(push (expand-file-name "etc" user-emacs-directory) load-path))
 
-  (defun add-subdirs-to-load-path (&rest _)
-	"Add subdirectories to `load-path'."
-	(let ((default-directory
-			(expand-file-name "site-lisp" user-emacs-directory)))
-      (normal-top-level-add-subdirs-to-load-path)))
+  (with-temp-message ""                 ;抹掉插件启动的输出
+	(require 'init-startup)
 
-  (advice-add #'package-initialize :after #'update-load-path)
-  (advice-add #'package-initialize :after #'add-subdirs-to-load-path)
+	;; autoload functions
+	(require '+autoload)
 
-  (update-load-path)
+	;; Constants
+	(require '+const)
 
-  ;; autoload functions
-  (require '+autoload)
-  
-  ;; Constants
-  (require '+const)
+	;; Customization
+	(require '+custom)
 
-  ;; Customization
-  (require '+custom)
-  
-  ;; Packages
-  (require 'init-package)
-  
-  (use-package esup
-  :ensure t
-  ;; To use MELPA Stable use ":pin melpa-stable",
-  :pin melpa
-  :commands (esup))
+	;; Packages
+	(require 'init-package)
+	(require 'init-basic)
+	(require 'init-ui)
+	(require 'init-utils)
 
-  (require 'lazy-load)
-  
-  (require 'init-treemacs)
-  
-  ;; Preferences
-  (require 'init-basic)
-  (require 'init-ui)
-  (require 'init-bindings)
-  (require 'init-utils)
-  (require 'init-ivy)
-  
-  ;;(require 'init-org)
-  (require 'init-file-encoding)
-  (require 'init-buffers)
-  (require 'init-sudo)
-  (require 'init-bookmark)
-  (require 'init-bbdb)
 
-  ;; Programming
-  (require 'init-ide)
-  (require 'init-lazy-search)
+	(require 'lazy-load)
+	(require 'one-key)
+	(require 'awesome-pair)
+	(require 'display-line-numbers)
+	(require 'basic-toolkit)
+	(require 'highlight-parentheses)
 
-  ;; windows 下表现不好
-  (if sys/linuxp
-	  (require 'init-snails))
+	(require 'init-awsome-pair)
+	(require 'init-awesome-tray)
+	(require 'init-awesome-tab)
+	(require 'init-line-number)
+    (require 'init-auto-save)
+	(require 'init-mode)
+    (require 'init-dired)
+	(require 'init-indent)
+	(require 'init-one-key)
+	(require 'init-key)
+	(require 'init-performance)
 
-  ;; 个人的一些特别设置
-  (require 'init-suk)
-  (require 'init-im)
-  (require 'init-key)
+
+	;; (use-package esup
+	;; :ensure t
+	;; ;; To use MELPA Stable use ":pin melpa-stable",
+	;; :pin melpa
+	;; :commands (esup))
+
+
+
+
+
+	(require 'init-file-encoding)
+	(require 'init-buffers)
+	(require 'init-sudo)
+	(require 'init-bookmark)
+
+	;; Programming
+	(require 'init-ide)
+	(require 'init-lazy-search)
+
+	;; windows 下表现不好
+	(if sys/linuxp
+		(require 'init-snails))
+
+	;; 个人的一些特别设置
+	(require 'init-suk)
+	(require 'init-im)
+
+
+
+	;; 可以延后加载的
+    (run-with-idle-timer
+     1 nil
+     #'(lambda ()
+         (require 'pretty-lambdada)
+         (require 'init-yasnippet)
+         (require 'init-company-mode)
+         (require 'init-company-tabnine)
+         (require 'init-info)
+         (require 'init-flycheck)
+         (require 'init-idle)
+         (require 'init-auto-sudoedit)
+         (require 'init-nox)
+
+         ;; Restore session at last.
+         (require 'init-session)
+         (emacs-session-restore)
+
+	     ;; 暂时没有什么用。
+	     ;; (require 'init-treemacs)
+	     ;; (require 'init-bbdb)
+         ;; (require 'init-eaf)
+
+         ;; (server-start)            ;为emacsclient准备使用场景，比如git
+         ))
+	)
+
+
   )
-
 
 ;; Make gc pauses faster by decreasing the threshold.
 (setq gc-cons-threshold (* 2 1000 1000))
 (put 'scroll-left 'disabled nil)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here
-
-

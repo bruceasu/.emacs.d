@@ -17,17 +17,6 @@
 ;;(require 'tabbar)
 ;;(require 'load-tabbar)
 
-;; new version is not support
-;;(require 'color-theme-molokai)
-;;(color-theme-molokai)
-
-
-(require 'init-awsome-pair)
-(require 'auto-save)
-
-(setq auto-save-silent t)   ; quietly save
-(setq auto-save-delete-trailing-whitespace t)  ; automatically delete spaces at the end of the line when saving
-
 ;; Frequently-accessed files
 
 ;; Registers allow you to jump to a file or other location quickly.

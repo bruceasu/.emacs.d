@@ -1,10 +1,9 @@
-# -*- mode: snippet -*-
-# contributor: Xah Lee (XahLee.org)
-# name: process marked files in dired
+#contributor: Xah Lee (XahLee.org)
+#name: process marked files in dired
 # key: x-dired
 # --
 ;; idiom for processing a list of files in dired's marked files
-
+ 
 ;; suppose myProcessFile is your function that takes a file path
 ;; and do some processing on the file
 
