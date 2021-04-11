@@ -200,70 +200,8 @@
            treemacs-mode)
           . hide-mode-line-mode)))
 
-;; 解决卡顿
-(setq inhibit-compacting-font-caches t) ;
-
-;; Fonts
-(when (or sys/mac-x-p sys/linux-x-p)
-  (set-frame-font "Noto Sans CJK SC-12"))
-
-(when sys/win32p
-  (set-frame-font "Simsun 12"))
 
 (require 'load-set-font)
-
-(when (and suk-cnfonts (display-graphic-p))
-  ;; cnfonts doesn't support terminal
-  (use-package cnfonts
-    :hook (after-init . cnfonts-enable)
-    :config
-    ;; NOTE: on macOS, the frame size is changed during the startup without below.
-    ;; Keep frame size
-    (setq cnfonts-keep-frame-size nil)
-    (add-hook 'window-setup-hook
-              (lambda ()
-                (setq cnfonts-keep-frame-size t)))
-
-    ;; Set profiles
-    (setq cnfonts-use-cache t)
-    (setq cnfonts-profiles
-          '("program" "org-mode" "read-book"))
-    (setq cnfonts--profiles-steps '(("program-normal" . 4)
-                                    ("org-mode" . 6)
-                                    ("read-book" . 8)))))
-
-;; (when (and (not suk-cnfonts) (display-graphic-p))
-;;   ;; Set a default font
-;;   (cond
-;;    ((member "Source Code Pro" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Source Code Pro"))
-;;    ((member "Menlo" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Menlo"))
-;;    ((member "Monaco" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Monaco"))
-;;    ((member "DejaVu Sans Mono" (font-family-list))
-;;     (set-face-attribute 'default nil :font "DejaVu Sans Mono"))
-;;    ((member "Consolas" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Consolas")))
-
-;;   (cond
-;;    (sys/mac-x-p
-;;     (set-face-attribute 'default nil :height 130))
-;;    (sys/win32p
-;;     (set-face-attribute 'default nil :height 110)))
-
-;;   ;; Specify font for all unicode characters
-;;   (when (member "Symbola" (font-family-list))
-;;     (set-fontset-font t 'unicode "Symbola" nil 'prepend))
-
-;;   ;; Specify font for chinese characters
-;;   (cond
-;;    ((member "WenQuanYi Micro Hei" (font-family-list))
-;;     (set-fontset-font t '(#x4e00 . #x9fff) "WenQuanYi Micro Hei"))
-;;    ((member "Microsoft Yahei" (font-family-list))
-;;     (set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")))
-;;   )
-
 
 ;; Line and Column
 (setq-default fill-column 65)
