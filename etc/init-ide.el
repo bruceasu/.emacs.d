@@ -44,6 +44,12 @@
 
 ;;; Code:
 
+
+
+(eval-when-compile
+  (require '+const)
+  (require '+custom))
+
 ;;; ### Hippie-exapnd ###
 ;;; --- 符号补全
 ;; hippie-expand 自动补全策略
@@ -84,7 +90,7 @@
   :init (setq company-tooltip-align-annotations t company-idle-delay 0 company-echo-delay 0
               company-minimum-prefix-length 1 company-require-match nil company-dabbrev-ignore-case
               nil company-dabbrev-downcase nil company-show-numbers t)
-  :config
+  :config (require 'init-company-mode)
   :bind (:map company-active-map
               ("M-n" . nil)
               ("M-p" . nil)
@@ -96,33 +102,41 @@
 ;; 人工智能补全代码
 (use-package
   company-tabnine
+  :load-path "~/.emacs.d/site-lisp/company-tabnine"
   :disabled
   :ensure t
   :after 'company-mode
   'company-tabnine-mode
-  :config (add-to-list 'company-backends #'company-tabnine))
-
-
+  :config
+  (add-to-list 'company-backends #'company-tabnine)
+  )
+  
+ (require 'init-company-tabnine)
+ 
 ;; Emacs对语言服务器支持的插件
-(use-package
-  lsp-mode
-  :ensure t
-  :defer t
-  :commands lsp
-  :hook ((java-mode python-mode js-mode js2-mode web-mode c-mode c++-mode objc-mode) . lsp)
-  :custom
-  (lsp-idle-delay 1200)
-  (lsp-auto-guess-root nil)
-  (lsp-file-watch-threshold 2000)
-  (read-process-output-max (* 1024 1024))
-  (lsp-eldoc-hook nil)
-  (lsp-prefer-flymake nil)
-  :bind (:map lsp-mode-map
+(if (eq suk-lsp "nox")
+	(require 'init-nox)
+  (use-package
+	lsp-mode
+	:ensure t
+	:defer t
+	:commands lsp
+	:hook ((java-mode python-mode js-mode js2-mode web-mode c-mode c++-mode objc-mode) . lsp)
+	:custom
+	(lsp-idle-delay 1200)
+	(lsp-auto-guess-root nil)
+	(lsp-file-watch-threshold 2000)
+	(read-process-output-max (* 1024 1024))
+	(lsp-eldoc-hook nil)
+	(lsp-prefer-flymake nil)
+	:bind (:map lsp-mode-map
 			  ("C-c C-f" . lsp-format-buffer)
 			  ("M-RET" . lsp-ui-sideline-apply-code-actions)
 			  ("M-\\" . lsp-execute-code-action))
-  :config
-  (setq lsp-prefer-capf t))
+	:config
+	(setq lsp-prefer-capf t))
+)
+
 
 ;; 各个语言的Debug工具
 (use-package dap-mode
@@ -150,16 +164,22 @@
   yasnippet
   :ensure t
   :commands (yas-reload-all)
-  :init (autoload 'yas-minor-mode-on "yasnippet")
+  :init 
+  (autoload 'yas-minor-mode-on "yasnippet")
   (setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
   (dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook))
-    (add-hook x #'yas-minor-mode-on)))
+    (add-hook x #'yas-minor-mode-on))
+  :config
+  (require 'init-yasnippet)
+  ;; 大量可用的代码片段
+   (use-package
+	 yasnippet-snippets
+	 :ensure t
+	 )
+)
 
-;; 大量可用的代码片段
-(use-package
-  yasnippet-snippets
-  :ensure t)
 
+	 
 ;; 项目管理
 (require 'init-projectile)
 (require 'init-program-c)

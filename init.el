@@ -161,14 +161,10 @@
          (require 'init-session)
          (emacs-session-restore)
 
-         (require 'init-yasnippet)
-         (require 'init-company-mode)
-         (require 'init-company-tabnine)
          (require 'init-info)
          (require 'init-flycheck)
          (require 'init-idle)
          (require 'init-auto-sudoedit)
-         (require 'init-nox)
 
 	     ;; 暂时没有什么用。
 	     ;; (require 'init-treemacs)

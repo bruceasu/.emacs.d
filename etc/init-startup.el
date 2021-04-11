@@ -116,10 +116,9 @@
       )
 
   ;; 非Mac, WINDOWS 平台直接全屏
-  (unless   (eq system-type 'windows-nt)
-    (require 'fullscreen)
-    (fullscreen))
-
+  ;;(unless   (eq system-type 'windows-nt)
+  ;;  (require 'fullscreen)
+  ;;  (fullscreen))
   )
 
 
