@@ -143,10 +143,10 @@
 
 ;; =========================================================
 ;; Start server
-;;(use-package server
-;;  :ensure nil
-;;  :defer 1
-;;  :hook (after-init . server-mode))
+(use-package server
+  :ensure nil
+  :defer 1
+  :hook (after-init . server-mode))
 
 ;; Emacs可以做为一个server, 然后用emacsclient连接这个server,
 ;; 无需再打开两个Emacs，windows下还不支持daemon的方式。

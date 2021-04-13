@@ -86,14 +86,42 @@
  ;; capture template
  (setq org-default-notes-file "~/org/notes.org")
  ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and (setq org-protocol)
- (setq org-capture-templates (quote (("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")  "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-									 ("n" "note" entry (file "~/org/notes.org") "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-									 ("r" "respond" entry (file "~/org/gtd.org") "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-									 ("j" "Journal" entry (file+datetree "~/org/journal.org") "* %?\nEntered on %U\n  %i\n  %a")
-									 ("w" "(setq org-protocol" entry (file "~/org/gtd.org") "* TODO Review %c\n%U\n" :immediate-finish t)
-									 ("m" "Meeting" entry (file "~/org/gtd.org") "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-									 ("p" "Phone call" entry (file "~/org/gtd.org") "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
-									 ("h" "Habit" entry (file "~/org/gtd.org") "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
+ (setq org-capture-templates (quote (("t" "Todo"
+									  entry (file+headline "~/org/gtd.org" "Tasks")
+									  "* TODO %?\n%U\n%a\n"
+									  :clock-in t
+									  :clock-resume t)
+									 ("n" "note"
+									  entry (file "~/org/notes.org")
+									  "* %? :NOTE:\n%U\n%a\n"
+									  :clock-in t
+									  :clock-resume t)
+									 ("r" "respond"
+									  entry (file "~/org/gtd.org")
+									  "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n"
+									  :clock-in t
+									  :clock-resume t
+									  :immediate-finish t)
+									 ("j" "Journal"
+									  entry (file+datetree "~/org/journal.org")
+									  "* %?\nEntered on %U\n  %i\n  %a")
+									 ("w" "Review"
+									  entry (file "~/org/gtd.org")
+									  "* TODO Review %c\n%U\n"
+									  :immediate-finish t)
+									 ("m" "Meeting"
+									  entry (file "~/org/gtd.org")
+									  "* MEETING with %? :MEETING:\n%U"
+									  :clock-in t
+									  :clock-resume t)
+									 ("p" "Phone call"
+									  entry (file "~/org/gtd.org")
+									  "* PHONE %? :PHONE:\n%U"
+									  :clock-in t
+									  :clock-resume t)
+									 ("h" "Habit"
+									  entry (file "~/org/gtd.org")
+									  "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
 									 )))
  
  ;; TODO TASK 不要使用中文，自寻烦恼
@@ -105,7 +133,7 @@
  ;; org-scheduled-string "计划时间："
  ;; org-time-stamp-custom-formats (quote ("<%Y年%m月%d日 %A>" . "<%Y年%m月%d日 %A %H:%M>"))
 
- (setq org-todo-interpretation (quote sequence))
+ ;; 设置打开某种文件类型
  (setq org-file-apps (quote ((auto-mode . emacs)
                              ("\\.mm\\'" . system)
                              ("\\.x?html?\\'" . system)
@@ -125,12 +153,6 @@
                                       ("MEETING" :foreground "forest brown" :weight bold)
                                       ("PHONE" :foreground "forest pink" :weight bold))))
 
- (setq org-use-fast-todo-selection t)
- ;; allows changing todo states with S-left and S-right skipping all of the
- ;; normal processing when entering or leaving a todo state. This cycles through
- ;; the todo states but skips setting timestamps and entering notes which is very
- ;; convenient when all you want to do is fix up the status of an entry.
- (setq org-treat-S-cursor-todo-selection-as-state-change nil)
  ;; The triggers break down to the following rules:
  ;;   Moving a task to CANCELLED adds a CANCELLED tag
  ;;   Moving a task to WAITING adds a WAITING tag
@@ -146,6 +168,13 @@
 											("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
 											("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
 											("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
+
+ ;; allows changing todo states with S-left and S-right skipping all of the
+ ;; normal processing when entering or leaving a todo state. This cycles through
+ ;; the todo states but skips setting timestamps and entering notes which is very
+ ;; convenient when all you want to do is fix up the status of an entry.
+ (setq org-treat-S-cursor-todo-selection-as-state-change nil)
+
  (setq org-deadline-warning-days 30)
  (setq org-log-done 'time)
  (setq org-log-done (quote time))
@@ -181,6 +210,7 @@
  ;; Allow setting single tags without the menu
  (setq org-fast-tag-selection-single-key (quote expert))
  (setq org-tags-match-list-sublevels t)
+
  
  ;; EXPORTER
  ;; Inline images in HTML instead of producting links to the image
@@ -233,12 +263,6 @@
 ;;   :hook (org-mode . org-bullets-mode)
 ;; 	:config  (setq org-bullets-bullet-list '("■" "◆" "▲" "▶")))
 
-;; (unless sys/win32p
-;;  (use-package org-fancy-priorities
-;;   :diminish
-;;   :defines org-fancy-priorities-list
-;;   :hook (org-mode . org-fancy-priorities-mode)
-;;	:config (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕"))))
 
 (eval-and-compile
       (defun hot-expand (str &optional mod)
@@ -263,6 +287,7 @@
 ;; (global-set-key "\C-cb" 'org-iswitchb)
 
 
+;; setting in init-key.el
 ;;(global-set-key (kbd "M-<f9>") 'org-toggle-inline-images)
 
 ;; C-',  C-, is org-cycle-agenda-files keys
@@ -323,7 +348,7 @@
 ;; subdirectory data. These are automatically added to my git
 ;; repository along with any other org-mode changes I've made.
 
-
+;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。
 
 ;;; 更多的配置
 (require 'suk-org)
