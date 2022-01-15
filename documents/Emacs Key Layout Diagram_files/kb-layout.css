@@ -1,0 +1,48 @@
+/* css file for keyboard shortcut layout
+
+Emacs Key Layout Diagram
+http://ergoemacs.org/emacs/emacs_kb_shortcuts.html
+
+Ergoemacs Layout Raw HTML
+http://ergoemacs.org/emacs/ergonomic_emacs_keybinding_rawhtml.html
+
+version 2018-06-25
+ */
+
+/* keyboard layout table */
+table.kb-layout td {
+vertical-align:top;
+max-width:90px;
+min-width:90px;
+min-height:90px;
+max-height:90px;
+width:90px;
+height:90px;
+border-radius:15px;
+border:solid thin black;
+}
+
+/* home row */
+table.kb-layout td.hr {background-color:#88ff88}
+
+/* key label */
+div.k {display:table;
+font-family:monospace; font-weight:bold; font-size:28px;
+text-align:center;
+width:30px;height:30px;
+margin:0px;padding:0px;
+}
+
+/* modifier key label */
+span.C-bg {} /* Ctrl key label */
+span.M-bg {}  /*Alt key label */
+
+/* text color for command */
+div.ctrl {color:#b03060} /* Ctrl */
+div.meta {color:#0000ff}  /* Meta */
+div.ms {color:#ff0000} /* Meta+Shift */
+div.n {color:#006600}  /* no modifier */
+
+span.s {background-color:#ffff00} /* prefix key */
+
+pre.legend {width:100%;margin:1px;background-color:#e6e6fa}

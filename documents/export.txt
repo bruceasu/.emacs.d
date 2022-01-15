@@ -1,0 +1,29 @@
+Mailfile
+-----------------------------
+all: index.html sketched-books.zip
+
+clean:
+	rm -f *.html
+
+distclean: clean
+	rm -f index.html
+
+index.html: index.org
+	emacs --batch -l build.el index.org -f org-html-export-to-html --kill
+	cp index.html index.tmp
+	sed -e "s/org-ul/org-ul small-block-grid-3/" -e 's/div id="content"/div id="content" class="columns"/' -e 's/class="status"/class="status columns"/' index.tmp > index.html
+	rm -f index.html~ index.tmp
+
+ebook.html: ebook.org
+	emacs --batch -l build.el ebook.org -f org-html-export-to-html --kill
+
+
+build.el:
+-----------------
+(require 'package)
+(package-initialize)
+(require 'ox-beamer)
+(setq org-html-validation-link nil)
+(setq org-export-with-section-numbers nil)
+(setq backup-directory-alist '(("." . nil)))
+

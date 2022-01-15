@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)http://ergoemacs.org/emacs/keyboard_shortcuts.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="./Emacs_ How to Define Keys_files/xahemacs.css">
+
+<title>Emacs: How to Define Keys</title>
+<script async="" src="http://www.google-analytics.com/analytics.js"></script><script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-10884311-3', 'auto');
+ga('send', 'pageview');
+</script>
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-5125343095650532",
+          enable_page_level_ads: true
+     });
+</script>
+</head>
+<body><div id="tooltip75523" style="visibility: hidden; position: fixed; font-family: sans-serif; font-size: 16px; color: black; font-weight: normal; left: 954.547px; top: 451.859px; padding: 4px; text-align: left; border: thin solid grey; border-radius: 8px; background-color: rgb(253, 245, 230); box-shadow: black 3px 3px 20px; z-index: 341;">Display documentation of the function invoked by KEY.<br>KEY can be any kind of a key sequence; it can include keyboard events,<br>mouse events, and/or menu events.  When calling from a program,<br>pass KEY as a string or a vector.<br><br>If non-nil, UNTRANSLATED is a vector of the corresponding untranslated events.<br>It can also be a number, in which case the untranslated events from<br>the last key sequence entered are used.<br>UP-EVENT is the up-event that was discarded by reading KEY, or nil.<br><br>If KEY is a menu item or a tool-bar button that is disabled, this command<br>temporarily enables it to allow getting help on disabled items and buttons.</div>
+
+<nav class="nav-back-85230"><a href="http://ergoemacs.org/index.html">Xah Emacs</a></nav>
+
+<aside id="aside-right-89129">
+</aside>
+
+<main>
+
+<div class="ad_top_39054">
+</div>
+
+<h1>Emacs: How to Define Keys</h1>
+
+<div class="byline">By Xah Lee. Date: <time>2005-12-30</time>. Last updated: <time>2019-01-08</time>.</div>
+
+<p>In emacs, you can create any keyboard shortcut to any command. This page shows you how.</p>
+
+<p>For example, if you want 【<kbd>F9</kbd>】 for <code class="elisp_f_3d841">whitespace-mode</code>, then, place this code <code>(global-set-key (kbd "&lt;f9&gt;") 'whitespace-mode)</code> in your emacs init file and restart emacs.</p>
+
+<p>If you are experimenting, and don't want to restart emacs every time you try to define a new key, you can place cursor at the end of parenthesis and <kbd>Alt</kbd>+<kbd>x</kbd> <code class="elisp_f_3d841">eval-last-sexp</code> 【<kbd>Ctrl</kbd>+<kbd>x</kbd> <kbd>Ctrl</kbd>+<kbd>e</kbd>】. The new key will be active right away.
+[see <a href="http://ergoemacs.org/emacs/elisp_eval_lisp_code.html">Evaluate Emacs Lisp Code</a>]
+</p>
+
+<p>If you made some mistake and need to start emacs without loading your init file, you can start emacs from terminal like this: <code>emacs -q</code>.</p>
+
+<h2>Emacs Keybinding Syntax Examples</h2>
+
+<pre class="emacs-lisp">(<span class="xah-elisp-command">global-set-key</span> (<span class="function-name">kbd</span> <span class="string">"M-a"</span>) '<span class="xah-elisp-command">backward-char</span>) <span class="comment-delimiter">; </span><span class="comment">Alt+a
+</span>
+(<span class="xah-elisp-command">global-set-key</span> (<span class="function-name">kbd</span> <span class="string">"C-a"</span>) '<span class="xah-elisp-command">backward-char</span>) <span class="comment-delimiter">; </span><span class="comment">Ctrl+a
+</span>
+(<span class="xah-elisp-command">global-set-key</span> (<span class="function-name">kbd</span> <span class="string">"C-c t"</span>) '<span class="xah-elisp-command">backward-char</span>) <span class="comment-delimiter">; </span><span class="comment">Ctrl+c t
+</span>
+(<span class="xah-elisp-command">global-set-key</span> (<span class="function-name">kbd</span> <span class="string">"&lt;f7&gt; &lt;f8&gt;"</span>) 'whitespace-mode)    <span class="comment-delimiter">; </span><span class="comment">F7 F8</span></pre>
+
+<p>More examples at <a href="http://ergoemacs.org/emacs/keyboard_shortcuts_examples.html">Emacs Keybinding Syntax Examples</a>.</p>
+
+<h2>Common Questions</h2>
+
+<section class="qna_xl">
+<h3 class="q">How to find key syntax?</h3>
+
+<p><kbd>Alt</kbd>+<kbd>x</kbd> <code class="elisp_f_3d841">describe-key</code> 【<kbd>Ctrl</kbd>+<kbd>h</kbd>&nbsp;<kbd>k</kbd>】, then press the key you want. Emacs will then display its syntax.</p>
+
+<p>For example, suppose you want to know the syntax for the key press of 【<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F8</kbd>】. <kbd>Alt</kbd>+<kbd>x</kbd> <code class="elisp_f_3d841">describe-key</code>, then press 【<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F8</kbd>】, then emacs will print
+“&lt;C-M-f8&gt; is undefined”. That means, you can use <code>(kbd "&lt;C-M-f8&gt;")</code> to represent that key combination in lisp code.</p>
+
+<p>For examples, see: <a href="http://ergoemacs.org/emacs/keyboard_shortcuts_examples.html">Emacs Keybinding Syntax Examples</a>.</p>
+
+<p>Note: emacs has lot syntax variations for a given keyboard shortcut, but the one printed by <code class="elisp_f_3d841">describe-key</code> is guaranteed to work. For details of emacs's keystroke syntax variation, see: <a href="http://ergoemacs.org/emacs/keystroke_rep.html">Emacs's Key Syntax Explained</a>.</p>
+
+</section>
+
+<section class="qna_xl">
+<h3 class="q">What's Meta key?</h3>
+
+<figure>
+<img src="./Emacs_ How to Define Keys_files/lisp-machine-keyboard-2-left.jpg" alt="lisp-machine-keyboard-2-left" width="600" height="450">
+<figcaption>Symbolics's Lisp Machine keyboard PN 365407 Rev C. (Photo by <a href="http://www.globalnerdy.com/2009/02/05/hacklabtos-lisp-machine-keyboard/">Joey Devilla</a>. Used with permission.)
+</figcaption>
+</figure>
+
+<p>[see <a href="http://xahlee.info/kbd/lisp_keyboards.html">Lisp Machine Keyboards</a>]</p>
+
+<p>The <kbd>Meta</kbd> key is a key on Lisp Machine keyboards in the 1970s and 1980s.</p>
+
+<p>GNU Emacs for Microsoft and Linux by default make the <kbd>Alt</kbd> key do <kbd>Meta</kbd>.</p>
+
+<p>On the Mac OS X, it's either <kbd>⌥&nbsp;option</kbd> or <kbd>⌘&nbsp;command</kbd>, depending on which emacs distribution you are using. There's usually a menu that lets you chose.</p>
+
+<p>In emacs documenation, the Meta key's notation is <code>M-</code>. For example, <code>M-x</code> means 【<kbd>Meta</kbd>+<kbd>x</kbd>】.</p>
+
+</section>
+
+<section class="qna_xl">
+<h3 class="q">How to remove a keybinding?</h3>
+
+<p>To unset a keybinding, set it to <code>nil</code>.</p>
+
+<pre class="emacs-lisp"><span class="comment-delimiter">;; </span><span class="comment">unset a key
+</span>(<span class="xah-elisp-command">global-set-key</span> (<span class="function-name">kbd</span> <span class="string">"C-b"</span>) <span class="builtin">nil</span>)</pre>
+
+<p>Or use <code class="elisp_f_3d841">global-unset-key</code>.</p>
+
+<pre class="emacs-lisp"><span class="comment-delimiter">;; </span><span class="comment">unset a key
+</span>(<span class="xah-elisp-command">global-unset-key</span> (<span class="function-name">kbd</span> <span class="string">"C-b"</span>))</pre>
+
+</section>
+
+<section class="qna_xl">
+<h3 class="q">How to find out the what command is bound to a given key?</h3>
+
+<p><kbd>Alt</kbd>+<kbd>x</kbd> <code class="elisp_f_3d841">describe-key</code> 【<kbd>Ctrl</kbd>+<kbd>h</kbd>&nbsp;<kbd>k</kbd>】, then type the key combination.</p>
+
+</section>
+
+<section class="qna_xl">
+<h3 class="q">How to list current major mode's keys?</h3>
+
+<p><kbd>Alt</kbd>+<kbd>x</kbd> <code class="elisp_f_3d841">describe-mode</code> 【<kbd>Ctrl</kbd>+<kbd>h</kbd>&nbsp;<kbd>m</kbd>】.</p>
+
+</section>
+
+<section class="qna_xl">
+<h3 class="q">How to list ALL keybinding?</h3>
+
+<p><kbd>Alt</kbd>+<kbd>x</kbd> <code class="elisp_f_3d841">describe-bindings</code> 【<kbd>Ctrl</kbd>+<kbd>h</kbd>&nbsp;<kbd>b</kbd>】.</p>
+
+<p>Each major mode or minor mode usually add or change some keys. So, key list generated is specific to current buffer.</p>
+
+</section>
+
+<section class="qna_xl">
+<h3 class="q">How to swap Caps&nbsp;Lock and Control key?</h3>
+
+<p>You cannot do it within emacs, because these are at the OS level. See:</p>
+
+<ul>
+<li><a href="http://xahlee.info/linux/linux_swap_control_and_alt_xmodmap.html">Linux: Swap Control Alt Keys, xmodmap</a></li>
+<li><a href="http://xahlee.info/mswin/autohotkey_swap_capslock.html">Microsoft Windows: Swap Caps Lock, Alt, Control Keys</a></li>
+<li><a href="http://xahlee.info/kbd/osx_swapping_modifier_keys.html">Mac OS X: How to Swap Control, Caps Lock, Option, Command Keys</a></li>
+<li><a href="http://ergoemacs.org/emacs/swap_CapsLock_Ctrl.html">Emacs: Why You Should Not Swap CapsLock and Control</a></li>
+</ul>
+</section>
+
+<h2>Keys to Avoid</h2>
+
+<p>Emacs has its quirks. It's best not to define the following keys, unless you know what you are doing.</p>
+
+<p>• 【<kbd>Ctrl</kbd>+<kbd>?</kbd>】. (due to emacs technical implementation quirk. <span class="ref"><a href="http://ergoemacs.org/emacs_manual/elisp/Ctl_002dChar-Syntax.html">(info "(elisp) Ctl-Char Syntax")</a></span>)</p>
+
+<p>• 【<kbd>F1</kbd>】 or 【<kbd>Ctrl</kbd>+<kbd>h</kbd>】. (This key is used for emacs help system and have a special status in emacs's key system. For example, type 【<kbd>Ctrl</kbd>+<kbd>x</kbd>】, then type 【<kbd>Ctrl</kbd>+<kbd>h</kbd>】, it'll list what valid keys can follow and the associated command.) <span class="ref"><a href="http://ergoemacs.org/emacs_manual/elisp/Help-Functions.html">(info "(elisp) Help Functions")</a></span></p>
+
+<p>• The <kbd>Escape</kbd> key or 【<kbd>Ctrl</kbd>+<kbd>[</kbd>】. (The <kbd>Escape</kbd> key is tied to 【<kbd>Ctrl</kbd>+<kbd>[</kbd>】 and <kbd>Meta</kbd>. <kbd>Escape</kbd> by itself has complicated meanings depending when it is pressed and how many times it is pressed.)</p>
+
+<p>• 【<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<var class="d">letter</var>】. In text terminals, it cannot distinguish shifted and unshifted versions of such combination. Works fine if you always use emacs in a GUI environment. <span class="ref"><a href="http://ergoemacs.org/emacs_manual/elisp/Other-Char-Bits.html">(info "(elisp) Other Char Bits")</a></span></p>
+
+<p>• 【<kbd>Ctrl</kbd>+<kbd>m</kbd>】 or <kbd>Enter</kbd>. These are the same by default. It sends ASCII carriage return character.</p>
+
+<p>• 【<kbd>Ctrl</kbd>+<kbd>i</kbd>】 or <kbd>Tab</kbd>. These are the same by default. It sends ASCII horizontal tab character.</p>
+
+<section class="qna_xl">
+<h3 class="q">What's the difference between emacs <code>"&lt;tab&gt;"</code> and <code>"TAB"</code> key notation?</h3>
+
+<p>See: <a href="http://ergoemacs.org/emacs/emacs_key_notation_return_vs_RET.html">Emacs's Key Notation: What's the difference between "&lt;return&gt;" and "RET"?</a></p>
+
+</section>
+
+<h2>Good Key Choices</h2>
+
+<p>Emacs has some 7 thousand commands. By default, 800 of them have key shortcuts.
+[see <a href="http://ergoemacs.org/emacs/gnu_emacs_keybinding.html">A Curious Look at Emacs's One Thousand Keybindings</a>]
+All the common key spots are used. If you define your own keys without care, you may find that many major mode or minor mode override your keys, because they have priority.</p>
+
+<p>By official emacs documentation
+<span class="ref"><a href="http://ergoemacs.org/emacs_manual/elisp/Key-Binding-Conventions.html">(info "(elisp) Key Binding Conventions")</a></span>, the key space reserved for users are the function keys <kbd>F5</kbd> to <kbd>F9</kbd>, and 【<kbd>Ctrl</kbd>+<kbd>c</kbd>&nbsp;<kbd><var class="d">letter</var></kbd>】. This is very restrictive.</p>
+
+<p>The following keys are good spots for your own definitions, and does not cause any problems in practice.</p>
+
+<p><kbd>F5</kbd>, <kbd>F6</kbd>, <kbd>F7</kbd>, <kbd>F8</kbd>, <kbd>F9</kbd>, <kbd>F11</kbd>, <kbd>F12</kbd> → Good. Combination with <kbd>Alt</kbd> or <kbd>Ctrl</kbd> or <kbd>Shift</kbd> is also good. Make sure they are not used by the OS.</p>
+
+<p><kbd>F1</kbd>, <kbd>F2</kbd>, <kbd>F3</kbd>, <kbd>F4</kbd>, <kbd>F10</kbd>, <kbd>F11</kbd> → Good if you don't use their
+defaults actions.</p>
+
+<p>For their default actions, see
+<a href="http://ergoemacs.org/emacs/emacs_kb_shortcuts.html">Emacs Key Layout Diagram</a></p>
+
+<p>【<kbd>Ctrl</kbd>+<kbd>0</kbd>】 to 【<kbd>Ctrl</kbd>+<kbd>9</kbd>】
+ → Good. By default they are <code class="elisp_f_3d841">digit-argument</code>. Use <code class="elisp_f_3d841">universal-argument</code> 【<kbd>Ctrl</kbd>+<kbd>u</kbd>】 instead.</p>
+
+<p>【<kbd>Alt</kbd>+<kbd>0</kbd>】 to 【<kbd>Alt</kbd>+<kbd>9</kbd>】 → good.</p>
+
+<p>Number Pad Keys → Very useful, but depending on which emacs distro/OS you are using, or if you use emacs in terminal or GUI, binding these keys may not work.
+[see <a href="http://ergoemacs.org/emacs/emacs_bind_number_pad_keys.html">Emacs: Bind Number Pad Keys</a>]</p>
+
+<h2>Practical Examples</h2>
+
+<p><a href="http://ergoemacs.org/emacs/emacs_useful_user_keybinding.html">Emacs Custom Keybinding to Enhance Productivity</a>.</p>
+
+<h2>Operating System Wide Key Keybinding Setup</h2>
+
+<ul>
+<li><a href="http://xahlee.info/kbd/osx_keybinding.html">How to Create Your Own Keybinding in Mac OS X</a></li>
+<li><a href="http://xahlee.info/mswin/Windows_keybinding.html">How to Create Your Own Keybinding in Microsoft Windows</a></li>
+<li><a href="http://xahlee.info/linux/linux_keyboard_tools.html">Linux: Keyboard Software Guide ⌨</a></li>
+</ul>
+
+<div class="topic_xl">
+<h4>Emacs Keys for Beginner</h4>
+<ol>
+<li><a href="http://ergoemacs.org/emacs/emacs_keys_basics.html">Emacs Keys Basics</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_keybinding_overview.html">Emacs Keys Overview</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_kb_shortcuts.html">Key Layout Diagram</a></li>
+<li style="background-color: lime;"><a href="http://ergoemacs.org/emacs/keyboard_shortcuts.html">How to Define Keys</a></li>
+</ol>
+</div>
+
+<div class="topic_xl">
+<h4>Emacs Keybinding How-To</h4>
+<ol>
+<li style="background-color: lime;"><a href="http://ergoemacs.org/emacs/keyboard_shortcuts.html">How to Define Keys</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_set_keys_for_major_mode.html">Change Major Mode Keys</a></li>
+<li><a href="http://ergoemacs.org/emacs/reclaim_keybindings.html">Change Minor Mode Keys</a></li>
+<li><a href="http://ergoemacs.org/emacs/minor_mode_key_priority.html">Fix Minor Mode Key Priority</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_keybinding_power_of_keys_sequence.html">Define Key Sequence</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_hyper_super_keys.html">How to Bind Super Hyper Keys</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_menu_app_keys.html">How to Define Menu Key</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_key-translation-map.html">Remapping Keys Using key-translation-map</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_mouse_wheel_config.html">How to Set Mouse Buttons</a></li>
+</ol>
+</div>
+
+<div class="topic_xl">
+<h4>Emacs Customization</h4>
+<ol>
+<li><a href="http://ergoemacs.org/emacs/emacs_make_modern.html">Emacs init file</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_package_system.html">Install Packages</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_installing_packages.html">Install Package Manually</a></li>
+<li style="background-color: lime;"><a href="http://ergoemacs.org/emacs/keyboard_shortcuts.html">Define Keys</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_custom_system.html">M-x customize</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_whats_major_mode.html">What's Major Mode?</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_minor_mode.html">What's Minor Mode?</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_auto-activate_a_major-mode.html">Set File to Open in a Major Mode</a></li>
+<li><a href="http://ergoemacs.org/emacs/organize_your_dot_emacs.html">Organize Init File</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_byte_compile.html">Byte Compile Elisp</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_whats_hook.html">What's Hook?</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_env_var_paths.html">Environment Variables in Emacs</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_customize_default_window_size.html">Set Default Window Size</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_list_and_set_font.html">Font Setup</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_playing_with_color_theme.html">Set Color Theme</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_set_backup_into_a_directory.html">Turn Off Auto Backup</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_determine_OS_version.html">Check OS, Version, Host Name</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_check_defined.html">Check Defined/Loaded</a></li>
+</ol>
+</div>
+
+<div class="ads-bottom-65900">
+</div>
+
+<div class="buyxahemacs97449">
+<p>If you have a question, put $5 at <a class="sorc" href="https://www.patreon.com/xahlee" data-accessed="2017-08-01">patreon</a> and message me.
+<br>
+Or <a href="http://ergoemacs.org/emacs/buy_xah_emacs_tutorial.html">Buy Xah Emacs Tutorial</a>
+<br>
+Or buy a nice keyboard:
+<a href="http://ergoemacs.org/emacs/emacs_best_keyboard.html">Best Keyboards for Emacs</a></p>
+</div>
+
+</main>
+
+<div class="lpanel_h7h547">
+<h4>Emacs</h4>
+<ul>
+<li><a href="http://ergoemacs.org/emacs/emacs.html">Practical Emacs</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_init_index.html">Init Setup</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_keys_index.html">Emacs Keys</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_extra_index.html">Xah Commands</a></li>
+</ul>
+<h4>Emacs Lisp</h4>
+<ul>
+<li><a href="http://ergoemacs.org/emacs/elisp.html">Practical Elisp</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_command_examples_index.html">Command Examples</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_script_examples_index.html">Script Examples</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_write_major_mode_index.html">Write Major Mode</a></li>
+<li><a href="http://ergoemacs.org/emacs/elisp_misc_index.html">Elisp Misc</a></li>
+</ul>
+<h4>Misc</h4>
+<ul>
+<li><a href="http://ergoemacs.org/emacs/xah_emacs_modes.html">Xah Packages</a></li>
+<li><a href="http://ergoemacs.org/misc/emacs_misc_index.html">Emacs Misc</a></li>
+<li><a href="http://ergoemacs.org/emacs/emacs_modernization.html">Emacs Modernization</a></li>
+<li><a href="http://ergoemacs.org/emacs_fun_index.html">Emacs Fun</a></li>
+<li><a href="http://ergoemacs.org/emacs/blog.html">Blog</a></li>
+</ul>
+</div>
+
+<!-- comment_6b83f -->
+
+<footer><span class="xsignet">∑</span><span class="xsignetxah">XAH</span> <div class="cpr">© 2006, 2019 Xah Lee.</div></footer>
+
+<script defer="" src="./Emacs_ How to Define Keys_files/emacs_tooltip.js.下载"></script>
+
+<script defer="" src="./Emacs_ How to Define Keys_files/highlightlink24082.js.下载"></script>
+
+
+</body></html>

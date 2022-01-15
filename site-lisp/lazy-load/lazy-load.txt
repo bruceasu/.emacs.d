@@ -1,0 +1,55 @@
+安装方法
+
+    下载 lazy-load 里面的 lazy-load.el 放到 ~/elisp 目录
+    把下面的配置加入到 ~/.emacs 中
+
+(let (;; temporarily increase `gc-cons-threshold' when loading to speed up startup.
+      (gc-cons-threshold most-positive-fixnum)
+      ;; Empty to avoid analyzing files when loading remote files.
+      (file-name-handler-alist nil))
+
+    ;; Emacs configuration file content is written below.
+
+)
+
+(add-to-list 'load-path (expand-file-name "~/elisp"))
+(require 'lazy-load)
+
+使用方法
+
+下面这段代码的意思是，第一次按 Alt + g 时，Emacs在 load-path 目录下去找　goto-line-preview.el 这个文件，加载插件并执行 goto-line-preview 这个函数。
+
+(lazy-load-global-keys
+ '(("M-g" . goto-line-preview))
+ "goto-line-preview")
+
+下面这段代码的意思是，第一次按在 ruby mode 中按 Ctrl + c t 时，Emacs在 load-path 目录下去找　ruby-extension.el 这个文件，加载插件并执行 ruby-hash-syntax-toggle 这个函数。
+
+(lazy-load-local-keys
+ '(("C-c t" . ruby-hash-syntax-toggle))
+ ruby-mode-map
+ "ruby-extension")
+
+很多全局按键默认已经被Emacs占用了，必须先卸载以后才能重新绑定这些全局按键，比如 Ctrl + x, 下面这段代码就是用 lazy-load-unset-keys 卸载默认绑定的全局按键：
+
+(lazy-load-unset-keys '("C-x C-f" "C-z" "C-q" "s-W" "s-z" "M-h" "C-x C-c" "C-\\" "s-c" "s-x" "s-v"))
+
+高级用法
+
+有时候，我们会用一个前缀按键取分类插件中不同的函数，比如我的 sdcv.el 插件的不同函数就可以按照下面的代码用 Ctrl + z 这个按键作为前缀按键， 先按 Ctrl + z ，再按 p 就可以触发 sdcv-search-pointer 函数
+
+(lazy-load-global-keys
+ '(("p" . sdcv-search-pointer)
+   ("y" . sdcv-search-pointer+)
+   ("i" . sdcv-search-input)
+   (";" . sdcv-search-input+))
+ "init-sdcv"
+ "C-z")
+
+对应的 lazy-load-local-keys 也支持最后一个参数传递前缀按键，只不过 lazy-load-local-keys 对应的不是 global-map ，而是插件的 keymap 。
+
+如果Emacs默认就加载了某个插件，而不需要在运行时动态加载，也可以使用 lazy-load-set-keys 函数做单独的按键绑定操作，不用手动写一行行的重复写类似　(define-key keymap key) 的配置
+
+(lazy-load-set-keys
+ '(("M-;" . comment-dwim-with-haskell-style))
+ haskell-mode-map)

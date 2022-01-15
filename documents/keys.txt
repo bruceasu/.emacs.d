@@ -1,0 +1,90 @@
+
+;;		快捷键设置
+C-c c		'org-capture
+C-c a		'org-agenda
+C-c b		'org-iswitchb
+<f12>		'org-agenda
+C-<f9>		'previous-buffer
+C-<f10>		'next-buffer
+M-<f9>		'org-toggle-inline-images
+<f11>		'org-clock-goto
+C-<f11>		'org-clock-in
+<S-f5>		'bh/set-truncate-lines
+
+<f9>		'f9-map
+<f9> <f9>		'bh/show-org-agenda
+<f9> c		'calendar
+<f9> a		'org-capture
+<f9> h		'bh/hide-other
+<f9> n		'bh/toggle-next-task-display
+<f9> I		'bh/punch-in
+<f9> O		'bh/punch-out
+<f9> SPC		'bh/clock-in-last-task, 好像没用，试试C-c C-x C-x
+<f9> o		'bh/make-org-scratch
+<f9> v		'visible-mode
+<f9> l		'org-toggle-link-display
+
+C-x l		'suk/count-brf-lines
+C-c u		'outline-up-heading
+C-x a		'align
+C-x M-a		'align-regexp
+C-x x		'suk/switch-major-mode
+C-x X		'suk/get-mode-name
+C-x U		'suk/revert-buffer-with-utf8
+C-x K		'suk/revert-buffer-with-gbk
+[C-t]		transpose-chars
+[C-f7]		suk/ska-point-to-register
+[f7]		suk/ska-jump-to-register
+[f8]		suk/toggle-letter-case
+[f6]		set-mark-command
+[S-f6]		hs-minor-mode
+[f5]		toggle-truncate-lines
+[?\S- ]		set-mark-command		; shift+space
+[S-f11]		insert-translated-name-insert		;; Chinese to English
+[S-f12]		toggle-company-english-helper		;; popup English tips
+[f1]		speedbar
+[f2]		calendar
+[C-f1]		toggle-font
+[apps]		showOrHide
+
+C-x 0           delete window
+C-x 1           delete other window
+C-x 2           split window vertically
+C-x 3           split window horizontally
+C-x 4 b         switch to buffer other window
+C-x 4 f         find file other window
+C-x 4 r         find file read only other window
+C-x 4 d         dired other window
+C-x 4 m         mail other window
+C-x 4 C-o       display buffer
+C-x 4 0         kill buffer and window
+C-x ^           enlarge window, C-u 行数， 可以是负数
+C-x {           shrink winow horizontally
+C-x }           enlarge window horizontally
+C-x -           shrink window if larger than buffer
+C-x +           balance windows
+C-M-v           scroll other window
+C-x o           other window
+
+
+原始矩形块模式
+emacs以C-x r开头的命令来进行矩形操作。先用C-space或者C-@设一个mark，移动光标到另一点，用以下命令进行列操作：
+C-x r r 复制一个矩形区域到寄存器
+C-x r k 剪切一个矩形块
+C-x r y 粘贴一个矩形块
+C-x r o 插入一个矩形块
+C-x r c 清除一个矩形块(使其变成空白)
+C-x r t 在选定区域的所有列前插入样的字符
+
+
+这里说的是emacs自带的HideShow mode.
+
+进入HideShow mode： M-x hs-minor-mode（幸亏有tab键。。要不这么长的命令=。=）
+
+主要的功能：
+
+* C-c @ C-M-s 显示所有的代码
+* C-c @ C-M-h 折叠所有的代码
+* C-c @ C-s 显示当前代码区
+* C-c @ C-h 折叠当前代码区
+* C-c @ C-c 折叠/显示当前代码区

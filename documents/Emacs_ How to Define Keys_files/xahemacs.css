@@ -1,0 +1,438 @@
+@charset "utf-8";
+
+nav.nav-back-85230
+{
+display: inline-block;
+position: fixed;
+top: 0;
+left: 0;
+padding:.2rem .5rem;
+margin:0;
+background-color: yellow;
+border:solid 2px red;
+z-index: 1;
+border-radius: 1rem;
+}
+
+nav.nav-back-85230:before
+{
+content:"back to ";
+}
+
+#aside-right-89129
+{
+position:absolute;
+top:24rem;
+right:0px;
+display:block;
+width:305px;
+max-width:305px;
+margin:0;
+}
+
+body
+{
+font-family: Arial, sans-serif;
+margin-top:2rem;
+margin-bottom:3rem;
+box-sizing: border-box;
+}
+
+*, *:before, *:after {
+box-sizing: inherit;
+}
+
+dt {
+border-top: solid thin red;
+}
+
+dd {
+margin-bottom:.6rem;
+}
+
+li {margin-bottom:.6rem}
+
+p {line-height:1.5}
+
+img {max-width:100%;height:auto;margin:1px}
+
+audio {width: 100%;}
+
+video {
+max-width:100%;
+max-height: 95vh;
+}
+
+a.big-i:before {content:"🔍"}
+a.big-i{font-size: 1.5rem;}
+
+figure {margin:.5rem}
+
+blockquote
+{
+color:navy;
+}
+
+section
+{
+border:solid thin silver;
+padding:.3rem;
+margin:.3rem;
+border-radius:1rem;
+}
+
+cite {color:red;}
+
+caption {background-color:lightgrey;border:solid thin black}
+
+footer {text-align:center}
+
+span.xsignet {font-family:"Times New Roman", serif;font-size:3rem;color:red}
+span.xsignetxah {font-family:"Times New Roman", serif;font-size:2rem;color:red}
+
+footer > div.cpr {font-size:80%}
+
+figure > img,
+figure > div
+{box-shadow:3px 3px 4px 3px silver}
+
+kbd
+{
+font-family: Arial, sans-serif;
+font-size:1rem;
+padding:0 .25rem 0 .25rem;
+border:solid 1px grey;
+border-radius:4px;
+background-color:#f0f0f0;
+box-shadow:2px 2px 2px 2px silver;
+}
+
+a:visited,a:link {text-decoration:none}
+a:hover {background-color:pink}
+
+nav.page
+{
+display:table;
+font-size:1.5rem;
+word-spacing:.3rem;
+/* margin:.5rem; */
+padding:.5rem;
+background-color:yellow;
+border-radius:1rem;
+border:thin solid #b42222
+}
+nav.page:before {content:"Goto Page "}
+nav.page a {text-decoration:underline;
+padding:.2rem;
+margin:.2rem;
+outline:solid thin grey;
+}
+
+div.date-xl {
+background-color: silver;
+display: table;
+margin: 0.5rem;
+}
+
+div.topic_xl
+{
+display:table;
+margin:.5rem;
+padding:.2rem;
+max-width: 20rem;
+border-radius:1rem;
+border:solid thin silver;
+}
+
+div.topic_xl > h4 {margin:0.5rem}
+
+div.rltd
+{
+display:table;
+margin:.5rem;
+padding:.5rem;
+border-radius:.5rem;
+border:solid thin grey;
+}
+
+div.rltd > ul {margin:0}
+
+div.rltd:before
+{
+content:"See also ";
+position:relative;
+top:-0.2rem;
+left:0;
+}
+
+table.nrm {border-collapse:collapse;margin:1rem;}
+table.nrm th, table.nrm td {padding:.25rem;border:solid thin grey}
+table.nrm th {background-color:silver}
+
+section.qna_xl {border:solid thin grey;}
+section.qna_xl h3.q {margin:.5rem}
+
+mark.b {background-color:hsl(190,60%,78%)}
+
+mark.unicode
+{
+font-size:2rem;
+background-color:transparent;
+}
+
+div > a {display:inline-block}
+
+a[href*="wikipedia.org/"] {color: green;}
+
+a[href$=".pdf"]:before {content:"PDF ";font-size:1.5rem}
+
+a.amz,
+a.amz_search,
+a.amazon_product
+{
+font-size: 1.3rem;
+padding:.2rem;
+background-color:#ffc125;
+}
+
+a.amz {border-radius:.5rem;}
+a.amz_search {border-radius:.5rem 1rem 1rem .5rem;}
+a.amazon_product {border-radius:0;}
+
+a.amz_search:before {content:"Buy "}
+
+a[href$=".mp3"] {border:solid thin silver}
+a[href$=".mp3"]:before {content:"mp3 "}
+
+a[href$=".mpg"]:before, a[href$=".mov"]:before {content:"📺 ";font-size:1.4rem}
+
+code
+{
+font-family: "Courier", monospace;
+white-space:pre-wrap;
+color:red;
+}
+
+var
+{
+font-family: "Courier", monospace;
+}
+
+code.path_xl {white-space:nowrap;
+color:green;
+}
+
+code.elisp_f_3d841
+{
+white-space:nowrap;
+font-weight:bold;
+color:#b22222;
+background-color:transparent;
+}
+
+var.elisp {white-space:nowrap;font-weight:bold; color:#a0522d;}
+
+var.d
+{
+color:teal;
+}
+
+.elisp-prefix-command,
+.elisp-command,
+.elisp-macro,
+.elisp-special-form,
+.elisp-function
+{
+white-space:nowrap;
+font-weight:bold;
+color:#b22222;
+background-color:transparent;
+}
+
+.elisp-constant,
+.elisp-user-option,
+.elisp-variable
+{
+white-space:nowrap;
+font-weight:bold;
+color:#a0522d;
+}
+
+span.ref {background-color:#e8ffff;}
+span.ref:before {content:"REF ";
+font-weight: bold;
+}
+
+pre
+{
+font-family: "Courier", monospace;
+tab-size:2;
+padding:.5rem;
+margin:.5rem;
+white-space:pre-wrap;
+border:solid thin grey;
+border-radius: 1rem;
+background-color:#eeeeee;
+}
+
+pre:before {content:"";
+position:relative;
+top:-0.5rem;
+right:0;
+float:right;
+color:black;
+text-shadow: .1rem .1rem .1rem white;
+}
+
+pre.bash {background-color:hsl(22,24%,85%)}
+pre.bash-output {background-color:hsl(204,81%,95%)}
+pre.bash:before {content:"bash"}
+pre.code {background-color:hsl(0,0%,95%)}
+pre.css {background-color:hsl(160,50%,97%)}
+pre.css:before {content:"CSS"}
+pre.emacs-lisp {background-color:hsl(120,100%,98%)}
+pre.emacs-lisp:before {content:"emacs lisp"}
+pre.html {background-color:hsl(244,61%,95%)}
+pre.html:before {content:"HTML"}
+pre.java {background-color:hsl(280,50%,97%)}
+pre.java:before {content:"Java"}
+pre.js {background-color:hsl(70,50%,95%)}
+pre.js:before {content:"JavaScript"}
+pre.mathematica {background-color:hsl(103,47%,90%)}
+pre.mathematica:before {content:"Wolfram Language"}
+pre.ocaml {background-color: hsl(180,50%,97%)}
+pre.ocaml:before {content:"OCaml"}
+pre.org-mode {background-color:hsl(158,27%,75%)}
+pre.output {background-color:hsl(0,0%,95%)}
+pre.perl {background-color:hsl(200,50%,98%)}
+pre.perl:before {content:"Perl"}
+pre.python {background-color:hsl(159,40%,92%)}
+pre.python:before {content:"Python 2"}
+pre.ruby {background-color:hsl(90,50%,97%)}
+pre.ruby:before {content:"Ruby"}
+pre.xml {background-color:hsl(230,50%,95%)}
+pre.xml:before {content:"XML"}
+
+pre .bold {font-weight:bold}
+pre .builtin {color:#483d8b}
+pre .comment {color:#b22222}
+pre .comment-delimiter {color:#b22222}
+pre .constant {color:#008b8b}
+pre .doc {color:#8b2252}
+pre .function-name {color:#0000ff}
+pre .keyword {color:#a020f0}
+pre .preprocessor {color:hsl(314,19%,30%)}
+pre .string {color:#8b2252}
+pre .type {color:#228b22}
+pre .underline {text-decoration:underline}
+pre .variable-name {color:#a0522d}
+pre .warning {color:#ff0000;font-weight:bold}
+
+span.css-property {color:#a0522d}
+span.css-selector {color:#0000ff}
+span.xah-css-id-selector {color:darkred}
+
+.xahk-mode-command-name {color:#0000ff}
+
+pre .xah-elisp-command {color:#228b22}
+pre .xah-elisp-dollar-symbol {font-weight: bold;color:darkgreen;}
+pre .xah-elisp-at-symbol { font-weight:bold; color:#ff0000; }
+pre .xah-elisp-cap-variable { font-weight:bold; color:#b22222; }
+
+.tuareg-font-lock-governing { color: #000000; font-weight: bold; }
+.tuareg-font-lock-operator { color: #a52a2a; }
+.tuareg-font-lock-constructor { color: #000000; background-color: #f0fff0; }
+.tuareg-font-lock-module { color: #228b22; }
+
+.cperl-array {color:#0000ff;background-color:#eeeed1;font-weight:bold}
+.cperl-hash {color:#ff0000;background-color:#eeeed1;font-weight:bold;font-style:italic}
+.cperl-nonoverridable {color:#66cd00}
+
+pre.xml span.sgml-namespace {color:#da70d6}
+
+.payme88711 {
+display: table;
+border: solid thin gray;
+}
+
+.ad_top_39054 {margin:1.5rem 0;}
+
+.ads-bottom-65900 {}
+
+.lpanel_h7h547
+{
+ width:200px;
+ border-right: solid thick silver;
+ border-bottom: solid 9px silver;
+ }
+
+.lpanel_h7h547 h3,
+.lpanel_h7h547 h4 {
+margin:0.2rem;
+}
+
+@media all and (min-width:801px)
+{
+ main,
+ #disqus_thread,
+ footer
+ {margin-left:215px}
+
+ .lpanel_h7h547
+ {
+  position:absolute;
+  top:2.5rem;
+  left:2px;
+  }
+
+ }
+
+/* ≤ 999 */
+@media all and (max-width:999px)
+{
+ #aside-right-89129 {display:none;}
+ }
+
+/* ≥ 1000 */
+@media all and (min-width:1000px)
+{
+ body
+ {
+  margin-right:310px;
+  }
+ }
+
+@media all and (max-width: 760px)
+{
+
+table {
+display: block;
+}
+
+table caption {
+display: inline-block;
+}
+
+table tr {
+display: list-item;
+border: none;
+border-top: solid thin red;
+margin-top: 0.2rem;
+}
+
+table th {
+display: inline-block;
+border: solid thin gray;
+margin-right: 0.2rem;
+border-radius: .5rem;
+}
+
+table td {
+display: inline-block;
+border: solid thin gray;
+margin-right: 0.2rem;
+border-radius: .5rem;
+}
+
+}
+

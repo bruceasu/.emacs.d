@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)http://xahlee.info/linux/linux_capslock_do_home_key.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="./Linux_ Make CapsLock Do Home Key_files/lbasic.css">
+
+<title>Linux: Make CapsLock Do Home Key</title>
+<script async="" src="http://www.google-analytics.com/analytics.js"></script><script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-10884311-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-5125343095650532",
+          enable_page_level_ads: true
+     });
+</script>
+</head>
+<body>
+
+<nav class="nav-back-85230"><a href="http://xahlee.info/linux/linux_keybinding_index.html">Linux Keybinding</a></nav>
+
+<aside id="aside-right-89129">
+<div class="google_ad_right_30226">
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- xlinfo_right_autosize_20171107 -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5125343095650532" data-ad-slot="9711764997" data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</aside>
+
+<main>
+
+<div class="ad_top_39054">
+<div class="google_ad_top_29890">
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- xlinfo_top_autosize_20171107 -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5125343095650532" data-ad-slot="2984018199" data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+
+<h1>Linux: Make CapsLock Do Home Key</h1>
+
+<div class="byline">By Xah Lee. Date: <time>2017-02-08</time>. Last updated: <time>2019-02-12</time>.</div>
+
+<p>How to make <kbd>CapsLock</kbd> do <kbd>Home</kbd> Key on Linux?</p>
+
+<p>Create a file at <code class="path_xl">~/.Xmodmap</code> with the following content:</p>
+
+<pre class="code">! -*- coding: utf-8 -*-
+! 2017-02-08
+! Linux: Make CapsLock Do Home Key
+! http://xahlee.info/linux/linux_capslock_do_home_key.html
+
+! keycode  66 = Caps_Lock NoSymbol Caps_Lock
+! keycode 110 = Home NoSymbol Home
+
+clear Lock
+keycode 66 = Home NoSymbol Home</pre>
+
+<p>Now, run this line in terminal:</p>
+
+<pre class="bash">xmodmap ~/.Xmodmap</pre>
+
+<p>When you restart, that file will run automatically.</p>
+
+<p>Note, xmodmap only works for X11 apps. If you are in linux virtual console [see <a href="http://xahlee.info/linux/linux_virtual_console.html">Linux: How to use Virtual Console</a>] , it won't work.</p>
+
+<p>Here's how to change the key for console.</p>
+
+<section>
+
+<h2>Change Key for Virtual Console</h2>
+
+<p>Written by 11fdriver, on 2018-12-18</p>
+
+<p>Xmodmap does not work when Emacs is used in the console (accessed with
+<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F1</kbd>
+to
+<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F6</kbd>
+)
+ rather than X11. It's still reasonably simple to
+change.</p>
+
+<p>Enter the keymap directory (see bottom of `man loadkeys'), and make a
+copy of your preferred keyboard layout. I use the Dvorak keyboard
+layout on Void Linux, so my commands are:</p>
+
+<pre class="bash">$ cd /usr/share/kbd/keymap/i386/dvorak/
+<span class="comment-delimiter"># </span><span class="comment">cp dvorak.map.gz xah-fly.map.gz
+</span><span class="comment-delimiter"># </span><span class="comment">Emacs xah-fly.map.gz</span></pre>
+
+<p>Note: Debian and derivatives users may need to install the console-data
+package:</p>
+
+<pre class="bash"><span class="comment-delimiter"># </span><span class="comment">apt-get install console-data
+</span>$ cd /usr/share/keymaps/i386/dvorak/
+<span class="comment-delimiter"># </span><span class="comment">cp dvorak.kmap.gz xah-fly.kmap.gz
+</span><span class="comment-delimiter"># </span><span class="comment">Emacs xah-fly.kmap.gz</span></pre>
+
+<p>The Caps_Lock key is usually bound to keycode 58, and Home to 102, but
+you should check these yourself using the `showkey' command.</p>
+
+<p>Keymaps often already contain a Caps_Lock binding; just find replace
+<code>Caps_Lock</code>
+with
+<code>Home</code>
+. The Home key generally needs an extra line to change it to Caps_Lock:</p>
+
+<p>keycode 102 = Caps_Lock
+!Note: End this file with a blank line.</p>
+
+<p>Test out your new keymap with the `loadkeys' command:</p>
+
+<p># loadkeys xah-fly.map.gz</p>
+
+<p>On most Linux distributions, load this keymap at boot by editing the
+relevant line in /etc/rc.conf to read:</p>
+
+<p>KEYMAP=xah-fly</p>
+
+<p>Debian-based distributions instead require you to add this line to
+/etc/default/keyboard:</p>
+
+<p>KMAP=/usr/share/keymaps/i386/dvorak/xah-fly.kmap.gz</p>
+
+</section>
+
+<p>back to <a href="http://xahlee.info/linux/linux_xmodmap_tutorial.html">Linux: xmodmap Tutorial</a></p>
+
+<div class="topic_xl">
+<h4>Linux Keybinding How-to</h4>
+<ol>
+<li><a href="http://xahlee.info/linux/linux_keyboard_tools.html">Keyboard Software Guide</a></li>
+<li><a href="http://xahlee.info/linux/linux_swap_control_and_alt_xmodmap.html">Swap Control Alt Keys</a></li>
+<li><a href="http://xahlee.info/linux/linux_set_F2_F3_F4_to_cut_copy_paste.html">Set F2 F3 F4 to Cut Copy Paste</a></li>
+<li><a href="http://xahlee.info/linux/linux_swap_capslock_esc_key.html">CapsLock → Escape</a></li>
+<li style="background-color: lime;"><a href="http://xahlee.info/linux/linux_capslock_do_home_key.html">CapsLock → Home</a></li>
+<li><a href="http://xahlee.info/linux/linux_shift_lock_key.html">Shift Lock</a></li>
+<li><a href="http://xahlee.info/linux/linux_add_keyboard_shortcuts_to_switch_to_app.html">Key to Switch App</a></li>
+<li><a href="http://xahlee.info/linux/linux_set_key_repeat_rate.html">Key Repeat Rate</a></li>
+<li><a href="http://xahlee.info/linux/linux_set_system_keyboard_layout.html">System Keyboard Layout</a></li>
+<li><a href="http://xahlee.info/linux/linux_switch_keyboard_layout.html">Switch Keyboard Layout</a></li>
+<li><a href="http://xahlee.info/linux/linux_command_line_volume_control.html">Change Volume</a></li>
+<li><a href="http://xahlee.info/linux/linux_xmodmap_tutorial.html">xmodmap</a></li>
+<li><a href="http://xahlee.info/linux/linux_xbindkeys_tutorial.html">xbindkeys</a></li>
+<li><a href="http://xahlee.info/linux/linux_xvkbd_tutorial.html">xvkbd</a></li>
+<li><a href="http://xahlee.info/linux/linux_show_keyboard_scancode.html">Find Keyboard Key Scancode</a></li>
+<li><a href="http://xahlee.info/linux/linux_show_keycode_keysym.html">X11 Keyboard Key Names</a></li>
+<li><a href="http://xahlee.info/linux/linux_diff_layouts_for_2_keyboards.html">2 Layouts for 2 Keyboards</a></li>
+<li><a href="http://xahlee.info/linux/linux_chinese_input.html">Chinese Input Setup</a></li>
+</ol>
+<h4>Mouse</h4>
+<ol>
+<li><a href="http://xahlee.info/linux/mouse_hover_auto-raise_window.html">Mouse Hover to Auto-Raise Window</a></li>
+<li><a href="http://xahlee.info/linux/linux_mouse_hover_click.html">Mouse Hover-Click</a></li>
+<li><a href="http://xahlee.info/linux/linux_mouse_single_click_open_file.html">Set Mouse Single-Click to Open File</a></li>
+<li><a href="http://xahlee.info/linux/linux_set_mouse_speed.html">How to Set Mouse Speed</a></li>
+<li><a href="http://xahlee.info/linux/linux_swap_mouse_buttons.html">How to Swap Mouse Buttons</a></li>
+<li><a href="http://xahlee.info/linux/linux_mouse_trackball_scroll.html">Set Trackball/Mouse Do Scroll</a></li>
+<li><a href="http://xahlee.info/linux/linux_Google_Chrome_autoscroll.html">Setup Accelerated Scroll and AutoScroll</a></li>
+<li><a href="http://xahlee.info/linux/linux_x11_mouse_button_number.html">X11 Mouse Button Numbering</a></li>
+</ol>
+</div>
+
+<div class="ads-bottom-65900">
+<div class="google_ad_bottom_e7e59">
+<script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- xlinfo_ad_bottom_20171117 -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5125343095650532" data-ad-slot="4412368092" data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+</div>
+
+<div class="ask_68256"><p>If you have a question, put $5 at <a class="sorc" href="https://www.patreon.com/xahlee" data-accessed="2017-08-01">patreon</a> and message me.</p></div>
+
+</main>
+
+<div class="lpanel_h7h547">
+<ul>
+<li><a href="http://xahlee.info/comp/unicode_index.html">Unicode <mark class="unicode" title="U+1F496: SPARKLING HEART">💖</mark></a></li>
+<li><a href="http://xahlee.info/kbd/keyboarding.html">Keyboard <mark class="unicode" title="U+2328: KEYBOARD">⌨</mark></a></li>
+<li><a href="http://xahlee.info/talk_show/xah_talk_show_index.html">Talk Show <mark class="unicode" title="U+1F4FA: TELEVISION">📺</mark></a></li>
+<li><a href="http://xahlee.info/comp/comp_lang_tutorials_index.html">Lang tutorials <mark class="unicode" title="U+1D77A: MATHEMATICAL SANS-SERIF BOLD SMALL LAMDA">𝝺</mark></a></li>
+<li><a href="http://xahlee.info/linux/linux_index.html">Linux <mark class="unicode" title="U+1F427: PENGUIN">🐧</mark></a></li>
+<li><a href="http://xahlee.info/linux/computer_networking_index.html">TCP/IP <mark class="unicode" title="U+1F5A7: THREE NETWORKED COMPUTERS">🖧</mark></a></li>
+<li><a href="http://xahlee.info/comp/lisp_index.html"><mark class="unicode" title="U+2768: MEDIUM LEFT PARENTHESIS ORNAMENT">❨</mark>On Lisp<mark class="unicode" title="U+2769: MEDIUM RIGHT PARENTHESIS ORNAMENT">❩</mark></a></li>
+<li><a href="http://xahlee.info/comp/syntax_soup_index.html">Syntax Soup</a></li>
+<li><a href="http://xahlee.info/comp/semantic_noodle_index.html">Semantic Noodle</a></li>
+<li><a href="http://xahlee.info/comp/comp_lang_doc_problems.html">doc by dummies</a></li>
+<li><a href="http://xahlee.info/comp/python_problems.html">Python Suck <mark class="unicode" title="U+1F40D: SNAKE">🐍</mark></a></li>
+<li><a href="http://xahlee.info/comp/comp_jargons_index.html">Jargons <mark class="unicode" title="U+1F4AC: SPEECH BALLOON">💬</mark></a></li>
+<li><a href="http://xahlee.info/js/web_design_index.html">Web Design</a></li>
+<li><a href="http://xahlee.info/js/web_html_validation_index.html">HTML History</a></li>
+<li><a href="http://xahlee.info/w/spam_index.html">Web Spam</a></li>
+<li><a href="http://xahlee.info/UnixResource_dir/writ/anti_hacker_2k_index.html">Anti Hacker y2k</a></li>
+<li><a href="http://xahlee.info/comp/technological_musing.html">Tech Review</a></li>
+</ul>
+</div>
+
+<!-- comment_6b83f -->
+
+<footer><span class="xsignet">∑</span><span class="xsignetxah">XAH</span> <div class="cpr">© 1995, 2019 Xah Lee.</div></footer>
+
+<script defer="" src="./Linux_ Make CapsLock Do Home Key_files/highlightlink24082.js.下载"></script>
+
+
+</body></html>
