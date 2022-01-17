@@ -106,14 +106,11 @@
               ("C-p" . #'company-select-previous)
               ("TAB" . company-complete-selection)
               ("M-h" . company-complete-selection)
-              （"M-H" . company-complete-common)
-              （"M-w" . company-show-location)
+              ("M-H" . company-complete-common)
               ("M-s" . company-search-candidates)
               ("M-S" . company-filter-candidates)
               ("M-n" . company-select-next)
-              ("M-p" . company-select-previous)
-              （"M-I" . yas-expand)
-              )
+              ("M-p" . company-select-previous))
   (:map leader-key
         ("c s" . #'company-yasnippet
         ))
