@@ -36,10 +36,6 @@
   "suk Emacs customizations."
   :group 'convenience)
 
-(defcustom suk-logo (expand-file-name "logo.png" user-emacs-directory)
-  "Set suk logo. nil means official logo."
-  :type 'string)
-
 (defcustom suk-full-name "Suk"
   "Set user full name."
   :type 'string)
@@ -65,16 +61,6 @@
   "Use cnfonts or not."
   :type 'boolean)
 
-(defcustom suk-lsp 'lsp-mode
-  "Set language server."
-  :type '(choice
-          (const :tag "LSP Mode" 'lsp-mode)
-          (const :tag "eglot" 'eglot)
-          nil))
-
-(defcustom suk-ivy-icon (and (not sys/win32p) (display-graphic-p))
-  "Display icons in `ivy' or not."
-  :type 'boolean)
 
 
 ;; Load `custom-file'

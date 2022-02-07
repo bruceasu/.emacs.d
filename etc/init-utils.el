@@ -125,7 +125,7 @@
   (setq enable-recursive-minibuffers t) ; Allow commands in minibuffers
 
   (setq ivy-use-selectable-prompt t)
-  (setq ivy-use-virtual-buffers t)    ; Enable bookmarks and recentf
+  (setq ivy-use-virtual-buffers t) ; Enable bookmarks and recentf
   (setq ivy-height 10)
   (setq ivy-count-format "(%d/%d) ")
   (setq ivy-on-del-error-function nil)
@@ -187,16 +187,16 @@
   (use-package counsel-tramp
     :bind (:map counsel-mode-map
                 ("C-c c v" . counsel-tramp)))
-)
+  )
 
 (use-package hydra
   :ensure t
   :defer 1)
 
 (use-package hydra-posframe
-   :load-path "~/.emacs.d/site-lisp/hydra-posframe/hydra-posframe.el"
-   :defer 1
-   :hook (after-init . hydra-posframe-mode))
+  :load-path "~/.emacs.d/site-lisp/hydra-posframe/hydra-posframe.el"
+  :defer 1
+  :hook (after-init . hydra-posframe-mode))
 
 (use-package major-mode-hydra
   :ensure t
@@ -213,22 +213,22 @@
 
 ;; On-the-fly spell checker
 (unless sys/win32p
-    (use-package flyspell
-      :ensure nil
-      :defer 2
-      :diminish flyspell-mode
-      :if (executable-find "aspell")
-      :hook (((text-mode outline-mode) . flyspell-mode)
-             (prog-mode . flyspell-prog-mode)
-             (flyspell-mode . (lambda ()
-                                (unbind-key "C-;" flyspell-mode-map)
-                                (unbind-key "C-," flyspell-mode-map)
-                                (unbind-key "C-." flyspell-mode-map))))
-      :init
-      (setq flyspell-issue-message-flag nil)
-      (setq ispell-program-name "aspell")
-      (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together")))
-)
+  (use-package flyspell
+    :ensure nil
+    :defer 2
+    :diminish flyspell-mode
+    :if (executable-find "aspell")
+    :hook (((text-mode outline-mode) . flyspell-mode)
+           (prog-mode . flyspell-prog-mode)
+           (flyspell-mode . (lambda ()
+                              (unbind-key "C-;" flyspell-mode-map)
+                              (unbind-key "C-," flyspell-mode-map)
+                              (unbind-key "C-." flyspell-mode-map))))
+    :init
+    (setq flyspell-issue-message-flag nil)
+    (setq ispell-program-name "aspell")
+    (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together")))
+  )
 
 ;; Treat undo history as a tree, ^x u
 (use-package undo-tree
@@ -306,135 +306,135 @@
               ("C-x C-s" . my-save-buffer)))
 
 (use-package daemons
-  :defer 1)                   ; system services/daemons
+  :defer 1)								; system services/daemons
 (use-package diffview
-  :defer 2)                  ; side-by-side diff view
+  :defer 2)								; side-by-side diff view
 (use-package htmlize
-  :defer 2)                   ; covert to html
+  :defer 2)								; covert to html
 (use-package list-environment
   :defer 2)
 ;;(use-package restart-emacs)
 
 ;; Emacs下的pdf查看工具，默认非图形化不开启
 (when (display-graphic-p)
-    ;; Emacs下最好用的终端仿真器，需要编译库，默认不开启
-    ;; libvterm
-    ;; Ubuntu/Debian
-    ;; apt install libvterm
-    ;; ArchLinux
-    ;; pacman -S libvterm
-    (when sys/linuxp
-       (use-package vterm
-         :ensure t
-         :defer 2 
-         :bind ("M-<f12>" . 'vterm))
-       (use-package pdf-tools 
-         :ensure t
-         :defer 2
-         :hook ('doc-view-mode 'pdf-view-mode))
+  ;; Emacs下最好用的终端仿真器，需要编译库，默认不开启
+  ;; libvterm
+  ;; Ubuntu/Debian
+  ;; apt install libvterm
+  ;; ArchLinux
+  ;; pacman -S libvterm
+  (when sys/linuxp
+    (use-package vterm
+      :ensure t
+      :defer 2
+      :bind ("M-<f12>" . 'vterm))
+    (use-package pdf-tools
+      :ensure t
+      :defer 2
+      :hook ('doc-view-mode 'pdf-view-mode))
     )
-     ;; 飘，晃眼
-     ;; (use-package which-key-posframe
-     ;;   :ensure nil
-     ;;   :disabled
-     ;;   :load-path "~/.emacs.d/site-lisp/which-key-posframe/which-key-posframe.el"
-     ;;   :init
-     ;;   (which-key-posframe-mode))
+  ;; 飘，晃眼
+  ;; (use-package which-key-posframe
+  ;;   :ensure nil
+  ;;   :disabled
+  ;;   :load-path "~/.emacs.d/site-lisp/which-key-posframe/which-key-posframe.el"
+  ;;   :init
+  ;;   (which-key-posframe-mode))
 
-;; emacs 调用 rime输入法的前端，强烈推荐
-;;          (use-package rime
-;;            :ensure t
-;;            :custom
-;;            (default-input-method "rime")
-;;            :config
-;;            (setq rime-user-data-dir "~/.config/fcitx/rime")
+  ;; emacs 调用 rime输入法的前端，强烈推荐
+  ;;          (use-package rime
+  ;;            :ensure t
+  ;;            :custom
+  ;;            (default-input-method "rime")
+  ;;            :config
+  ;;            (setq rime-user-data-dir "~/.config/fcitx/rime")
 
-;;            (setq rime-posframe-properties
-;;                  (list :background-color "#333333"
-;;                        :foreground-color "#dcdccc"
-;;                        :font "Sarasa Mono SC-16"
-;;                        :internal-border-width 10))
-;;            (setq default-input-method "rime"
-;;                  rime-show-candidate 'posframe))
-
-
-;; (if (file-exists-p "~/.emacs.d/site-lisp/emacs-application-framework") 
-;;            (use-package eaf
-;;              :load-path "~/.emacs.d/site-lisp/emacs-application-framework" 
-;;              :custom (eaf-find-alternate-file-in-dired t)
-;;              (eaf-proxy-type "socks5")
-;;              (eaf-proxy-host "127.0.0.1")
-;;              (eaf-proxy-port "1088")
-;;              (browse-url-browser-function 'eaf-open-browser)
-;;              :config
-;;              (defalias 'browse-web #'eaf-open-browser)
-;;              (setq eaf-grip-token "32872f2ccde165e5d36548619681c7b7e7ec8793")
-;;              (eaf-setq eaf-pdf-dark-mode "true")
-;;              (eaf-setq eaf-browser-dark-mode "true") 
-;;              (eaf-setq eaf-mindmap-dark-mode "true")
-;;              (eaf-setq eaf-browser-enable-adblocker "true")
-;;              (when (and
-;;                     (> (car (circadian-now-time)) (car (circadian-sunrise)))
-;;                     (< (car (circadian-now-time)) (car (circadian-sunset))))
-;;                (progn
-;;                  (eaf-setq eaf-pdf-dark-mode "false")
-;;                  (eaf-setq eaf-browser-dark-mode "false") 
-;;                  (eaf-setq eaf-mindmap-dark-mode "false")))
-;;              (eaf-setq eaf-browser-default-zoom "1.2")
-;;              (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding) 
-;;              (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding) 
-;;              (eaf-bind-key take_photo "p" eaf-camera-keybinding))
-;;          (message
-;;           "你需要下载emacs-application-framework到~/.emacs.d/site-lisp/emacs-application-framework.才能启用EAF"))
+  ;;            (setq rime-posframe-properties
+  ;;                  (list :background-color "#333333"
+  ;;                        :foreground-color "#dcdccc"
+  ;;                        :font "Sarasa Mono SC-16"
+  ;;                        :internal-border-width 10))
+  ;;            (setq default-input-method "rime"
+  ;;                  rime-show-candidate 'posframe))
 
 
+  ;; (if (file-exists-p "~/.emacs.d/site-lisp/emacs-application-framework")
+  ;;            (use-package eaf
+  ;;              :load-path "~/.emacs.d/site-lisp/emacs-application-framework"
+  ;;              :custom (eaf-find-alternate-file-in-dired t)
+  ;;              (eaf-proxy-type "socks5")
+  ;;              (eaf-proxy-host "127.0.0.1")
+  ;;              (eaf-proxy-port "1088")
+  ;;              (browse-url-browser-function 'eaf-open-browser)
+  ;;              :config
+  ;;              (defalias 'browse-web #'eaf-open-browser)
+  ;;              (setq eaf-grip-token "32872f2ccde165e5d36548619681c7b7e7ec8793")
+  ;;              (eaf-setq eaf-pdf-dark-mode "true")
+  ;;              (eaf-setq eaf-browser-dark-mode "true")
+  ;;              (eaf-setq eaf-mindmap-dark-mode "true")
+  ;;              (eaf-setq eaf-browser-enable-adblocker "true")
+  ;;              (when (and
+  ;;                     (> (car (circadian-now-time)) (car (circadian-sunrise)))
+  ;;                     (< (car (circadian-now-time)) (car (circadian-sunset))))
+  ;;                (progn
+  ;;                  (eaf-setq eaf-pdf-dark-mode "false")
+  ;;                  (eaf-setq eaf-browser-dark-mode "false")
+  ;;                  (eaf-setq eaf-mindmap-dark-mode "false")))
+  ;;              (eaf-setq eaf-browser-default-zoom "1.2")
+  ;;              (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+  ;;              (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+  ;;              (eaf-bind-key take_photo "p" eaf-camera-keybinding))
+  ;;          (message
+  ;;           "你需要下载emacs-application-framework到~/.emacs.d/site-lisp/emacs-application-framework.才能启用EAF"))
 
-;; Emacs下telegram的客户端，默认不开启
-;;  tdlib :: telega需要
-;; ArchLinux #archlinuxcn
-;;    pacman -S libtd-git
-;;(use-package 
- ;;  telega
- ;;  :ensure nil
- ;;  :commands telega 
- ;;  :init (setq telega-proxies 
- ;;              '((:server "localhost" 
- ;;                         :port 1088
- ;;                         :enable t 
- ;;                         :type (:@type "proxyTypeSocks5"
- ;;                                       )
- ;;                         ))) 
- ;;  (setq telega-chat-fill-column 65) 
- ;;  (setq telega-emoji-use-images nil) 
- ;;  :config
- ;;  (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'prepend) 
- ;;  (with-eval-after-load 'company (add-hook 'telega-chat-mode-hook (lambda () 
- ;;                                                                    (make-local-variable 'company-backends) 
- ;;                                                                    (dolist (it '(telega-company-botcmd telega-company-emoji)) 
- ;;                                                                      (push it company-backends))))) 
- ;;  (with-eval-after-load 'all-the-icons (add-to-list 'all-the-icons-mode-icon-alist '(telega-root-mode all-the-icons-fileicon "telegram" 
- ;;                                                                                                      :heigt 1.0 
- ;;                                                                                                      :v-adjust -0.2 
- ;;                                                                                                      :face all-the-icons-yellow)) 
- ;;                        (add-to-list 'all-the-icons-mode-icon-alist '(telega-chat-mode all-the-icons-fileicon "telegram" 
- ;;                                                                                       :heigt 1.0 
- ;;                                                                                       :v-adjust -0.2 
- ;;                                                                                       :face all-the-icons-blue))) 
- ;;  (telega-notifications-mode 1) 
- ;;  (telega-mode-line-mode 1))
 
-)
+
+  ;; Emacs下telegram的客户端，默认不开启
+  ;;  tdlib :: telega需要
+  ;; ArchLinux #archlinuxcn
+  ;;    pacman -S libtd-git
+  ;;(use-package
+  ;;  telega
+  ;;  :ensure nil
+  ;;  :commands telega
+  ;;  :init (setq telega-proxies
+  ;;              '((:server "localhost"
+  ;;                         :port 1088
+  ;;                         :enable t
+  ;;                         :type (:@type "proxyTypeSocks5"
+  ;;                                       )
+  ;;                         )))
+  ;;  (setq telega-chat-fill-column 65)
+  ;;  (setq telega-emoji-use-images nil)
+  ;;  :config
+  ;;  (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'prepend)
+  ;;  (with-eval-after-load 'company (add-hook 'telega-chat-mode-hook (lambda ()
+  ;;                                                                    (make-local-variable 'company-backends)
+  ;;                                                                    (dolist (it '(telega-company-botcmd telega-company-emoji))
+  ;;                                                                      (push it company-backends)))))
+  ;;  (with-eval-after-load 'all-the-icons (add-to-list 'all-the-icons-mode-icon-alist '(telega-root-mode all-the-icons-fileicon "telegram"
+  ;;                                                                                                      :heigt 1.0
+  ;;                                                                                                      :v-adjust -0.2
+  ;;                                                                                                      :face all-the-icons-yellow))
+  ;;                        (add-to-list 'all-the-icons-mode-icon-alist '(telega-chat-mode all-the-icons-fileicon "telegram"
+  ;;                                                                                       :heigt 1.0
+  ;;                                                                                       :v-adjust -0.2
+  ;;                                                                                       :face all-the-icons-blue)))
+  ;;  (telega-notifications-mode 1)
+  ;;  (telega-mode-line-mode 1))
+
+  )
 
 
 
 ;; 一个可以临时安装使用插件的插件
-(use-package try
-  :disabled
-  :ensure t
-  :defer 2)
+;; (use-package try
+;;   :disabled
+;;   :ensure t
+;;   :defer 2)
 
 ;;; browser
-;; (use-package eww 
+;; (use-package eww
 ;;   :ensure t
 ;;   :defer 2
 ;;   :custom (eww-search-prefix "https://google.com/search?q="))

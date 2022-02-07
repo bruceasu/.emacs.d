@@ -8,24 +8,24 @@
 ;; 简易的配置文件目录
 
 (defun crete-quck-config-link (label link)
-  "create LINK with LABEL."
-  (insert label ": ")
-  (insert-button link
-				 'action (lambda (_) (find-file link))
-				 'follow-link t)
-  (insert "\n)"))
+	"create LINK with LABEL."
+	(insert label ": ")
+	(insert-button link
+				'action (lambda (_) (find-file link))
+				'follow-link t)
+	(insert "\n)"))
 
 (defun open-quick-config-links()
-  "Open the configurations."
-  (interactive)
-  (let ((buf (get-buffer-create "*Config Links*")) ; create a buffer
+	"Open the configurations."
+	(interactive)
+	(let ((buf (get-buffer-create "*Config Links*")) ; create a buffer
 		(configs '(("BASH" , "~/.bashrc")
-				   ("Emacs" . "~/.emacs.d")))) ; set configs
+					("Emacs" . "~/.emacs.d")))) ; set configs
 	(with-current-buffer buf ; change to the buf
-	  (erase-buffer) ; clear buf
-	  (mapcar (lambda (item)
+		(erase-buffer) ; clear buf
+		(mapcar (lambda (item)
 				(create-quick-config-link (car item) (cdr item)))
-			  configs))
+				configs))
 	(pop-to-buffer buf t) ; display the buf
 	))
 
@@ -33,7 +33,7 @@
 ;;(define-key global-map (kbd "<f9>") #'open-quick-config-links)
 
 
-;; -------------------------------------------------------------
+;; ------------------------------------------
 ;; overlay
 ;; 用来对改变原始文本的显示，例如高亮。
 
@@ -50,9 +50,9 @@
 ;;	(overlay-put ov 'dsipaly (create-image "url")) ; replace with picture.
 	))
 
-;; -------------------------------------------------------------
+;; ------------------------------------
 ;; 用自定义函数改良命令
-;;
+;; ------------------------------------
 
 (require 'cl-lib)
 
@@ -70,52 +70,55 @@
   (highlight-position-hint position-hint-move-function))
 
 (defun move-to-position-hint-1()
-  (interactive)
-  (move-to-position-hint 1))
+	(interactive)
+	(move-to-position-hint 1))
 
 
 (defun move-to-position-hint-2()
-  (interactive)
-  (move-to-position-hint 2))
+	(interactive)
+	(move-to-position-hint 2))
 
 
 (defun highlight-position-hint (cmd)
-  (let (ovs)
-  (save-mark-and-excursion
+	(let (ovs)
+	(save-mark-and-excursion
 	(cl-loop for i from 1 to 9 do
-			 (call-interactively cmd)
-			 (let ((ov (make-overlay (point) (1+(point)))))
-			   (overlay-put ov 'display
+			(call-interactively cmd)
+			(let ((ov (make-overlay (point) (1+(point)))))
+				(overlay-put ov 'display
 							(cond ((looking-at-p "\n")
-								   (format "%d\n" i))
-								  (t (format "%d" i))))
-			   (overlay-put ov 'face position-hint-face)
-			   (push ov ovs)))))
-  (sit-for 1)
-  (mapcar #'delete-overlay ovs)
-  (setq position-hint-move-function cmd)
-  (set-transient-map position-hint-map t (lambda () (setq position-hint-move-function nil))  ))
+								(format "%d\n" i))
+								(t (format "%d" i))))
+				(overlay-put ov 'face position-hint-face)
+				(push ov ovs)))))
+	(sit-for 1)
+	(mapcar #'delete-overlay ovs)
+	(setq position-hint-move-function cmd)
+	(set-transient-map position-hint-map t
+		(lambda () (setq position-hint-move-function nil)))
+)
 
 (defun my-forward-word()
-  (interactive)
-  (call-interactively #'forward-word)
-  (heighlight-position-hint #'forward-word))
+	(interactive)
+	(call-interactively #'forward-word)
+	(heighlight-position-hint #'forward-word))
 
 (defun my-backward-word()
-  (interactive)
-  (call-interactively #'backward-word)
-  (heighlight-position-hint #'backward-word))
+	(interactive)
+	(call-interactively #'backward-word)
+	(heighlight-position-hint #'backward-word))
 
 
 ;; use mode
 (defvar position-hint-map
-  (let ((keymap (make-sparse-keymap)))
-	(define-key keymap (kbd "M-1") 'move-to-position-hint-1)
-	(define-key keymap (kbd "M-2") 'move-to-position-hint-2)
+	(let ((keymap (make-sparse-keymap)))
+		(define-key keymap (kbd "M-1") 'move-to-position-hint-1)
+		(define-key keymap (kbd "M-2") 'move-to-position-hint-2)
 	keymap))
 
- (define-key global-map [remap  forward-word] #'my-forward-word)
- (define-key global-map [remap backward-word] #'my-backward-word)
+
+(define-key global-map [remap  forward-word] #'my-forward-word)
+(define-key global-map [remap backward-word] #'my-backward-word)
 
 
 ;; --------------------------------------------------
@@ -129,31 +132,31 @@
 ;; ---------------------------------------------------
 ;; 交换选区和剪贴板 和简单的宏实现
 (defun mlet* (steps &rest body)
-  (let ((step (car steps))
-		 (steps (cdr steps)))
+	(let ((step (car steps))
+		(steps (cdr steps)))
 	(if step
 		`(when-let (, step)
-		   (mlet ,steps, @body))
-	  `(progn, @body))))
+			(mlet ,steps, @body))
+	`(progn, @body))))
 
 (defmacro mlet (steps &rest body)
-  (declare (indent defun))
-  (apply #'melt* steps body))
+	(declare (indent defun))
+	(apply #'melt* steps body))
 
 (defun exchange-region-kill-ring-car()
-  (interactive)
-  (mlet ((m (mark))
-		 (_ (region-active-p))
-		 (rbeg (region-beginning))
-	 	 (rend (region-end))
-		 (rep (pop kill-ring))
-		 (txt (buffer-substring rbeg rend)))
+	(interactive)
+	(mlet ((m (mark))
+		(_ (region-active-p))
+		(rbeg (region-beginning))
+		(rend (region-end))
+		(rep (pop kill-ring))
+		(txt (buffer-substring rbeg rend)))
 		(delete-region rbeg rend)
 		(push txt kill-ring)
 		(let ((p (point)))
-		  (insert rep)
-		  (push-mark p t t)
-		  ((save-excursion )tq deactivate-mark nil)))
-  )
+			(insert rep)
+			(push-mark p t t)
+			((save-excursion )tq deactivate-mark nil)))
+)
 
 ;; (global-set-key (kbd "<f9>") #'exchange-region-kill-ring-car)

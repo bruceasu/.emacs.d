@@ -69,13 +69,11 @@
             (time-subtract after-init-time before-init-time)))
         gcs-done)
       (add-hook 'focus-out-hook 'garbage-collect)))
-      
+
   ;; 忽略 cl 过期警告
   (setq byte-compile-warnings '(cl-function))
 
   (with-temp-message ""                 ;抹掉插件启动的输出
-    (require 'init-startup)
-
     ;; autoload functions
     (require '+autoload)
 
@@ -125,8 +123,8 @@
      1 nil
      #'(lambda ()
          ;; Restore session at last.
-         ;; (require 'init-session)
-         ;; (emacs-session-restore)
+         (require 'init-session)
+         (emacs-session-restore)
          (require 'init-idle)
          (require 'highlight-parentheses)
          (require 'init-auto-save)

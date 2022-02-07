@@ -50,12 +50,16 @@
 ;;(setq file-name-coding-system 'gb18030)
 ;;(if is-os-windows
 ;;	(setq file-name-coding-system 'gb18030))
-
+(if sys/win32p
+	(setq file-name-coding-system 'gb18030)
+	;;(setq file-name-coding-system 'big5-hkscs)
+)
 ;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
 ;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
 ;; utf-16 (utf-16 实际上还细分为 utf-16le, utf-16be, utf-16le-with-signature等多种)
 ;; 繁体
 (prefer-coding-system 'cp950)
+(prefer-coding-system 'big5-hkscs)
 ;; 简体
 (prefer-coding-system 'gb2312)
 (prefer-coding-system 'cp936)
