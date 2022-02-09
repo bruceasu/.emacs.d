@@ -289,7 +289,7 @@ With the prefix argument UNFILL, unfill it instead."
 ;; 保留最早的2个备份文件
 (setq kept-old-versions 2)
 ;; 保留最近的100个备份文件
-(setq kept-new-versions 100)
+(setq kept-new-version 100)
 ;; 自动删除旧的备份文件
 (setq delete-old-versions t)
 
