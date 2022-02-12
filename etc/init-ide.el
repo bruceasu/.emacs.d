@@ -359,22 +359,6 @@
   ;; 开启代码折叠快捷键
   (define-key hs-minor-mode-map (kbd "C-c C-f") 'hs-toggle-hiding))
 
-(use-package css-mode
-  :ensure nil
-  :init (setq css-indent-offset 2)
-  :hook
-  (css-mode-hook
-          (lambda ()
-            ;; 开启 LSP 模式自动完成
-            (lsp)
-            ;; 设置自动缩进的宽度
-            (setq css-indent-offset 2)
-            ;; 设置 Company 后端
-            (add-to-list (make-local-variable 'company-backends)
-                         '(company-css company-files company-capf company-dabbrev))
-            ;; 其它开发设置
-            (web-dev-attached)))
-  )
 
 ;; New `less-cs-mde' in Emacs 26
 (unless (fboundp 'less-css-mode)
@@ -503,16 +487,6 @@
 		 (js2-mode . js2-highlight-unused-variables-mode))
 )
 
-(use-package typescript-mode
-  :defer 3
-  :mode "\\.ts[x]?\\'"
-  :init
-  ;; 设置缩进两个空格
-  (setq typescript-indent-level 2)
-  :config
-  (add-hook 'typescript-mode-hook (lambda()
-                             (web-dev-attached)
-                             (my/web-js-setup))))
 
 ;; 直接编辑 HTML 文件时的设置
 (add-hook 'mhtml-mode-hook 'web-dev-attached)

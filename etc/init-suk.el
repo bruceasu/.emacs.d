@@ -36,9 +36,8 @@ Version 2022-01-22"
 ;; (require 'company-english-helper)
 
 (when sys/linuxp
-  ;; bbyac
-  (require 'bbyac)
-  (bbyac-global-mode 1)
+
+
   )
 
 (require 'load-abbrev)
