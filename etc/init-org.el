@@ -82,7 +82,7 @@
  ;; Set default column view headings: Task Effort Clock_Summary
  (setq org-columns-default-format "%80ITEM(Task) %10Effort(Effort){:} %10CLOCKSUM")
  (setq org-agenda-persistent-filter t)
- 
+
 
  ;; capture template
  (setq org-default-notes-file "~/org/notes.org")
@@ -124,7 +124,7 @@
 									  entry (file "~/org/gtd.org")
 									  "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
 									 )))
- 
+
 
  ;; TODO TASK 不要使用中文，自寻烦恼
  ;; org-archive-tag "资料库"
@@ -189,7 +189,7 @@
  ;; Entering C-c C-x i RET inserts a clock table report with your
  ;; estimated values and any clocked time to date.
 
- 
+
 
 
  ;; Tags with fast selection keys
@@ -214,7 +214,7 @@
  (setq org-fast-tag-selection-single-key (quote expert))
  (setq org-tags-match-list-sublevels t)
 
- 
+
 
  ;; EXPORTER
  ;; Inline images in HTML instead of producting links to the image
@@ -241,7 +241,7 @@
 
  (setq org-refile-target-verify-function (quote suk/verify-refile-target))
 
- 
+
 
  (setq org-startup-indented t)
  (setq org-startup-folded t)

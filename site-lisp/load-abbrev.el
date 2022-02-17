@@ -4,7 +4,7 @@
 ;;; code:
 
 ;; sample use of emacs abbreviation feature
-
+;; C-x ' 触发
 (define-abbrev-table 'global-abbrev-table '(
 
     ;; math/unicode symbols
@@ -48,7 +48,7 @@
     ("8ff" "firefox ")
 
     ("8f0" "find . -type f -size 0 -exec rm {} ';'")
-    
+
     ))
 
 ;; stop asking whether to save newly added abbrev when quitting emacs
@@ -62,4 +62,3 @@
 
 (provide 'load-abbrev)
 ;; load-abbrev.el ends here
-

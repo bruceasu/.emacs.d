@@ -155,4 +155,4 @@ STRING)).  Returns nil if it is not visible in the current calendar window."
 (setq view-calendar-holidays-initially nil) ; 打开calendar的时候不显示一堆节日
 
 
-;(global-set-key (kbd "<f11>") 'calendar)
+;;(global-set-key (kbd "<f11>") 'calendar)

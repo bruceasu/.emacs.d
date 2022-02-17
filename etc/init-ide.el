@@ -76,8 +76,8 @@
   :defer 1
   :diminish hs-minor-mode
   :bind (:map prog-mode-map
-			  ("C-c TAB" . hs-toggle-hiding)
-			  ("C-c p +" . hs-show-all)
+			  ("C-c ." . hs-toggle-hiding)
+			  ("C-c ," . hs-show-all)
 			  )
   :hook (prog-mode . hs-minor-mode))
 ;;代码折叠
@@ -90,8 +90,7 @@
 (add-hook 'python-mode-hook     'hs-minor-mode)
 
 ; 著名的Emacs补全框架
-(use-package
-	company
+(use-package company
 	:defer 2
 	:hook (after-init . global-company-mode)
 	:init (setq company-tooltip-align-annotations t
@@ -118,8 +117,7 @@
 )
 
 ;; 人工智能补全代码
-(use-package
-  company-tabnine
+(use-package company-tabnine
   :load-path "~/.emacs.d/site-lisp/company-tabnine"
   :disabled
   :ensure t
@@ -129,68 +127,67 @@
   (add-to-list 'company-backends #'company-tabnine)
   )
 
- (require 'init-company-tabnine)
+(require 'init-company-tabnine)
 
 ;; ===============================
 ;; Emacs对语言服务器支持的插件
 ;; ===============================
-;; (use-package
-;; 	lsp-mode
-;; 	:ensure t
-;; 	:defer t
-;; 	:commands lsp
-;; 	:hook ((java-mode python-mode js-mode js2-mode web-mode c-mode c++-mode objc-mode) . lsp)
-;; 	:custom
-;; 	(lsp-idle-delay 1200)
-;; 	(lsp-auto-guess-root nil)
-;; 	(lsp-file-watch-threshold 2000)
-;; 	(read-process-output-max (* 1024 1024))
-;; 	(lsp-eldoc-hook nil)
-;; 	(lsp-prefer-flymake nil)
-;; 	:bind (:map lsp-mode-map
-;; 			("C-c C-f" . lsp-format-buffer)
-;; 			("M-RET" . lsp-ui-sideline-apply-code-actions)
-;; 			("M-\\" . lsp-execute-code-action))
-;; 	:config
-;; 	(defun my/lsp-client-clear-leak-handlers (lsp-client)
-;; 	"Clear leaking handlers in LSP-CLIENT."
-;; 	(let ((response-handlers (lsp--client-response-handlers lsp-client))
-;; 			to-delete-keys)
-;; 		(maphash (lambda (key value)
-;; 				 (when (> (time-convert (time-since (nth 3 value)) 'integer)
-;; 							(* 2 lsp-response-timeout))
-;; 					(push key to-delete-keys)))
-;; 				 response-handlers)
-;; 		(when to-delete-keys
-;; 			(message "Deleting %d handlers in %s lsp-client..."
-;; 				(length to-delete-keys)
-;; 				(lsp--client-server-id lsp-client))
-;; 		(mapc (lambda (k) (remhash k response-handlers))
-;; 				to-delete-keys))))
-;; 	(defun my/lsp-clear-leak ()
-;; 		"Clear all leaks"
-;; 		(maphash (lambda (_ client)
-;; 			(my/lsp-client-clear-leak-handlers client))
-;; 			lsp-clients))
-;; 	(setq my/lsp-clear-leak-timer
-;; 		(run-with-timer 5 5 #'my/lsp-clear-leak))
-;; 	(add-to-list 'lsp-language-id-configuration '(".*\\.less$" . "css"))
-;; 	(setq lsp-prefer-capf t))
+(use-package
+	lsp-mode
+	:ensure t
+	:defer t
+	:commands lsp
+	:hook ((java-mode python-mode js-mode js2-mode web-mode c-mode c++-mode objc-mode) . lsp)
+	:custom
+	(lsp-idle-delay 1200)
+	(lsp-auto-guess-root nil)
+	(lsp-file-watch-threshold 2000)
+	(read-process-output-max (* 1024 1024))
+	(lsp-eldoc-hook nil)
+	(lsp-prefer-flymake nil)
+	:bind (:map lsp-mode-map
+			("C-c C-f" . lsp-format-buffer)
+			("M-RET" . lsp-ui-sideline-apply-code-actions)
+			("M-\\" . lsp-execute-code-action))
+	:config
+	(defun my/lsp-client-clear-leak-handlers (lsp-client)
+	"Clear leaking handlers in LSP-CLIENT."
+	(let ((response-handlers (lsp--client-response-handlers lsp-client))
+			to-delete-keys)
+		(maphash (lambda (key value)
+				 (when (> (time-convert (time-since (nth 3 value)) 'integer)
+							(* 2 lsp-response-timeout))
+					(push key to-delete-keys)))
+				 response-handlers)
+		(when to-delete-keys
+			(message "Deleting %d handlers in %s lsp-client..."
+				(length to-delete-keys)
+				(lsp--client-server-id lsp-client))
+		(mapc (lambda (k) (remhash k response-handlers))
+				to-delete-keys))))
+	(defun my/lsp-clear-leak ()
+		"Clear all leaks"
+		(maphash (lambda (_ client)
+			(my/lsp-client-clear-leak-handlers client))
+			lsp-clients))
+	(setq my/lsp-clear-leak-timer
+		(run-with-timer 5 5 #'my/lsp-clear-leak))
+	(add-to-list 'lsp-language-id-configuration '(".*\\.less$" . "css"))
+	(setq lsp-prefer-capf t))
 
-;; ;; LSP 模式的帮助文档相关
-;; (use-package lsp-ui
-;;   :after lsp-mode
-;;   :commands lsp-ui-mode
-;;   :config
-;;   (setq lsp-ui-doc-delay 3)
-;;   (setq lsp-ui-doc-enable nil)
-;;   (setq lsp-ui-sideline-delay 1)
-;;   (setq lsp-ui-sideline-enable t))
+;; LSP 模式的帮助文档相关
+(use-package lsp-ui
+  :after lsp-mode
+  :commands lsp-ui-mode
+  :config
+  (setq lsp-ui-doc-delay 3)
+  (setq lsp-ui-doc-enable nil)
+  (setq lsp-ui-sideline-delay 1)
+  (setq lsp-ui-sideline-enable t))
 
 
 ;; 代码片段
-(use-package
-  yasnippet
+(use-package yasnippet
   :ensure t
   :commands (yas-reload-all)
   :init
@@ -311,21 +308,23 @@
 ;;--------------------------------------
 ;; Java 配置
 ;;--------------------------------------
-;; (use-package lsp-java
-;;   :ensure t
-;;   :hook (java-mode . (lambda () (request 'lsp-java)))
-;;   :config
-;;   (setq lsp-java-server-install-dir (expand-file-name "~/.emacs.d/var/jdt-lsp")))
+(use-package lsp-java
+  :ensure t
+  :hook (java-mode . (lambda () (request 'lsp-java)))
+  :config
+  (setq lsp-java-server-install-dir (expand-file-name "~/.emacs.d/var/jdt-lsp")))
 
 ;; ;; Java 调试配置
-;; (use-package dap-mode
-;;   :after lsp-java
-;;   :config (setq dap-auto-configure-features (remove 'controls dap-auto-configure-features)))
-;; (use-package dap-java :ensure nil)
+(use-package dap-mode
+  :after lsp-java
+  :config (setq dap-auto-configure-features (remove 'controls dap-auto-configure-features)))
+(use-package dap-java :ensure nil)
 
-;; (use-package autodisass-java-bytecode
-;;   :ensure t
-;;   :defer t)
+
+
+(use-package autodisass-java-bytecode
+  :ensure t
+  :defer t)
 
 ;;--------------------------------------
 ;; web develop

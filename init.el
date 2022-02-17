@@ -135,6 +135,7 @@
          (require 'init-sudo)
          (require 'init-bookmark)
          (require 'init-dired)
+		 (require 'init-calendar)
          ;; Music
          ;;(require 'init-emms)
          ;; (server-start)            ;为emacsclient准备使用场景，比如git

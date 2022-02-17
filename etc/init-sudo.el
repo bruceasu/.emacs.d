@@ -40,7 +40,7 @@
   (if (or arg (not buffer-file-name))
       (find-file (concat "/sudo:root@localhost:"
                          (ido-read-file-name "Find file(as root): ")))
-      (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
+    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
   )
 )
 ;; ---------------------------------------------------------
@@ -53,12 +53,13 @@
 (defun suk/sudo-find-file (file-name)
   "Like find file, but opens the file as root."
   (interactive "Find File for sudo-edit: ")
-  (let ((tramp-file-name (concat "/sudo::"
-                                 (expand-file-name file-name)
-                          )
-         )
+  (let ((tramp-file-name
+		 (concat "/sudo::"
+                 (expand-file-name file-name)
+				 )
+		 )
         )
-       (find-file tramp-file-name)
+    (find-file tramp-file-name)
   )
 )
 
@@ -127,7 +128,7 @@
 ;; (add-to-list 'tramp-default-proxies-alist
 ;;              '("\\." nil "/ssh:bird@bastion.your.domain:"))
 ;; (add-to-list 'tramp-default-proxies-alist
-;;              '("\\.your\\.domain\\'" nil nil))
+;;              '("\\`your\\.domain\\'" nil nil))
 ;; Note: add-to-list adds elements at the beginning of a list.
 ;;       Therefore, most relevant rules must come last in the list.
 ;;

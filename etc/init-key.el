@@ -45,6 +45,29 @@
  "init-insert-translated-name")
 
 
+(lazy-load-global-keys
+ '(
+   ("C-x l" . suk/count-brf-lines)
+   ("C-x x" . suk/switch-major-mode)
+   ("C-x X" . suk/get-mode-name)
+   ;;(list (kbd "C-x U") 'suk/revert-buffer-with-utf8)
+   ;;(list (kbd "C-x K") 'suk/revert-buffer-with-gbk)
+   ("C-x k" . suk/close-current-buffer)
+   ("C-S-t" . suk/open-last-closed) ; control+shift+t
+   ("C-S-r" . suk/open-recently-closed) ; control+shift+t
+   ("S-<f2>" .  suk/new-empty-buffer)
+   ("C-c s" .  suk/create-scratch-buffer)
+   ("C-c o" .  suk/switch-to-minibuffer)
+   ("C-x t m" . suk/toggle-margin-right)
+   ("M-Q" . suk/unfill-paragraph)
+   ("M-q" . suk/fill-or-unfill-paragraph)
+   ("C-x n x" . xah-narrow-to-region) ; C-x n w ,  C-x n d, C-x n n, C-x n p 系列
+   ("S-<F7>" . indent-buffer)
+
+   )
+ "init-buffer")
+
+
 ;;; ### Toolkit ###
 ;;; --- 工具函数
 (lazy-load-set-keys
@@ -53,8 +76,17 @@
    ("s-," . bury-buffer)                ;隐藏当前buffer
    ("s-." . unbury-buffer)              ;反隐藏当前buffer
    ("s-[" . eval-expression)            ;执行表达式
+   ("s-1" . sort-lines)                 ;排序
+   ("s-2" . hanconvert-region)          ;转换简体或繁体中文
+   ("s-3" . uniquify-all-lines-buffer)  ;删除重复的行
+   ("s-<f12>" . calendar)
    ("C-<f12>" . lazycat-theme-toggle)
+   ; ([C-t]               transpose-chars)
+   ([S-f6] hs-minor-mode)
+   ([S-f5] toggle-truncate-lines)
+   ("C-x M-a" . align-regexp)
    ))
+
 
 
 (lazy-load-global-keys
@@ -332,7 +364,7 @@
 
 ;;; ### Isearch ###
 ;;; --- 交互式搜索
-;; (lazy-load-set-keys			
+;; (lazy-load-set-keys
 ;;  '(
 ;;    ("TAB" . isearch-complete)               ;isearch补全
 ;;    ("C-s" . isearch-repeat-forward)         ;重复向前搜索, 第一次可以用来搜索上一次的历史哟
@@ -436,7 +468,7 @@
    ("c" . org-capture)
    ("i" . org-toggle-inline-images)
    ("l" . org-toggle-link-display)
-   ("d" . calendar)
+;   ("d" . calendar)
    ("f" . boxquote-insert-file)
    ("r" . boxquote-region)
    ("v" . visible-mode))
@@ -541,12 +573,13 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 					   ;; '([M-f9]           aweshell-new)
 					   ;; '([S-f2]           suk/new-empty-buffer)
 					   ;; '([f2]                hs-toggle-hiding)
-					   '([M-f12]             vterm)
+					   ;;'([M-f12]             vterm)
 					   '([S-f1]              snails)
 					   ))
 
 (global-set-key  (kbd "S-SPC") 'set-mark-command)
-(global-set-key "\C-c\C-i" 'indent-region) ; C-u C-c TAB => (un)indent-region
+; C-c TAB indent-region
+; C-u C-c TAB => (un)indent-region
 
 ;; global-set-key examples:
 ;; (global-set-key (kbd "C-x C-\\") 'next-line)

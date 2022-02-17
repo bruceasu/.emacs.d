@@ -2,36 +2,6 @@
   (require '+custom))
 
 
-(defun indent-buffer ()
-  "Indent the whole buffer."
-  (interactive)
-  (save-excursion
-	(indent-region (point-min) (point-max) nil)))
-
-
-;;绑定到F7键
-(global-set-key [S-f7] 'indent-buffer)
-
-(defun xah-narrow-to-region ()
-  "Same as `narrow-to-region', but if no selection, narrow to the current block.
-Version 2022-01-22"
-  (interactive)
-  (if (region-active-p)
-      (progn
-        (narrow-to-region (region-beginning) (region-end)))
-    (progn
-      (let ($p1 $p2)
-        (save-excursion
-          (if (re-search-backward "\n[ \t]*\n" nil "move")
-              (progn (goto-char (match-end 0))
-                     (setq $p1 (point)))
-            (setq $p1 (point)))
-          (if (re-search-forward "\n[ \t]*\n" nil "move")
-              (progn (goto-char (match-beginning 0))
-                     (setq $p2 (point)))
-            (setq $p2 (point))))
-        (narrow-to-region $p1 $p2)))))
-
 ;; 英语自动补全
 ;; (require 'company-english-helper)
 
@@ -41,7 +11,6 @@ Version 2022-01-22"
   )
 
 (require 'load-abbrev)
-;;(require 'init-calendar)
 ;;(require 'load-epa)
 ;;(require 'redo)
 ;;(require 'tabbar)

@@ -213,9 +213,101 @@ It returns the buffer."
   (browse-url suk-homepage))
 
 
-(global-set-key (kbd "C-x k") 'suk/close-current-buffer)
-(global-set-key (kbd "C-S-t") 'suk/open-last-closed) ; control+shift+t
-(global-set-key [S-f2]  'suk/new-empty-buffer)
+(defun indent-buffer ()
+  "Indent the whole buffer."
+  (interactive)
+  (save-excursion
+	(indent-region (point-min) (point-max) nil)))
+
+
+;;绑定到F7键
+;;(global-set-key [S-f7] 'indent-buffer)
+
+(defun xah-narrow-to-region ()
+  "Same as `narrow-to-region', but if no selection, narrow to the current block.
+Version 2022-01-22"
+  (interactive)
+  (if (region-active-p)
+      (progn
+        (narrow-to-region (region-beginning) (region-end)))
+    (progn
+      (let ($p1 $p2)
+        (save-excursion
+          (if (re-search-backward "\n[ \t]*\n" nil "move")
+              (progn (goto-char (match-end 0))
+                     (setq $p1 (point)))
+            (setq $p1 (point)))
+          (if (re-search-forward "\n[ \t]*\n" nil "move")
+              (progn (goto-char (match-beginning 0))
+                     (setq $p2 (point)))
+            (setq $p2 (point))))
+        (narrow-to-region $p1 $p2)))))
+
+;; =========================================================
+;; 段落格式化
+;; --------------------------------------------------------------
+(defun suk/unfill-paragraph (&optional region)
+    "Takes a multi-line paragraph (or REGION) and make it into a single line of text."
+    (interactive (progn
+                   (barf-if-buffer-read-only)
+                   (list t)))
+    (let ((fill-column (point-max)))
+      (fill-paragraph nil region)))
+;(bind-key "M-Q" 'suk/unfill-paragraph)
+
+;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
+;; --------------------------------------------------------------
+(defun suk/fill-or-unfill-paragraph (&optional unfill region)
+    "Fill paragraph (or REGION).
+With the prefix argument UNFILL, unfill it instead."
+    (interactive (progn
+                   (barf-if-buffer-read-only)
+                   (list (if current-prefix-arg 'unfill) t)))
+    (let ((fill-column (if unfill (point-max) fill-column)))
+      (fill-paragraph nil region)))
+;(bind-key "M-q" 'suk/fill-or-unfill-paragraph)
+
+;; =========================================================
+;; 方便的切换major mode
+;; ---------------------------------------------------------
+(defvar suk/switch-major-mode-last-mode nil)
+;; ---------------------------------------------------------
+(defun suk/major-mode-heuristic (symbol)
+  (and (fboundp symbol)
+       (string-match ".*-mode$" (symbol-name symbol))))
+;; ---------------------------------------------------------
+(defun suk/switch-major-mode (mode)
+  "Change major mode to MODE."
+  (interactive
+  (let ((fn suk/switch-major-mode-last-mode) val)
+    (setq val
+          (completing-read
+           (if fn (format "Change major-mode(default:%s): " fn) "Change major mode: ")
+           obarray 'suk/major-mode-heuristic t nil nil (symbol-name fn)))
+    (list (intern val))))
+  (let ((last-mode major-mode))
+    (funcall mode)
+    (setq suk/switch-major-mode-last-mode last-mode)
+	(message "Change to %s." major-mode))
+)
+;; ---------------------------------------------------------
+;; show major mode
+(defun suk/get-mode-name ()
+  "显示`major-mode'及`mode-name'."
+  (interactive)
+  (message "major-mode:%s, mode-name:%s" major-mode mode-name))
+
+(defun suk/toggle-margin-right ()
+  "Toggle the right margin between `fill-column' or window width.
+This command is convenient when reading novel, documentation."
+  (interactive)
+  (if (eq (cdr (window-margins)) nil)
+      (set-window-margins nil 0 (- (window-body-width) fill-column))
+    (set-window-margins nil 0 0)))
+
+;; (global-set-key (kbd "C-x k") 'suk/close-current-buffer)
+;; (global-set-key (kbd "C-S-t") 'suk/open-last-closed) ; control+shift+t
+;; (global-set-key [S-f2]  'suk/new-empty-buffer)
 
 (provide 'init-buffers)
 ;;; init-buffers.el ends here

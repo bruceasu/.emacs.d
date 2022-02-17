@@ -60,13 +60,6 @@
 (setq user-mail-address suk-mail-address)
 
 
-;;; 选中文本后输入会覆盖
-(delete-selection-mode 1)
-(auto-compression-mode 1)
-(size-indication-mode 1)
-(blink-cursor-mode -1)
-;; 高亮对应的括号
-(show-paren-mode 1)
 
 (modify-all-frames-parameters '((vertical-scroll-bars)))
 (setq system-time-locale "C")
@@ -149,67 +142,6 @@
 ;;(server-force-delete)
 ;;(server-start)
 
-;; =========================================================
-;; 方便的切换major mode
-;; ---------------------------------------------------------
-(defvar suk/switch-major-mode-last-mode nil)
-;; ---------------------------------------------------------
-(defun suk/major-mode-heuristic (symbol)
-  (and (fboundp symbol)
-       (string-match ".*-mode$" (symbol-name symbol))))
-;; ---------------------------------------------------------
-(defun suk/switch-major-mode (mode)
-  "Change major mode to MODE."
-  (interactive
-  (let ((fn suk/switch-major-mode-last-mode) val)
-    (setq val
-          (completing-read
-           (if fn (format "Change major-mode(default:%s): " fn) "Change major mode: ")
-           obarray 'suk/major-mode-heuristic t nil nil (symbol-name fn)))
-    (list (intern val))))
-  (let ((last-mode major-mode))
-    (funcall mode)
-    (setq suk/switch-major-mode-last-mode last-mode)
-	(message "Change to %s." major-mode))
-)
-;; ---------------------------------------------------------
-;; show major mode
-(defun suk/get-mode-name ()
-  "显示`major-mode'及`mode-name'."
-  (interactive)
-  (message "major-mode:%s, mode-name:%s" major-mode mode-name))
-
-(defun suk/toggle-margin-right ()
-  "Toggle the right margin between `fill-column' or window width.
-This command is convenient when reading novel, documentation."
-  (interactive)
-  (if (eq (cdr (window-margins)) nil)
-      (set-window-margins nil 0 (- (window-body-width) fill-column))
-    (set-window-margins nil 0 0)))
-
-;; =========================================================
-;; 段落格式化
-;; --------------------------------------------------------------
-(defun suk/unfill-paragraph (&optional region)
-    "Takes a multi-line paragraph (or REGION) and make it into a single line of text."
-    (interactive (progn
-                   (barf-if-buffer-read-only)
-                   (list t)))
-    (let ((fill-column (point-max)))
-      (fill-paragraph nil region)))
-(bind-key "M-Q" 'my/unfill-paragraph)
-
-;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
-;; --------------------------------------------------------------
-(defun suk/fill-or-unfill-paragraph (&optional unfill region)
-    "Fill paragraph (or REGION).
-With the prefix argument UNFILL, unfill it instead."
-    (interactive (progn
-                   (barf-if-buffer-read-only)
-                   (list (if current-prefix-arg 'unfill) t)))
-    (let ((fill-column (if unfill (point-max) fill-column)))
-      (fill-paragraph nil region)))
-(bind-key "M-q" 'suk/fill-or-unfill-paragraph)
 
 ;; 设置缓存文件/杂七杂八的文件存放的地址
 ;; 不好的做法
