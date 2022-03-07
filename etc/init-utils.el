@@ -213,7 +213,7 @@
 
 ;; On-the-fly spell checker
 (unless sys/win32p
-  (use-package flyspell
+ (use-package flyspell
     :ensure nil
     :defer 2
     :diminish flyspell-mode

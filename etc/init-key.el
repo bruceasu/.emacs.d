@@ -10,7 +10,7 @@
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
-;; '("C-z" "s-W"))
+ ;; '("C-z" "s-W"))
  '("C-z" "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
 
 ;;; ### Sdcv ###
@@ -40,8 +40,8 @@
 
 (lazy-load-global-keys
  '(
-    ("s-i" . insert-translated-name-insert)
- )
+   ("s-i" . insert-translated-name-insert)
+   )
  "init-insert-translated-name")
 
 
@@ -62,10 +62,10 @@
    ("M-Q" . suk/unfill-paragraph)
    ("M-q" . suk/fill-or-unfill-paragraph)
    ("C-x n x" . xah-narrow-to-region) ; C-x n w ,  C-x n d, C-x n n, C-x n p 系列
-   ("S-<F7>" . indent-buffer)
-
+   ("S-<f7>" . indent-buffer)
+   ("C-<F2>" . rename-file-and-buffer)
    )
- "init-buffer")
+ "init-buffers")
 
 
 ;;; ### Toolkit ###
@@ -81,10 +81,12 @@
    ("s-3" . uniquify-all-lines-buffer)  ;删除重复的行
    ("s-<f12>" . calendar)
    ("C-<f12>" . lazycat-theme-toggle)
-   ; ([C-t]               transpose-chars)
+										; ([C-t]               transpose-chars)
    ([S-f6] hs-minor-mode)
    ([S-f5] toggle-truncate-lines)
    ("C-x M-a" . align-regexp)
+   ("C-c ." . hs-toggle-hiding)
+   ("C-c ," . hs-show-all)
    ))
 
 
@@ -97,7 +99,7 @@
    ("C-s-p" . comment-dwim-prev-line)    ;移动到下一行并注释
    ("M-2" . indent-buffer)               ;自动格式化当前Buffer
    ("M-z" . upcase-char)      ;Upcase char handly with capitalize-word
-   ;("C-x u" . mark-line)      ;选中整行
+										;("C-x u" . mark-line)      ;选中整行
    ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
    ("M-G" . goto-column)                ;到指定列
    ("C->" . remember-init)              ;记忆初始函数
@@ -136,7 +138,7 @@
    ("M-<" . window-move-up)              ;向下滚动当前窗口
    ("M->" . window-move-down)            ;向上滚动当前窗口
    )
-"win-move")
+ "win-move")
 
 ;;; ### Buffer Move ###
 ;;; --- 缓存移动
@@ -300,39 +302,39 @@
 ;;; ### Awesome-Pair ###
 ;;; --- 结构化编程
 (lazy-load-unset-keys
-'("M-J" "M-r" "M-s" "M-;" "C-M-f" "C-M-b" "M-)")
-  awesome-pair-mode-map)                 ;卸载按键
+ '("M-J" "M-r" "M-s" "M-;" "C-M-f" "C-M-b" "M-)")
+ awesome-pair-mode-map)                 ;卸载按键
 
 (defvar awesome-pair-key-alist nil)
 (setq awesome-pair-key-alist
-     '(
-       ;; 移动
-       ("M-n" . awesome-pair-jump-left)
-       ("M-p" . awesome-pair-jump-right)
-       ;; 符号插入
-       ("%" . awesome-pair-match-paren)       ;括号跳转
-       ("(" . awesome-pair-open-round)        ;智能 (
-       ("[" . awesome-pair-open-bracket)      ;智能 [
-       ("{" . awesome-pair-open-curly)        ;智能 {
-       (")" . awesome-pair-close-round)       ;智能 )
-       ("]" . awesome-pair-close-bracket)     ;智能 ]
-       ("}" . awesome-pair-close-curly)       ;智能 }
-       ("\"" . awesome-pair-double-quote)     ;智能 "
-       ("=" . awesome-pair-equal)             ;智能 =
-       ("SPC" . awesome-pair-space)           ;智能 Space
-       ;; 删除
-       ("M-o" . awesome-pair-backward-delete) ;向后删除
-       ("C-d" . awesome-pair-forward-delete)  ;向前删除
-       ("C-k" . awesome-pair-kill)            ;向前kill
-       ;; 包围
-       ("M-\"" . awesome-pair-wrap-double-quote) ;用 " " 包围对象, 或跳出字符串
-       ("M-[" . awesome-pair-wrap-bracket)       ;用 [ ] 包围对象
-       ("M-{" . awesome-pair-wrap-curly)         ;用 { } 包围对象
-       ("M-(" . awesome-pair-wrap-round)         ;用 ( ) 包围对象
-       ("M-)" . awesome-pair-unwrap)             ;去掉包围对象
-       ;; 跳出并换行缩进
-       ("M-:" . awesome-pair-jump-out-pair-and-newline) ;跳出括号并换行
-       ))
+      '(
+		;; 移动
+		("M-n" . awesome-pair-jump-left)
+		("M-p" . awesome-pair-jump-right)
+		;; 符号插入
+		("%" . awesome-pair-match-paren)       ;括号跳转
+		("(" . awesome-pair-open-round)        ;智能 (
+		("[" . awesome-pair-open-bracket)      ;智能 [
+		("{" . awesome-pair-open-curly)        ;智能 {
+		(")" . awesome-pair-close-round)       ;智能 )
+		("]" . awesome-pair-close-bracket)     ;智能 ]
+		("}" . awesome-pair-close-curly)       ;智能 }
+		("\"" . awesome-pair-double-quote)     ;智能 "
+		("=" . awesome-pair-equal)             ;智能 =
+		("SPC" . awesome-pair-space)           ;智能 Space
+		;; 删除
+		("M-o" . awesome-pair-backward-delete) ;向后删除
+		("C-d" . awesome-pair-forward-delete)  ;向前删除
+		("C-k" . awesome-pair-kill)            ;向前kill
+		;; 包围
+		("M-\"" . awesome-pair-wrap-double-quote) ;用 " " 包围对象, 或跳出字符串
+		("M-[" . awesome-pair-wrap-bracket)       ;用 [ ] 包围对象
+		("M-{" . awesome-pair-wrap-curly)         ;用 { } 包围对象
+		("M-(" . awesome-pair-wrap-round)         ;用 ( ) 包围对象
+		("M-)" . awesome-pair-unwrap)             ;去掉包围对象
+		;; 跳出并换行缩进
+		("M-:" . awesome-pair-jump-out-pair-and-newline) ;跳出括号并换行
+		))
 
 (lazy-load-set-keys awesome-pair-key-alist awesome-pair-mode-map)
 ;;; ### Thingh-edit ###
@@ -358,7 +360,7 @@
 (lazy-load-global-keys
  '(
    ("<f8>" . dired-jump)
-;;   ("C-x C-f" . find-file)
+   ;;   ("C-x C-f" . find-file)
    )
  "init-dired")
 
@@ -468,7 +470,7 @@
    ("c" . org-capture)
    ("i" . org-toggle-inline-images)
    ("l" . org-toggle-link-display)
-;   ("d" . calendar)
+										;   ("d" . calendar)
    ("f" . boxquote-insert-file)
    ("r" . boxquote-region)
    ("v" . visible-mode))
@@ -555,15 +557,15 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
 (suk-set-key-bindings 'global-set-key
 					  (list
-					   (list (kbd "C-x l")   'suk/count-brf-lines)
+					   ;;					   (list (kbd "C-x l")   'suk/count-brf-lines)
 					   (list (kbd "C-x M-a") 'align-regexp)
-					   (list (kbd "C-x x")   'suk/switch-major-mode)
-					   (list (kbd "C-x X")   'suk/get-mode-name)
+					   ;;					   (list (kbd "C-x x")   'suk/switch-major-mode)
+					   ;;					   (list (kbd "C-x X")   'suk/get-mode-name)
 					   ;;(list (kbd "C-x U") 'suk/revert-buffer-with-utf8)
 					   ;;(list (kbd "C-x K") 'suk/revert-buffer-with-gbk)
-					   '([C-t]               transpose-chars)
-					   '([S-f6]              hs-minor-mode)
-					   '([S-f5]              toggle-truncate-lines)
+					   ;;					   '([C-t]               transpose-chars)
+					   ;;					   '([S-f6]              hs-minor-mode)
+					   ;;					   '([S-f5]              toggle-truncate-lines)
 					   ;; '([S-f11]          insert-translated-name-insert) ;; Chinese to English
 					   ;; '([S-f12]          toggle-company-english-helper) ;; popup English tips
 					   ;; '([M-f12]          aweshell-dedicated-toggle)
@@ -574,12 +576,12 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 					   ;; '([S-f2]           suk/new-empty-buffer)
 					   ;; '([f2]                hs-toggle-hiding)
 					   ;;'([M-f12]             vterm)
-					   '([S-f1]              snails)
+					   ;; '([S-f1]              snails)
 					   ))
 
 (global-set-key  (kbd "S-SPC") 'set-mark-command)
-; C-c TAB indent-region
-; C-u C-c TAB => (un)indent-region
+										; C-c TAB indent-region
+										; C-u C-c TAB => (un)indent-region
 
 ;; global-set-key examples:
 ;; (global-set-key (kbd "C-x C-\\") 'next-line)

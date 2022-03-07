@@ -76,7 +76,7 @@
 (prefer-coding-system 'utf-16)
 ;; 新建文件使用utf-8-unix方式
 ;; 如果不写下面两句，只写
-;; (prefer-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
 ;; 这一句的话，新建文件以utf-8编码，行末结束符平台相关
 (unless sys/win32p
   (prefer-coding-system 'utf-8-dos)
@@ -84,7 +84,7 @@
   )
 
 (setq session-save-file-coding-system 'utf-8)
-(set-charset-priority 'unicode)
+;;(set-charset-priority 'unicode)
 
 
 ;; =========================================================

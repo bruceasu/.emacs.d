@@ -89,17 +89,17 @@
 (add-hook 'sh-mode-hook         'hs-minor-mode)
 (add-hook 'python-mode-hook     'hs-minor-mode)
 
-; 著名的Emacs补全框架
+										; 著名的Emacs补全框架
 (use-package company
-	:defer 2
-	:hook (after-init . global-company-mode)
-	:init (setq company-tooltip-align-annotations t
-				company-idle-delay 0 company-echo-delay 0
-				company-minimum-prefix-length 1
-				company-require-match nil
-				company-dabbrev-ignore-case nil
-				company-dabbrev-downcase nil
-				company-show-numbers t)
+  :defer 2
+  :hook (after-init . global-company-mode)
+  :init (setq company-tooltip-align-annotations t
+			  company-idle-delay 0 company-echo-delay 0
+			  company-minimum-prefix-length 1
+			  company-require-match nil
+			  company-dabbrev-ignore-case nil
+			  company-dabbrev-downcase nil
+			  company-show-numbers t)
   ;; :config
   :bind (:map company-active-map
 			  ("C-n" . #'company-select-next)
@@ -113,8 +113,8 @@
 			  ("M-p" . company-select-previous))
   (:map leader-key
 		("c s" . #'company-yasnippet
-		))
-)
+		 ))
+  )
 
 ;; 人工智能补全代码
 (use-package company-tabnine
@@ -132,48 +132,47 @@
 ;; ===============================
 ;; Emacs对语言服务器支持的插件
 ;; ===============================
-(use-package
-	lsp-mode
-	:ensure t
-	:defer t
-	:commands lsp
-	:hook ((java-mode python-mode js-mode js2-mode web-mode c-mode c++-mode objc-mode) . lsp)
-	:custom
-	(lsp-idle-delay 1200)
-	(lsp-auto-guess-root nil)
-	(lsp-file-watch-threshold 2000)
-	(read-process-output-max (* 1024 1024))
-	(lsp-eldoc-hook nil)
-	(lsp-prefer-flymake nil)
-	:bind (:map lsp-mode-map
-			("C-c C-f" . lsp-format-buffer)
-			("M-RET" . lsp-ui-sideline-apply-code-actions)
-			("M-\\" . lsp-execute-code-action))
-	:config
-	(defun my/lsp-client-clear-leak-handlers (lsp-client)
+(use-package lsp-mode
+  :ensure t
+  :defer t
+  :commands lsp
+  :hook ((java-mode python-mode js-mode js2-mode web-mode c-mode c++-mode objc-mode) . lsp)
+  :custom
+  (lsp-idle-delay 1200)
+  (lsp-auto-guess-root nil)
+  (lsp-file-watch-threshold 2000)
+  (read-process-output-max (* 1024 1024))
+  (lsp-eldoc-hook nil)
+  (lsp-prefer-flymake nil)
+  :bind (:map lsp-mode-map
+			  ("C-c C-f" . lsp-format-buffer)
+			  ("M-RET" . lsp-ui-sideline-apply-code-actions)
+			  ("M-\\" . lsp-execute-code-action))
+  :config
+  (defun my/lsp-client-clear-leak-handlers (lsp-client)
 	"Clear leaking handlers in LSP-CLIENT."
 	(let ((response-handlers (lsp--client-response-handlers lsp-client))
-			to-delete-keys)
-		(maphash (lambda (key value)
+		  to-delete-keys)
+	  (maphash (lambda (key value)
 				 (when (> (time-convert (time-since (nth 3 value)) 'integer)
-							(* 2 lsp-response-timeout))
-					(push key to-delete-keys)))
-				 response-handlers)
-		(when to-delete-keys
-			(message "Deleting %d handlers in %s lsp-client..."
-				(length to-delete-keys)
-				(lsp--client-server-id lsp-client))
+						  (* 2 lsp-response-timeout))
+				   (push key to-delete-keys)))
+			   response-handlers)
+	  (when to-delete-keys
+		(message "Deleting %d handlers in %s lsp-client..."
+				 (length to-delete-keys)
+				 (lsp--client-server-id lsp-client))
 		(mapc (lambda (k) (remhash k response-handlers))
-				to-delete-keys))))
-	(defun my/lsp-clear-leak ()
-		"Clear all leaks"
-		(maphash (lambda (_ client)
-			(my/lsp-client-clear-leak-handlers client))
-			lsp-clients))
-	(setq my/lsp-clear-leak-timer
+			  to-delete-keys))))
+  (defun my/lsp-clear-leak ()
+	"Clear all leaks"
+	(maphash (lambda (_ client)
+			   (my/lsp-client-clear-leak-handlers client))
+			 lsp-clients))
+  (setq my/lsp-clear-leak-timer
 		(run-with-timer 5 5 #'my/lsp-clear-leak))
-	(add-to-list 'lsp-language-id-configuration '(".*\\.less$" . "css"))
-	(setq lsp-prefer-capf t))
+  (add-to-list 'lsp-language-id-configuration '(".*\\.less$" . "css"))
+  (setq lsp-prefer-capf t))
 
 ;; LSP 模式的帮助文档相关
 (use-package lsp-ui
@@ -198,11 +197,11 @@
   :config
   (require 'init-yasnippet)
   ;; 大量可用的代码片段
-   (use-package
-	 yasnippet-snippets
-	 :ensure t
-	 )
-)
+  (use-package
+	yasnippet-snippets
+	:ensure t
+	)
+  )
 
 
 ;; ===============================
@@ -264,34 +263,34 @@
   ;;   :init (modern-c++-font-lock-global-mode t))
 
   (use-package irony
-	  :defines (irony-mode-map irony-server-w32-pipe-buffer-size)
-	  :hook (((c-mode c++-mode objc-mode) . irony-mode)
-			 (irony-mode . irony-cdb-autosetup-compile-options))
-	  :config
-	  ;; Windows performance tweaks
-	  (when (boundp 'w32-pipe-read-delay)
-		(setq w32-pipe-read-delay 0))
-	  ;; Set the buffer size to 64K on Windows (from the original 4K)
-	  (when (boundp 'w32-pipe-buffer-size)
-		(setq irony-server-w32-pipe-buffer-size (* 64 1024)))
+	:defines (irony-mode-map irony-server-w32-pipe-buffer-size)
+	:hook (((c-mode c++-mode objc-mode) . irony-mode)
+		   (irony-mode . irony-cdb-autosetup-compile-options))
+	:config
+	;; Windows performance tweaks
+	(when (boundp 'w32-pipe-read-delay)
+	  (setq w32-pipe-read-delay 0))
+	;; Set the buffer size to 64K on Windows (from the original 4K)
+	(when (boundp 'w32-pipe-buffer-size)
+	  (setq irony-server-w32-pipe-buffer-size (* 64 1024)))
 
-	  (with-eval-after-load 'counsel
-		(bind-keys :map irony-mode-map
-				   ([remap completion-at-point] . counsel-irony)
-				   ([remap complete-symbol] . counsel-irony)))
+	(with-eval-after-load 'counsel
+	  (bind-keys :map irony-mode-map
+				 ([remap completion-at-point] . counsel-irony)
+				 ([remap complete-symbol] . counsel-irony)))
 
-	  (use-package irony-eldoc
-		:hook (irony-mode . irony-eldoc))
+	(use-package irony-eldoc
+	  :hook (irony-mode . irony-eldoc))
 
-	  (with-eval-after-load 'company
-		(use-package company-irony
-		  :init (cl-pushnew 'company-irony company-backends))
-		(use-package company-irony-c-headers
-		  :init (cl-pushnew 'company-irony-c-headers company-backends)))
+	(with-eval-after-load 'company
+	  (use-package company-irony
+		:init (cl-pushnew 'company-irony company-backends))
+	  (use-package company-irony-c-headers
+		:init (cl-pushnew 'company-irony-c-headers company-backends)))
 
-	  (with-eval-after-load 'flycheck
-		(use-package flycheck-irony
-		  :hook (flycheck-mode . flycheck-irony-setup)))
+	(with-eval-after-load 'flycheck
+	  (use-package flycheck-irony
+		:hook (flycheck-mode . flycheck-irony-setup)))
 
 	;; Company mode backend for C/C++ header files
 	(with-eval-after-load 'company
@@ -329,15 +328,12 @@
 ;;--------------------------------------
 ;; web develop
 ;;--------------------------------------
-(use-package prettier-js
-  :defer 3
-  :hook ((css-mode web-mode typescript-mode js-mode json-mode) . prettier-js-mode))
 
 ;; 快速编写 HTML 代码
 (use-package emmet-mode
   :defer 3
   :init (setq emmet-expand-jsx-className? t)
-  :hook (web-mode typescript-mode js-mode)
+  :hook (web-mode typescript-mode js-mode js2-mode rjsx-mode css-mode scss-mode sgml-mode)
   :config
   (add-to-list 'emmet-jsx-major-modes 'js-mode)
   (add-to-list 'emmet-jsx-major-modes 'typescript-mode))
@@ -363,7 +359,7 @@
 (unless (fboundp 'less-css-mode)
   (use-package less-css-mode))
 
-; JSON mode
+										; JSON mode
 (use-package json-mode
   :defer 3
   :mode "\\.json\\'"
@@ -448,11 +444,11 @@
   (add-to-list 'auto-mode-alist '("\\.js[x]?\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.json\\'" . web-mode))
   (setq
-    web-mode-css-indent-offset 2                  ;; CSS 默认缩进 2 空格：包含 HTML 的 CSS 部分以及纯 CSS/LESS/SASS 文件等
-    web-mode-code-indent-offset 2                 ;; JavaScript 默认缩进 2 空格：包含 HTML 的 SCRIPT 部分以及纯 JS/JSX/TS/TSX 文件等
-    web-mode-markup-indent-offset 2               ;; HTML 默认缩进 2 空格：包含 HTML 文件以及 Vue 文件的 TEMPLATE 部分
-    web-mode-enable-css-colorization t            ;; 开启 CSS 部分色值的展示：展示的时候会有光标显示位置异常
-    web-mode-enable-current-column-highlight nil)
+   web-mode-css-indent-offset 2                  ;; CSS 默认缩进 2 空格：包含 HTML 的 CSS 部分以及纯 CSS/LESS/SASS 文件等
+   web-mode-code-indent-offset 2                 ;; JavaScript 默认缩进 2 空格：包含 HTML 的 SCRIPT 部分以及纯 JS/JSX/TS/TSX 文件等
+   web-mode-markup-indent-offset 2               ;; HTML 默认缩进 2 空格：包含 HTML 文件以及 Vue 文件的 TEMPLATE 部分
+   web-mode-enable-css-colorization t            ;; 开启 CSS 部分色值的展示：展示的时候会有光标显示位置异常
+   web-mode-enable-current-column-highlight nil)
   :config
   (add-hook 'web-mode-hook 'company-mode)
   (add-hook 'web-mode-hook (lambda()
@@ -484,7 +480,22 @@
 				("node" . js2-jsx-mode))
   :hook ((js2-mode . js2-imenu-extras-mode)
 		 (js2-mode . js2-highlight-unused-variables-mode))
-)
+  )
+
+
+(use-package rjsx-mode
+  :ensure t
+  :mode ("\\.js\\'")
+  :config
+  (add-hook 'rjsx-mode-hook (lambda()
+							  (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
+							  (flycheck-select-checker 'javascript-eslint)))
+  )
+
+(use-package prettier-js
+  :ensure t
+  :defer 3
+  :hook ((css-mode web-mode typescript-mode js-mode json-mode js2-mode) . prettier-js-mode))
 
 
 ;; 直接编辑 HTML 文件时的设置
