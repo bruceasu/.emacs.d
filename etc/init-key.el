@@ -40,10 +40,9 @@
 
 (lazy-load-global-keys
  '(
-   ("s-i" . insert-translated-name-insert)
+   ("M-<f2>" . insert-translated-name-insert)
    )
  "init-insert-translated-name")
-
 
 (lazy-load-global-keys
  '(
@@ -63,7 +62,7 @@
    ("M-q" . suk/fill-or-unfill-paragraph)
    ("C-x n x" . xah-narrow-to-region) ; C-x n w ,  C-x n d, C-x n n, C-x n p 系列
    ("S-<f7>" . indent-buffer)
-   ("C-<F2>" . rename-file-and-buffer)
+   ("C-<f2>" . rename-file-and-buffer)
    )
  "init-buffers")
 
@@ -72,18 +71,17 @@
 ;;; --- 工具函数
 (lazy-load-set-keys
  '(
-   ("s-c o" . one-key-menu-directory)   ;目录打开菜单
-   ("s-," . bury-buffer)                ;隐藏当前buffer
-   ("s-." . unbury-buffer)              ;反隐藏当前buffer
+   ("C-," . bury-buffer)                ;隐藏当前buffer
+   ("C-." . unbury-buffer)              ;反隐藏当前buffer
    ("s-[" . eval-expression)            ;执行表达式
    ("s-1" . sort-lines)                 ;排序
    ("s-2" . hanconvert-region)          ;转换简体或繁体中文
    ("s-3" . uniquify-all-lines-buffer)  ;删除重复的行
    ("s-<f12>" . calendar)
    ("C-<f12>" . lazycat-theme-toggle)
-										; ([C-t]               transpose-chars)
-   ([S-f6] hs-minor-mode)
-   ([S-f5] toggle-truncate-lines)
+   ;;([c-t] . transpose-chars)
+   ([S-f6] . hs-minor-mode)
+   ([S-f5] . toggle-truncate-lines)
    ("C-x M-a" . align-regexp)
    ("C-c ." . hs-toggle-hiding)
    ("C-c ," . hs-show-all)
@@ -129,14 +127,14 @@
    ("M-M" . delete-block-forward))
  "delete-block")
 
-;;; ### Watch other window ###
+;;; ### watch other window ###
 ;;; --- 滚动其他窗口
 (lazy-load-global-keys
  '(
-   ("M-J" . other-window-move-up)        ;向下滚动其他窗口
+   ("M-I" . other-window-move-up)        ;向下滚动其他窗口
    ("M-K" . other-window-move-down)      ;向上滚动其他窗口
-   ("M-<" . window-move-up)              ;向下滚动当前窗口
-   ("M->" . window-move-down)            ;向上滚动当前窗口
+   ("M-J" . window-move-up)              ;向下滚动当前窗口
+   ("M-L" . window-move-down)            ;向上滚动当前窗口
    )
  "win-move")
 
@@ -144,8 +142,8 @@
 ;;; --- 缓存移动
 (lazy-load-set-keys
  '(
-   ("C-z k" . beginning-of-buffer)      ;缓存开始
-   ("C-z j" . end-of-buffer)            ;缓存结尾
+   ("C-z i" . beginning-of-buffer)      ;缓存开始
+   ("C-z k" . end-of-buffer)            ;缓存结尾
    ("C-M-f" . forward-paragraph)        ;下一个段落
    ("C-M-b" . backward-paragraph)       ;上一个段落
    ("C-M-y" . backward-up-list)         ;向左跳出 LIST
@@ -159,8 +157,8 @@
 
 (lazy-load-global-keys
  '(
-   ("s-N" . move-text-down)      ;把光标所在的整行文字(或标记)下移一行
-   ("s-P" . move-text-up)        ;把光标所在的整行文字(或标记)上移一行
+   ("M-N" . move-text-down)      ;把光标所在的整行文字(或标记)下移一行
+   ("M-P" . move-text-up)        ;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
 
@@ -448,29 +446,18 @@
  emacs-lisp-mode-map
  )
 
-;;; ### EMMS ###
-;;; --- Emacs 多媒体系统
-(lazy-load-global-keys
- '(
-   ("C-c p" . one-key-menu-emms)        ;播放器菜单
-   ("M-A" . emms-pause)                 ;暂停/播放
-   ("M-X" . emms-random)                ;随机播放
-   ("M-Z" . emms-stop)                  ;停止
-   )
- "init-emms")
 
 ;;; ### Org ###
 ;;; --- 笔记管理和组织
 (define-prefix-command 'F9-map)
 (global-set-key (kbd "<f9>") 'F9-map)
-
 (lazy-load-global-keys
  '(("a" . org-agenda)
    ("s" . show-org-agenda)
    ("c" . org-capture)
    ("i" . org-toggle-inline-images)
    ("l" . org-toggle-link-display)
-										;   ("d" . calendar)
+   ("d" . calendar)
    ("f" . boxquote-insert-file)
    ("r" . boxquote-region)
    ("v" . visible-mode))

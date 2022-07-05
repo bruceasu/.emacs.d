@@ -60,8 +60,10 @@
 (setq user-mail-address suk-mail-address)
 
 
+;; 隐藏垂直滚动条。
+;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
+;;  (modify-all-frames-parameters '((vertical-scroll-bars)))
 
-(modify-all-frames-parameters '((vertical-scroll-bars)))
 (setq system-time-locale "C")
 ;; 当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
 (setq suggest-key-bindings 1)
@@ -105,11 +107,13 @@
               tab-width        4
               indent-tabs-mode t)
 
+
 ;; 创建新行的动作
 ;; 回车时创建新行并且对齐
 (global-set-key (kbd "RET") 'newline-and-indent)
 ;; 取消对齐创建的新行
 (global-set-key (kbd "S-<return>") 'comment-indent-new-line)
+
 ;; 让'_'被视为单词的一部分
 (add-hook 'after-change-major-mode-hook (lambda ()(modify-syntax-entry ?_ "w")))
 ;; "-" 同上)
@@ -238,7 +242,6 @@
 ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
 (add-hook 'after-save-hook
           'executable-make-buffer-file-executable-if-script-p)
-
 
 ;; =========================================================
 ;; 通过编辑配置文件使其可以调用外部程序，来为其添加功能。

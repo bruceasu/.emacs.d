@@ -57,7 +57,7 @@
       (when (and light-value (floatp (string-to-number light-value)))
 	(shell-command
 	 (concat "echo "
-		 (format "%d" (* max-backlight (string-to-number light-value))) 
+		 (format "%d" (* max-backlight (string-to-number light-value)))
 		 " > /sys/class/backlight/intel_backlight/brightness")))))
 
   ;; 增加10%屏幕亮度
@@ -76,9 +76,9 @@
       (if (< add-backlight max-backlight)
 	  (progn (shell-command
 		  (concat "echo "
-			  (format "%d" add-backlight) 
+			  (format "%d" add-backlight)
 			  " > /sys/class/backlight/intel_backlight/brightness"))
-		 (message "亮度+10%")) 
+		 (message "亮度+10%"))
 	(message "亮度MAX!!"))))
 
   ;; 减少屏幕亮度
@@ -98,7 +98,7 @@
 		  (concat "echo "
 			  (format "%d" less-backlight)
 			  " > /sys/class/backlight/intel_backlight/brightness"))
-		 (message "亮度-10%")) 
+		 (message "亮度-10%"))
 	(message "亮度Min!!"))))
 )
 
@@ -143,7 +143,7 @@
   (interactive)
   (setq url-gateway-method 'socks)
   (setq socks-noproxy '("localhost"))
-  (setq socks-server '("Default server" "127.0.0.1" 1086 5))
+  (setq socks-server '("Default server" "127.0.0.1" 1080 5))
   (message "Enable socks proxy."))
 
 ;;;###autoload
@@ -154,7 +154,7 @@
   (setq socks-noproxy nil)
   (message "Disable socks proxy."))
 
-(autoload 'calendar "init-calendar" "Config Chinese calendar " t)
+;;(autoload 'calendar "init-calendar" "Config Chinese calendar " t)
 
 (provide '+autoload)
 ;;; +autoload.el ends here

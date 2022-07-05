@@ -58,11 +58,12 @@
 
 
 
-;;除去基督徒的节日、希伯来人的节日和伊斯兰教的节日。 christian-holidays nil
+;;除去基督徒的节日、希伯来人的节日和伊斯兰教的节日。
 (setq hebrew-holidays nil
       islamic-holidays nil
       solar-holidays nil
       bahai-holidays nil
+	  ;; christian-holidays nil
       )
 
 (setq general-holidays '((holiday-fixed 1 1   "元旦")

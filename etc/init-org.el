@@ -283,7 +283,7 @@
 
  (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\)$" . org-mode))
 
-;;; 快捷键设置
+;;; 快捷键设置 keys are set in init-key.el
 ;;; I use C-c c to start capture mode 冲突了。
 ;; (global-set-key (kbd "C-c C") 'org-capture)
 ;; (global-set-key "\C-cc" 'org-capture)
@@ -292,21 +292,8 @@
 ;; (global-set-key "\C-cb" 'org-iswitchb)
 
 
-;; setting in init-key.el
-;;(global-set-key (kbd "M-<f9>") 'org-toggle-inline-images)
-
 ;; C-',  C-, is org-cycle-agenda-files keys
-
-;;(define-prefix-command 'f9-map)
-;;(global-set-key (kbd "<f9>") 'f9-map)
-;;(global-set-key (kbd "<f9> a") 'org-agenda)
-;;(global-set-key (kbd "<f9> s") 'show-org-agenda)
-;;(global-set-key (kbd "<f9> c") 'org-capture)
-;;(global-set-key (kbd "<f9> d") 'calendar)
-;;(global-set-key (kbd "<f9> f") 'boxquote-insert-file)
-;;(global-set-key (kbd "<f9> r") 'boxquote-region)
-;;(global-set-key (kbd "<f9> v") 'visible-mode)
-;;(global-set-key (kbd "<f9> l") 'org-toggle-link-display)
+;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。
 
 (setq org-time-stamp-rounding-minutes (quote (1 1)))
 (defun show-org-agenda ()
@@ -353,10 +340,29 @@
 ;; subdirectory data. These are automatically added to my git
 ;; repository along with any other org-mode changes I've made.
 
-;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。
+
 
 ;;; 更多的配置
-(require 'suk-org)
+;; Always hilight the current agenda line
+(add-hook 'org-agenda-mode-hook '(lambda () (hl-line-mode 1)) 'append)
+
+;; The following custom-set-faces create the highlights
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-mode-line-clock ((t (:background "grey75" :foreground "red" :box (:line-width -1 :style released-button)))) t))
+
+
+
+
+(add-to-list 'Info-default-directory-list "~/org/doc")
+;; flyspell mode for spell checking everywhere
+;; (add-hook 'org-mode-hook 'turn-on-flyspell 'append)
+
+(setq default-process-coding-system '(utf-8-unix . utf-8-unix))
+
 
 (provide 'init-org)
 

@@ -38,51 +38,59 @@
 (defvar suk-emacs-share-dir (concat suk-emacs-root-dir "/share"))
 (defvar suk-emacs-themes-dir (concat suk-emacs-share-dir "/themes"))
 
-(defun add-subdirs-to-load-path (dir)
-  "Recursive add directories to `load-path'."
-  (let ((default-directory (file-name-as-directory dir)))
-     (add-to-list 'load-path dir)
-     (normal-top-level-add-subdirs-to-load-path)))
+
+;; 忽略 cl 过期警告
+(setq byte-compile-warnings '(cl-function))
+
+
+;;(defun add-subdirs-to-load-path (dir)
+;;  "Recursive add directories to `load-path'."
+;;  (let ((default-directory (file-name-as-directory dir)))
+;;     (add-to-list 'load-path dir)
+;;     (normal-top-level-add-subdirs-to-load-path)))
 
 ;; 王勇的版本 https://manateelazycat.github.io/emacs/2022/03/02/emacs-load-directory-recursively.html
-;; 似乎没有成功加载指定的目录
-;; (require 'cl-lib)
-;; (defun add-subdirs-to-load-path (search-dir)
-;;   (interactive)
-;;   (let* ((dir (file-name-as-directory search-dir)))
-;;     (dolist (subdir
-;;              ;; 过滤出不必要的目录，提升Emacs启动速度
-;;              (cl-remove-if
-;;               #'(lambda (subdir)
-;;                   (or
-;;                    ;; 不是文件的都移除
-;;                    (not (file-directory-p (concat dir subdir)))
-;;                    ;; 目录匹配下面规则的都移除
-;;                    (member subdir '("." ".." ;Linux当前目录和父目录
-;;                                     "dist" "node_modules" "__pycache__" ;语言相关的模块目录
-;;                                     "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ;版本控制目录
-;;               (directory-files dir)))
-;;       (let ((subdir-path (concat dir (file-name-as-directory subdir))))
-;;         ;; 目录下有 .el .so .dll 文件的路径才添加到 load-path 中，提升Emacs启动速度
-;;         (when (cl-some #'(lambda (subdir-file)
-;;                            (and (file-regular-p (concat subdir-path subdir-file))
-;;                                 ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
-;;                                 (member (file-name-extension subdir-file) '("el" "so" "dll"))))
-;;                        (directory-files subdir-path))
-;;
-;;           ;; 注意：add-to-list 函数的第三个参数必须为 t ，表示加到列表末尾
-;;           ;; 这样Emacs会从父目录到子目录的顺序搜索Elisp插件，顺序反过来会导致Emacs无法正常启动
-;;           (add-to-list 'load-path subdir-path t))
-;;
-;;         ;; 继续递归搜索子目录
-;;         (add-subdirs-to-load-path subdir-path)))))
+(require 'cl-lib)
+(defun add-subdirs-to-load-path (search-dir isFirst)
+  (interactive)
+  (when isFirst
+	;; 原来的版本没有把第1个 search-dir 本身添加到load path
+	;; 递归时的search-dir是在递归前加入了。
+	(add-to-list 'load-path search-dir))
+  (let* ((dir (file-name-as-directory search-dir)))
+    (dolist (subdir
+             ;; 过滤出不必要的目录，提升Emacs启动速度
+             (cl-remove-if
+              #'(lambda (subdir)
+                  (or
+                   ;; 不是文件的都移除
+                   (not (file-directory-p (concat dir subdir)))
+                   ;; 目录匹配下面规则的都移除
+                   (member subdir '("." ".." ;Linux当前目录和父目录
+                                    "dist" "node_modules" "__pycache__" ;语言相关的模块目录
+                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ;版本控制目录
+              (directory-files dir)))
+      (let ((subdir-path (concat dir (file-name-as-directory subdir))))
+        ;; 目录下有 .el .so .dll 文件的路径才添加到 load-path 中，提升Emacs启动速度
+        (when (cl-some #'(lambda (subdir-file)
+                           (and (file-regular-p (concat subdir-path subdir-file))
+                                ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
+                                 (member (file-name-extension subdir-file) '("el" "so" "dll"))))
+                       (directory-files subdir-path))
+
+           ;; 注意：add-to-list 函数的第三个参数必须为 t ，表示加到列表末尾
+          ;; 这样Emacs会从父目录到子目录的顺序搜索Elisp插件，顺序反过来会导致Emacs无法正常启动
+          (add-to-list 'load-path subdir-path t))
+
+        ;; 继续递归搜索子目录
+        (add-subdirs-to-load-path subdir-path nil)))))
 
 ;; (add-subdirs-to-load-path (expand-file-name "etc"       user-emacs-directory))
 ;; (add-subdirs-to-load-path (expand-file-name "site-lisp" user-emacs-directory))
 ;; (add-subdirs-to-load-path (expand-file-name "themes"    suk-emacs-share-dir))
-(add-subdirs-to-load-path suk-emacs-config-dir)
-(add-subdirs-to-load-path suk-emacs-extension-dir)
-(add-subdirs-to-load-path suk-emacs-themes-dir)
+(add-subdirs-to-load-path suk-emacs-config-dir t)
+(add-subdirs-to-load-path suk-emacs-extension-dir t)
+(add-subdirs-to-load-path suk-emacs-themes-dir t)
 
 (let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
       (gc-cons-threshold most-positive-fixnum)
@@ -91,15 +99,15 @@
       (file-name-handler-alist nil))
 
   ;; Emacs配置文件内容写到下面.
-  ;; (when (version< emacs-version "25.1")
-  ;;   (error "This requires Emacs 25.1 and above!"))
+  (when (version< emacs-version "25.1")
+     (error "This requires Emacs 25.1 and above!"))
 
   (add-hook 'emacs-startup-hook
     (lambda ()
       "Restore defalut values after init."
       (setq file-name-handler-alist default-file-name-handler-alist)
       ;; The default is 0.8MB
-      (setq gc-cons-threshold 8000000)
+      ;;(setq gc-cons-threshold 8000000)
       (message "Emacs ready in %s with %d garbage collections."
         (format "%.2f seconds"
           (float-time
@@ -107,8 +115,6 @@
         gcs-done)
       (add-hook 'focus-out-hook 'garbage-collect)))
 
-  ;; 忽略 cl 过期警告
-  (setq byte-compile-warnings '(cl-function))
 
   (with-temp-message ""                 ;抹掉插件启动的输出
     ;; autoload functions
@@ -125,8 +131,7 @@
     (require 'display-line-numbers)
     (require 'basic-toolkit)
 
-    (require 'one-key)
-    (require 'init-one-key)
+
     (require 'init-key)
 
     ;; Packages
@@ -185,4 +190,3 @@
 (put 'scroll-left 'disabled nil)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here
-(put 'upcase-region 'disabled nil)

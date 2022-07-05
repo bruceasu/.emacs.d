@@ -44,7 +44,7 @@
   "Set user email address."
   :type 'string)
 
-(defcustom suk-proxy "127.0.0.1:1087"
+(defcustom suk-proxy "127.0.0.1:1080"
   "Set network proxy."
   :type 'string)
 

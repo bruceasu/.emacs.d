@@ -105,15 +105,6 @@
          :map ivy-minibuffer-map
          ("C-w" . ivy-yank-word)
 
-         ;; Search at point
-         ;; "M-j": word-at-point
-         ;; "M-n"/"C-w": symbol-at-point
-         ;; Refer to https://www.emacswiki.org/emacs/SearchAtPoint#toc8
-         ;; and https://github.com/abo-abo/swiper/wiki/FAQ
-         ;; ("C-w" . (lambda ()
-         ;;            (interactive)
-         ;;            (insert (format "%s" (with-ivy-window (ivy-thing-at-point))))))
-
          :map counsel-find-file-map
          ("C-h" . counsel-up-directory)
 
@@ -123,7 +114,6 @@
          (ivy-mode . counsel-mode))
   :config
   (setq enable-recursive-minibuffers t) ; Allow commands in minibuffers
-
   (setq ivy-use-selectable-prompt t)
   (setq ivy-use-virtual-buffers t) ; Enable bookmarks and recentf
   (setq ivy-height 10)
@@ -307,12 +297,11 @@
 
 (use-package daemons
   :defer 1)								; system services/daemons
-(use-package diffview
-  :defer 2)								; side-by-side diff view
 (use-package htmlize
   :defer 2)								; covert to html
 (use-package list-environment
   :defer 2)
+
 ;;(use-package restart-emacs)
 
 ;; Emacs下的pdf查看工具，默认非图形化不开启
@@ -328,11 +317,7 @@
       :ensure t
       :defer 2
       :bind ("M-<f12>" . 'vterm))
-    (use-package pdf-tools
-      :ensure t
-      :defer 2
-      :hook ('doc-view-mode 'pdf-view-mode))
-    )
+	)
   ;; 飘，晃眼
   ;; (use-package which-key-posframe
   ;;   :ensure nil
@@ -357,87 +342,7 @@
   ;;            (setq default-input-method "rime"
   ;;                  rime-show-candidate 'posframe))
 
-
-  ;; (if (file-exists-p "~/.emacs.d/site-lisp/emacs-application-framework")
-  ;;            (use-package eaf
-  ;;              :load-path "~/.emacs.d/site-lisp/emacs-application-framework"
-  ;;              :custom (eaf-find-alternate-file-in-dired t)
-  ;;              (eaf-proxy-type "socks5")
-  ;;              (eaf-proxy-host "127.0.0.1")
-  ;;              (eaf-proxy-port "1088")
-  ;;              (browse-url-browser-function 'eaf-open-browser)
-  ;;              :config
-  ;;              (defalias 'browse-web #'eaf-open-browser)
-  ;;              (setq eaf-grip-token "32872f2ccde165e5d36548619681c7b7e7ec8793")
-  ;;              (eaf-setq eaf-pdf-dark-mode "true")
-  ;;              (eaf-setq eaf-browser-dark-mode "true")
-  ;;              (eaf-setq eaf-mindmap-dark-mode "true")
-  ;;              (eaf-setq eaf-browser-enable-adblocker "true")
-  ;;              (when (and
-  ;;                     (> (car (circadian-now-time)) (car (circadian-sunrise)))
-  ;;                     (< (car (circadian-now-time)) (car (circadian-sunset))))
-  ;;                (progn
-  ;;                  (eaf-setq eaf-pdf-dark-mode "false")
-  ;;                  (eaf-setq eaf-browser-dark-mode "false")
-  ;;                  (eaf-setq eaf-mindmap-dark-mode "false")))
-  ;;              (eaf-setq eaf-browser-default-zoom "1.2")
-  ;;              (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-  ;;              (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
-  ;;              (eaf-bind-key take_photo "p" eaf-camera-keybinding))
-  ;;          (message
-  ;;           "你需要下载emacs-application-framework到~/.emacs.d/site-lisp/emacs-application-framework.才能启用EAF"))
-
-
-
-  ;; Emacs下telegram的客户端，默认不开启
-  ;;  tdlib :: telega需要
-  ;; ArchLinux #archlinuxcn
-  ;;    pacman -S libtd-git
-  ;;(use-package
-  ;;  telega
-  ;;  :ensure nil
-  ;;  :commands telega
-  ;;  :init (setq telega-proxies
-  ;;              '((:server "localhost"
-  ;;                         :port 1088
-  ;;                         :enable t
-  ;;                         :type (:@type "proxyTypeSocks5"
-  ;;                                       )
-  ;;                         )))
-  ;;  (setq telega-chat-fill-column 65)
-  ;;  (setq telega-emoji-use-images nil)
-  ;;  :config
-  ;;  (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'prepend)
-  ;;  (with-eval-after-load 'company (add-hook 'telega-chat-mode-hook (lambda ()
-  ;;                                                                    (make-local-variable 'company-backends)
-  ;;                                                                    (dolist (it '(telega-company-botcmd telega-company-emoji))
-  ;;                                                                      (push it company-backends)))))
-  ;;  (with-eval-after-load 'all-the-icons (add-to-list 'all-the-icons-mode-icon-alist '(telega-root-mode all-the-icons-fileicon "telegram"
-  ;;                                                                                                      :heigt 1.0
-  ;;                                                                                                      :v-adjust -0.2
-  ;;                                                                                                      :face all-the-icons-yellow))
-  ;;                        (add-to-list 'all-the-icons-mode-icon-alist '(telega-chat-mode all-the-icons-fileicon "telegram"
-  ;;                                                                                       :heigt 1.0
-  ;;                                                                                       :v-adjust -0.2
-  ;;                                                                                       :face all-the-icons-blue)))
-  ;;  (telega-notifications-mode 1)
-  ;;  (telega-mode-line-mode 1))
-
   )
-
-
-
-;; 一个可以临时安装使用插件的插件
-;; (use-package try
-;;   :disabled
-;;   :ensure t
-;;   :defer 2)
-
-;;; browser
-;; (use-package eww
-;;   :ensure t
-;;   :defer 2
-;;   :custom (eww-search-prefix "https://google.com/search?q="))
 
 (provide 'init-utils)
 
