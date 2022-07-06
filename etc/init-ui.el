@@ -40,14 +40,9 @@
 (tool-bar-mode -1)
 ;; 关闭菜单栏
 (menu-bar-mode -1)
+(require 'load-set-font)
 (require 'lazycat-theme)
 (lazycat-theme-load-dark)
-
-;; 高亮当前行
-;; Highlight the current line
-(use-package hl-line
-  :ensure nil
-  :hook (after-init . global-hl-line-mode))
 
 ;; 切换buffer焦点时高亮动画
 (use-package beacon
@@ -79,8 +74,6 @@
 	)
   )
 
-
-
 ;; 这是 purcell 写的一个插件，按照描述来看就是把 ^L显示为一个整洁的水平线。
 ;; 这个^L其实并不是^与L的组合，而是一个单一的字符。我查了一下，很可能这个代表的
 ;; 意思是软回车。C-q C-L 来输入。
@@ -98,23 +91,15 @@
   ;; 浮动窗口支持
   (use-package posframe :ensure t)
 )
+
 ;; Mode-line
 (defun mode-line-height ()
    "Get current height of mode-line."
    (- (elt (window-pixel-edges) 3)
      (elt (window-inside-pixel-edges) 3)))
 
-(use-package hide-mode-line
-  :hook (((completion-list-mode
-           completion-in-region-mode
-           neotree-mode
-           treemacs-mode)
-          . hide-mode-line-mode)))
-
-
-(require 'load-set-font)
-
 ;; Line and Column
+(linum-mode t)
 (setq-default fill-column 65)
 (setq column-number-mode t)
 (defun buffer-too-big-p ()

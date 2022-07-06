@@ -138,37 +138,14 @@
    )
  dired-mode-map
  )
-(lazy-load-local-keys
- '(
-   ("w" . wdired-change-to-wdired-mode))
- dired-mode-map
- "wdired")
-(lazy-load-local-keys
- '(
-   ("C-s" . dired-isearch-forward)             ;向后搜索
-   ("C-r" . dired-isearch-backward)            ;向前搜索
-   ("ESC C-s" . dired-isearch-forward-regexp)  ;向前正则表达式搜索
-   ("ESC C-r" . dired-isearch-backward-regexp) ;向后正则表达式搜索
-   )
- dired-mode-map
- "dired-isearch")
+
 (lazy-load-local-keys
  '(
    ("/" . copy-buffer-file-name-as-kill))
  dired-mode-map
  "buffer-extension")
-(lazy-load-local-keys
- '(
-   (";" . dired-view-minor-mode-toggle) ;字母输入导航模式
-   )
- dired-mode-map
- "dired-view")
-(lazy-load-local-keys
- '(
-   ("T" . dired-tar-pack-unpack)
-   )
- dired-mode-map
- "dired-tar")
+
+
 (lazy-load-local-keys
  '(
    ("M-o" . dired-toggle-omit)          ;切换忽略状态
@@ -187,69 +164,7 @@
    )
  dired-mode-map
  "dired-extension")
-(lazy-load-local-keys
- '(
-   ("\"" . grep-dired-dwim)             ;查找特定的lisp文件
-   )
- dired-mode-map
- "grep-dired")
-(lazy-load-local-keys
- '(
-   ("]" . dired-show-file-qrcode))
- dired-mode-map
- "eaf.el")
-;;; ### Wdired ###
-;;; --- Dired 的编辑模式
-(eval-after-load 'wdired
-  '(lambda ()
-     (progn
-       (require 'wdired-extension)
-       (lazy-load-set-keys
-        '(
-          ("C-c C-e" . wdired-format-filename) ;格式化文件名
-          )
-        wdired-mode-map
-        ))))
 
-(defvar one-key-menu-dired-sort-alist nil
-  "The `one-key' menu alist for DIRED-SORT.")
-
-(setq one-key-menu-dired-sort-alist
-      '(
-        (("s" . "Size") . dired-sort-size)
-        (("x" . "Extension") . dired-sort-extension)
-        (("n" . "Name") . dired-sort-name)
-        (("t" . "Modified Time") . dired-sort-time)
-        (("u" . "Access Time") . dired-sort-utime)
-        (("c" . "Create Time") . dired-sort-ctime)))
-
-(defun one-key-menu-dired-sort ()
-  "The `one-key' menu for DIRED-SORT."
-  (interactive)
-  (require 'one-key)
-  (require 'dired-sort)                 ;排序 dired 文件
-  (one-key-menu "DIRED-SORT" one-key-menu-dired-sort-alist t))
-
-(defvar one-key-menu-dired-filter-alist nil
-  "The `one-key' menu alist for DIRED-FILTER.")
-
-(setq one-key-menu-dired-filter-alist
-      '(
-        (("x" . "Extension") . dired-filter-by-extension)
-        (("f" . "File") . dired-filter-by-file)
-        (("d" . "Directory") . dired-filter-by-directory)
-        (("e" . "Execute") . dired-filter-by-executable)
-        (("." . "Dot files") . dired-filter-by-dot-files)
-        (("r" . "Regex") . dired-filter-by-regexp)
-        (("s" . "Symlink") . dired-filter-by-symlink)
-        (("n" . "Name") . dired-filter-by-name)
-        ))
-
-(defun one-key-menu-dired-filter ()
-  "The `one-key' menu for DIRED-FILTER."
-  (interactive)
-  (require 'dired-filter)
-  (one-key-menu "DIRED-FILTER" one-key-menu-dired-filter-alist t))
 
 (provide 'init-dired)
 

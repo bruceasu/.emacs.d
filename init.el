@@ -94,7 +94,7 @@
 
 (let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
       (gc-cons-threshold most-positive-fixnum)
-      (gc-cons-percentage 0.6)
+      (gc-cons-percentage 0.8)
       ;; 清空避免加载远程文件的时候分析文件。
       (file-name-handler-alist nil))
 
@@ -107,7 +107,7 @@
       "Restore defalut values after init."
       (setq file-name-handler-alist default-file-name-handler-alist)
       ;; The default is 0.8MB
-      ;;(setq gc-cons-threshold 8000000)
+	  ;;(setq gc-cons-threshold 80000000)
       (message "Emacs ready in %s with %d garbage collections."
         (format "%.2f seconds"
           (float-time
@@ -129,9 +129,7 @@
     (require 'lazy-load)
     (require 'awesome-pair)
     (require 'display-line-numbers)
-    (require 'basic-toolkit)
-
-
+   ;; (require 'basic-toolkit)
     (require 'init-key)
 
     ;; Packages
@@ -140,7 +138,6 @@
     (require 'init-ui)
     (require 'init-utils)
     (require 'init-file-encoding)
-    (require 'init-buffers)
     ;; (use-package esup
     ;;              :ensure t
     ;;              ;; To use MELPA Stable use ":pin melpa-stable",
@@ -164,10 +161,7 @@
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-         ;; Restore session at last.
-         (require 'init-session)
-         (emacs-session-restore)
-         (require 'init-idle)
+	     (require 'init-idle)
          (require 'highlight-parentheses)
          (require 'init-auto-save)
          (require 'init-auto-sudoedit)
@@ -175,12 +169,12 @@
          (require 'init-awesome-tray)
          (require 'init-awesome-tab)
          (require 'init-sudo)
-         (require 'init-bookmark)
-         (require 'init-dired)
 		 (require 'init-calendar)
-         ;; Music
-         ;;(require 'init-emms)
+		 (require 'load-abbrev)
          ;; (server-start)            ;为emacsclient准备使用场景，比如git
+		 ;; Restore session at last.
+		 (require 'init-session)
+		 (emacs-session-restore)
          ))
     )
 )

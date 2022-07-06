@@ -82,7 +82,7 @@
       scroll-preserve-screen-position 'always)
 
 
-;; (setq initial-scratch-message nil)
+(setq initial-scratch-message nil)
 (setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
 (setq adaptive-fill-first-line-regexp "^* *$")
 (setq kill-whole-line t)                   ; C-k deletes the end of line

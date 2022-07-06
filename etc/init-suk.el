@@ -1,21 +1,3 @@
-(eval-when-compile
-  (require '+custom))
-
-
-;; Ó¢Óï×Ô¶¯²¹È«
-;; (require 'company-english-helper)
-
-(when sys/linuxp
-
-
-  )
-
-(require 'load-abbrev)
-;;(require 'load-epa)
-;;(require 'redo)
-;;(require 'tabbar)
-;;(require 'load-tabbar)
-
 ;; Frequently-accessed files
 
 ;; Registers allow you to jump to a file or other location quickly.

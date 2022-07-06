@@ -59,8 +59,8 @@
         (jump-to-register 8)
         (set-register 8 tmp)))
 
-(global-set-key  [C-f7] 'suk/ska-point-to-register)
-(global-set-key  [f7] 'suk/ska-jump-to-register)
+;;(global-set-key  [C-f7] 'suk/ska-point-to-register)
+;;(global-set-key  [f7] 'suk/ska-jump-to-register)
 
 ;; bookmark
 ;; C-x r m <RET>

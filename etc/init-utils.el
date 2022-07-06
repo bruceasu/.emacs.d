@@ -199,8 +199,6 @@
   :defer 2
   :bind (("<C-return>" . rectangle-mark-mode)))
 
-
-
 ;; On-the-fly spell checker
 (unless sys/win32p
  (use-package flyspell
@@ -318,13 +316,6 @@
       :defer 2
       :bind ("M-<f12>" . 'vterm))
 	)
-  ;; 飘，晃眼
-  ;; (use-package which-key-posframe
-  ;;   :ensure nil
-  ;;   :disabled
-  ;;   :load-path "~/.emacs.d/site-lisp/which-key-posframe/which-key-posframe.el"
-  ;;   :init
-  ;;   (which-key-posframe-mode))
 
   ;; emacs 调用 rime输入法的前端，强烈推荐
   ;;          (use-package rime

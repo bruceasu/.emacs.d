@@ -35,6 +35,7 @@
 ;; =========================================================
 ;; 普通用户调用root权限写文件
 ;; ---------------------------------------------------------
+;;;###autoload
 (defun suk/sudo-edit (&optional arg)
   (interactive "P")
   (if (or arg (not buffer-file-name))
@@ -44,12 +45,14 @@
   )
 )
 ;; ---------------------------------------------------------
+;;;###autoload
 (defadvice ido-find-file (after suk/sudo-find-file activate)
       "Find file as root if necessary."
       (unless (and buffer-file-name
                    (file-writable-p buffer-file-name))
         (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
 ;; ---------------------------------------------------------
+;;;###autoload
 (defun suk/sudo-find-file (file-name)
   "Like find file, but opens the file as root."
   (interactive "Find File for sudo-edit: ")
@@ -64,6 +67,7 @@
 )
 
 ;; ---------------------------------------------------------
+;;;###autoload
 (defun suk/sudo-save ()
     (interactive)
     (if (not buffer-file-name)

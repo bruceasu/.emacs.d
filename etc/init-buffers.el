@@ -30,7 +30,8 @@
 
 (eval-when-compile
   (require '+const)
-  (require '+custom))
+  (require '+custom)
+  (require 'buffer-extension))
 
 ;; ==============================================================
 ;; buffers

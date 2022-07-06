@@ -2,10 +2,22 @@
   (require '+const)
   (require '+custom))
 
+;;; 全局 lazy-load-global-keys
+;;; 模式 lazy-load-local-keys
+;;; 支持最后一个参数传递前缀按键，
+;;;
+;;; 如果Emacs默认就加载了某个插件，而不需要在运行时动态加载，也可
+;;; 以使用 lazy-load-set-keys
+;;;
+;;; 很多全局按键默认已经被 Emacs占用了，必须先卸载以后才能重新绑
+;;; 定这些全局按键，比如 Ctrl + x, 下面这段代码就是用
+;;; lazy-load-unset-keys 卸载默认绑定的全局按键
+
 ;; Mac平台下交换 Option 和 Command 键。
 ;;(when (featurep 'cocoa)
 ;;  (setq mac-option-modifier 'super)
 ;;  (setq mac-command-modifier 'meta))
+;;
 
 ;;; ### Unset key ###
 ;;; --- 卸载按键
@@ -16,9 +28,9 @@
 ;;; ### Sdcv ###
 ;;; --- 星际译王命令行
 (lazy-load-global-keys
- '(("p" . sdcv-search-pointer)          ;光标处的单词, buffer显示
-   ("P" . sdcv-search-pointer+)         ;光标处的单词, tooltip显示
-   ("i" . sdcv-search-input)            ;输入的单词, buffer显示
+ '(("p" . sdcv-search-pointer)		   ;光标处的单词, buffer显示
+   ("P" . sdcv-search-pointer+)		   ;光标处的单词, tooltip显示
+   ("i" . sdcv-search-input)		   ;输入的单词, buffer显示
    (";" . sdcv-search-input+)
    ("y" . youdao-dictionary-search-at-point)
    ("Y" . youdao-dictionary-search-at-point-tooltip)
@@ -28,6 +40,7 @@
    )
  "init-translate"
  "C-z")
+
 ;;; ### Insert translated name ###
 (lazy-load-global-keys
  '(
@@ -44,16 +57,17 @@
    )
  "init-insert-translated-name")
 
+;;; ### buffers ###
 (lazy-load-global-keys
  '(
    ("C-x l" . suk/count-brf-lines)
    ("C-x x" . suk/switch-major-mode)
    ("C-x X" . suk/get-mode-name)
-   ;;(list (kbd "C-x U") 'suk/revert-buffer-with-utf8)
-   ;;(list (kbd "C-x K") 'suk/revert-buffer-with-gbk)
+
    ("C-x k" . suk/close-current-buffer)
-   ("C-S-t" . suk/open-last-closed) ; control+shift+t
+   ("C-S-t" . suk/open-last-closed)		; control+shift+t
    ("C-S-r" . suk/open-recently-closed) ; control+shift+t
+   ("C-x L" . suk/list-recently-closed) ; control+x L
    ("S-<f2>" .  suk/new-empty-buffer)
    ("C-c s" .  suk/create-scratch-buffer)
    ("C-c o" .  suk/switch-to-minibuffer)
@@ -63,6 +77,10 @@
    ("C-x n x" . xah-narrow-to-region) ; C-x n w ,  C-x n d, C-x n n, C-x n p 系列
    ("S-<f7>" . indent-buffer)
    ("C-<f2>" . rename-file-and-buffer)
+   ("C-M-;" . kill-other-window-buffer) ;关闭其他窗口的
+   ("C-x K" . kill-all-buffers-except-current)
+   ("C-x M" . move-buffer-file)
+   ("C-x C" . copy-buffer-file-name-as-kill)
    )
  "init-buffers")
 
@@ -88,24 +106,24 @@
    ))
 
 
-
+;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
-   ("M-s-n" . comment-part-move-down)    ;向下移动注释
-   ("M-s-p" . comment-part-move-up)      ;向上移动注释
-   ("C-s-n" . comment-dwim-next-line)    ;移动到上一行并注释
-   ("C-s-p" . comment-dwim-prev-line)    ;移动到下一行并注释
-   ("M-2" . indent-buffer)               ;自动格式化当前Buffer
-   ("M-z" . upcase-char)      ;Upcase char handly with capitalize-word
-										;("C-x u" . mark-line)      ;选中整行
+   ("M-s-n" . comment-part-move-down)   ;向下移动注释
+   ("M-s-p" . comment-part-move-up)     ;向上移动注释
+   ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
+   ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
+   ("M-2" . indent-buffer)              ;自动格式化当前Buffer
+   ("M-z" . upcase-char) ;Upcase char handly with capitalize-word
+   ;;("C-x u" . mark-line)              ;选中整行
    ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
    ("M-G" . goto-column)                ;到指定列
    ("C->" . remember-init)              ;记忆初始函数
    ("C-<" . remember-jump)              ;记忆跳转函数
    ("M-s-," . point-stack-pop)          ;buffer索引跳转
    ("M-s-." . point-stack-push)         ;buffer索引标记
-   ("s-g" . goto-percent)    ;跳转到当前Buffer的文本百分比, 单位为字符
-   ("M-I" . backward-indent) ;向后移动4个字符
+   ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
+   ("M-I" . backward-indent)            ;向后移动4个字符
    ("s-J" . scroll-up-one-line)         ;向上滚动一行
    ("s-K" . scroll-down-one-line)       ;向下滚动一行
    ("<f2>" . refresh-file)              ;自动刷新文件
@@ -114,6 +132,7 @@
    )
  "basic-toolkit")
 
+;;; ### goto-line-preview ###
 (lazy-load-global-keys
  '(
    ("M-g" . goto-line-preview))
@@ -131,10 +150,10 @@
 ;;; --- 滚动其他窗口
 (lazy-load-global-keys
  '(
-   ("M-I" . other-window-move-up)        ;向下滚动其他窗口
-   ("M-K" . other-window-move-down)      ;向上滚动其他窗口
-   ("M-J" . window-move-up)              ;向下滚动当前窗口
-   ("M-L" . window-move-down)            ;向上滚动当前窗口
+   ("M-I" . other-window-move-up)		;向下滚动其他窗口
+   ("M-K" . other-window-move-down)		;向上滚动其他窗口
+   ("M-J" . window-move-up)				;向下滚动当前窗口
+   ("M-L" . window-move-down)			;向上滚动当前窗口
    )
  "win-move")
 
@@ -154,14 +173,15 @@
    ("C-M-e" . end-of-defun)             ;函数末尾
    ))
 
-
+;;; ### move text ###
 (lazy-load-global-keys
  '(
-   ("M-N" . move-text-down)      ;把光标所在的整行文字(或标记)下移一行
-   ("M-P" . move-text-up)        ;把光标所在的整行文字(或标记)上移一行
+   ("M-N" . move-text-down)	;把光标所在的整行文字(或标记)下移一行
+   ("M-P" . move-text-up)	;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
 
+;;; ### duplicate-line ###
 (lazy-load-global-keys
  '(
    ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
@@ -172,6 +192,7 @@
    )
  "duplicate-line")
 
+;;; ### open new line ###
 (lazy-load-global-keys
  '(
    ("C-o" . open-newline-above)         ;在上面一行新建一行
@@ -179,13 +200,6 @@
    )
  "open-newline")
 
-;;; ### Buffer Name ###
-;;; --- 缓存名字
-(lazy-load-global-keys
- '(
-   ("C-M-;" . kill-other-window-buffer) ;关闭其他窗口的buffer
-   )
- "buffer-extension")
 
 
 ;;; ### Buffer Edit ###
@@ -198,6 +212,7 @@
    ("M-SPC" . just-one-space)              ;只有一个空格在光标处
    ))
 
+;;; ### undo-tree ###
 (lazy-load-global-keys
  '(
    ("C-/" . undo-tree-undo)             ;撤销
@@ -210,15 +225,15 @@
 ;;; --- 矩形操作
 (lazy-load-global-keys
  '(
-   ("s-M" . rm-set-mark)                 ;矩形标记
-   ("s-X" . rm-exchange-point-and-mark)  ;矩形对角交换
-   ("s-D" . rm-kill-region)              ;矩形删除
-   ("s-S" . rm-kill-ring-save)           ;矩形保存
-   ("s-Y" . yank-rectangle)              ;粘帖矩形
-   ("s-O" . open-rectangle)              ;用空白填充矩形, 并向右移动文本
-   ("s-C" . clear-rectangle)             ;清空矩形
-   ("s-T" . string-rectangle)            ;用字符串替代矩形的每一行
-   ("s-I" . string-insert-rectangle)     ;插入字符串在矩形的每一行
+   ("s-M" . rm-set-mark)				;矩形标记
+   ("s-X" . rm-exchange-point-and-mark)	;矩形对角交换
+   ("s-D" . rm-kill-region)				;矩形删除
+   ("s-S" . rm-kill-ring-save)			;矩形保存
+   ("s-Y" . yank-rectangle)				;粘帖矩形
+   ("s-O" . open-rectangle)		  ;用空白填充矩形, 并向右移动文本
+   ("s-C" . clear-rectangle)	  ;清空矩形
+   ("s-T" . string-rectangle)	  ;用字符串替代矩形的每一行
+   ("s-I" . string-insert-rectangle)	;插入字符串在矩形的每一行
    ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
    ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
    ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
@@ -252,11 +267,11 @@
    ))
 (lazy-load-global-keys
  '(
-   ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
+   ("C-c V" . delete-other-windows-vertically+)	;关闭上下的其他窗口
    ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
    ("C-'" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
-   ("C-\"" . delete-current-buffer-window)    ;删除当前buffer的窗口
-   ("M-s-o" . toggle-one-window)              ;切换一个窗口
+   ("C-\"" . delete-current-buffer-window) ;删除当前buffer的窗口
+   ("M-s-o" . toggle-one-window)		   ;切换一个窗口
    ("C-x O" . toggle-window-split)
    )
  "window-extension")
@@ -306,43 +321,74 @@
 (defvar awesome-pair-key-alist nil)
 (setq awesome-pair-key-alist
       '(
-		;; 移动
-		("M-n" . awesome-pair-jump-left)
-		("M-p" . awesome-pair-jump-right)
-		;; 符号插入
-		("%" . awesome-pair-match-paren)       ;括号跳转
-		("(" . awesome-pair-open-round)        ;智能 (
-		("[" . awesome-pair-open-bracket)      ;智能 [
-		("{" . awesome-pair-open-curly)        ;智能 {
-		(")" . awesome-pair-close-round)       ;智能 )
-		("]" . awesome-pair-close-bracket)     ;智能 ]
-		("}" . awesome-pair-close-curly)       ;智能 }
-		("\"" . awesome-pair-double-quote)     ;智能 "
-		("=" . awesome-pair-equal)             ;智能 =
-		("SPC" . awesome-pair-space)           ;智能 Space
-		;; 删除
-		("M-o" . awesome-pair-backward-delete) ;向后删除
-		("C-d" . awesome-pair-forward-delete)  ;向前删除
-		("C-k" . awesome-pair-kill)            ;向前kill
-		;; 包围
-		("M-\"" . awesome-pair-wrap-double-quote) ;用 " " 包围对象, 或跳出字符串
-		("M-[" . awesome-pair-wrap-bracket)       ;用 [ ] 包围对象
-		("M-{" . awesome-pair-wrap-curly)         ;用 { } 包围对象
-		("M-(" . awesome-pair-wrap-round)         ;用 ( ) 包围对象
-		("M-)" . awesome-pair-unwrap)             ;去掉包围对象
-		;; 跳出并换行缩进
-		("M-:" . awesome-pair-jump-out-pair-and-newline) ;跳出括号并换行
-		))
+        ;; 移动
+        ("M-n" . awesome-pair-jump-left)
+        ("M-p" . awesome-pair-jump-right)
+        ;; 符号插入
+        ("%" . awesome-pair-match-paren)       ;括号跳转
+        ("(" . awesome-pair-open-round)        ;智能 (
+        ("[" . awesome-pair-open-bracket)      ;智能 [
+        ("{" . awesome-pair-open-curly)        ;智能 {
+        (")" . awesome-pair-close-round)       ;智能 )
+        ("]" . awesome-pair-close-bracket)     ;智能 ]
+        ("}" . awesome-pair-close-curly)       ;智能 }
+        ("\"" . awesome-pair-double-quote)     ;智能 "
+        ("=" . awesome-pair-equal)             ;智能 =
+        ("SPC" . awesome-pair-space)           ;智能 Space
+        ;; 删除
+        ("M-o" . awesome-pair-backward-delete) ;向后删除
+        ("C-d" . awesome-pair-forward-delete)  ;向前删除
+        ("C-k" . awesome-pair-kill)            ;向前kill
+        ;; 包围
+        ("M-\"" . awesome-pair-wrap-double-quote) ;用 " " 包围对象, 或跳出字符串
+        ("M-[" . awesome-pair-wrap-bracket)	;用 [ ] 包围对象
+        ("M-{" . awesome-pair-wrap-curly)	;用 { } 包围对象
+        ("M-(" . awesome-pair-wrap-round)	;用 ( ) 包围对象
+        ("M-)" . awesome-pair-unwrap)		;去掉包围对象
+        ;; 跳出并换行缩进
+        ("M-:" . awesome-pair-jump-out-pair-and-newline) ;跳出括号并换行
+        ))
 
 (lazy-load-set-keys awesome-pair-key-alist awesome-pair-mode-map)
 ;;; ### Thingh-edit ###
 ;;; --- 增强式编辑当前光标的对象
 (lazy-load-global-keys
  '(
-   ("M-s-h" . one-key-menu-thing-edit)  ;thing-edit 菜单
+   ("C-c w" . thing-copy-word)
+   ("C-c s" . thing-copy-symbol)
+   ("C-c m" . thing-copy-email)
+   ("C-c f" . thing-copy-filename)
+   ("C-c u" . thing-copy-url)
+   ("C-c x" . thing-copy-sexp)
+   ("C-c g" . thing-copy-page)
+   ("C-c t" . thing-copy-sentence)
+   ("C-c o" . thing-copy-witespace)
+   ("C-c i" . thing-copy-list)
+   ("C-c c" . thing-copy-comment)
+   ("C-c h" . thing-copy-defun)
+   ("C-c p" . thing-copy-parentheses)
+   ("C-c l" . thing-copy-line)
+   ("C-c a" . thing-copy-to-line-begining)
+   ("C-c e" . thing-copy-to-line-end)
+   ("C-c W" . thing-cut-word)
+   ("C-c S" . thing-cut-symbol)
+   ("C-c M" . thing-cut-email)
+   ("C-c F" . thing-cut-filename)
+   ("C-c G" . thing-cut-page)
+   ("C-c T" . thing-cut-sentence)
+   ("C-c O" . thing-cut-whitespace)
+   ("C-c I" . thing-cut-list)
+   ("C-c C" . thing-cut-comment)
+   ("C-c H" . thing-cut-defun)
+   ("C-c P" . thing-cut-parentheses)
+   ("C-c L" . thing-cut-line)
+   ("C-c A" . thing-cut-to-line-beginning)
+   ("C-c E" . thing-cut-to-line-end)
    )
- "init-thing-edit"
+ "thing-edit"
+ "C-z"
  )
+
 ;;; ### Aweshell ###
 ;;; --- 多标签式的shell
 ;; (lazy-load-global-keys
@@ -364,41 +410,32 @@
 
 ;;; ### Isearch ###
 ;;; --- 交互式搜索
-;; (lazy-load-set-keys
-;;  '(
-;;    ("TAB" . isearch-complete)               ;isearch补全
-;;    ("C-s" . isearch-repeat-forward)         ;重复向前搜索, 第一次可以用来搜索上一次的历史哟
-;;    ("C-r" . isearch-repeat-backward)        ;重复向后搜索
-;;    ("C-g" . isearch-abort)                  ;中止搜索
-;;    ("C-w" . isearch-yank-word-or-char)      ;粘帖光标后的词或字符作为搜索对象
-;;    ("C-y" . isearch-yank-line)              ;粘帖光标后的行作为搜索对象
-;;    ("M-o" . isearch-delete-char)            ;删除
-;;    ("M-p" . isearch-ring-retreat)           ;搜索历史向后
-;;    ("M-n" . isearch-ring-adjust)            ;搜索历史向前
-;;    ("M-y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
-;;    ("M-h" . isearch-yank-char)              ;粘帖光标后的字符到搜索对象
-;;    ("M-e" . isearch-edit-string)            ;编辑搜索对象
-;;    ("M-c" . isearch-toggle-case-fold)       ;切换大小写
-;;    ("M-r" . isearch-toggle-regexp)          ;切换正则表达式
-;;    ("M-w" . isearch-toggle-word)            ;切换词
-;;    ("M->" . isearch-beginning-of-buffer)    ;跳转到buffer开头并重新搜索, 搜索最前面一个
-;;    ("M-<" . isearch-end-of-buffer)          ;跳转到buffer末尾并重新搜索, 搜索最后面一个
-;;    ("M-%" . isearch-query-replace)          ;替换
-;;    ("M-d" . isearch-find-duplicate-word)    ;查找重复的单词
-;;    ("M-z" . isearch-find-duplicate-line)    ;查找重复的行
-;;    ("C-M-%" . isearch-query-replace-regexp) ;正则表达式替换
-;;    )
-;;  isearch-mode-map
-;;  )
-
-
-;;; ### Help ###
-;;; --- 帮助模式
-(lazy-load-global-keys
+(lazy-load-set-keys
  '(
-   ("C-h". one-key-menu-help)           ;帮助菜单
+   ("TAB" . isearch-complete)               ;isearch补全
+   ("C-s" . isearch-repeat-forward)         ;重复向前搜索, 第一次可以用来搜索上一次的历史哟
+   ("C-r" . isearch-repeat-backward)        ;重复向后搜索
+   ("C-g" . isearch-abort)                  ;中止搜索
+   ("C-w" . isearch-yank-word-or-char)      ;粘帖光标后的词或字符作为搜索对象
+   ("C-y" . isearch-yank-line)              ;粘帖光标后的行作为搜索对象
+   ("M-o" . isearch-delete-char)            ;删除
+   ("M-p" . isearch-ring-retreat)           ;搜索历史向后
+   ("M-n" . isearch-ring-adjust)            ;搜索历史向前
+   ("M-y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
+   ("M-h" . isearch-yank-char)              ;粘帖光标后的字符到搜索对象
+   ("M-e" . isearch-edit-string)            ;编辑搜索对象
+   ("M-c" . isearch-toggle-case-fold)       ;切换大小写
+   ("M-r" . isearch-toggle-regexp)          ;切换正则表达式
+   ("M-w" . isearch-toggle-word)            ;切换词
+   ("M->" . isearch-beginning-of-buffer)    ;跳转到buffer开头并重新搜索, 搜索最前面一个
+   ("M-<" . isearch-end-of-buffer)          ;跳转到buffer末尾并重新搜索, 搜索最后面一个
+   ("M-%" . isearch-query-replace)          ;替换
+   ("M-d" . isearch-find-duplicate-word)    ;查找重复的单词
+   ("M-z" . isearch-find-duplicate-line)    ;查找重复的行
+   ("C-M-%" . isearch-query-replace-regexp) ;正则表达式替换
    )
- "init-help-mode")
+ isearch-mode-map
+ )
 
 
 ;;; ### expand-region ###
@@ -406,18 +443,12 @@
  '(
    ("C-=" . er/expand-region))
  "expand-region")
+
 ;; ### vdiff ###
 (lazy-load-global-keys
  '(
    ("M-s-u" . vdiff-buffers))
  "vdiff")
-;;; ### Magit ###
-;;
-(lazy-load-global-keys
- '(
-   ("s-x f" . one-key-menu-magit))
- "init-git")
-
 
 ;;; ### Ace jump ###
 (lazy-load-global-keys
@@ -480,30 +511,31 @@
 ;; "C-x"
 ;; )
 
-;;; ### Doc-view ###
-;;; --- 文档阅读器
-;; (lazy-load-global-keys
-;;  '(
-;;    ("C-M-j" . pdf-view-scroll-up-or-next-page+) ;翻另一个窗口中图书的下一页
-;;    ("C-M-k" . pdf-view-scroll-down-or-previous-page+) ;翻另一个窗口中图书的上一页
-;;    )
-;;  "init-pdf-tools")
 
 ;;; ### Keyboard Macro ###
 ;;; --- 键盘宏
 (lazy-load-global-keys
  '(
    ("M-s-s" . kmacro-start-macro-or-insert-counter) ;开始键盘宏或插入 F3
-   ("M-s-d" . kmacro-end-or-call-macro)             ;结束键盘宏或调用 F4
-   ("M-s-c" . kmacro-delete-ring-head)              ;删除当前的键盘宏
-   ("M-s-w" . kmacro-cycle-ring-next)               ;下一个键盘宏
-   ("M-s-e" . kmacro-cycle-ring-previous)           ;上一个键盘宏
-   ("M-s-a" . kmacro-edit-macro)                    ;编辑键盘宏
-   ("M-s-v" . name-last-kbd-macro)                  ;命令当前键盘宏
-   ("M-s-f" . insert-kbd-macro)                     ;插入键盘宏
+   ("M-s-d" . kmacro-end-or-call-macro)	   ;结束键盘宏或调用 F4
+   ("M-s-c" . kmacro-delete-ring-head)	   ;删除当前的键盘宏
+   ("M-s-w" . kmacro-cycle-ring-next)	   ;下一个键盘宏
+   ("M-s-e" . kmacro-cycle-ring-previous)  ;上一个键盘宏
+   ("M-s-a" . kmacro-edit-macro)		   ;编辑键盘宏
+   ("M-s-v" . name-last-kbd-macro)		   ;命令当前键盘宏
+   ("M-s-f" . insert-kbd-macro)			   ;插入键盘宏
    ("M-s-q" . apply-macro-to-region-lines) ;应用键盘宏到选择的区域
    )
  "macros+")
+
+;;(global-set-key  [C-f7] 'suk/ska-point-to-register)
+;;(global-set-key  [f7] 'suk/ska-jump-to-register)
+(lazy-load-global-keys
+ '(
+   ("C-<f7>" . suk/ska-point-to-register)
+   ("<f7>" . suk/ska-jump-to-register )
+   )
+ "init-bookmark")
 
 ;; f3 start macro(kmacro-start-macro-or-insert-counter),
 ;; f4 done macro or run marcro (kmacro-end-or-call-macro).
@@ -527,10 +559,10 @@
 ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
   (mapcar (lambda(lst)
-			""
-			(let ((x (car lst))
-				  (y (car (last lst))))
-			  (funcall ACTION x y))) BINDINGLIST ))
+            ""
+            (let ((x (car lst))
+                  (y (car (last lst))))
+              (funcall ACTION x y))) BINDINGLIST ))
 
 ;; 使用方式
 ;; (suk-set-key-bindings 'global-set-key
@@ -543,32 +575,33 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;; )
 
 (suk-set-key-bindings 'global-set-key
-					  (list
-					   ;;					   (list (kbd "C-x l")   'suk/count-brf-lines)
-					   (list (kbd "C-x M-a") 'align-regexp)
-					   ;;					   (list (kbd "C-x x")   'suk/switch-major-mode)
-					   ;;					   (list (kbd "C-x X")   'suk/get-mode-name)
-					   ;;(list (kbd "C-x U") 'suk/revert-buffer-with-utf8)
-					   ;;(list (kbd "C-x K") 'suk/revert-buffer-with-gbk)
-					   ;;					   '([C-t]               transpose-chars)
-					   ;;					   '([S-f6]              hs-minor-mode)
-					   ;;					   '([S-f5]              toggle-truncate-lines)
-					   ;; '([S-f11]          insert-translated-name-insert) ;; Chinese to English
-					   ;; '([S-f12]          toggle-company-english-helper) ;; popup English tips
-					   ;; '([M-f12]          aweshell-dedicated-toggle)
-					   ;; '([M-f11]          aweshell-sudo-toggle)
-					   ;; '([M-f10]          aweshell-prev)
-					   ;; '([M-f11]          aweshell-next)
-					   ;; '([M-f9]           aweshell-new)
-					   ;; '([S-f2]           suk/new-empty-buffer)
-					   ;; '([f2]                hs-toggle-hiding)
-					   ;;'([M-f12]             vterm)
-					   ;; '([S-f1]              snails)
-					   ))
+                      (list
+                       ;;                      (list (kbd "C-x l")   'suk/count-brf-lines)
+                       (list (kbd "C-x M-a") 'align-regexp)
+                       ;;                      (list (kbd "C-x x")   'suk/switch-major-mode)
+                       ;;                      (list (kbd "C-x X")   'suk/get-mode-name)
+                       ;;(list (kbd "C-x U") 'suk/revert-buffer-with-utf8)
+                       ;;(list (kbd "C-x K") 'suk/revert-buffer-with-gbk)
+                       ;;                      '([C-t]               transpose-chars)
+                       ;;                      '([S-f6]              hs-minor-mode)
+                       ;;                      '([S-f5]              toggle-truncate-lines)
+                       ;; '([S-f11]          insert-translated-name-insert) ;; Chinese to English
+                       ;; '([S-f12]          toggle-company-english-helper) ;; popup English tips
+                       ;; '([M-f12]          aweshell-dedicated-toggle)
+                       ;; '([M-f11]          aweshell-sudo-toggle)
+                       ;; '([M-f10]          aweshell-prev)
+                       ;; '([M-f11]          aweshell-next)
+                       ;; '([M-f9]           aweshell-new)
+                       ;; '([S-f2]           suk/new-empty-buffer)
+                       ;; '([f2]                hs-toggle-hiding)
+                       ;;'([M-f12]             vterm)
+                       ;; '([S-f1]              snails)
+                       ))
+(unless sys/win32p
+  (global-set-key  (kbd "S-SPC") 'set-mark-command))
 
-(global-set-key  (kbd "S-SPC") 'set-mark-command)
-										; C-c TAB indent-region
-										; C-u C-c TAB => (un)indent-region
+;; C-c TAB indent-region
+;; C-u C-c TAB => (un)indent-region
 
 ;; global-set-key examples:
 ;; (global-set-key (kbd "C-x C-\\") 'next-line)
@@ -591,29 +624,29 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
 ;; (add-hook 'isearch-mode-hook
-;; 		  '(lambda ()
-;; 			 ;; 搜索下一个结果
-;; 			 (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
-;; 			 ;; 搜索前一个结果
-;; 			 (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
-;; 			 ;; 替换
-;; 			 (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
-;; 			 ;; 正则替换
-;; 			 (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
-;; 			 (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
-;; 			 ;; 剪切板作为搜索内容
-;; 			 (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
-;; 			 ;; 将光标到行尾作为搜索内容
-;; 			 (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
-;; 			 (define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
-;; 			 ;; 向左或向右(选择/取消)单个字符作为搜索内容
-;; 			 (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
-;; 			 ;; 显示occur视图
-;; 			 (define-key isearch-mode-map [(meta o)] 'isearch-occur)
-;; 			 ;; 单词搜索
-;; 			 (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
-;; 			 (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
-;; 			 ))
+;;        '(lambda ()
+;;           ;; 搜索下一个结果
+;;           (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
+;;           ;; 搜索前一个结果
+;;           (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
+;;           ;; 替换
+;;           (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
+;;           ;; 正则替换
+;;           (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
+;;           (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
+;;           ;; 剪切板作为搜索内容
+;;           (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
+;;           ;; 将光标到行尾作为搜索内容
+;;           (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
+;;           (define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
+;;           ;; 向左或向右(选择/取消)单个字符作为搜索内容
+;;           (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
+;;           ;; 显示occur视图
+;;           (define-key isearch-mode-map [(meta o)] 'isearch-occur)
+;;           ;; 单词搜索
+;;           (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
+;;           (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
+;;           ))
 
 
 
