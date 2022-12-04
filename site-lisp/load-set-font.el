@@ -189,11 +189,36 @@
         ;;(set-face-attribute 'default nil :font "Migu 1M Less 11")
         ;;(set-face-attribute 'default nil :font "Victor Mono Medium 12")
 		(set-face-attribute 'default nil :font "Consolas 12")
+		(cond
+		 ;; linnux 下不支持
+		 ((member "Victor Mono" (font-family-list))
+		  (set-face-attribute 'default nil :font "Victor Mono 12"))
+		 ((member "JetBrains Mono" (font-family-list))
+		  (set-face-attribute 'default nil :font "JetBrains Mono 12"))
+		 ;; 这个字体偏小
+		 ;;((member "monofur" (font-family-list))
+		 ;; (set-face-attribute 'default nil :font "monofur"))
+		 ((member "Migu 1M Less" (font-family-list))
+		  (set-face-attribute 'default nil :font "Migu 1M Less 12"))
+		 ((member "Source Code Pro" (font-family-list))
+		  (set-face-attribute 'default nil :font "Source Code Pro 12"))
+		 ((member "Monaco" (font-family-list))
+		  (set-face-attribute 'default nil :font "Monaco 12"))
+		 ((member "DejaVu Sans Mono" (font-family-list))
+		  (set-face-attribute 'default nil :font "Consolas 12"))
+		 ((member "Consolas" (font-family-list))
+		  (set-face-attribute 'default nil :font "Courier New 12")))
         ;; 给相应的字符集设置中文字体。
         (dolist (charset '(han cjk-misc chinese-gbk))
-          (set-fontset-font "fontset-default"
-                            charset (font-spec :family "Simsun")
-                            ))
+		  (cond
+		   ((member "仓耳今楷01-27533 W04" (font-family-list))
+			(set-fontset-font "fontset-default" charset (font-spec :family "仓耳今楷01-27533 W04")))
+		   ((member "等距更纱黑体 SC" (font-family-list))
+			(set-fontset-font "fontset-default" charset (font-spec :family "等距更纱黑体 SC")))
+		   ((member "Simsun" (font-family-list))
+			(set-fontset-font "fontset-default" charset (font-spec :family "Simsun")))
+
+		   ))
         (setq face-font-rescale-alist
               '(("宋体" . 1.0)
                 ("微软雅黑" . 1.0)))))
@@ -208,7 +233,7 @@
     (when sys/win32p
       (set-frame-font "Times New Roman 12")
       (set-fontset-font (frame-parameter nil 'font)
-                        'han '("PMingliU" . "unicode-bmp")))
+                        'han '("仓耳今楷01-27533 W04" . "unicode-bmp")))
 
     (when sys/linuxp
       (set-face-attribute 'default nil :font "Noto Serif 12")

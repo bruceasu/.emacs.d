@@ -45,12 +45,14 @@
 ;; =========================================================
 ;; 方便快速跳到bookmark
 ;; ---------------------------------------------------------
+;;;###autoload
 (defun suk/ska-point-to-register()
   "Store cursorposition _fast_ in a register. Use ska-jump-to-register to jump back to the stored position."
   (interactive)
   (setq zmacs-region-stays t)
   (point-to-register 8))
 ;; ---------------------------------------------------------
+;;;###autoload
 (defun suk/ska-jump-to-register()
   "Switch between current cursorposition and position that was stored with ska-point-to-register."
   (interactive)

@@ -56,7 +56,34 @@
 ;;appointment
 (setq appt-issue-message t)
 
-
+(autoload 'chinese-year "cal-china" "Chinese year data" t)
+(require 'cal-china-x)
+(setq mark-holidays-in-calendar t)
+(setq cal-china-x-important-holidays cal-china-x-chinese-holidays)
+(setq cal-china-x-general-holidays '(
+                                     (holiday-lunar 1 15 "元宵节")
+                                     (holiday-lunar 5 5   "端午节 (五月初五)")
+                                     (holiday-lunar 9 9   "重阳节 (九月初九)")
+                                     (holiday-lunar 8 15  "中秋节 (八月十五)")
+                                     ;; 生日
+                                     (holiday-lunar 7 16  "老豆生日 (七月十六)" );阴历生日
+                                     (holiday-lunar 1 10  "老母生日 (正月初十)" );阴历生日
+                                     (holiday-lunar 4 4  "老母生日 (四月初四)" );阴历生日
+                                     (holiday-lunar 10 18 "我嘅生日 (十月十八)" );阴历生日
+                                     (holiday-lunar 9 1   "細佬生日 (九月初一)") ;阴历生日
+                                     (holiday-lunar 3 2   "女儿生日 (三月初二)") ;阴历生日
+                                     (holiday-fixed   4 8   "女儿生日 (4月8日)")   ;阳历生日
+                                     (holiday-fixed   10 12  "女儿生日 (10月12日)") ;阳历生日
+                                     (holiday-lunar 9 14   "女儿生日 (九月十四)") ;阴历生日
+                                     (holiday-lunar 6 21  "老婆生日 (六月廿一)") ;阴历生日
+                                     ))
+(setq calendar-holidays
+      (append cal-china-x-important-holidays
+              cal-china-x-general-holidays
+              cal-china-x-japanese-holidays
+              holiday-general-holidays
+              holiday-christian-holidays
+              ))
 
 ;;除去基督徒的节日、希伯来人的节日和伊斯兰教的节日。
 (setq hebrew-holidays nil
@@ -109,7 +136,7 @@
 
 (add-hook 'today-visible-calendar-hook 'calendar-mark-today)
 
-(autoload 'chinese-year "cal-china" "Chinese year data" t)
+
 
 (defun holiday-chinese (cmonth cday string)
   "Chinese calendar holiday, month and day in Chinese calendar (CMONTH, CDAY).

@@ -74,12 +74,12 @@
    ("C-x t m" . suk/toggle-margin-right)
    ("M-Q" . suk/unfill-paragraph)
    ("M-q" . suk/fill-or-unfill-paragraph)
-   ("C-x n x" . xah-narrow-to-region) ; C-x n w ,  C-x n d, C-x n n, C-x n p 系列
-   ("S-<f7>" . indent-buffer)
-   ("C-<f2>" . rename-file-and-buffer)
-   ("C-M-;" . kill-other-window-buffer) ;关闭其他窗口的
-   ("C-x K" . kill-all-buffers-except-current)
-   ("C-x M" . move-buffer-file)
+   ("C-x n x" . suk/xah-narrow-to-region) ; C-x n w ,  C-x n d, C-x n n, C-x n p 系列
+   ("S-<f7>" . suk/indent-buffer)
+   ("C-<f2>" . suk/rename-file-and-buffer)
+   ("C-M-;" . suk/kill-other-window-buffer) ;关闭其他窗口的
+   ("C-x K" . suk/kill-all-buffers-except-current)
+   ("C-x M" . suk/move-buffer-file)
    ("C-x C" . copy-buffer-file-name-as-kill)
    )
  "init-buffers")
@@ -314,42 +314,7 @@
 
 ;;; ### Awesome-Pair ###
 ;;; --- 结构化编程
-(lazy-load-unset-keys
- '("M-J" "M-r" "M-s" "M-;" "C-M-f" "C-M-b" "M-)")
- awesome-pair-mode-map)                 ;卸载按键
 
-(defvar awesome-pair-key-alist nil)
-(setq awesome-pair-key-alist
-      '(
-        ;; 移动
-        ("M-n" . awesome-pair-jump-left)
-        ("M-p" . awesome-pair-jump-right)
-        ;; 符号插入
-        ("%" . awesome-pair-match-paren)       ;括号跳转
-        ("(" . awesome-pair-open-round)        ;智能 (
-        ("[" . awesome-pair-open-bracket)      ;智能 [
-        ("{" . awesome-pair-open-curly)        ;智能 {
-        (")" . awesome-pair-close-round)       ;智能 )
-        ("]" . awesome-pair-close-bracket)     ;智能 ]
-        ("}" . awesome-pair-close-curly)       ;智能 }
-        ("\"" . awesome-pair-double-quote)     ;智能 "
-        ("=" . awesome-pair-equal)             ;智能 =
-        ("SPC" . awesome-pair-space)           ;智能 Space
-        ;; 删除
-        ("M-o" . awesome-pair-backward-delete) ;向后删除
-        ("C-d" . awesome-pair-forward-delete)  ;向前删除
-        ("C-k" . awesome-pair-kill)            ;向前kill
-        ;; 包围
-        ("M-\"" . awesome-pair-wrap-double-quote) ;用 " " 包围对象, 或跳出字符串
-        ("M-[" . awesome-pair-wrap-bracket)	;用 [ ] 包围对象
-        ("M-{" . awesome-pair-wrap-curly)	;用 { } 包围对象
-        ("M-(" . awesome-pair-wrap-round)	;用 ( ) 包围对象
-        ("M-)" . awesome-pair-unwrap)		;去掉包围对象
-        ;; 跳出并换行缩进
-        ("M-:" . awesome-pair-jump-out-pair-and-newline) ;跳出括号并换行
-        ))
-
-(lazy-load-set-keys awesome-pair-key-alist awesome-pair-mode-map)
 ;;; ### Thingh-edit ###
 ;;; --- 增强式编辑当前光标的对象
 (lazy-load-global-keys

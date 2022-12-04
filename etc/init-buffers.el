@@ -27,7 +27,6 @@
 ;; buffers configuration.
 ;;
 ;;; Code:
-
 (eval-when-compile
   (require '+const)
   (require '+custom)
@@ -36,12 +35,14 @@
 ;; ==============================================================
 ;; buffers
 ;; --------------------------------------------------------------
+;;;###autoload
 (defvar suk/recently-closed-buffers nil
   "A list of recently closed buffers. Each element is (buffer name, file path). The max number to track is controlled by the variable `suk/recently-closed-buffers-max'.")
 
 (defvar suk/recently-closed-buffers-max 40 "The maximum length for `suk/recently-closed-buffers'.")
 
 ;; ---------------------------------------------------------------
+;;;###autoload
 (defun suk/close-current-buffer ()
   "Close the current buffer.
 
@@ -64,7 +65,7 @@ prompt the user to save before closing.
     (setq $emacs-buff-p (if (string-match "^*" (buffer-name)) t nil))
 
     (if (string= major-mode "minibuffer-inactive-mode")
-        (minibuffer-keyboard-quit) ; if the buffer is minibuffer
+        (minibuffer-keyboard-quit)  ; if the buffer is minibuffer
       (progn
         ;; offer to save buffers that are non-empty and modified, even for
         ;; non-file visiting buffer. (because kill-buffer does not offer to save
@@ -95,6 +96,7 @@ prompt the user to save before closing.
         (kill-buffer (current-buffer))))))
 
 ;; ---------------------------------------------------------------
+;;;###autoload
 (defun suk/open-last-closed ()
   "Open the last closed file."
   (interactive)
@@ -103,6 +105,7 @@ prompt the user to save before closing.
     (progn (message "No recently close buffer in this session."))))
 
 ;; ---------------------------------------------------------------
+;;;###autoload
 (defun suk/open-recently-closed ()
   "Open recently closed file.Prompt for a choice."
   (interactive)
@@ -111,6 +114,7 @@ prompt the user to save before closing.
 ;; ---------------------------------------------------------------
 ;; List the recently closed files.
 ;; ---------------------------------------------------------------
+;;;###autoload
 (defun suk/list-recently-closed ()
   "List recently closed file."
   (interactive)
@@ -119,10 +123,72 @@ prompt the user to save before closing.
     (mapc (lambda ($f) (insert (cdr $f) "\n"))
           suk/recently-closed-buffers)))
 
+;;;###autoload
+(defun suk/kill-current-mode-buffers ()
+  "Kill all buffers that major mode same with current mode."
+  (interactive)
+  (suk/kill-special-mode-buffers-internal major-mode))
+
+;;;###autoload
+(defun suk/kill-current-mode-buffers-except-current ()
+  "Kill all buffers that major mode same with current mode.
+And don't kill current buffer."
+  (interactive)
+  (kill-special-mode-buffers-internal major-mode t))
+
+;;;###autoload
+(defun suk/kill-special-mode-buffers ()
+  "Kill all buffers that major mode that user given."
+  (interactive)
+  (let (mode-list)
+    (dolist (element (buffer-list))
+      (set-buffer element)
+      (unless (member (symbol-name major-mode) mode-list)
+        (add-to-ordered-list 'mode-list (symbol-name major-mode))))
+    (kill-special-mode-buffers-internal (intern-soft (completing-read "Mode: " mode-list)))))
+
+;;;###autoload
+(defun suk/kill-special-mode-buffers-internal (mode &optional except-current-buffer)
+  "Kill all buffers that major MODE same with special.
+If option EXCEPT-CURRENT-BUFFER is `non-nil',
+kill all buffers with MODE except current buffer."
+  (interactive)
+  (let ((current-buf (current-buffer))
+        (count 0))
+    (dolist (buffer (buffer-list))
+      (set-buffer buffer)
+      (when (and (equal major-mode mode)
+                 (or (not except-current-buffer)
+                     (not (eq current-buf buffer))))
+        (incf count)
+        (kill-buffer buffer)))
+    (message "Killed %s buffer%s" count (if (> count 1) "s" ""))))
+
+;;;###autoload
+(defun suk/kill-all-buffers-except-current ()
+  "Kill all buffers except current buffer."
+  (interactive)
+  (let ((current-buf (current-buffer)))
+    (dolist (buffer (buffer-list))
+      (set-buffer buffer)
+      (unless (eq current-buf buffer)
+        (kill-buffer buffer)))))
+
+;;;###autoload
+(defun suk/kill-other-window-buffer ()
+  "Kill the buffer in other window."
+  (interactive)
+  (other-window +1)
+  (kill-this-buffer)
+  (other-window -1))
+
+
+
 
 ;; --------------------------------------------------------------
 ;; new empty buffer
 ;; --------------------------------------------------------------
+;;;###autoload
 (defun suk/new-empty-buffer ()
   "Create a new empty buffer.
 New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
@@ -130,7 +196,7 @@ It returns the buffer."
   (interactive)
   (let (($buf (generate-new-buffer "untitled")))
     (switch-to-buffer $buf)
-;;    (funcall initial-major-mode)
+    ;;    (funcall initial-major-mode)
     (text-mode)
     (setq buffer-offer-save t)
     $buf
@@ -138,6 +204,7 @@ It returns the buffer."
 ;; --------------------------------------------------------------
 ;; Rename
 ;; --------------------------------------------------------------
+;;;###autoload
 (defun rename-file-and-buffer (new-name)
   "Renames both current buffer and file it's visiting to NEW-NAME."
   (interactive "sNew name: ")
@@ -154,8 +221,30 @@ It returns the buffer."
           (set-buffer-modified-p nil))))))
 
 ;; --------------------------------------------------------------
+;; move
+;; --------------------------------------------------------------
+(defun suk/move-buffer-file (dir)
+  "Move both current buffer and file it's visiting to DIR."
+  (interactive "DNew directory: ")
+  (let* ((name (buffer-name))
+         (filename (buffer-file-name))
+         (dir
+          (if (string-match dir "\\(?:/\\|\\\\)$")
+              (substring dir 0 -1) dir))
+         (newname (concat dir "/" name)))
+    (if (not filename)
+        (message "Buffer '%s' is not visiting a file!" name)
+      (copy-file filename newname 1)
+      (delete-file filename)
+      (set-visited-file-name newname)
+      (set-buffer-modified-p nil)
+      t)))
+
+
+;; --------------------------------------------------------------
 ;; Reload
 ;; --------------------------------------------------------------
+;;;###autoload
 (defun suk/reload-emacs-configuration ()
   "Reload emacs initial configured file init.el."
   (interactive)
@@ -164,6 +253,7 @@ It returns the buffer."
 ;; --------------------------------------------------------------
 ;; Open custom file
 ;; --------------------------------------------------------------
+;;;###autoload
 (defun open-custom-file()
   "Open custom.el if exists, otherwise create it."
   (interactive)
@@ -185,6 +275,7 @@ It returns the buffer."
   (lisp-interaction-mode))
 (global-set-key "\C-cs" 'suk/create-scratch-buffer) ;; Bind to `C-c s'
 
+;;;###autoload
 (defun suk/switch-to-minibuffer ()
   "Switch to minibuffer window."
   (interactive)
@@ -195,6 +286,7 @@ It returns the buffer."
 
 ;; 显示当前buffer或region或函数的行数和字符数
 ;; --------------------------------------------------------------
+;;;###autoload
 (defun suk/count-brf-lines (&optional is-fun)
   "显示当前buffer或region或函数的行数和字符数."
   (interactive "P")
@@ -224,24 +316,19 @@ It returns the buffer."
                    (count-lines nmin nmax) (- nmax nmin) (count-lines min max) (- max min)))))))
 
 ;; =========================================================
-;; Browse the homepage
-(defun suk/browse-homepage ()
-  "Browse the Github page of Suk Emacs."
-  (interactive)
-  (browse-url suk-homepage))
-
-
-(defun indent-buffer ()
+;;;###autoload
+(defun suk/indent-buffer ()
   "Indent the whole buffer."
   (interactive)
   (save-excursion
-	(indent-region (point-min) (point-max) nil)))
+    (indent-region (point-min) (point-max) nil)))
 
 
 ;;绑定到F7键
 ;;(global-set-key [S-f7] 'indent-buffer)
 
-(defun xah-narrow-to-region ()
+;;;###autoload
+(defun suk/xah-narrow-to-region ()
   "Same as `narrow-to-region', but if no selection, narrow to the current block.
 Version 2022-01-22"
   (interactive)
@@ -263,58 +350,64 @@ Version 2022-01-22"
 
 ;; =========================================================
 ;; 段落格式化
-;; --------------------------------------------------------------
+;; ---------------------------------------------------------
+;;;###autoload
 (defun suk/unfill-paragraph (&optional region)
-    "Takes a multi-line paragraph (or REGION) and make it into a single line of text."
-    (interactive (progn
-                   (barf-if-buffer-read-only)
-                   (list t)))
-    (let ((fill-column (point-max)))
-      (fill-paragraph nil region)))
-;(bind-key "M-Q" 'suk/unfill-paragraph)
+  "Takes a multi-line paragraph (or REGION) and make it into a single line of text."
+  (interactive (progn
+                 (barf-if-buffer-read-only)
+                 (list t)))
+  (let ((fill-column (point-max)))
+    (fill-paragraph nil region)))
+                                        ;(bind-key "M-Q" 'suk/unfill-paragraph)
 
 ;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
 ;; --------------------------------------------------------------
+;;;###autoload
 (defun suk/fill-or-unfill-paragraph (&optional unfill region)
-    "Fill paragraph (or REGION).
+  "Fill paragraph (or REGION).
 With the prefix argument UNFILL, unfill it instead."
-    (interactive (progn
-                   (barf-if-buffer-read-only)
-                   (list (if current-prefix-arg 'unfill) t)))
-    (let ((fill-column (if unfill (point-max) fill-column)))
-      (fill-paragraph nil region)))
-;(bind-key "M-q" 'suk/fill-or-unfill-paragraph)
+  (interactive (progn
+                 (barf-if-buffer-read-only)
+                 (list (if current-prefix-arg 'unfill) t)))
+  (let ((fill-column (if unfill (point-max) fill-column)))
+    (fill-paragraph nil region)))
+                                        ;(bind-key "M-q" 'suk/fill-or-unfill-paragraph)
 
 ;; =========================================================
 ;; 方便的切换major mode
 ;; ---------------------------------------------------------
 (defvar suk/switch-major-mode-last-mode nil)
 ;; ---------------------------------------------------------
+;;;###autoload
 (defun suk/major-mode-heuristic (symbol)
   (and (fboundp symbol)
        (string-match ".*-mode$" (symbol-name symbol))))
 ;; ---------------------------------------------------------
+;;;###autoload
 (defun suk/switch-major-mode (mode)
   "Change major mode to MODE."
   (interactive
-  (let ((fn suk/switch-major-mode-last-mode) val)
-    (setq val
-          (completing-read
-           (if fn (format "Change major-mode(default:%s): " fn) "Change major mode: ")
-           obarray 'suk/major-mode-heuristic t nil nil (symbol-name fn)))
-    (list (intern val))))
+   (let ((fn suk/switch-major-mode-last-mode) val)
+     (setq val
+           (completing-read
+            (if fn (format "Change major-mode(default:%s): " fn) "Change major mode: ")
+            obarray 'suk/major-mode-heuristic t nil nil (symbol-name fn)))
+     (list (intern val))))
   (let ((last-mode major-mode))
     (funcall mode)
     (setq suk/switch-major-mode-last-mode last-mode)
-	(message "Change to %s." major-mode))
-)
+    (message "Change to %s." major-mode))
+  )
 ;; ---------------------------------------------------------
 ;; show major mode
+;;;###autoload
 (defun suk/get-mode-name ()
   "显示`major-mode'及`mode-name'."
   (interactive)
   (message "major-mode:%s, mode-name:%s" major-mode mode-name))
 
+;;;###autoload
 (defun suk/toggle-margin-right ()
   "Toggle the right margin between `fill-column' or window width.
 This command is convenient when reading novel, documentation."

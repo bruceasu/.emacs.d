@@ -1,4 +1,4 @@
-;;; init-ui.el --- Initialize ui configurations.	-*- lexical-binding: t -*-
+;;; init-ui.el --- Initialize ui configurations.    -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 ;;
@@ -40,9 +40,8 @@
 (tool-bar-mode -1)
 ;; 关闭菜单栏
 (menu-bar-mode -1)
+;; 字体
 (require 'load-set-font)
-(require 'lazycat-theme)
-(lazycat-theme-load-dark)
 
 ;; 切换buffer焦点时高亮动画
 (use-package beacon
@@ -59,27 +58,9 @@
 ;; ===================================
 ;; Theme
 ;; -----------------------------------
-(defvar after-load-theme-hook nil
-  "Hook run after a color theme is loaded using `load-theme'.")
+(require 'lazycat-theme)
+(lazycat-theme-load-dark)
 
-(defadvice load-theme (after run-after-load-theme-hook activate)
-  "Run `after-load-theme-hook'."
-  (run-hooks 'after-load-theme-hook))
-
-(defun suk-load-theme (theme)
-  "Set color THEME. Infact, only support lazycat-theme-load-dark"
-  (interactive
-    (require 'lazycat-theme)
-	(lazycat-theme-load-dark)
-	)
-  )
-
-;; 这是 purcell 写的一个插件，按照描述来看就是把 ^L显示为一个整洁的水平线。
-;; 这个^L其实并不是^与L的组合，而是一个单一的字符。我查了一下，很可能这个代表的
-;; 意思是软回车。C-q C-L 来输入。
-(use-package page-break-lines
-  :ensure t
-  :hook ('after-init .  'page-break-lines-mode))
 
 ;; 图形界面插件的设置
 (when (display-graphic-p)
@@ -90,12 +71,12 @@
     )
   ;; 浮动窗口支持
   (use-package posframe :ensure t)
-)
+  )
 
 ;; Mode-line
 (defun mode-line-height ()
-   "Get current height of mode-line."
-   (- (elt (window-pixel-edges) 3)
+  "Get current height of mode-line."
+  (- (elt (window-pixel-edges) 3)
      (elt (window-inside-pixel-edges) 3)))
 
 ;; Line and Column
@@ -124,14 +105,46 @@
 (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
            ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
            ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
-		   )
+           )
 
 ;; for windows settings
 (when (eq system-type 'windows-nt)
   (setq locale-coding-system 'gb18030)    ; 此句保证中文字体设置有效
   (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
   (setq file-name-coding-system 'gb18030) ; 设置文件名的编码为gb18030
-)
+  )
+
+
+(require 'sort-tab)
+(sort-tab-mode 1)
+;;Usage
+;;sort-tab-select-next-tab: select next tab
+;;sort-tab-select-prev-tab: select previous tab
+;;sort-tab-select-first-tab: select first tab
+;;sort-tab-select-last-tab: select last tab
+;;sort-tab-close-current-tab: close current tab
+(global-set-key (kbd "C-c 1") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c 2") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c 3") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c 4") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c 5") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c 6") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c 7") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c 8") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c 9") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c 0") 'sort-tab-select-visible-tab)
+(global-set-key (kbd "C-c q") 'sort-tab-close-mode-tabs)
+(global-set-key (kbd "C-c Q") 'sort-tab-close-all-tabs)
+(global-set-key (kbd "C-;") 'sort-tab-close-current-tab)
+(global-set-key (kbd "C-x <left>") 'sort-tab-select-prev-tab)
+(global-set-key (kbd "C-x <right>") 'sort-tab-select-next-tab)
+
+(require 'awesome-tray)
+(awesome-tray-mode 1)
+
+;;(require 'awesome-tab)
+;;(require 'all-the-icons)
+;;(awesome-tab-mode t)
 
 (provide 'init-ui)
 

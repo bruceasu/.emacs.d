@@ -86,7 +86,7 @@
 
 ;; (require 'pretty-lambdada)
 ;; (pretty-lambda-for-modes)
-(browse-kill-ring-default-keybindings)    ;加载默认的按键邦定
+
 (setq browse-kill-ring-quit-action        ;设置退出动作
       (quote save-and-restore))           ;保存还原窗口设置
 (autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
@@ -122,6 +122,15 @@ from tradition chinese to simple chinese" t)
 (setq print-escape-newlines t)            ;显示字符窗中的换行符为 \n
 (setq tramp-default-method "ssh")         ;设置传送文件默认的方法
 (setq void-text-area-pointer nil)         ;禁止显示鼠标指针
+(setq auto-window-vscroll nil)            ;关闭自动调节行高
+(setq mouse-yank-at-point nil)            ;让光标无法离开视线
+(setq kill-whole-line t)                  ; C-k deletes the end of line
+(setq delete-by-moving-to-trash t)        ; Deleting files go to OS's trash folder
+(setq track-eol t)                        ; Keep cursor at end of lines. Require line-move-visual is nil.
+(setq line-move-visual nil)
+(setq inhibit-compacting-font-caches t) ; Don’t compact font caches during GC.
+(setq save-interprogram-paste-before-kill t) ; Save clipboard contents into kill-ring before replace them
+;;(setq auto-save-default nil)              ; Disable auto save
 (setq byte-compile-warnings
       (quote (
               ;; 显示的警告
@@ -174,6 +183,95 @@ from tradition chinese to simple chinese" t)
 ;; (setq package-archives ;设置中国的镜像源，国外的太慢了，偶尔去偷点 *.el 文件
 ;;       '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
 ;;         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
+
+
+;; 如果有两个重名buffer, 则再前面加上路径区别
+(require 'uniquify)
+;; (setq uniquify-buffer-name-style 'forward)
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+
+;; chmod +x
+;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
+(add-hook 'after-save-hook
+          'executable-make-buffer-file-executable-if-script-p)
+
+;; --------------------------------------------------------------
+;;备份策略
+;; --------------------------------------------------------------
+(setq make-backup-files t)
+;; 允许多次备份
+(setq version-control t)
+;; 保留最早的2个备份文件
+(setq kept-old-versions 2)
+;; 保留最近的100个备份文件
+(setq kept-new-version 100)
+;; 自动删除旧的备份文件
+(setq delete-old-versions t)
+;; 回到关闭文件前光标的位置
+(use-package saveplace
+  :ensure nil
+  :defer 1
+  :hook (after-init . save-place-mode)
+  :config (setq save-place-file "~/.emacs.d/var/saveplace")
+
+  )
+(use-package recentf
+  :ensure nil
+  :defer 1
+  ;; lazy load recentf
+  :hook (find-file . (lambda () (unless recentf-mode
+                                  (recentf-mode)
+                                  (recentf-track-opened-file))))
+  :init
+  (add-hook 'after-init-hook #'recentf-mode)
+  (setq recentf-max-saved-items 500)
+  (setq recentf-max-saved-items 17)
+  (setq recentf-save-file "~/.emacs.d/var/recentf")
+  :config
+  (add-to-list 'recentf-exclude (expand-file-name package-user-dir))
+  (add-to-list 'recentf-exclude ".cache")
+  (add-to-list 'recentf-exclude ".cask")
+  (add-to-list 'recentf-exclude ".elfeed")
+  (add-to-list 'recentf-exclude "bookmarks")
+  (add-to-list 'recentf-exclude "cache")
+  (add-to-list 'recentf-exclude "persp-confs")
+  (add-to-list 'recentf-exclude "recentf")
+  (add-to-list 'recentf-exclude "url")
+  (add-to-list 'recentf-exclude "COMMIT_EDITMSG\\'")
+  (defun simon-recentf-exclude-p (file)
+    (let ((file-dir (file-truename (file-name-directory file))))
+      (-any-p (lamdba (dir)
+                      (string-prefix-p dir file-dir))
+              (mapcar 'file-truename (list var package-user-dir)))))
+  (add-to-list 'recentf-exclude 'simon-recentf-exclude-p))
+
+(use-package savehist
+  :ensure nil
+  :hook (after-init . savehist-mode)
+  :init (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
+              history-length 1000
+              savehist-additional-variables '(mark-ring
+                                              global-mark-ring
+                                              search-ring
+                                              regexp-search-ring
+                                              extended-command-history)
+              savehist-autosave-interval 300
+              savehist-file "~/.emacs.d/var/history"))
+
+;; 设置光标样式
+(setq-default cursor-type 'box)
+
+;; =========================================================
+;; Start server
+(use-package server
+  :ensure nil
+  :defer 1
+  :hook (after-init . server-mode))
+
+;; Emacs可以做为一个server, 然后用emacsclient连接这个server,
+;; 无需再打开两个Emacs，windows下还不支持daemon的方式。
+;;(server-force-delete)
+;;(server-start)
 
 (provide 'init-idle)
 

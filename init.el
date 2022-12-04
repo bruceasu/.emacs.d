@@ -1,4 +1,4 @@
-;;; init.el --- Emacs configurations.    -*- lexical-binding: t no-byte-compile: t; -*-
+;;k; init.el --- Emacs configurations.    -*- lexical-binding: t no-byte-compile: t; -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -31,12 +31,13 @@
 
 ;;; Code:
 
- ;; 定义一些启动目录，方便下次迁移修改
+;; 定义一些启动目录，方便下次迁移修改
 (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
 (defvar suk-emacs-config-dir (concat suk-emacs-root-dir "/etc"))
 (defvar suk-emacs-extension-dir (concat suk-emacs-root-dir "/site-lisp"))
 (defvar suk-emacs-share-dir (concat suk-emacs-root-dir "/share"))
 (defvar suk-emacs-themes-dir (concat suk-emacs-share-dir "/themes"))
+(defvar suk-emacs-elpa-dir (concat suk-emacs-root-dir "/elpa"))
 
 
 ;; 忽略 cl 过期警告
@@ -54,9 +55,9 @@
 (defun add-subdirs-to-load-path (search-dir isFirst)
   (interactive)
   (when isFirst
-	;; 原来的版本没有把第1个 search-dir 本身添加到load path
-	;; 递归时的search-dir是在递归前加入了。
-	(add-to-list 'load-path search-dir))
+    ;; 原来的版本没有把第1个 search-dir 本身添加到load path
+    ;; 递归时的search-dir是在递归前加入了。
+    (add-to-list 'load-path search-dir))
   (let* ((dir (file-name-as-directory search-dir)))
     (dolist (subdir
              ;; 过滤出不必要的目录，提升Emacs启动速度
@@ -75,10 +76,10 @@
         (when (cl-some #'(lambda (subdir-file)
                            (and (file-regular-p (concat subdir-path subdir-file))
                                 ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
-                                 (member (file-name-extension subdir-file) '("el" "so" "dll"))))
+                                (member (file-name-extension subdir-file) '("el" "so" "dll"))))
                        (directory-files subdir-path))
 
-           ;; 注意：add-to-list 函数的第三个参数必须为 t ，表示加到列表末尾
+          ;; 注意：add-to-list 函数的第三个参数必须为 t ，表示加到列表末尾
           ;; 这样Emacs会从父目录到子目录的顺序搜索Elisp插件，顺序反过来会导致Emacs无法正常启动
           (add-to-list 'load-path subdir-path t))
 
@@ -91,6 +92,7 @@
 (add-subdirs-to-load-path suk-emacs-config-dir t)
 (add-subdirs-to-load-path suk-emacs-extension-dir t)
 (add-subdirs-to-load-path suk-emacs-themes-dir t)
+(add-subdirs-to-load-path suk-emacs-elpa-dir t)
 
 (let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
       (gc-cons-threshold most-positive-fixnum)
@@ -100,20 +102,20 @@
 
   ;; Emacs配置文件内容写到下面.
   (when (version< emacs-version "25.1")
-     (error "This requires Emacs 25.1 and above!"))
+    (error "This requires Emacs 25.1 and above!"))
 
   (add-hook 'emacs-startup-hook
-    (lambda ()
-      "Restore defalut values after init."
-      (setq file-name-handler-alist default-file-name-handler-alist)
-      ;; The default is 0.8MB
-	  ;;(setq gc-cons-threshold 80000000)
-      (message "Emacs ready in %s with %d garbage collections."
-        (format "%.2f seconds"
-          (float-time
-            (time-subtract after-init-time before-init-time)))
-        gcs-done)
-      (add-hook 'focus-out-hook 'garbage-collect)))
+            (lambda ()
+              "Restore defalut values after init."
+              (setq file-name-handler-alist default-file-name-handler-alist)
+              ;; The default is 0.8MB
+              ;;(setq gc-cons-threshold 80000000)
+              (message "Emacs ready in %s with %d garbage collections."
+                       (format "%.2f seconds"
+                               (float-time
+                                (time-subtract after-init-time before-init-time)))
+                       gcs-done)
+              (add-hook 'focus-out-hook 'garbage-collect)))
 
 
   (with-temp-message ""                 ;抹掉插件启动的输出
@@ -127,15 +129,12 @@
     (require '+custom)
 
     (require 'lazy-load)
-    (require 'awesome-pair)
     (require 'display-line-numbers)
-   ;; (require 'basic-toolkit)
     (require 'init-key)
 
     ;; Packages
     (require 'init-package)
     (require 'init-basic)
-    (require 'init-ui)
     (require 'init-utils)
     (require 'init-file-encoding)
     ;; (use-package esup
@@ -147,37 +146,36 @@
     ;; windows 下表现不好
     (when sys/linuxp
       (progn
-        ;; Programming
-        (require 'init-ide)
+
         (require 'init-im)
         )
-    )
+      )
+
 
     ;; 个人的一些特别设置
     (require 'init-suk)
-
-
+    ;; Restore session at last.
+    ;; 速度有点慢
+    (require 'init-session)
+    (emacs-session-restore)
+    (require 'init-ui)
     ;; 可以延后加载的
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-	     (require 'init-idle)
-         (require 'highlight-parentheses)
+         (require 'init-idle)
+         ;;(require 'highlight-parentheses)
          (require 'init-auto-save)
-         (require 'init-auto-sudoedit)
          (require 'init-awsome-pair)
-         (require 'init-awesome-tray)
-         (require 'init-awesome-tab)
          (require 'init-sudo)
-		 (require 'init-calendar)
-		 (require 'load-abbrev)
-         ;; (server-start)            ;为emacsclient准备使用场景，比如git
-		 ;; Restore session at last.
-		 (require 'init-session)
-		 (emacs-session-restore)
+         (require 'init-calendar)
+         (require 'load-abbrev)
+         ;; (server-start) ;;为emacsclient准备使用场景，比如git
+         ;; Programming
+         (require 'init-ide)
          ))
     )
-)
+  )
 
 ;; Make gc pauses faster by decreasing the threshold.
 (setq gc-cons-threshold (* 8 1000 1000))

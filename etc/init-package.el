@@ -79,31 +79,39 @@
 (setq package-check-signature nil) ; 个别时候会出现签名校验失败
 
 ;; Initialize packages
-(unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
-  (setq package-enable-at-startup nil)          ; To prevent initializing twice
-  (package-initialize))
+;; (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
+;;   (setq package-enable-at-startup nil)          ; To prevent initializing twice
+;;   (package-initialize))
 
-;;(when (< emacs-major-version 27)
-;;  (package-initialize))
+(when (< emacs-major-version 27)
+ (package-initialize))
 
 ;;(package-initialize)
 
 ;; Setup `use-package'
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+;; (unless (package-installed-p 'use-package)
+;;   (package-refresh-contents)
+;;   (package-install 'use-package))
 
 ;; Should set before loading `use-package'
-(eval-and-compile
-  (setq use-package-always-ensure t)
-  (setq use-package-always-defer t)
-  (setq use-package-expand-minimally t)
-  (setq use-package-enable-imenu-support t)
-  (require 'use-package)
-  ;; Required by `use-package'
-  (use-package diminish)
-  (use-package bind-key))
+;; (eval-and-compile
+;;   (setq use-package-always-ensure t)
+;;   (setq use-package-always-defer t)
+;;   (setq use-package-expand-minimally t)
+;;   (setq use-package-enable-imenu-support t)
+;;   (require 'use-package)
+;;   ;; Required by `use-package'
+;;   (use-package diminish)
+;;   (use-package bind-key))
 
+(setq use-package-always-ensure t)
+(setq use-package-always-defer t)
+(setq use-package-expand-minimally t)
+(setq use-package-enable-imenu-support t)
+(require 'use-package)
+;; Required by `use-package'
+(use-package diminish)
+(use-package bind-key)
 
 (provide 'init-package)
 

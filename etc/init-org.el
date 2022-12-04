@@ -125,6 +125,70 @@
 									  "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
 									 )))
 
+;;
+;; Phone capture template handling with BBDB lookup
+;; Adapted from code by Gregory J. Grubbs
+ (defun suk/phone-call ()
+   "Return name and company info for caller from bbdb lookup"
+   (interactive)
+   (let* (name rec caller)
+     (setq name (completing-read "Who is calling? "
+                                 (bbdb-hashtable)
+                                 'bbdb-completion-predicate
+                                 'confirm))
+     (when (> (length name) 0)
+                                        ; Something was supplied - look it up in bbdb
+       (setq rec
+             (or (first
+                  (or (bbdb-search (bbdb-records) name nil nil)
+                      (bbdb-search (bbdb-records) nil name nil)))
+                 name)))
+
+                                        ; Build the bbdb link if we have a bbdb record, otherwise just return the name
+     (setq caller (cond ((and rec (vectorp rec))
+                         (let ((name (bbdb-record-name rec))
+                               (company (bbdb-record-company rec)))
+                           (concat "[[bbdb:"
+                                   name "]["
+                                   name "]]"
+                                   (when company
+                                     (concat " - " company)))))
+                        (rec)
+                        (t "NameOfCaller")))
+     (insert caller)))
+
+;; (setq org-agenda-custom-commands
+;;  `(
+      ;; ("W" "Completed and/or deferred tasks from previous week"
+      ;;  ((agenda "" ((org-agenda-span 7)
+      ;;          (org-agenda-start-day "-7d")
+      ;;          (org-agenda-entry-types '(:timestamp))
+      ;;          (org-agenda-show-log t)))))
+
+      ;; ("O" "Office block agenda"
+      ;;  ((agenda "" ((org-agenda-span 1)))
+      ;;   ;; limits the agenda display to a single day
+      ;;   (tags-todo "+PRIORITY=\"A\"")
+      ;;   (tags-todo "computer|office|phone")
+      ;;   (tags "project+CATEGORY=\"elephants\"")
+      ;;   (tags "review" ((org-agenda-files '("~/org/circuspeanuts.org"))))
+      ;;   ;; limits the tag search to the file circuspeanuts.org
+      ;;   (todo "WAITING"))
+      ;;  ((org-agenda-compact-blocks t)))
+      ;;  ("x" "With deadline columns" alltodo ""
+      ;;     ((org-agenda-overriding-columns-format "%20ITEM %DEADLINE")
+      ;;      (org-agenda-view-columns-initially t)))
+ ;;   ("c" "Calendar" agenda ""
+ ;; ((org-agenda-span 7)                          ;;
+ ;;  (org-agenda-start-on-weekday 0)               ;;
+ ;;    (org-agenda-time-grid nil)
+ ;;  (org-agenda-repeating-timestamp-show-all t)   ;;
+ ;;  (org-agenda-entry-types '(:timestamp :sexp))))  ;;
+ ;;  ("d" "Upcoming deadlines" agenda ""
+ ;; ((org-agenda-time-grid nil)
+ ;;  (org-deadline-warning-days 365)        ;;
+ ;;  (org-agenda-entry-types '(:deadline))  ;; 
+;;                ))
 
  ;; TODO TASK 不要使用中文，自寻烦恼
  ;; org-archive-tag "资料库"
@@ -140,15 +204,16 @@
                              ("\\.mm\\'" . system)
                              ("\\.x?html?\\'" . system)
                              ("\\.pdf\\'" . system))))
-
+;; ! 的含义是记录某项更改为状态的时间。我不把这个添加到完成的状态，是因为它们已经被记录了。
+;; @ 符号表示带理由的提示，所以当切换到 WAITTING 时，Org 模式会问我为什么，并将这个添加到笔记中。
  (setq org-todo-keywords (quote
-                          ((sequence "TODO(t)" "NEXT(n!)" "|" "DONE(d!)")
-                           (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
+                          ((sequence "TODO(t)" "NEXT(n!)" "|" "DONE(d!)" "CANCELLED(c@/!)")
+                           (sequence "WAITTING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
 
  (setq org-todo-keyword-faces (quote (("TODO" :foreground "red" :weight bold)
                                       ("NEXT" :foreground "blue" :weight bold)
                                       ("DONE" :foreground "forest green" :weight bold)
-                                      ("WAITING" :foreground "orange" :weight bold)
+                                      ("WAITTING" :foreground "orange" :weight bold)
                                       ("HOLD" :foreground "magenta" :weight bold)
                                       ("CANCELLED" :foreground "forest grey" :weight bold)
                                       ("ABORT" :foreground "forest yellow" :weight bold)
@@ -157,19 +222,19 @@
 
  ;; The triggers break down to the following rules:
  ;;   Moving a task to CANCELLED adds a CANCELLED tag
- ;;   Moving a task to WAITING adds a WAITING tag
- ;;   Moving a task to HOLD adds WAITING and HOLD tags
- ;;   Moving a task to a done state removes WAITING and HOLD tags
- ;;   Moving a task to TODO removes WAITING, CANCELLED, and HOLD tags
- ;;   Moving a task to NEXT removes WAITING, CANCELLED, and HOLD tags
- ;;   Moving a task to DONE removes WAITING, CANCELLED, and HOLD tags
+ ;;   Moving a task to WAITTING adds a WAITTING tag
+ ;;   Moving a task to HOLD adds WAITTING and HOLD tags
+ ;;   Moving a task to a done state removes WAITTING and HOLD tags
+ ;;   Moving a task to TODO removes WAITTING, CANCELLED, and HOLD tags
+ ;;   Moving a task to NEXT removes WAITTING, CANCELLED, and HOLD tags
+ ;;   Moving a task to DONE removes WAITTING, CANCELLED, and HOLD tags
  (setq org-todo-state-tags-triggers (quote (("CANCELLED" ("CANCELLED" . t))
-											("WAITING" ("WAITING" . t))
-											("HOLD" ("WAITING") ("HOLD" . t))
-											("DONE" ("WAITING") ("HOLD"))
-											("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
-											("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
-											("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
+											("WAITTING" ("WAITTING" . t))
+											("HOLD" ("WAITTING") ("HOLD" . t))
+											("DONE" ("WAITTING") ("HOLD"))
+											("TODO" ("WAITTING") ("CANCELLED") ("HOLD"))
+											("NEXT" ("WAITTING") ("CANCELLED") ("HOLD"))
+											("DONE" ("WAITTING") ("CANCELLED") ("HOLD")))))
 
  ;; allows changing todo states with S-left and S-right skipping all of the
  ;; normal processing when entering or leaving a todo state. This cycles through
@@ -198,7 +263,7 @@
                              ("@office" . ?o)
                              ("@home" . ?H)
                              (:endgroup)
-                             ("WAITING" . ?w)
+                             ("WAITTING" . ?w)
                              ("HOLD" . ?h)
                              ("PERSONAL" . ?P)
                              ("WORK" . ?W)

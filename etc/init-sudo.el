@@ -81,6 +81,14 @@
     )
 )
 
+
+;; Just hook on `find-file-hook', don't hook `dired-mode-hook', it's unnecessary.
+(add-hook 'find-file-hook
+          #'(lambda ()
+              (require 'auto-sudoedit)
+              (auto-sudoedit)))         ;默认打开忽略模式
+
+
 ;; ---------------------------------------------------------
 ;;emacs sudo编辑远端文件由 jay 发表于 on 六月 20日, 2011我在之前的一篇
 ;;文章里提到过在Emacs下使用sudo的方法。这个解决了我很多本地编辑的问题。

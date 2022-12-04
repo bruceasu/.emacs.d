@@ -61,6 +61,11 @@
   "Use cnfonts or not."
   :type 'boolean)
 
+(defcustom suk-enable-c-cpp nil "启用C/C++开发环境" :type 'boolean)
+(defcustom suk-enable-java nil "启用Java开发环境" :type 'boolean)
+(defcustom suk-enable-python nil "启用Python开发环境" :type 'boolean)
+(defcustom suk-enable-web nil "启用Web开发环境" :type 'boolean)
+(defcustom suk-enable-go nil "启用Go开发环境" :type 'boolean)
 
 
 ;; Load `custom-file'

@@ -82,6 +82,7 @@
 	(message "亮度MAX!!"))))
 
   ;; 减少屏幕亮度
+;;;###autoload
   (defun suk/less-backlight ()
     (interactive)
     (let* (
@@ -113,29 +114,29 @@
   (if url-proxy-services
       (message "Current HTTP proxy is \"%s\"" suk-proxy)
     (message "No proxy")))
-
+;;;###autoload
 (defun suk/proxy-http-enable ()
   "Enable http/https proxy."
   (interactive)
-  (setq url-proxy-services `(("http" . ,suk-proxy)
-                             ("https" . ,suk-proxy)
+  (setq url-proxy-services `(("http" . suk-proxy)
+                             ("https" . suk-proxy)
                              ("no_proxy" . "^\\(localhost\\|192.168.*\\|10.*\\)")))
-  (proxy-http-show))
+  (suk/proxy-http-show))
 
 ;;;###autoload
 (defun suk/proxy-http-disable ()
   "Disable http/https proxy."
   (interactive)
   (setq url-proxy-services nil)
-  (proxy-http-show))
+  (suk/proxy-http-show))
 
 ;;;###autoload
 (defun suk/proxy-http-toggle ()
   "Toggle http/https proxy."
   (interactive)
   (if url-proxy-services
-      (proxy-http-disable)
-    (proxy-http-enable)))
+      (suk/proxy-http-disable)
+    (suk/proxy-http-enable)))
 
 ;;;###autoload
 (defun suk/proxy-socks-enable ()
@@ -154,7 +155,12 @@
   (setq socks-noproxy nil)
   (message "Disable socks proxy."))
 
-;;(autoload 'calendar "init-calendar" "Config Chinese calendar " t)
+;;;###autoload
+(defun now ()
+  (interactive)
+  ( insert (org-time-stamp)))
+
+(autoload 'calendar "init-calendar" "Config Chinese calendar " t)
 
 (provide '+autoload)
 ;;; +autoload.el ends here
