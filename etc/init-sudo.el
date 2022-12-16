@@ -81,12 +81,17 @@
     )
 )
 
+(when sys/linuxp
+  (progn
 
-;; Just hook on `find-file-hook', don't hook `dired-mode-hook', it's unnecessary.
-(add-hook 'find-file-hook
-          #'(lambda ()
-              (require 'auto-sudoedit)
-              (auto-sudoedit)))         ;默认打开忽略模式
+    ;; Just hook on `find-file-hook', don't hook `dired-mode-hook', it's unnecessary.
+    (add-hook 'find-file-hook
+              #'(lambda ()
+                  (require 'auto-sudoedit)
+                  (auto-sudoedit)))         ;默认打开忽略模式
+    )
+  )
+
 
 
 ;; ---------------------------------------------------------

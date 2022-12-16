@@ -1,9 +1,6 @@
 [submodule "site-lisp/sort-tab"]
 	path = site-lisp/sort-tab
 	url = https://github.com/manateelazycat/sort-tab.git
-[submodule "site-lisp/hydra-postframe"]
-	path = site-lisp/hydra-postframe
-	url = https://github.com/Ladicle/hydra-posframe.git
 [submodule "site-lisp/company-mode"]
 	path = site-lisp/company-mode
 	url = https://github.com/company-mode/company-mode.git
@@ -34,3 +31,9 @@
 [submodule "site-lisp/awesom-tray"]
 	path = site-lisp/awesom-tray
 	url = https://github.com/manateelazycat/awesome-tray.git
+[submodule "site-lisp/blink-search"]
+	path = site-lisp/blink-search
+	url = https://github.com/manateelazycat/blink-search.git
+[submodule "site-lisp/hydra-posframe"]
+	path = site-lisp/hydra-posframe
+	url = https://github.com/Ladicle/hydra-posframe.git
