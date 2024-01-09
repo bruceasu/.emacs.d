@@ -39,6 +39,12 @@
 (defvar suk-emacs-themes-dir (concat suk-emacs-share-dir "/themes"))
 (defvar suk-emacs-elpa-dir (concat suk-emacs-root-dir "/elpa"))
 
+(setq  lsp-maven-path "~/.m2/settings.xml"                             ;; maven setting path
+      org-directory "~/org/"                                          ;; org root path
+      org-roam-directory "~/org/org-roam"                             ;; org roam root path
+      lsp-java-java-path (concat (getenv "JAVA_HOME") "/bin/java")    ;; java11 exec path
+      
+)
 
 ;; 忽略 cl 过期警告
 (setq byte-compile-warnings '(cl-function))
@@ -86,13 +92,12 @@
         ;; 继续递归搜索子目录
         (add-subdirs-to-load-path subdir-path nil)))))
 
-;; (add-subdirs-to-load-path (expand-file-name "etc"       user-emacs-directory))
-;; (add-subdirs-to-load-path (expand-file-name "site-lisp" user-emacs-directory))
-;; (add-subdirs-to-load-path (expand-file-name "themes"    suk-emacs-share-dir))
+
 (add-subdirs-to-load-path suk-emacs-config-dir t)
 (add-subdirs-to-load-path suk-emacs-extension-dir t)
 (add-subdirs-to-load-path suk-emacs-themes-dir t)
 (add-subdirs-to-load-path suk-emacs-elpa-dir t)
+
 
 (let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
       (gc-cons-threshold most-positive-fixnum)
@@ -101,8 +106,8 @@
       (file-name-handler-alist nil))
 
   ;; Emacs配置文件内容写到下面.
-  (when (version< emacs-version "25.1")
-    (error "This requires Emacs 25.1 and above!"))
+  ;;(when (version< emacs-version "25.1")
+  ;; (error "This requires Emacs 25.1 and above!"))
 
   (add-hook 'emacs-startup-hook
             (lambda ()
@@ -133,10 +138,9 @@
     (require 'init-key)
 
     ;; Packages
-    (require 'init-package)
     (require 'init-basic)
+    (require 'init-package)
     (require 'init-utils)
-    (require 'init-file-encoding)
     ;; (use-package esup
     ;;              :ensure t
     ;;              ;; To use MELPA Stable use ":pin melpa-stable",
@@ -153,16 +157,17 @@
 
 
     ;; 个人的一些特别设置
-    (require 'init-suk)
-    ;; Restore session at last.
-    ;; 速度有点慢
-    (require 'init-session)
-    (emacs-session-restore)
+    ;;(require 'init-suk)
+
     (require 'init-ui)
     ;; 可以延后加载的
     (run-with-idle-timer
      1 nil
      #'(lambda ()
+         ;; Restore session at last.
+         ;; 速度有点慢
+         (require 'init-session)
+         (emacs-session-restore)
          (require 'init-idle)
          ;;(require 'highlight-parentheses)
          (require 'init-auto-save)

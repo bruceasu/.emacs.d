@@ -55,6 +55,7 @@
   "Convert the current buffer to UNIX file format."
   (interactive)
   (set-buffer-file-coding-system 'undecided-unix nil))
+
 ;;;###autoload
 (defun set2dos ()
   "Convert the current buffer to DOS file format."
@@ -79,6 +80,7 @@
   (interactive)
   (message "Revert this buffer.")
   (revert-buffer t t))
+
 ;;; =========================================================
 ;;; 用新编码重新读取文件
 ;;; ---------------------------------------------------------
@@ -90,6 +92,7 @@
     (revert-buffer buffer-file-name t)
    )
   )
+
 ;;; ---------------------------------------------------------
 ;;;###autoload
 (defun suk/revert-buffer-with-coding-system-no-confirm (coding-system)
@@ -97,6 +100,7 @@
   (interactive "Coding system for visited file (default nil): ")
   (let ((coding-system-for-read coding-system))
     (suk/revert-buffer-no-confirm)))
+
 ;;; ---------------------------------------------------------
 ;;;###autoload
 (defun suk/revert-buffer-with-gbk ()
@@ -104,6 +108,7 @@
 It is bound to \\[suk/revert-buffer-with-gbk]."
   (interactive)
   (suk/revert-buffer-with-coding-system-no-confirm 'gb18030))
+
 ;;; ---------------------------------------------------------
 ;;;###autoload
 (defun suk/revert-buffer-with-utf8 ()
@@ -111,5 +116,17 @@ It is bound to \\[suk/revert-buffer-with-gbk]."
 It is bound to \\[suk/revert-buffer-with-utf8]."
   (interactive)
   (suk/revert-buffer-with-coding-system-no-confirm 'utf-8))
+
 ;;; =========================================================
+;;; set the eol to unix format
+;;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/no-junk-please-were-unixish ()
+  "只用unix类换行格式."
+  (let ((coding-str (symbol-name buffer-file-coding-system)))
+    (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
+      (set-buffer-file-coding-system 'unix))))
+
+(add-hook 'find-file-hook 'suk/no-junk-please-were-unixish)
+
 (provide 'file-encoding)

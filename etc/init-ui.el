@@ -37,9 +37,11 @@
 (setq inhibit-startup-message nil)
 (setq inhibit-startup-screen t)
 ;; 关闭工具栏
-(tool-bar-mode -1)
+(when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 ;; 关闭菜单栏
-(menu-bar-mode -1)
+;;(menu-bar-mode -1)
+;; (when (fboundp 'tooltip-mode) (tooltip-mode -1))
+;; (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 ;; 字体
 (require 'load-set-font)
 
@@ -79,9 +81,7 @@
   (- (elt (window-pixel-edges) 3)
      (elt (window-inside-pixel-edges) 3)))
 
-;; Line and Column
-(linum-mode t)
-(setq-default fill-column 65)
+(setq-default fill-column 80)
 (setq column-number-mode t)
 (defun buffer-too-big-p ()
   "Check whether the buffer is too big."
@@ -93,13 +93,6 @@
             ;; turn off `linum-mode' when there are more than 5000 lines
             (if (buffer-too-big-p) (linum-mode -1))))
 
-;; Mouse & Smooth Scroll
-;; Scroll one line at a time (less "jumpy" than defaults)
-(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))
-      mouse-wheel-progressive-speed nil
-      scroll-step 1
-      scroll-margin 0
-      scroll-conservatively 100000)
 
 ;; Toggle fullscreen <F11> also bind to fullscreen
 (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
@@ -107,44 +100,24 @@
            ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
            )
 
-;; for windows settings
-(when (eq system-type 'windows-nt)
-  (setq locale-coding-system 'gb18030)    ; 此句保证中文字体设置有效
-  (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
-  (setq file-name-coding-system 'gb18030) ; 设置文件名的编码为gb18030
-  )
-
-
-(require 'sort-tab)
-(sort-tab-mode 1)
-;;Usage
-;;sort-tab-select-next-tab: select next tab
-;;sort-tab-select-prev-tab: select previous tab
-;;sort-tab-select-first-tab: select first tab
-;;sort-tab-select-last-tab: select last tab
-;;sort-tab-close-current-tab: close current tab
-(global-set-key (kbd "C-c 1") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c 2") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c 3") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c 4") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c 5") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c 6") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c 7") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c 8") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c 9") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c 0") 'sort-tab-select-visible-tab)
-(global-set-key (kbd "C-c q") 'sort-tab-close-mode-tabs)
-(global-set-key (kbd "C-c Q") 'sort-tab-close-all-tabs)
-(global-set-key (kbd "C-;") 'sort-tab-close-current-tab)
-(global-set-key (kbd "C-x <left>") 'sort-tab-select-prev-tab)
-(global-set-key (kbd "C-x <right>") 'sort-tab-select-next-tab)
 
 (require 'awesome-tray)
 (awesome-tray-mode 1)
 
-;;(require 'awesome-tab)
-;;(require 'all-the-icons)
-;;(awesome-tab-mode t)
+;; set the alpha background
+(setq-default alpha-list '((90 100) (100 100)))
+(defun loop-alpha ()
+  ;;doc
+  (interactive)
+  (let ((h (car alpha-list)))
+    ((lambda (a ab)
+       (set-frame-parameter (selected-frame) 'alpha (list a ab))
+       (add-to-list 'default-frame-alist (cons 'alpha (list a ab)))
+       ) (car h) (car (cdr h)))
+    (setq alpha-list (cdr (append alpha-list (list h))))
+    )
+)
+(loop-alpha)
 
 (provide 'init-ui)
 

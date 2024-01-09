@@ -5,7 +5,7 @@
 ;;; code:
 
 ;; youdao / google
-(setq insert-translated-name-translate-engine "youdao")
+(setq insert-translated-name-translate-engine "google")
 (require 'insert-translated-name)
 
 (provide 'init-insert-translated-name)

@@ -34,306 +34,57 @@
   (require '+custom)
   (require 'init-package))
 
-
-;; 增强了搜索功能
-(use-package swiper
-  :bind
-  (("C-s" . swiper)
-   ("M-x" . counsel-M-x)
-   ("C-x C-f" . counsel-find-file))
-  :config
-  (progn
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-display-style 'fancy)
-    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)))
-
-(use-package counsel
-  :ensure t
-  :diminish ivy-mode counsel-mode
-  :defines (projectile-completion-system magit-completing-read-function)
-  :bind (("C-s" . swiper)
-         ("C-S-s" . swiper-all)
-         ("C-x C-r" . 'counsel-recentf)
-         ("C-x d" . 'counsel-dired)
-         ("C-c C-r" . ivy-resume)
-         ("C-c v p" . ivy-push-view)
-         ("C-c v o" . ivy-pop-view)
-         ("C-c v ." . ivy-switch-view)
-
-         :map counsel-mode-map
-         ([remap swiper] . counsel-grep-or-swiper)
-         ("C-x C-r" . counsel-recentf)
-         ("C-x j" . counsel-mark-ring)
-
-         ("C-c L" . counsel-load-library)
-         ("C-c P" . counsel-package)
-         ("C-c f" . counsel-find-library)
-         ("C-c g" . counsel-grep)
-         ("C-c h" . counsel-command-history)
-         ("C-c i" . counsel-git)
-         ("C-c j" . counsel-git-grep)
-         ("C-c l" . counsel-locate)
-         ("C-c r" . counsel-rg)
-         ("C-c z" . counsel-fzf)
-
-         ("C-c c L" . counsel-load-library)
-         ("C-c c P" . counsel-package)
-         ("C-c c a" . counsel-apropos)
-         ("C-c c e" . counsel-colors-emacs)
-         ("C-c c f" . counsel-find-library)
-         ("C-c c g" . counsel-grep)
-         ("C-c c h" . counsel-command-history)
-         ("C-c c i" . counsel-git)
-         ("C-c c j" . counsel-git-grep)
-         ("C-c c l" . counsel-locate)
-         ("C-c c m" . counsel-minibuffer-history)
-         ("C-c c o" . counsel-outline)
-         ("C-c c p" . counsel-pt)
-         ("C-c c r" . counsel-rg)
-         ("C-c c s" . counsel-ag)
-         ("C-c c t" . counsel-load-theme)
-         ("C-c c u" . counsel-unicode-char)
-         ("C-c c w" . counsel-colors-web)
-         ("C-c c z" . counsel-fzf)
-
-         ;; Find counsel commands quickly
-         ("<f6>" . (lambda ()
-                     (interactive)
-                     (counsel-M-x "^counsel ")))
-
-         :map ivy-minibuffer-map
-         ("C-w" . ivy-yank-word)
-
-         :map counsel-find-file-map
-         ("C-h" . counsel-up-directory)
-
-         :map swiper-map
-         ("M-%" . swiper-query-replace))
-  :hook ((after-init . ivy-mode)
-         (ivy-mode . counsel-mode))
-  :config
-  (setq enable-recursive-minibuffers t) ; Allow commands in minibuffers
-  (setq ivy-use-selectable-prompt t)
-  (setq ivy-use-virtual-buffers t) ; Enable bookmarks and recentf
-  (setq ivy-height 10)
-  (setq ivy-count-format "(%d/%d) ")
-  (setq ivy-on-del-error-function nil)
-  (setq ivy-format-function 'ivy-format-function-arrow)
-  (setq ivy-initial-inputs-alist nil)
-
-  (setq ivy-re-builders-alist
-        '((read-file-name-internal . ivy--regex-fuzzy)
-          (t . ivy--regex-plus)))
-
-  (setq swiper-action-recenter t)
-  (setq counsel-find-file-at-point t)
-  (setq counsel-yank-pop-separator "\n-------\n")
-
-  ;; Use faster search tools: ripgrep or the silver search
-  (let ((command
-         (cond
-          ((executable-find "rg")
-           "rg -i -M 120 --no-heading --line-number --color never '%s' %s")
-          ((executable-find "ag")
-           "ag -i --noheading --nocolor --nofilename --numbers '%s' %s")
-          (t counsel-grep-base-command))))
-    (setq counsel-grep-base-command command))
-
-  (when (executable-find "rg")
-    (setq counsel-git-cmd "rg --files")
-    (setq counsel-rg-base-command
-          "rg -i -M 120 --no-heading --line-number --color never %s ."))
-
-  ;; Integration with `projectile'
-  (with-eval-after-load 'projectile
-    (setq projectile-completion-system 'ivy))
-
-  ;; Integration with `magit'
-  (with-eval-after-load 'magit
-    (setq magit-completing-read-function 'ivy-completing-read))
-
-  ;; Enhance fuzzy matching
-  (use-package flx)
-
-  ;; Enhance M-x
-  (use-package amx)
-
-  ;; Correcting words with flyspell via Ivy
-  (use-package flyspell-correct-ivy
-    :after flyspell
-    :bind (:map flyspell-mode-map
-                ([remap flyspell-correct-word-before-point] . flyspell-correct-previous-word-generic)))
-
-  ;; Ivy integration for Projectile
-  (use-package counsel-projectile
-    :ensure t
-    :hook ((counsel-mode . counsel-projectile-mode))
-    :init (counsel-projectile-mode 1)
-    :bind (:map leader-key
-                ("p" . #'projectile-command-map)))
-
-  ;; Tramp ivy interface
-  (use-package counsel-tramp
-    :bind (:map counsel-mode-map
-                ("C-c c v" . counsel-tramp)))
-  )
-
-(use-package hydra
-  :ensure t
-  :defer 1)
-
 (use-package hydra-posframe
   :load-path "~/.emacs.d/site-lisp/hydra-posframe/hydra-posframe.el"
   :defer 1
   :hook (after-init . hydra-posframe-mode))
 
-(use-package major-mode-hydra
-  :ensure t
-  :defer 1
-  :after hydra)
 
-;; Rectangle
-(use-package rect
-  :ensure nil
-  :defer 2
-  :bind (("<C-return>" . rectangle-mark-mode)))
+;; Frequently-accessed files
 
-;; On-the-fly spell checker
-(unless sys/win32p
- (use-package flyspell
-    :ensure nil
-    :defer 2
-    :diminish flyspell-mode
-    :if (executable-find "aspell")
-    :hook (((text-mode outline-mode) . flyspell-mode)
-           (prog-mode . flyspell-prog-mode)
-           (flyspell-mode . (lambda ()
-                              (unbind-key "C-;" flyspell-mode-map)
-                              (unbind-key "C-," flyspell-mode-map)
-                              (unbind-key "C-." flyspell-mode-map))))
-    :init
-    (setq flyspell-issue-message-flag nil)
-    (setq ispell-program-name "aspell")
-    (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together")))
-  )
+;; Registers allow you to jump to a file or other location quickly.
+;; To jump to a register, use C-x r j followed by the letter of the register.
+;; Using registers for all these file shortcuts is probably a bit of
+;; a waste since I can easily define my own keymap, but since I rarely
+;; go beyond register A anyway. Also, I might as well add shortcuts for refiling.
 
-;; Treat undo history as a tree, ^x u
-(use-package undo-tree
-  :ensure t
-  :defer 2
-  :diminish undo-tree-mode
-  :hook (after-init . global-undo-tree-mode)
-  :init
-  (setq undo-tree-visualizer-timestamps t
-        undo-tree-enable-undo-in-region nil
-        undo-tree-auto-save-history nil)
-  ;; HACK: keep the diff window
-  (with-no-warnings
-    (make-variable-buffer-local 'undo-tree-visualizer-diff)
-    (setq-default undo-tree-visualizer-diff t))
-  )
+(require 'bookmark)
+(defvar my-refile-map (make-sparse-keymap))
+(defmacro my-defshortcut (key file)
+  `(progn
+     (set-register ,key (cons 'file ,file))
+     (define-key my-refile-map
+       (char-to-string ,key)
+       (lambda (prefix)
+         (interactive "p")
+         (let ((org-refile-targets '(((,file) :maxlevel . 6)))
+               (current-prefix-arg (or current-prefix-arg '(4))))
+           (call-interactively 'org-refile))))))
 
-;; Group ibuffer's list by project root
-(use-package ibuffer-projectile
-  :bind ("C-x C-b" . ibuffer)
-  :defer 1
-  :hook ((ibuffer . (lambda ()
-                      (ibuffer-projectile-set-filter-groups)
-                      (unless (eq ibuffer-sorting-mode 'alphabetic)
-                        (ibuffer-do-sort-by-alphabetic)))))
-  :config
-  (setq ibuffer-projectile-prefix "Project: ")
-  (setq ibuffer-filter-group-name-face 'font-lock-function-name-face)
-  (with-eval-after-load 'counsel
-    (defun my-ibuffer-find-file (file &optional wildcards)
-      "Like `find-file', but default to the directory of the buffer at point."
-      (interactive
-       (let ((default-directory (let ((buf (ibuffer-current-buffer)))
-                                  (if (buffer-live-p buf)
-                                      (with-current-buffer buf
-                                        default-directory)
-                                    default-directory))))
-         (counsel-find-file))))
-    (advice-add #'ibuffer-find-file :override #'my-ibuffer-find-file)))
+;;(define-key my-refile-map "," 'my-org-refile-to-previous-in-file)
+(my-defshortcut ?e "~/.emacs.d/init.el")
+(my-defshortcut ?E "~/.emacs.d/custom.el")
+;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
+;; (my-defshortcut ?o "~/cloud/orgzly/organizer.org")
+;; (my-defshortcut ?s "~/personal/sewing.org")
+;; (my-defshortcut ?b "~/personal/business.org")
+;; (my-defshortcut ?p "~/personal/google-inbox.org")
+;; (my-defshortcut ?P "~/personal/google-ideas.org")
+;; (my-defshortcut ?B "~/Dropbox/books")
+(my-defshortcut ?n "~/notes")
+;; (my-defshortcut ?N "~/sync/notes/QuickNote.md")
+;; (my-defshortcut ?w "~/Dropbox/public/sharing/index.org")
+;; (my-defshortcut ?W "~/Dropbox/public/sharing/blog.org")
+;; (my-defshortcut ?j "~/personal/journal.org")
+;; (my-defshortcut ?J "~/cloud/a/Journal.csv")
+;; (my-defshortcut ?I "~/Dropbox/Inbox")
+;; (my-defshortcut ?g "~/sachac.github.io/evil-plans/index.org")
+;; (my-defshortcut ?c "~/code/dev/elisp-course.org")
+;; (my-defshortcut ?C "~/personal/calendar.org")
+;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
+;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
+;; (my-defshortcut ?Q "~/personal/questions.org")
 
-
-;; Display available keybindings in popup
-(use-package which-key
-  :diminish which-key-mode
-  :defer 2
-  :custom
-  ;; 弹出方式，底部弹出
-  (which-key-popup-type 'side-window)
-  :config
-  (which-key-mode)
-  :bind (:map help-map ("C-h" . which-key-C-h-dispatch))
-  :hook (after-init . which-key-mode))
-
-
-;; Open files as another user
-(unless sys/win32p
-  (use-package sudo-edit))
-
-;; Persistent the scratch buffer
-(use-package persistent-scratch
-  :defer 2
-  :preface
-  (defun my-save-buffer ()
-    "Save scratch and other buffer."
-    (interactive)
-    (let ((scratch-name "*scratch*"))
-      (if (string-equal (buffer-name) scratch-name)
-          (progn
-            (message "Saving %s..." scratch-name)
-            (persistent-scratch-save)
-            (message "Wrote %s" scratch-name))
-        (save-buffer))))
-  :hook (after-init . persistent-scratch-setup-default)
-  :bind (:map lisp-interaction-mode-map
-              ("C-x C-s" . my-save-buffer)))
-
-(use-package daemons
-  :defer 1)								; system services/daemons
-(use-package htmlize
-  :defer 2)								; covert to html
-(use-package list-environment
-  :defer 2)
-
-;;(use-package restart-emacs)
-
-;; Emacs下的pdf查看工具，默认非图形化不开启
-(when (display-graphic-p)
-  ;; Emacs下最好用的终端仿真器，需要编译库，默认不开启
-  ;; libvterm
-  ;; Ubuntu/Debian
-  ;; apt install libvterm
-  ;; ArchLinux
-  ;; pacman -S libvterm
-  (when sys/linuxp
-    (use-package vterm
-      :ensure t
-      :defer 2
-      :bind ("M-<f12>" . 'vterm))
-	)
-
-  ;; emacs 调用 rime输入法的前端，强烈推荐
-  ;;          (use-package rime
-  ;;            :ensure t
-  ;;            :custom
-  ;;            (default-input-method "rime")
-  ;;            :config
-  ;;            (setq rime-user-data-dir "~/.config/fcitx/rime")
-
-  ;;            (setq rime-posframe-properties
-  ;;                  (list :background-color "#333333"
-  ;;                        :foreground-color "#dcdccc"
-  ;;                        :font "Sarasa Mono SC-16"
-  ;;                        :internal-border-width 10))
-  ;;            (setq default-input-method "rime"
-  ;;                  rime-show-candidate 'posframe))
-
-  )
 
 (provide 'init-utils)
 

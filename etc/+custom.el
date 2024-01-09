@@ -48,25 +48,9 @@
   "Set network proxy."
   :type 'string)
 
-(defcustom suk-package-archives 'melpa
-  "Set package archives from which to fetch."
-  :type '(choice
-          (const :tag "Melpa" melpa)
-          (const :tag "Melpa Mirror" melpa-mirror)
-          (const :tag "Emacs-China" emacs-china)
-          (const :tag "Netease" netease)
-          (const :tag "Tuna" tuna)))
-
 (defcustom suk-cnfonts nil
   "Use cnfonts or not."
   :type 'boolean)
-
-(defcustom suk-enable-c-cpp nil "启用C/C++开发环境" :type 'boolean)
-(defcustom suk-enable-java nil "启用Java开发环境" :type 'boolean)
-(defcustom suk-enable-python nil "启用Python开发环境" :type 'boolean)
-(defcustom suk-enable-web nil "启用Web开发环境" :type 'boolean)
-(defcustom suk-enable-go nil "启用Go开发环境" :type 'boolean)
-
 
 ;; Load `custom-file'
 ;; If it doesn't exist, copy from the template, then load it.

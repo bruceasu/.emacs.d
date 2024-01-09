@@ -23,7 +23,7 @@
 
 ;; 增加或减少透明
 ;;;###autoload
-(defun sanityinc/adjust-opacity (frame incr)
+(defun suk/adjust-opacity (frame incr)
   "Adjust the background opacity of FRAME by increment INCR."
   (unless (display-graphic-p frame)
     (error "Cannot adjust opacity of this frame"))
@@ -39,15 +39,15 @@
 ;;;###autoload
 (defun suk/less-alpha ()
   (interactive)
-  (sanityinc/adjust-opacity nil -2))
+  (suk/adjust-opacity nil -2))
 ;; 减少透明度
 ;;;###autoload
 (defun suk/plus-alpha ()
   (interactive)
-  (sanityinc/adjust-opacity nil 2))
+  (suk/adjust-opacity nil 2))
 
 (when  (eq system-type 'gnu/linux)
-  ;; 调节屏幕亮度
+;; 调节屏幕亮度
 ;;;###autoload
   (defun suk/set-backlight (&optional light-value)
     (interactive "s请输入亮度(小数表示的百分比): ")
@@ -60,7 +60,7 @@
 		 (format "%d" (* max-backlight (string-to-number light-value)))
 		 " > /sys/class/backlight/intel_backlight/brightness")))))
 
-  ;; 增加10%屏幕亮度
+;; 增加10%屏幕亮度
 ;;;###autoload
   (defun suk/plus-backlight ()
     (interactive)
@@ -81,7 +81,7 @@
 		 (message "亮度+10%"))
 	(message "亮度MAX!!"))))
 
-  ;; 减少屏幕亮度
+;; 减少屏幕亮度
 ;;;###autoload
   (defun suk/less-backlight ()
     (interactive)
@@ -114,6 +114,7 @@
   (if url-proxy-services
       (message "Current HTTP proxy is \"%s\"" suk-proxy)
     (message "No proxy")))
+    
 ;;;###autoload
 (defun suk/proxy-http-enable ()
   "Enable http/https proxy."

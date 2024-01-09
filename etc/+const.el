@@ -73,11 +73,14 @@
   (>= emacs-major-version 27)
   "Emacs is 27 or above.")
 
-(defconst emacs/>=25.2p
-  (or emacs/>=26p
-      (and (= emacs-major-version 25) (>= emacs-minor-version 2)))
-  "Emacs is 25.2 or above.")
+(defconst emacs/>=28p
+  (>= emacs-major-version 28)
+  "Emacs is 28 or above.")
 
+(defconst emacs/>=29p
+  (>= emacs-major-version 29)
+  "Emacs is 29 or above.")
+  
 (provide '+const)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

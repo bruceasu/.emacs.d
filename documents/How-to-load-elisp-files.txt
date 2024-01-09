@@ -1,0 +1,176 @@
+Emacs Lisp files
+
+文件加载需要注意的问题有：
+
+加载所有需要的文件
+按正确的顺序加载
+按需加载（不要加载太多）
+
+1. Loading a file
+   最简单的方式是调用 load-file.
+   (load-file "~/elisp/foo.el")
+   
+  这种方式非常原始：
+    - 路径必须准确。
+    - 文件不必在 Emacs 的 load path 里。
+    - 不会查找 .elc 文件，它只是简单地加载你指定的文件。
+
+2. Features
+   更好地方式是使用 features. 一个 feature 就是一个符号(symbol)，通常和它所 在的文件名相同。
+   假如你有一个文件 my-feature.el 包含如下内容：
+
+   ;; Your code goes here ...
+   (provide 'my-feature)
+
+   要使 Emacs 加载这个文件，像下面这样调用 require:
+
+   require 'my-feature
+
+   这会先检查 my-feature 是否已经被加载，如果没有，就查找名字类似于
+   my-feature.el, my-feature.elc 之类的文件。如果找到了，就会进行加载。
+   当执行完 provide 语句之后，这个 feature 就会被添加到已加载列表里，
+   以后再遇到 require 的调用就不会再重复操作。如果相应的文件找不到就会报错。
+
+   文件 my-feature.el 中也可以包含 require 调用，这是保证代码的依赖在执行前
+   被加载的常用方式。
+
+3. The load path
+   当调用 require 时，Emacs 会查找 load path 中的文件。这只不过是一个
+   emacs-lisp 文件的路径列表。要添加一个路径，直接向这个列表中 push 就行：
+
+   (push "/some/path/" load-path)
+
+4. Auto-loading
+   当一个函数被注册为 auto-loading，会提 供一个“空”定义。当该函数被调用时，
+   提供这个函数的文件（以及它依赖的 feature） 会立即被加载。最后，“空”函数
+   会被替换为真实的并被正常调用。用户只会在第一次调 用这个函数时感觉到
+   短暂的延迟，之后对该函数（以及其他在此过程中被加载的函数） 的调用会
+   和正常调用一样快。
+   语法：
+   (autoload filename docstring interactive type)
+
+   要将一个函数注册为 auto-loadable，需要使用 autoload:
+
+   (autoload 'some-function "some-file")
+
+   这行代码会使得 some-function 被调用的时候，先加载 some-file.el 再继续。
+
+   另外特殊用法为：
+
+   ;;;###autoload
+   (defun my-function ()
+     ;; Source code...
+   )
+
+   ;;;###autoload 这个特殊注释告诉 Emacs 下面的定义应该使用 auto-load 方式加载。 
+   这会自动生成一个 autoload 调用。
+
+   基本上，所有“可定义”(definable)可以使用 auto-load 机制，如 function, macros, major 
+   或 minor modes, groups, classes 等等。
+
+   这种注释也可以作用在其他东西上，如变量定义(defvar)，但在这种情况下，
+   定义只是简单地逐字拷贝到 auto-loading 文件里。例如，下面的代码会在启动时加载 Helm， 
+   远比文件求值的时间早，这可能不是你想要的：
+
+   ;;;###autoload
+   (require 'helm)
+
+   确保 package 能被正确地 auto-load 是作者的责任，大多数 package 都做得很好。
+
+使用下面的命令生成 autoloads 文件
+
+(package-generate-autoloads "hello-world" "~/my-mode")
+在同一目录生成 hello-world-autoloads.el 文件，内容为：
+
+;;; hello-world-autoloads.el --- automatically extracted autoloads
+;;
+;;; Code:
+
+(add-to-list 'load-path (directory-file-name
+                      (or (file-name-directory #$) (car load-path))))
+
+
+;;;### (autoloads nil "hello-world" "hello-world.el" (0 0 0 0))
+;;; Generated autoloads from hello-world.el
+
+(autoload 'my-hello "hello-world" nil t nil)
+
+;;;***
+
+;; Local Variables:
+;; version-control: never
+;; no-byte-compile: t
+;; no-update-autoloads: t
+;; coding: utf-8
+;; End:
+;;; hello-world-autoloads.el ends here
+
+
+5. Eval after load
+   很多时候我们都需要在加载完 package 之后设置它们，如设置一些变量或调用一些函数。
+   在使用 require 这不是一个问题，因为它立即就被加载了，但使用 auto-loading 时
+   就会更复杂，因为配置的代码也必须推迟执行。
+
+   Emacs 为此提供了 with-eval-after-load, 用法如下：
+
+   (with-eval-after-load 'helm
+     ;; Code
+   )
+
+   这会使得相关代码在 Helm 加载后执行（不管是通过 require 还是 autoload 加 载），
+   如果 Helm 已经加载过了，这些代码就会立即执行。
+
+   因为 with-eval-after-load 是一个宏而非函数，所以它的参数不必加 quote。
+
+6. Use-package
+   对于想要拼凑出高效配置的用户， use-package 是一个非常有用的 package，
+   它提供了一个同名的宏 use-package, 在把整个流程串起来这方面做得不错。
+
+   推荐 layer 作者看一下 use-package 的文档。下面是一些例子。
+
+   (use-package helm)
+
+   上面的代码只是简单地加载 Helm。实际上等同于 (require 'helm).
+
+   (use-package helm
+     :defer t)
+
+   这里的 defer 用了 auto-load 的基础设施和 Helm 源文件中的 autoload 命令，它 实际上是一个空操作。
+
+   (use-package helm
+     :defer t
+     :init
+     ;; Code to execute before Helm is loaded
+     :config
+     ;; Code to execute after Helm is loaded
+   )
+
+   这个 form 包含了 Helm 加载前后要执行的代码。其中 :init 部分可以被立即执行，
+   但因为 Helm 被延迟加载了， :config 部分的代码直到 Helm 加载后都会执行。
+   这实际上等同于先运行 :init 块，再将 :config 块添加到 with-eval-after-load 中。
+
+   (use-package helm
+     :commands (helm-find-files helm-M-x))
+
+   如果你发现 package 作者大意了，可以使用上面的代码会为命令新建一个 auto-load 引用。
+
+   (use-package ruby-mode
+     :mode "\\.rb\\'")
+
+   对于提供 major mode 的 package，人可以使用 :mode 关键字将扩展名和 mode 联系起来。
+   这会在 auto-mode-alist 中添加一个条目并为 ruby-mode 添加一个 auto-load。
+   通常情况下不需要这么做，因为 ruby-mode 应该已经是 auto-loadable 了，
+   且该 package 也应该自己建立了和 Ruby 文件的联系了。
+
+7. run-with-idle-timer
+    ;; 可以延后加载的
+    (run-with-idle-timer
+     1 nil
+     #'(lambda ()
+         (require 'init-eaf)
+         (require 'init-popweb)
+
+         ;; Restore session at last.
+         (require 'init-session)
+         (emacs-session-restore)
+         ))))

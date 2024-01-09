@@ -160,7 +160,7 @@ kill all buffers with MODE except current buffer."
       (when (and (equal major-mode mode)
                  (or (not except-current-buffer)
                      (not (eq current-buf buffer))))
-        (incf count)
+        (cl-incf count)
         (kill-buffer buffer)))
     (message "Killed %s buffer%s" count (if (> count 1) "s" ""))))
 
@@ -275,6 +275,12 @@ It returns the buffer."
   (lisp-interaction-mode))
 (global-set-key "\C-cs" 'suk/create-scratch-buffer) ;; Bind to `C-c s'
 
+(defun suk/create-scratch-org ()
+  "Create a scratch buffer with org-mode"
+  (interactive)
+  (find-file "/tmp/scratch.org")
+  (gnus-make-directory "/tmp"))
+  
 ;;;###autoload
 (defun suk/switch-to-minibuffer ()
   "Switch to minibuffer window."
@@ -359,7 +365,8 @@ Version 2022-01-22"
                  (list t)))
   (let ((fill-column (point-max)))
     (fill-paragraph nil region)))
-                                        ;(bind-key "M-Q" 'suk/unfill-paragraph)
+
+;;(bind-key "M-Q" 'suk/unfill-paragraph)
 
 ;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
 ;; --------------------------------------------------------------
@@ -372,7 +379,7 @@ With the prefix argument UNFILL, unfill it instead."
                  (list (if current-prefix-arg 'unfill) t)))
   (let ((fill-column (if unfill (point-max) fill-column)))
     (fill-paragraph nil region)))
-                                        ;(bind-key "M-q" 'suk/fill-or-unfill-paragraph)
+;;(bind-key "M-q" 'suk/fill-or-unfill-paragraph)
 
 ;; =========================================================
 ;; 方便的切换major mode
@@ -403,7 +410,7 @@ With the prefix argument UNFILL, unfill it instead."
 ;; show major mode
 ;;;###autoload
 (defun suk/get-mode-name ()
-  "显示`major-mode'及`mode-name'."
+  "Show `major-mode' and `mode-name'."
   (interactive)
   (message "major-mode:%s, mode-name:%s" major-mode mode-name))
 
@@ -420,5 +427,6 @@ This command is convenient when reading novel, documentation."
 ;; (global-set-key (kbd "C-S-t") 'suk/open-last-closed) ; control+shift+t
 ;; (global-set-key [S-f2]  'suk/new-empty-buffer)
 
+;; bind the hotkey in init-key.el
 (provide 'init-buffers)
 ;;; init-buffers.el ends here

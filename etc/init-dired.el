@@ -132,8 +132,8 @@
    ("e" . scroll-down)                       ;向上翻页
    ("c" . kill-this-buffer)                  ;关闭当前标签
    ("/" . copy-buffer-file-name-as-kill)     ;显示路径或名称
-   ("s" . one-key-menu-dired-sort)           ;排序
-   ("F" . one-key-menu-dired-filter)         ;过滤
+   ;;("s" . one-key-menu-dired-sort)           ;排序
+   ;;("F" . one-key-menu-dired-filter)         ;过滤
    ("w" . wdired-change-to-wdired-mode)      ;切换到dired编辑模式
    )
  dired-mode-map
@@ -157,7 +157,7 @@
    ("8" . dired-move-to-first-file)     ;移动到第一个文件
    ("k" . dired-previous-file-line)     ;上一行
    ("j" . dired-next-file-line)         ;下一行
-   ("{" . dired-gnome-open-file)        ;用GNOME方式打开文件
+   ;;("{" . dired-gnome-open-file)        ;用GNOME方式打开文件
    ("E" . dired-touch-now)              ;Touch命令
    ("f" . dired-find-file+)             ;打开当前文件或目录
    ("C-m" . dired-find-file+)           ;打开当前文件或目录

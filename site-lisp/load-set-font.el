@@ -53,7 +53,7 @@
 ;;                     (font-spec :family "Simsun" :size 12)))
 
 ;; 设置不同字符集使用不同的字体
-                                        ;(set-face-attribute 'default' nil :font "Migu 1M Less:pixelsize=16")
+;;(set-face-attribute 'default' nil :font "Migu 1M Less:pixelsize=16")
 ;; (set-frame-font "Migu 1M Less-12")
 ;; (set-fontset-font (frame-parameter nil 'font) 'han '("Simsun" . "unicode-bmp"))
 ;; (set-fontset-font (frame-parameter nil 'font) 'symbol '("Console" . "unicode-bmp"))
@@ -63,8 +63,6 @@
   (require '+const)
   (require '+custom))
 
-(defvar loaded-font-type 0)
-(defvar loaded-font-type-num 3)
 ;; 解决卡顿
 (setq inhibit-compacting-font-caches t)
 ;;只渲染当前屏幕语法高亮，加快显示速度
@@ -75,87 +73,145 @@
 (when (or sys/mac-x-p sys/linux-x-p)
   (set-frame-font "Noto Sans CJK SC-12"))
 
+;;(setq en-font "Consolas Mono"
+;;      cn-font "宋体")
+(setq emacs-font-size-pair '(19 . 20))
+(setq en-font "victor Mono"
+      cn-font "LXGW WenKai Mono")
+(cond
+  ((member "Victor Mono" (font-family-list))
+    (setq en-font "Victor Mono"))
+  ((member "JetBrains Mono" (font-family-list))
+    (setq en-font "JetBrains Mono"))
+  ((member "Migu 1M Less" (font-family-list))
+    (setq en-font "Migu 1M Less"))
+  ((member "Source Code Pro" (font-family-list))
+    (setq en-font "Source Code Pro"))
+  ((member "Monaco" (font-family-list))
+    (setq en-font "Monaco"))
+  ((member "DejaVu Sans Mono" (font-family-list))
+    (setq en-font "DejaVu Sans Mono"))
+  ((member "Consolas" (font-family-list))
+    (setq en-font "Consolas"))
+)
+(cond
+  ((member "LXGW WenKai Mono" (font-family-list))
+    (setq en-font "LXGW WenKai Mono"))
+  ((member "露鹜文楷等宽" (font-family-list))
+    (setq en-font "露鹜文楷等宽"))
+  ((member "LXGW WenKai" (font-family-list))
+    (setq en-font "LXGW WenKai"))
+  ((member "露鹜文楷" (font-family-list))
+    (setq en-font "露鹜文楷"))
+  ((member "仓耳今楷01-27533 W04" (font-family-list))
+    (setq cn-font "仓耳今楷01-27533 W04"))
+  ((member "等距更纱黑体 SC" (font-family-list))
+    (setq cn-font "等距更纱黑体 SC"))
+  ((member "Simsun" (font-family-list))
+    (setq cn-font "Simsun"))
+  ((member "宋体" (font-family-list))
+    (setq cn-font "宋体"))
+  ((member "微软雅黑" (font-family-list))
+    (setq cn-font "微软雅黑"))
+)
+
+(setq en-font-size (car emacs-font-size-pair)
+      cn-font-size (cdr emacs-font-size-pair))
+
+(defun config-font-size (en-size cn-size)
+  (set-face-attribute 'default nil :font
+                      (format "%s:pixelsize=%d" en-font en-size))
+  (if (display-graphic-p)
+      (dolist (charset '(kana han cjk-misc bopomofo))
+        (set-fontset-font (frame-parameter nil 'font) charset
+                          (font-spec :family cn-font :size cn-size)))))
+;; (config-font-size 17 18)
+(config-font-size (default-value 'en-font-size) (default-value 'cn-font-size))
+
+(defvar emacs-english-font nil
+  "The font name of English.")
+
+(defvar emacs-cjk-font nil
+  "The font name for CJK.")
+(defvar emacs-font-size-pair nil
+  "Default font size pair for (latin . cjk)")
+  
+(defun font-exist-p (fontname)
+  "test if this font is exist or not."
+  (if (or (not fontname) (string= fontname ""))
+      nil
+    (if (not (x-list-fonts fontname))
+        nil t)))
+        
+(defun set-font (latin cjk size-pair)
+  "Setup emacs Latin and CJK font on x window-system."
+  (if (font-exist-p latin)
+      (set-frame-font (format "%s:pixelsize=%d" latin (car size-pair)) t))
+
+  (if (font-exist-p cjk)
+      (dolist (charset '(kana han symbol cjk-misc bopomofo))
+        (set-fontset-font (frame-parameter nil 'font) charset
+                          (font-spec :family cjk :size (cdr size-pair))))))
+                          
+(defun emacs-step-font-size (step)
+  "Increase/Decrease emacs's font size."
+  (let ((scale-steps emacs-font-size-pair-list))
+    (if (< step 0) (setq scale-steps (reverse scale-steps)))
+    (setq emacs-font-size-pair
+          (or (cadr (member emacs-font-size-pair scale-steps))
+              emacs-font-size-pair))
+    (when emacs-font-size-pair
+      (message "emacs font size set to %.1f" (car emacs-font-size-pair))
+      (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair))))
+      
+(defun increase-emacs-font-size ()
+  "Decrease emacs's font-size acording emacs-font-size-pair-list."
+  (interactive) (emacs-step-font-size 1))
+
+(defun decrease-emacs-font-size ()
+  "Increase emacs's font-size acording emacs-font-size-pair-list."
+  (interactive) (emacs-step-font-size -1))
+  
+
 (when sys/win32p
-  (set-frame-font "Simsun 12"))
+  ;; (set-frame-font "Simsun 12")
+  ;; setup change size font, base on emacs-font-size-pair-list
+  (global-set-key (kbd "C-M-=") 'increase-emacs-font-size)
+  (global-set-key (kbd "C-M--") 'decrease-emacs-font-size)
+  (setq emacs-english-font en-font)
+  (setq emacs-cjk-font cn-font)
+  ;; Setup font size based on emacs-font-size-pair
+  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+)
 
 
-(when (and suk-cnfonts (display-graphic-p))
-  ;; cnfonts doesn't support terminal
-  (use-package cnfonts
-    :hook (after-init . cnfonts-enable)
-    :config
-    ;; NOTE: on macOS, the frame size is changed during the startup without below.
-    ;; Keep frame size
-    (setq cnfonts-keep-frame-size nil)
-    (add-hook 'window-setup-hook
-              (lambda ()
-                (setq cnfonts-keep-frame-size t)))
+;;(when (and suk-cnfonts (display-graphic-p))
+;;  ;; cnfonts doesn't support terminal
+;;  (use-package cnfonts
+;;    :hook (after-init . cnfonts-enable)
+;;    :config
+;;    ;; NOTE: on macOS, the frame size is changed during the startup without below.
+;;    ;; Keep frame size
+;;    (setq cnfonts-keep-frame-size nil)
+;;    (add-hook 'window-setup-hook
+;;              (lambda ()
+;;                (setq cnfonts-keep-frame-size t)))
+;;
+;;    ;; Set profiles
+;;    (setq cnfonts-use-cache t)
+;;    (setq cnfonts-profiles
+;;          '("program" "org-mode" "read-book"))
+;;    (setq cnfonts--profiles-steps '(("program-normal" . 4)
+;;                                    ("org-mode" . 6)
+;;                                    ("read-book" . 9)))))
 
-    ;; Set profiles
-    (setq cnfonts-use-cache t)
-    (setq cnfonts-profiles
-          '("program" "org-mode" "read-book"))
-    (setq cnfonts--profiles-steps '(("program-normal" . 4)
-                                    ("org-mode" . 6)
-                                    ("read-book" . 9)))))
 
-;; (when (and (not suk-cnfonts) (display-graphic-p))
-;;   ;; Set a default font
-;;   (cond
-;;    ((member "Source Code Pro" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Source Code Pro"))
-;;    ((member "Menlo" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Menlo"))
-;;    ((member "Monaco" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Monaco"))
-;;    ((member "DejaVu Sans Mono" (font-family-list))
-;;     (set-face-attribute 'default nil :font "DejaVu Sans Mono"))
-;;    ((member "Consolas" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Consolas")))
-
-;;   (cond
-;;    (sys/mac-x-p
-;;     (set-face-attribute 'default nil :height 130))
-;;    (sys/win32p
-;;     (set-face-attribute 'default nil :height 110)))
-
-;;   ;; Specify font for all unicode characters
-;;   (when (member "Symbola" (font-family-list))
-;;     (set-fontset-font t 'unicode "Symbola" nil 'prepend))
-
-;;   ;; Specify font for chinese characters
-;;   (cond
-;;    ((member "WenQuanYi Micro Hei" (font-family-list))
-;;     (set-fontset-font t '(#x4e00 . #x9fff) "WenQuanYi Micro Hei"))
-;;    ((member "Microsoft Yahei" (font-family-list))
-;;     (set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")))
-;;   )
-
- ;;----------------------------------------------------------
+;;----------------------------------------------------------
 (defun load-program-font ()
   "Load Program font."
   (interactive)
   (when sys/linuxp
     ;; Set a default font
-    (cond
-      ;; linnux 下不支持
-      ((member "Victor Mono" (font-family-list))
-       (set-face-attribute 'default nil :font "Victor Mono"))
-	  ((member "JetBrains Mono" (font-family-list))
-       (set-face-attribute 'default nil :font "JetBrains Mono"))
-	  ;; 这个字体偏小
-      ;;((member "monofur" (font-family-list))
-      ;; (set-face-attribute 'default nil :font "monofur"))
-      ((member "Migu 1M Less" (font-family-list))
-       (set-face-attribute 'default nil :font "Migu 1M Less"))
-	  ((member "Source Code Pro" (font-family-list))
-       (set-face-attribute 'default nil :font "Source Code Pro"))
-      ((member "Monaco" (font-family-list))
-       (set-face-attribute 'default nil :font "Monaco"))
-      ((member "DejaVu Sans Mono" (font-family-list))
-       (set-face-attribute 'default nil :font "DejaVu Sans Mono"))
-      ((member "Consolas" (font-family-list))
-       (set-face-attribute 'default nil :font "Consolas")))
     ;;(set-face-attribute 'default nil :font "Victor Mono Light 12")
     ;;(set-face-attribute 'default nil :font "Victor Mono") ;; linux
     ;;(set-face-attribute 'default nil :font "Source Code Pro"))
@@ -164,185 +220,123 @@
     ;;(set-face-attribute 'default nil :font "DejaVu Sans Mono"))
     ;;(set-face-attribute 'default nil :font "Consolas")))
     (set-face-attribute 'default nil :height 120)
+    (cond
+      ;; linnux 下不支持
+      ((member "Victor Mono" (font-family-list))
+       (set-face-attribute 'default nil :font "Victor Mono"))
+      ((member "JetBrains Mono" (font-family-list))
+       (set-face-attribute 'default nil :font "JetBrains Mono"))
+      ;; 这个字体偏小
+      ;;((member "monofur" (font-family-list))
+      ;; (set-face-attribute 'default nil :font "monofur"))
+      ((member "Migu 1M Less" (font-family-list))
+       (set-face-attribute 'default nil :font "Migu 1M Less"))
+      ((member "Source Code Pro" (font-family-list))
+       (set-face-attribute 'default nil :font "Source Code Pro"))
+      ((member "Monaco" (font-family-list))
+       (set-face-attribute 'default nil :font "Monaco"))
+      ((member "DejaVu Sans Mono" (font-family-list))
+       (set-face-attribute 'default nil :font "DejaVu Sans Mono"))
+      ((member "Consolas" (font-family-list))
+       (set-face-attribute 'default nil :font "Consolas")))
 
+    
     ;; Specify font for chinese characters
-;;	(set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")
+    ;; (set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")
 
     (set-fontset-font (frame-parameter nil 'font)
-                      ;;'han  '("Simsun" . "unicode-bmp"))
-                      ;;'han  '("PMingliU" . "unicode-bmp"))
-                      ;;'han  '("AR PL UKai CN" . "unicode-bmp"))
-                      ;;'han  '("AR PL UMing CN" . "unicode-bmp"))
-                      ;;'han  '("WenQuanYi Micro Hei" . "unicode-bmp"))
-                      ;;'han  '("Microsoft Yahei" . "unicode-bmp"))
-                      'han  '("Noto Sans Mono CJK SC" . "unicode-bmp")
-                      ;; linnux 下不支持
-                      ;;'han '("TsangerJinKai01-27533 W03". "unicode-bmp")
-					  ;;'han '("仓耳今楷01-27533" . "unicode-bmp")
-					  )
-	)
-    (when (string-equal system-type "windows-nt")
-      ;; 下面是用于Windows的配置。
+                    ;;'han  '("Simsun" . "unicode-bmp")
+                    ;;'han  '("PMingliU" . "unicode-bmp")
+                    ;;'han  '("AR PL UKai CN" . "unicode-bmp")
+                    ;;'han  '("AR PL UMing CN" . "unicode-bmp")
+                    ;;'han  '("WenQuanYi Micro Hei" . "unicode-bmp")
+                    ;;'han  '("Microsoft Yahei" . "unicode-bmp")
+                    ;;'han  '("Noto Sans Mono CJK SC" . "unicode-bmp")
+                    'han '("LXGW WenKai Mono" . "unicode-bmp")
+                    ;; linnux 下不支持
+                    ;;'han '("TsangerJinKai01-27533 W03". "unicode-bmp")
+                    ;;'han '("仓耳今楷01-27533" . "unicode-bmp")
+		    ))
+    (when sys/win32p
+    ;; 下面是用于Windows的配置。
       (progn
         ;; 设置英文字体并指定字号。
-        ;; 因为不同操作系统下字体显示的大小不一样(DPI的问题)，所以分开设置。
         ;;(set-face-attribute 'default nil :font "Migu 1M Less 11")
         ;;(set-face-attribute 'default nil :font "Victor Mono Medium 12")
-		(set-face-attribute 'default nil :font "Consolas 12")
-		(cond
-		 ;; linnux 下不支持
-		 ((member "Victor Mono" (font-family-list))
-		  (set-face-attribute 'default nil :font "Victor Mono 12"))
-		 ((member "JetBrains Mono" (font-family-list))
-		  (set-face-attribute 'default nil :font "JetBrains Mono 12"))
-		 ;; 这个字体偏小
-		 ;;((member "monofur" (font-family-list))
-		 ;; (set-face-attribute 'default nil :font "monofur"))
-		 ((member "Migu 1M Less" (font-family-list))
-		  (set-face-attribute 'default nil :font "Migu 1M Less 12"))
-		 ((member "Source Code Pro" (font-family-list))
-		  (set-face-attribute 'default nil :font "Source Code Pro 12"))
-		 ((member "Monaco" (font-family-list))
-		  (set-face-attribute 'default nil :font "Monaco 12"))
-		 ((member "DejaVu Sans Mono" (font-family-list))
-		  (set-face-attribute 'default nil :font "Consolas 12"))
-		 ((member "Consolas" (font-family-list))
-		  (set-face-attribute 'default nil :font "Courier New 12")))
+        (set-face-attribute 'default nil :font "Consolas 12")
+        (cond
+         ;; linnux 下不支持
+         ((member "Victor Mono" (font-family-list))
+          (set-face-attribute 'default nil :font "Victor Mono 12"))
+         ((member "JetBrains Mono" (font-family-list))
+          (set-face-attribute 'default nil :font "JetBrains Mono 12"))
+         ;; 这个字体偏小
+         ;;((member "monofur" (font-family-list))
+         ;; (set-face-attribute 'default nil :font "monofur"))
+         ((member "Migu 1M Less" (font-family-list))
+          (set-face-attribute 'default nil :font "Migu 1M Less 12"))
+         ((member "Source Code Pro" (font-family-list))
+          (set-face-attribute 'default nil :font "Source Code Pro 12"))
+         ((member "Monaco" (font-family-list))
+          (set-face-attribute 'default nil :font "Monaco 12"))
+         ((member "DejaVu Sans Mono" (font-family-list))
+          (set-face-attribute 'default nil :font "Consolas 12"))
+         ((member "Consolas" (font-family-list))
+          (set-face-attribute 'default nil :font "Courier New 12")))
         ;; 给相应的字符集设置中文字体。
         (dolist (charset '(han cjk-misc chinese-gbk))
-		  (cond
-		   ((member "仓耳今楷01-27533 W04" (font-family-list))
-			(set-fontset-font "fontset-default" charset (font-spec :family "仓耳今楷01-27533 W04")))
-		   ((member "等距更纱黑体 SC" (font-family-list))
-			(set-fontset-font "fontset-default" charset (font-spec :family "等距更纱黑体 SC")))
-		   ((member "Simsun" (font-family-list))
-			(set-fontset-font "fontset-default" charset (font-spec :family "Simsun")))
+          (cond
+           ((member "仓耳今楷01-27533 W04" (font-family-list))
+            (set-fontset-font "fontset-default" charset (font-spec :family "仓耳今楷01-27533 W04")))
+           ((member "等距更纱黑体 SC" (font-family-list))
+            (set-fontset-font "fontset-default" charset (font-spec :family "等距更纱黑体 SC")))
+           ((member "Simsun" (font-family-list))
+            (set-fontset-font "fontset-default" charset (font-spec :family "Simsun")))
 
-		   ))
+           ))
         (setq face-font-rescale-alist
               '(("宋体" . 1.0)
                 ("微软雅黑" . 1.0)))))
-
-    (setq loaded-font-type 1)
     (message "Set program font"))
-
-;;----------------------------------------------------------
-(defun load-article-font ()
-    "Load article font."
-    (interactive)
-    (when sys/win32p
-      (set-frame-font "Times New Roman 12")
-      (set-fontset-font (frame-parameter nil 'font)
-                        'han '("仓耳今楷01-27533 W04" . "unicode-bmp")))
-
-    (when sys/linuxp
-      (set-face-attribute 'default nil :font "Noto Serif 12")
-      ;; Specify font for chinese characters
-      (set-fontset-font (frame-parameter nil 'font)
-                        'han '("仓耳今楷01\-27533" . "unicode-bmp")
-                        ;;'han  '("Noto Serif CJK SC" . "unicode-bmp")
-                        )
-      )
-
-    (setq loaded-font-type 2)
-    (setq-default line-spacing 5)
-    (message "Set article fonts"))
-
 
 ;;----------------------------------------------------------
   (defun load-default-font ()
     "Load default font setting."
     (interactive)
     (load-program-font)
-    (setq loaded-font-type 0)
-    (setq-default line-spacing 1)
-    (message "set default fonts")
+    ;; (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+     (message "set default fonts")
     )
 
-;;; ----------------------------------------------------------
-;; (dolist (hook (list
-;;                  'c-mode-common-hook
-;;                  'c-mode-hook
-;;                  'c++-mode-hook
-;;                  'java-mode-hook
-;;                  'haskell-mode-hook
-;;                  'emacs-lisp-mode-hook
-;;                  'lisp-interaction-mode-hook
-;;                  'lisp-mode-hook
-;;                  'maxima-mode-hook
-;;                  'ielm-mode-hook
-;;                  'sh-mode-hook
-;;                  'makefile-gmake-mode-hook
-;;                  'php-mode-hook
-;;                  'python-mode-hook
-;;                  'js-mode-hook
-;;                  'go-mode-hook
-;;                  'qml-mode-hook
-;;                  'jade-mode-hook
-;;                  'css-mode-hook
-;;                  'ruby-mode-hook
-;;                  'coffee-mode-hook
-;;                  'rust-mode-hook
-;;                  'qmake-mode-hook
-;;                  'lua-mode-hook
-;;                  'swift-mode-hook
-;;                  'minibuffer-inactive-mode-hook
-;;                  'prog-mode-hook
-;;                  ))
-;;     (add-hook hook '(lambda() (load-program-font))))
 
-
-  (with-eval-after-load 'org
-    (defun load-org-font ()
-      "Load org-mode font."
-      (interactive)
-      (make-face 'width-font-face)
-      (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC-12")
-      ;; (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC" :size 12) ;; linux
-      (setq buffer-face-mode-face 'width-font-face)
-      (buffer-face-mode)
-      (setq loaded-font-type 3)
-      (setq-default line-spacing 5)
-      (message "Set org-mode font")
-      )
-    (add-hook 'org-mode-hook 'load-org-font))
-
-  (defun toggle-font ()
-    "toggle font between program envirement and article envirement."
+(with-eval-after-load 'org
+  (defun load-org-font ()
+    "Load org-mode font."
     (interactive)
-    (setq loaded-font-type
-          (%  (1+  loaded-font-type)  loaded-font-type-num ))
-    (let ((foo (buffer-name))
-          (bar (buffer-size)))
-      (message
-       "This buffer is %s and has %d characters."
-       foo bar))
-    (cond ((eq loaded-font-type 0)
-           (load-default-font))
-          ((eq loaded-font-type 1)
-           (load-program-font))
-          ((eq loaded-font-type 2)
-           (load-article-font))
-          )
+    (make-face 'width-font-face)
+    (when sys/win32p
+      (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC-12")
     )
-
-
+    (when sys/linuxp
+      (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC" :size 12) ;; linux
+    )
+    (setq buffer-face-mode-face 'width-font-face)
+    (buffer-face-mode)
+    (setq loaded-font-type 3)
+    (setq-default line-spacing 5)
+    (message "Set org-mode font")
+  )
+  (add-hook 'org-mode-hook 'load-org-font))
 ;;; ----------------------------------------------------------
-;;; (global-set-key (kbd "<f6>") 'toggle-font)
-;;; ----------------------------------------------------------
 
-
-;;; ----------------------------------------------------------
-
-  ;; 解决 daemon 时， 字体无效。
-  (when (and (fboundp 'daemonp) (daemonp))
+;; 解决 daemon 时， 字体无效。
+(when (and (fboundp 'daemonp) (daemonp))
     (add-hook 'after-make-frame-functions
               (lambda (frame)
                 (with-selected-frame frame
-                  (load-default-font))))
-    )
+                  (load-default-font)))))
 
-  (load-default-font)
+(load-default-font)
 
   ;; ------------------------------------------------------
   ;; 设置不同操作系统使用不同的字体

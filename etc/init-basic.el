@@ -37,38 +37,10 @@
 (defvar default-file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
 
-;; Key Modifiers
-(when sys/win32p
-  ;; make PC keyboard's Win key or other to type Super or Hyper
-  ;; (setq w32-pass-lwindow-to-system nil)
-  (setq w32-lwindow-modifier 'super)    ; Left Windows key
-  (setq w32-apps-modifier 'hyper)       ; Menu/App key
-  ;; (w32-register-hot-key [s-])
-  (w32-register-hot-key [s-t])
-  ;; scroll-bar
-  (set-scroll-bar-mode 'right)
-  )
-
-
-;; Environment
-(when (or sys/mac-x-p sys/linux-x-p)
-  (use-package exec-path-from-shell
-    :init
-    (setq exec-path-from-shell-check-startup-files nil)
-    (setq exec-path-from-shell-variables '("PATH" "MANPATH" "PYTHONPATH" "GOPATH"))
-    (setq exec-path-from-shell-arguments '("-l"))
-    (exec-path-from-shell-initialize)))
-
 ;; Personal information
 (setq user-full-name suk-full-name)
 (setq user-mail-address suk-mail-address)
 
-
-;; 隐藏垂直滚动条。
-;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
-;;  (modify-all-frames-parameters '((vertical-scroll-bars)))
-
-(setq system-time-locale "C")
 ;; 当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
 (setq suggest-key-bindings 1)
 ;;只渲染当前屏幕语法高亮，加快显示速度
@@ -76,12 +48,12 @@
 (setq initial-scratch-message nil)
 (setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
 (setq adaptive-fill-first-line-regexp "^* *$")
-(setq set-mark-command-repeat-pop t) ; Repeating C-SPC after popping mark pops it again
+;; Repeating C-SPC after popping mark pops it again
+(setq set-mark-command-repeat-pop t)
 (setq-default major-mode 'text-mode)
 ;; 设置 sentence-end 可以识别中文标点。不用在 fill 时在句号后插 入两个空格。
 (setq sentence-end "\\([。！？￥%×（）—]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
 (setq sentence-end-double-space nil)
-
 
 ;; 更友好及平滑的滚动
 (setq scroll-step 2
@@ -108,10 +80,15 @@
 ;; "-" 同上)
 (add-hook 'after-change-major-mode-hook (lambda () (modify-syntax-entry ?- "w")))
 
+(if (fboundp 'pixel-scroll-precision-mode)
+    (pixel-scroll-precision-mode)
+  (pixel-scroll-mode))
+
 ;; Misc
 (fset 'yes-or-no-p 'y-or-n-p)
 ;; 忽略 cl 过期警告
 (setq byte-compile-warnings '(cl-function))
+
 ;; 设置缓存文件/杂七杂八的文件存放的地址
 ;; 不好的做法
 ;; (setq user-emacs-directory "~/.emacs.d/var")
@@ -129,6 +106,93 @@
 ;; projectitle-bookmarks
 (setq projectile-known-projects-file "~/.emacs.d/var/projectile-bookmarks.eld")
 (setq backup-directory-alist '(("" . "~/tmp/emacs/backup")))
+;; 编码设置 begin
+(setq default-buffer-file-coding-system 'utf-8-unix)            ;缓存文件编码
+(setq default-file-name-coding-system 'utf-8-unix)              ;文件名编码
+(setq default-keyboard-coding-system 'utf-8-unix)               ;键盘输入编码
+(setq default-process-coding-system '(utf-8-unix . utf-8-unix)) ;进程输出输入编码
+(setq default-sendmail-coding-system 'utf-8-unix)               ;发送邮件编码
+(setq default-terminal-coding-system 'utf-8-unix)               ;终端编码
+
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+;; 23.2 之后废弃，用buffer-file-coding-system
+;;(setq default-buffer-file-coding-system 'utf-8)
+(setq buffer-file-coding-system 'utf-8)
+(setq session-save-file-coding-system 'utf-8)
+
+
+;; 据说设置为UTF-8不会卡顿
+(set-language-environment "UTF-8")
+;; (set-language-environment 'Chinese-GB)
+   
+;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
+;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
+;; utf-16 (utf-16 实际上还细分为 utf-16le, utf-16be, utf-16le-with-signature等多种)
+
+(if sys/win32p
+   ;; (setq file-name-coding-system 'cp932)      ;; Japanese
+   ;; (setq file-name-coding-system 'big5-hkscs) ;; Hong Kong and Taiwan
+   ;; (setq file-name-coding-system 'euc-cn)
+   (setq file-name-coding-system 'gb18030)
+   (setq locale-coding-system 'gb18030)    ; 此句保证中文字体设置有效
+   (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
+   ;; (setq-default pathname-coding-system 'euc-cn)
+
+   ;; 简体
+   ;;(prefer-coding-system 'gb2312)
+   ;;(prefer-coding-system 'cp936)
+   ;;(prefer-coding-system 'gb18030)
+
+   ;; 繁体
+   ;; (prefer-coding-system 'cp950)
+   ;; (prefer-coding-system 'big5-hkscs)
+
+   ;; Unicode
+   ;; (prefer-coding-system 'utf-16le-with-signature)
+   ;; (prefer-coding-system 'utf-16)
+   ;; (prefer-coding-system 'utf-8-dos)
+   ;; Key Modifiers
+   ;; make PC keyboard's Win key or other to type Super or Hyper
+   ;; (setq w32-pass-lwindow-to-system nil)
+   (setq w32-lwindow-modifier 'super)    ; Left Windows key
+   (setq w32-apps-modifier 'hyper)       ; Menu/App key
+   ;; w32-register-hot-key 在 Emacs 中是用来在Windows系统上注册全局热键的函数，
+   ;; 但它并不直接关联到执行 Emacs Lisp 函数。
+   ;; 这个函数更多的是告诉Windows操作系统，
+   ;; “当这个按键组合被按下时，应该通知Emacs”。
+   ;; 要使Emacs在按下这个热键时执行特定的Elisp函数，还需要在Emacs内部设置相应的
+   ;; 响应机制。这通常涉及到编写一些额外的Elisp代码来监听这个热键，
+   ;; 并在它被按下时触发相应的操作。
+   ;; 实际上，w32-register-hot-key 更多地用于在操作系统级别处理特定的按键组合，
+   ;; 而不是在Emacs的编辑环境内。如果您想在Emacs内部绑定热键并执行函数，
+   ;; 通常会使用像 global-set-key 或 define-key 这样的函数。
+   (w32-register-hot-key [s-t])
+   ;; scroll-bar
+   (set-scroll-bar-mode 'right) 
+)
+
+;; Unix like OS.
+(unless sys/win32p
+   ;; 新建文件使用utf-8-unix方式
+   ;;(prefer-coding-system 'utf-8-unix)
+   (setq system-time-locale "C")
+)
+
+;; GUI Environment
+(when (or sys/mac-x-p sys/linux-x-p sys/win32p)
+	(progn
+	;; 隐藏垂直滚动条。
+	;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
+	;;  (modify-all-frames-parameters '((vertical-scroll-bars)))	
+	)
+)
+
+;; 新建文件以utf-8编码，行末结束符平台相关
+(prefer-coding-system 'utf-8)
+
+(require 'file-encoding)
 
 ;; 开启行号显示
 ;; (global-linum-mode t)

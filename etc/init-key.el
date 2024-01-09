@@ -66,11 +66,12 @@
 
    ("C-x k" . suk/close-current-buffer)
    ("C-S-t" . suk/open-last-closed)		; control+shift+t
-   ("C-S-r" . suk/open-recently-closed) ; control+shift+t
+   ("C-S-r" . suk/open-recently-closed) ; control+shift+r
    ("C-x L" . suk/list-recently-closed) ; control+x L
    ("S-<f2>" .  suk/new-empty-buffer)
    ("C-c s" .  suk/create-scratch-buffer)
-   ("C-c o" .  suk/switch-to-minibuffer)
+   ("C-c o" .  suk/create-scratch-org)
+   ("C-c m" .  suk/switch-to-minibuffer)
    ("C-x t m" . suk/toggle-margin-right)
    ("M-Q" . suk/unfill-paragraph)
    ("M-q" . suk/fill-or-unfill-paragraph)
@@ -124,8 +125,8 @@
    ("M-s-." . point-stack-push)         ;buffer索引标记
    ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
    ("M-I" . backward-indent)            ;向后移动4个字符
-   ("s-J" . scroll-up-one-line)         ;向上滚动一行
-   ("s-K" . scroll-down-one-line)       ;向下滚动一行
+;   ("s-J" . scroll-up-one-line)         ;向上滚动一行
+;   ("s-K" . scroll-down-one-line)       ;向下滚动一行
    ("<f2>" . refresh-file)              ;自动刷新文件
    ("s-f" . find-file-root)             ;用root打开文件
    ("s-r" . find-file-smb)              ;访问sambao
@@ -152,8 +153,8 @@
  '(
    ("M-I" . other-window-move-up)		;向下滚动其他窗口
    ("M-K" . other-window-move-down)		;向上滚动其他窗口
-   ("M-J" . window-move-up)				;向下滚动当前窗口
-   ("M-L" . window-move-down)			;向上滚动当前窗口
+   ("s-I" . window-move-up)				;向下滚动当前窗口
+   ("s-K" . window-move-down)			;向上滚动当前窗口
    )
  "win-move")
 
@@ -161,8 +162,8 @@
 ;;; --- 缓存移动
 (lazy-load-set-keys
  '(
-   ("C-z i" . beginning-of-buffer)      ;缓存开始
-   ("C-z k" . end-of-buffer)            ;缓存结尾
+   ;;("C-z i" . beginning-of-buffer)      ;缓存开始 M-<
+   ;;("C-z k" . end-of-buffer)            ;缓存结尾 M->
    ("C-M-f" . forward-paragraph)        ;下一个段落
    ("C-M-b" . backward-paragraph)       ;上一个段落
    ("C-M-y" . backward-up-list)         ;向左跳出 LIST
@@ -261,7 +262,7 @@
 (lazy-load-set-keys
  '(
    ("C-c :" . split-window-vertically)   ;纵向分割窗口
-   ("C-x |" . split-window-horizontally) ;横向分割窗口
+   ("C-c |" . split-window-horizontally) ;横向分割窗口
    ("C-;" . kill-this-buffer)            ;关闭当前buffer
    ("C-x ;" . delete-other-windows)      ;关闭其它窗口
    ))
@@ -498,7 +499,7 @@
 (lazy-load-global-keys
  '(
    ("C-<f7>" . suk/ska-point-to-register)
-   ("<f7>" . suk/ska-jump-to-register )
+   ("<f7>"   . suk/ska-jump-to-register )
    )
  "init-bookmark")
 
@@ -679,5 +680,5 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 (global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
 (global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
 (global-set-key (kbd "C-x t f") 'global-flycheck-mode)
-
+(global-set-key (kbd "C-x R") 'recentf)
 (provide 'init-key)

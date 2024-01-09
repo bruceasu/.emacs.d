@@ -56,7 +56,7 @@
 ;;appointment
 (setq appt-issue-message t)
 
-(autoload 'chinese-year "cal-china" "Chinese year data" t)
+(autoload 'calendar-chinese-year "cal-china" "Chinese year data" t)
 (require 'cal-china-x)
 (setq mark-holidays-in-calendar t)
 (setq cal-china-x-important-holidays cal-china-x-chinese-holidays)
@@ -147,7 +147,7 @@ Returns nil if it is not visible in the current calendar window."
   (let* ((m displayed-month)
      (y displayed-year)
      (gdate (calendar-gregorian-from-absolute
-         (+ (cadr (assoc cmonth (chinese-year y))) (1- cday))))
+         (+ (cadr (assoc cmonth (calendar-chinese-year y))) (1- cday))))
      (gm (car gdate))
      (gd (cadr gdate))
      (gy (caddr gdate)))
@@ -170,9 +170,9 @@ STRING)).  Returns nil if it is not visible in the current calendar window."
 
 ;;设置我所在地方的经纬度，calendar里有个功能是日月食的预测，和你的经纬度相联系的。
 ;; 让emacs能计算日出日落的时间，在 calendar 上用 S 即可看到
-(setq calendar-latitude +23.08)
-(setq calendar-longitude +113.17)
-(setq calendar-location-name "廣州")
+(setq calendar-latitude +35.6764)
+(setq calendar-longitude +139.6500)
+(setq calendar-location-name "東京")
 
 
 ;; 设置 calendar 的显示
@@ -182,5 +182,5 @@ STRING)).  Returns nil if it is not visible in the current calendar window."
 (setq mark-holidays-in-calendar nil) ; 为了突出有diary的日期，calendar上不标记节日
 (setq view-calendar-holidays-initially nil) ; 打开calendar的时候不显示一堆节日
 
-
+;; bind `s-<F11>` in init-key.el  
 ;;(global-set-key (kbd "<f11>") 'calendar)
