@@ -103,4 +103,23 @@
   ;; Enable Chinese word segmentation support (支持中文分词)
   (setq youdao-dictionary-use-chinese-word-segmentation t))
 
+(defun suk/translate-one-key ()
+		    (interactive)
+		    (require 'one-key)
+		    (one-key-create-menu
+			  "Translate"
+			  '(
+			    (("p" . "SDCV Translate pointer" ). sdcv-search-pointer)		   ;光标处的单词, buffer显示
+			   (("P" . "SDCV Translate pointer+") . sdcv-search-pointer+)		   ;光标处的单词, tooltip显示
+			   (("i" . "SDCV Translate input" ) . sdcv-search-input)		   ;输入的单词, buffer显示
+			   ((";" . "SDCV Translate input+") . sdcv-search-input+)
+			   (("y" . "Youdao Translate pointer") . youdao-dictionary-search-at-point)
+			   (("Y" . "Youdao Translate pointer+") . youdao-dictionary-search-at-point-tooltip)
+			   (("g" . "Google Translate pointer") . google-translate-at-point)
+			   (("G" . "Googole Translate query") . google-translate-query-translate)
+			   (("s" . "Goold Translate smooth") . google-translate-smooth-translate)
+			   )
+			t)
+		)
+		
 (provide 'init-translate)

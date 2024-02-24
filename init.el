@@ -34,17 +34,45 @@
 ;; 定义一些启动目录，方便下次迁移修改
 (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
 (defvar suk-emacs-config-dir (concat suk-emacs-root-dir "/etc"))
-(defvar suk-emacs-extension-dir (concat suk-emacs-root-dir "/site-lisp"))
+(defvar suk-emacs-extension-dir (concat suk-emacs-root-dir "/extensions"))
 (defvar suk-emacs-share-dir (concat suk-emacs-root-dir "/share"))
 (defvar suk-emacs-themes-dir (concat suk-emacs-share-dir "/themes"))
 (defvar suk-emacs-elpa-dir (concat suk-emacs-root-dir "/elpa"))
+(defvar suk-emacs-var-dir (concat suk-emacs-root-dir "/var"))
+(defvar suk-emacs-tmp-dir (concat suk-emacs-var-dir "/tmp"))
 
-(setq  lsp-maven-path "~/.m2/settings.xml"                             ;; maven setting path
-      org-directory "~/org/"                                          ;; org root path
-      org-roam-directory "~/org/org-roam"                             ;; org roam root path
-      lsp-java-java-path (concat (getenv "JAVA_HOME") "/bin/java")    ;; java11 exec path
-      
+(defvar user-home-dir (getenv "HOME"))
+(if (eq system-type 'windows-nt)
+    (defvar user-home-dir (getenv "USERPROFILE"))
 )
+
+;; 设置缓存文件/杂七杂八的文件存放的地址
+;; 不好的做法
+;; (setq user-emacs-directory "~/.emacs.d/var")
+
+;; blink search
+(setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
+;; Saveplace
+(setq save-place-file (concat suk-emacs-var-dir "/saveplace"))
+;; Recentf
+(setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
+;; History
+(setq savehist-file (concat suk-emacs-var-dir "/history"))
+; Amx
+(setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
+;; Auto save
+(setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
+;; Eshell
+(setq eshell-directory-name (concat suk-emacs-var-dir "eschell"))
+(setq eshell-history-file-name (concat eshell-directory-name "/history"))
+;; projectitle-bookmarks
+(setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
+(setq backup-directory-alist '(("" . (concat suk-emacs-tmp-dir "/backup"))))
+;; Bookmark
+(setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
+;; Diary
+(setq diary-file (concat "~/diary"))
+
 
 ;; 忽略 cl 过期警告
 (setq byte-compile-warnings '(cl-function))
@@ -106,10 +134,7 @@
       (file-name-handler-alist nil))
 
   ;; Emacs配置文件内容写到下面.
-  ;;(when (version< emacs-version "25.1")
-  ;; (error "This requires Emacs 25.1 and above!"))
-
-  (add-hook 'emacs-startup-hook
+   (add-hook 'emacs-startup-hook
             (lambda ()
               "Restore defalut values after init."
               (setq file-name-handler-alist default-file-name-handler-alist)
@@ -124,23 +149,21 @@
 
 
   (with-temp-message ""                 ;抹掉插件启动的输出
-    ;; autoload functions
-    (require '+autoload)
-
     ;; Constants
     (require '+const)
 
     ;; Customization
     (require '+custom)
-
+    (require 'init-basic)
+    
     (require 'lazy-load)
-    (require 'display-line-numbers)
     (require 'init-key)
 
     ;; Packages
-    (require 'init-basic)
+    
     (require 'init-package)
-    (require 'init-utils)
+ 
+  
     ;; (use-package esup
     ;;              :ensure t
     ;;              ;; To use MELPA Stable use ":pin melpa-stable",
@@ -150,40 +173,35 @@
     ;; windows 下表现不好
     (when sys/linuxp
       (progn
-
         (require 'init-im)
+		(require 'init-sudo)
         )
       )
-
-
-    ;; 个人的一些特别设置
-    ;;(require 'init-suk)
-
-    (require 'init-ui)
-    ;; 可以延后加载的
+     ;; 可以延后加载的
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-         ;; Restore session at last.
-         ;; 速度有点慢
-         (require 'init-session)
-         (emacs-session-restore)
+         (require 'init-line-number)
          (require 'init-idle)
          ;;(require 'highlight-parentheses)
          (require 'init-auto-save)
          (require 'init-awsome-pair)
-         (require 'init-sudo)
          (require 'init-calendar)
          (require 'load-abbrev)
-         (server-start) ;;为emacsclient准备使用场景，比如git
          ;; Programming
          (require 'init-ide)
+         (server-start)
+	 ;; Restore session at last.
+         ;; 速度有点慢
+         (require 'init-session)
+         (emacs-session-restore)
+		 ;; Make gc pauses faster by decreasing the threshold.
+		 (setq gc-cons-threshold (* 8 1000 1000))
+
          ))
     )
   )
 
-;; Make gc pauses faster by decreasing the threshold.
-(setq gc-cons-threshold (* 8 1000 1000))
-(put 'scroll-left 'disabled nil)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init.el ends here

@@ -29,8 +29,6 @@
 
 ;;; Code:
 
-;; 书签文件的路径及文件名
-(setq bookmark-default-file "~/.emacs.d/var/emacs.bmk")
 
 ;; 同步更新书签文件
 ;; 或者退出时保存

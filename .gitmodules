@@ -1,45 +1,66 @@
-[submodule "site-lisp/company-mode"]
-	path = site-lisp/company-mode
-	url = https://github.com/company-mode/company-mode.git
-[submodule "site-lisp/company-posframe"]
-	path = site-lisp/company-posframe
-	url = https://github.com/tumashu/company-posframe
-[submodule "site-lisp/all-the-icons"]
-	path = site-lisp/all-the-icons
-	url = https://github.com/domtronn/all-the-icons.el
-[submodule "site-lisp/awesome-pair"]
-	path = site-lisp/awesome-pair
-	url = https://github.com/manateelazycat/awesome-pair.git
-[submodule "site-lisp/awesome-tab"]
-	path = site-lisp/awesome-tab
-	url = https://github.com/manateelazycat/awesome-tab.git
-[submodule "site-lisp/cal-china-x"]
-	path = site-lisp/cal-china-x
-	url = https://github.com/xwl/cal-china-x
-[submodule "site-lisp/go-mode"]
-	path = site-lisp/go-mode
-	url = https://github.com/dominikh/go-mode.el
-[submodule "site-lisp/company-english-helper"]
-	path = site-lisp/company-english-helper
-	url = https://github.com/manateelazycat/company-english-helper.git
-[submodule "site-lisp/insert-translated-name"]
-	path = site-lisp/insert-translated-name
-	url = https://github.com/manateelazycat/insert-translated-name
-[submodule "site-lisp/awesom-tray"]
-	path = site-lisp/awesom-tray
-	url = https://github.com/manateelazycat/awesome-tray.git
-[submodule "site-lisp/blink-search"]
-	path = site-lisp/blink-search
-	url = https://github.com/manateelazycat/blink-search.git
-[submodule "site-lisp/hydra-posframe"]
-	path = site-lisp/hydra-posframe
-	url = https://github.com/Ladicle/hydra-posframe.git
-[submodule "site-lisp/fingertip"]
-	path = site-lisp/fingertip
-	url = https://github.com/manateelazycat/fingertip/
-[submodule "site-lisp/eglot-java"]
-	path = site-lisp/eglot-java
-	url = https://github.com/yveszoundi/eglot-java
-[submodule "site-lisp/copilot"]
-	path = site-lisp/copilot
-	url = https://github.com/zerolfx/copilot.el.git
+[submodule "extensions/company-mode"]
+	path = extensions/company-mode
+	url = git@github.com:company-mode/company-mode.git
+[submodule "extensions/company-posframe"]
+	path = extensions/company-posframe
+	url = git@github.com:tumashu/company-posframe
+[submodule "extensions/all-the-icons"]
+	path = extensions/all-the-icons
+	url = git@github.com:domtronn/all-the-icons.el
+[submodule "extensions/go-mode"]
+	path = extensions/go-mode
+	url = git@github.com:dominikh/go-mode.el
+[submodule "extensions/company-english-helper"]
+	path = extensions/company-english-helper
+	url = git@github.com:manateelazycat/company-english-helper.git
+[submodule "extensions/insert-translated-name"]
+	path = extensions/insert-translated-name
+	url = git@github.com:manateelazycat/insert-translated-name
+[submodule "extensions/hydra-posframe"]
+	path = extensions/hydra-posframe
+	url = git@github.com:Ladicle/hydra-posframe.git
+[submodule "extensions/eglot-java"]
+	path = extensions/eglot-java
+	url = git@github.com:yveszoundi/eglot-java
+[submodule "extensions/copilot"]
+	path = extensions/copilot
+	url = git@github.com:zerolfx/copilot.el.git
+[submodule "extensions/one-key"]
+	path = extensions/one-key
+	url = git@github.com:manateelazycat/one-key
+[submodule "extensions/move-text"]
+	path = extensions/move-text
+	url = git@github.com:manateelazycat/move-text.git
+[submodule "extensions/rjsx-mode"]
+	path = extensions/rjsx-mode
+	url = git@github.com:felipeochoa/rjsx-mode.git
+[submodule "extensions/typescript"]
+	path = extensions/typescript
+	url = git@github.com:ananthakumaran/typescript.el.git
+[submodule "extensions/dash"]
+	path = extensions/dash
+	url = git@github.com:magnars/dash.el.git
+[submodule "extensions/emacs-rime"]
+	path = extensions/emacs-rime
+	url = git@github.com:DogLooksGood/emacs-rime.git
+[submodule "extensions/json-mode"]
+	path = extensions/json-mode
+	url = git@github.com:joshwnj/json-mode
+[submodule "extensions/json-reformat"]
+	path = extensions/json-reformat
+	url = git@github.com:gongo/json-reformat.git
+[submodule "extensions/posframe"]
+	path = extensions/posframe
+	url = git@github.com:tumashu/posframe.git
+[submodule "extensions/smex"]
+	path = extensions/smex
+	url = git@github.com:nonsequitur/smex
+[submodule "extensions/yasnippet"]
+	path = extensions/yasnippet
+	url = git@github.com:joaotavora/yasnippet
+[submodule "extensions/awesome-pair"]
+	path = extensions/awesome-pair
+	url = git@github.com:manateelazycat/awesome-pair
+[submodule "extensions/cal-china-x"]
+	path = extensions/cal-china-x
+	url = git@github.com:xwl/cal-china-x

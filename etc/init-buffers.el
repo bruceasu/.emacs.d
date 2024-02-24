@@ -280,7 +280,7 @@ It returns the buffer."
   (interactive)
   (find-file "/tmp/scratch.org")
   (gnus-make-directory "/tmp"))
-  
+
 ;;;###autoload
 (defun suk/switch-to-minibuffer ()
   "Switch to minibuffer window."
@@ -427,6 +427,38 @@ This command is convenient when reading novel, documentation."
 ;; (global-set-key (kbd "C-S-t") 'suk/open-last-closed) ; control+shift+t
 ;; (global-set-key [S-f2]  'suk/new-empty-buffer)
 
+;;;###autoload
+(defun suk/buffer-one-key()
+  (interactive)
+  (require 'one-key)
+  (one-key-create-menu
+   "Buffer ACTION"
+   '(
+	 (("l" . "Count lines") . suk/count-bfr-lines)
+	 (("f" . "Sudo Find") . suk/sudo-find-file)
+	 (("e" . "Sudo edit") . suk/sudo-edit)
+     (("x" . "Switch major mode" ). suk/switch-major-mode)
+     (("X" . "Get current major mode") . suk/get-mode-name)
+     (("k" . "Close current buffer") . suk/close-current-buffer)
+     (("t" . "Reopen the last closed file") . suk/open-last-closed)		; control+shift+t
+     (("r" . "Reopen teh recently closed file") . suk/open-recently-closed) ; control+shift+r
+     (("L" . "List the recently closed files" ). suk/list-recently-closed) ; control+x L
+     ("n" . "New file") .  suk/new-empty-buffer)
+     (("S" . "Create a scratch buffer" ) .  suk/create-scratch-buffer)
+     (("o" . "Create a scratch org-mode buffer") . suk/create-scratch-org)
+     (("m" . "Switch to the minibuffer") . suk/switch-to-minibuffer)
+     (("t m" . "Toggle the margin right"). suk/toggle-margin-right)
+     (("Q" . "Unfill paragraph") . suk/unfill-paragraph)
+     (("q" . "file or unfill paragraph" ). suk/fill-or-unfill-paragraph)
+     ("S-<f7>" . suk/indent-buffer)
+     ("C-<f2>" . suk/rename-file-and-buffer)
+     ("C-M-;" . suk/kill-other-window-buffer) ;关闭其他窗口的
+     ("C-x K" . suk/kill-all-buffers-except-current)
+     ("C-x M" . suk/move-buffer-file)
+     ("C-x C" . copy-buffer-file-name-as-kill)
+	 )
+   t)
+  )
 ;; bind the hotkey in init-key.el
 (provide 'init-buffers)
 ;;; init-buffers.el ends here

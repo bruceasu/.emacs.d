@@ -49,8 +49,7 @@
     )
   )
 
-;; 保存日记的文件
-;(setq diary-file "~/diary")
+
 (setq diary-mail-addr "bruceasu@163.com")
 (add-hook 'diary-hook 'appt-make-list)
 ;;appointment

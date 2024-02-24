@@ -8,7 +8,6 @@
 (setq suk-mail-address "bruceasu@163.com")   ; Email address
 ;; (setq suk-proxy "127.0.0.1:1080")         ; Network proxy
 (setq suk-cnfonts nil)                       ; Use cnfonts not: t or nil
-
 ;; Misc.
 (setq confirm-kill-emacs 'y-or-n-p)
 

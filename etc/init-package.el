@@ -41,15 +41,28 @@
     (setq package-selected-packages value)))
 (advice-add 'package--save-selected-packages :override #'my-save-selected-packages)
 
-;; gnu https://elpa.gnu.org/packages/ https://elpa.emacs-china.org/gnu/ https://mirrors.163.com/elpa/gnu/ https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/
-;; melpa https://melpa.org/packages/ https://www.mirrorservice.org/sites/melpa.org/packages/ https://elpa.emacs-china.org/melpa/ https://mirrors.163.com/elpa/melpa/ https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/
-'(package-archives
-   '(("melpa" . "http://melpa.org/packages/")
-     ("org" . "https://orgmode.org/elpa/")
-     ("gnu" . "https://elpa.gnu.org/packages/")
-     ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+(require 'package)
+;; gnu：
+;; https://elpa.gnu.org/packages/
+;; https://elpa.emacs-china.org/gnu/ http://1.15.88.122/gnu/
+;; https://mirrors.163.com/elpa/gnu/
+;; https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/
+;; melpa:
+;; https://melpa.org/packages/
+;; https://www.mirrorservice.org/sites/melpa.org/packages/
+;; https://elpa.emacs-china.org/melpa/ http://1.15.88.122/melpa/
+;; https://mirrors.163.com/elpa/melpa/
+;; https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/
+(add-to-list 'package-archives
+   '("melpa" . "http://1.15.88.122/melpa/"))
+(add-to-list 'package-archives
+   '("org" . "https://orgmode.org/elpa/"))
+(add-to-list 'package-archives
+   '("gnu" . "http://1.15.88.122/gnu/"))
+(add-to-list 'package-archives
+   '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
      
-(setq package-check-signature nil) ; 个别时候会出现签名校验失败
+;; (setq package-check-signature nil) ; 个别时候会出现签名校验失败
 
 ;; Initialize packages
 ;; (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
@@ -63,7 +76,6 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
 
 ;; Should set before loading `use-package'
 ;; make use-package default behavior better
@@ -139,16 +151,82 @@
   :bind (:map lisp-interaction-mode-map
               ("C-x C-s" . my-save-buffer)))
 
-(use-package daemons
-  :defer 1)								; system services/daemons
+
 (use-package htmlize
   :defer 2)								; covert to html
 
 
+(use-package centaur-tabs
+  :demand
+  :init
+  ;; Set the style to rounded with icons
+  (setq centaur-tabs-style "bar")
+  (setq centaur-tabs-set-icons t)
+  :config
+  (centaur-tabs-mode t)
+  :bind
+  ("C-<prior>" . centaur-tabs-backward)
+  ("C-<next>" . centaur-tabs-forward))
+
+(use-package treemacs
+  :ensure t
+  :defer t
+  :bind
+  (("C-c t" . treemacs))
+  :custom
+  (treemacs-is-never-other-window t)
+  :config
+  (setq treemacs-width 30)
+  :hook
+  (treemacs-mode . treemacs-project-follo-mode)
+)
+(defun hide-mode-line-in-treemsacs()
+  "Hide the mode line in the treemacs buffer."
+  (setq-local  mode-line-format nil)
+)
+(add-hook 'treemacs-mode-hook 'hide-mode-line-in-treemacs)
+(use-package helm
+  :ensure t)
+(use-package ac-helm
+  :ensure t)
+;; 著名的Emacs补全框架, 为 LSP 提供额外的功能，如自动补全
+(use-package company
+  :defer 2
+  :hook (after-init . global-company-mode)
+  :init (setq company-tooltip-align-annotations t
+        company-idle-delay 0 company-echo-delay 0
+        company-minimum-prefix-length 1
+        company-require-match nil
+        company-dabbrev-ignore-case nil
+        company-dabbrev-downcase nil
+        company-show-numbers t)
+  :config
+  (setq switch-window-input-style 'minibuffer)
+  (setq switch-window-increase 4)
+  (setq switch-window-threshold 2)
+  (setq switch-window-shortcut-sytle 'querty)
+  (setq switch-window-qwerty-shortcuts
+          '("a" "s" "d" "f" "j" "k" "l"))
+  (global-company-mode)        
+  :bind (:map company-active-map
+        ("C-n" . #'company-select-next)
+        ("C-p" . #'company-select-previous)
+        ("TAB" . company-complete-selection)
+        ("M-h" . company-complete-selection)
+        ("M-H" . company-complete-common)
+        ("M-s" . company-search-candidates)
+        ("M-S" . company-filter-candidates)
+        ("M-n" . company-select-next)
+        ("M-p" . company-select-previous))
+  (:map leader-key
+    ("c s" . #'company-yasnippet
+     ))
+  )
+
 ;; On-the-fly spell checker
 (unless sys/win32p
   (use-package flyspell
-    :ensure nil
+    :ensure t
     :defer 2
     :diminish flyspell-mode
     :if (executable-find "aspell")
@@ -166,8 +244,115 @@
 
 ;; Open files as another user
 (use-package sudo-edit)
+(use-package mood-line
+  :ensure t
+  :if window-system
+  :init
+  (mood-line-mode)
+)
+;; 主题设置
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; 加载一个主题，DOOM One 是 DOOM Emacs 的默认主题，非常美观
+  (load-theme 'doom-one t))
+
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1)
+  :config (column-number-mode 1)
+  :custom
+  (doom-modeline-height 30)
+  (doom-modeline-window-width-limit nil)
+  (doom-modeline-buffer-file-name-style 'truncate-with-project)
+  (doom-modeline-minor-modes nil)
+  (doom-modeline-enable-word-count t)
+  ;;(doom-modeline-buffer-encoding nil)
+  (doom-modeline-buffer-modification-icon t)
+  ;;(doom-modeline-env-python-executeable "python")
+  ;; needs display-time-mode to be one
+  (doom-modeline-time t)
+  (doom-modeline-vcs-max-leghth 50)
+)
+
+;; 切换buffer焦点时高亮动画
+(use-package beacon
+  :ensure t
+  :hook (after-init . beacon-mode))
+
+;; 图形界面插件的设置
+(when (display-graphic-p)
+	;; 图标支持
+	(use-package all-the-icons
+		;; :ensure t
+		:load-path "~/.emacs.d/extensions/all-the-icons"
+		:if (display-graphic-p)
+	)
+	(use-package hydra)
+    (use-package hydra-posframe
+  		:load-path "~/.emacs.d/extensions/hydra-posframe/hydra-posframe.el"
+  		:defer 1
+  		:hook (after-init . hydra-posframe-mode))
+  	;; 浮动窗口支持
+  	(use-package posframe :ensure t)
+  	(use-package vertico-posframe
+  		:ensure t
+  		:custom
+  		(vertico-posframe-parameters
+  		'((left-fringe . 8)
+     		(right-fringe . 8))))
+)
 
 
+;; 一些我不知道用途的依赖  
+(use-package slime
+  :ensure t)
+(use-package anaconda-mode
+  :ensure t)
+(use-package company-anaconda
+  :ensure t)
+(use-package company-box
+  :ensure t)
+(use-package auto-compile
+  :ensure t)
+(use-package haml-mode
+  :ensure t)
+(use-package wgrep
+  :ensure t)
+(use-package multiple-cursors
+  :ensure t)
+(use-package rtags
+  :ensure t)
+(use-package window-purpose
+  :ensure t)
+(use-package password-store
+  :ensure t)
+(use-package historian
+  :ensure t)
+(use-package gitlab
+  :ensure t)
+(use-package bibtex-completion
+  :ensure t)
+(use-package ov
+  :ensure t)
+(use-package xml-rpc
+  :ensure t)
+(use-package deferred
+  :ensure t)
+(use-package frame-local
+  :ensure t)
+(use-package shell-split-string
+  :ensure t)
+(use-package pythonic
+  :ensure t)
+(use-package packed
+  :ensure t)
+
+(use-package alert
+  :ensure t)
+(use-package yasnippet
+  :ensure t
+  :load-path "~/.emacs.d/extensions/yasnippet")
 (provide 'init-package)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

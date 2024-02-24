@@ -653,6 +653,17 @@ A prefix arg forces clock in of the default task."
 ;; C-',  C-, is org-cycle-agenda-files keys
 ;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。
 
+(use-pacakge org-roam
+  :ensure t
+  :(setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory (concat user-home-dir "/RoamNotes"))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-oram-node-find)
+           ("C-c n i" . org-roam-node-insert))
+  :config
+  (org-roam-setup)
+)
 (provide 'init-org)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

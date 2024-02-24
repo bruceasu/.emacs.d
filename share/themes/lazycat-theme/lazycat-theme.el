@@ -376,11 +376,11 @@ theme face specs. These is a simplified spec. For example:
     ;; 2. All other line number plugin faces should &inherit from these.
     (line-number
      :inherit 'default
-     :foreground base5 :distant-foreground nil
+     :foreground base5 :distant-foreground unspecified
      :weight 'normal :italic nil :underline nil :strike-through nil)
     (line-number-current-line
      :inherit '(hl-line default)
-     :foreground fg :distant-foreground nil
+     :foreground fg :distant-foreground unspecified
      :weight 'normal :italic nil :underline nil :strike-through nil)
 
 
@@ -1698,10 +1698,12 @@ theme face specs. These is a simplified spec. For example:
 (defvar lazycat-theme-status "init")
 
 (defun lazycat-theme-load-light ()
+  (mapc #'disable-theme custom-enabled-themes)
   (load-theme 'lazycat-light t)
   (setq lazycat-theme-status "light"))
 
 (defun lazycat-theme-load-dark ()
+  (mapc #'disable-theme custom-enabled-themes)
   (load-theme 'lazycat-dark t)
   (setq lazycat-theme-status "dark"))
 

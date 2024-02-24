@@ -272,45 +272,33 @@ from tradition chinese to simple chinese" t)
 ;; 无需再打开两个Emacs，windows下还不支持daemon的方式。
 ;;(server-force-delete)
 ;;(server-start)
-
-(require 'blink-search)
-;;Installation
-;;Install Emacs 28 and above versions
-;;Install Python dependencies: pip3 install epc requests
-;;Install external tools:
-;;fd
-;;ripgrep
-;;sqlite3 (optional, for sqlite3 backend)
-;;rga (optional, for searching pdf backend)
-;;Clone or download this repository (path of the folder is the <path-to-blink-search> used below).
-;;Add following code in your ~/.emacs:
-;;(add-to-list 'load-path "<path-to-blink-search>")
-;;(require 'blink-search)
-
-
-;;Usage
-;;Start blink-search: M-x blink-search
-;;C-u M-x blink-search to search current symbol
-;;Typed keyword to search from all backends
-;;Search current buffer when keyword starts with #
-;;Search current directory when keyword starts with !
-;;Press Ctrl + m to select candidate or press Alt + QuickKey to select candidate match QuickKey
-;;Keymap
-;;Key	Command	Description
-;;C + n	blink-search-candidate-select-next	Select next candidate item
-;;C + p	blink-search-candidate-select-prev	Select previous candidate item
-;;M + n	blink-search-backend-select-next	Select next backend item
-;;M + p	blink-search-backend-select-prev	Select previous backend item
-;;M + j	blink-search-candidate-group-select-next	Select next candidate group item
-;;M + k	blink-search-candidate-group-select-prev	Select previous candidate group item
-;;C + j	blink-search-parent	Jump to parent directory of select candidate item
-;;C + l	blink-search-continue	Continue search new directory of current candidate item
-;;C + m	blink-search-do	Execute action for selected candidate item
-;;C + M + m	blink-search-preview	Preview selected candidate item
-;;C + M + n	blink-search-preview-next	Preview next candidate item
-;;C + M + p	blink-search-preview-next	Preview previous candidate item
-;;M + w	blink-search-copy	Copy text of selected candidate item
-;;C + g	blink-search-quit	Quit
+;;;###autoload
+(defun suk/magit-actions-one-key ()
+  (interactive)
+  (require 'one-key)
+  (one-key-create-menu
+   "MAGIT"
+   '(
+	 (("s" . "Magit status") . magit-status+)
+	 (("c" . "Magit checkout") . magit-checkout)
+	 (("C" . "Magit commit") . magit-commit)
+	 (("u" . "Magit push to remote") . magit-push-current-to-pushremote)
+	 (("p" . "Magit delete remote branch") . magit-delete-remote-branch)
+	 (("i" . "Magit pull") . magit-pull-from-upstream)
+	 (("r" . "Magit rebase") . magit-rebase)
+	 (("e" . "Magit merge") . magit-merge)
+	 (("l" . "Magit log") . magit-log-all)
+	 (("L" . "Magit blame") . magit-blame+)
+	 (("b" . "Magit branch") . magit-branch)
+	 (("B" . "Magit buffer") . magit-process-buffer)
+	 (("D" . "Magit discarded") . magit-discard)
+	 (("," . "Magit init") . magit-init)
+	 (("." . "Magit add remote") . magit-remote-add)
+	 )
+   t)
+)
+;; Then binding function one-key-menu-magit with one global key to call it.
+;;
 (provide 'init-idle)
 
 ;;; init-idle.el ends here

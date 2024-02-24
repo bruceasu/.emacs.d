@@ -1,6 +1,9 @@
-#name : Header 6
-#contributor: Peng Deng <dengpeng@gmail.com>
+# -*- mode: snippet -*-
+# name: Header6
+# contributor: liuyinz <liuyinz95@gmail.com>
+# key: h6
 # --
-###### ${1:Header 6} ######
+
+###### ${1:Header6}
 
 $0

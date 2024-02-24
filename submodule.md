@@ -30,7 +30,7 @@ git submodule update --remote site-lisp/sort-tab
 ```
 ### multiply submodules
 ```
-git submodule foreach 'git pull origin master
+git submodule foreach 'git pull origin master'
 ```
 
 # DELETE SUBMODULE
@@ -38,6 +38,7 @@ git submodule foreach 'git pull origin master
 git submodule deinit -f site-lisp/sort-tab
 ```
 then edit the .gitmodules to remove the submodule config 
+then edit the .git/config to remove the submodule config 
 and the also delete `rm -fr.git/modules/site-lisp/sort-tab`
 
 # SUBTREE

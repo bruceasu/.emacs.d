@@ -49,10 +49,12 @@
 (eval-when-compile
   (require '+const)
   (require '+custom)
+  (require 'init-package)
   )
 
 ;; 语法检查包
 (use-package flycheck
+  :ensure t
   :defer 3)
 
 ;; format all, formatter for almost languages
@@ -83,56 +85,65 @@
 (add-hook 'sh-mode-hook         'hs-minor-mode)
 (add-hook 'python-mode-hook     'hs-minor-mode)
 
-;; 著名的Emacs补全框架
-(use-package company
-  :defer 2
-  :hook (after-init . global-company-mode)
-  :init (setq company-tooltip-align-annotations t
-        company-idle-delay 0 company-echo-delay 0
-        company-minimum-prefix-length 1
-        company-require-match nil
-        company-dabbrev-ignore-case nil
-        company-dabbrev-downcase nil
-        company-show-numbers t)
-  ;; :config
-  :bind (:map company-active-map
-        ("C-n" . #'company-select-next)
-        ("C-p" . #'company-select-previous)
-        ("TAB" . company-complete-selection)
-        ("M-h" . company-complete-selection)
-        ("M-H" . company-complete-common)
-        ("M-s" . company-search-candidates)
-        ("M-S" . company-filter-candidates)
-        ("M-n" . company-select-next)
-        ("M-p" . company-select-previous))
-  (:map leader-key
-    ("c s" . #'company-yasnippet
-     ))
-  )
-
 ;; 代码片段
-(use-package yasnippet
-  :ensure t
-  :commands (yas-reload-all)
-  :init
-  (autoload 'yas-minor-mode-on "yasnippet")
+(require 'yasnippet)
+(yas-global-mode 1)
+(autoload 'yas-minor-mode-on "yasnippet")
   (setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
   (dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook))
   (add-hook x #'yas-minor-mode-on))
-  :config
-  (require 'init-yasnippet)
-  ;; 大量可用的代码片段
-  (use-package
-  yasnippet-snippets
+
+
+(use-package projectile
   :ensure t
-  )
-  )
+  :config
+  ;; Eanble Projectile globally
+  (setq projectile-completion-system 'ido)
+  (setq ido-enable-flex-matching t)
+  (projectile-mode 1)
 
-(use-package projectile)
-(use-package hydra)
+  ;; Set akeybinding for projectile commands
+  (global-set-key (kbd "C-c p") 'projectitle-command-map)
+)
 
 
-;; install dash s editorconfig
+(defvar user-home-dir (getenv "HOME"))
+(if sys/win32p
+    (defvar user-home-dir (getenv "USERPROFILE"))
+)
+
+(setq lsp-maven-path (concat user-home-dir "/.m2/settings.xml"))  ;; maven setting path
+(setq org-directory (concat user-home-dir "/org") ;; org root path
+(setq org-roam-directory (concat org-dirctory "/org-roam") ;; org roam root path
+(setq lsp-java-java-path (concat (getenv "JAVA_HOME") "/bin/java"))    ;; java11 exec path
+
+(use-package lsp-mode
+  :ensure t
+  :hook (java-mode . lsp-deferred)
+  :commands (lsp lsp-deferred))
+
+(use-package lsp-java
+  :ensure t
+  :after lsp-mode
+  :config
+  (add-hook 'java-mode-hook 'lsp))  ;; 在打开 Java 文件时启动 lsp
+
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+    
+(use-package eglot-java)
+
+(add-hook 'java-mode-hook 'eglot-java-mode)
+(add-hook 'eglot-java-mode-hook (lambda ()
+								  (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
+								  (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
+								  (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
+								  (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
+								  (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
+								  (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh)))
+
+
 
 (setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
 (add-to-list 'load-path "C:\\green\\emacs-29.1\\.emacs.d\\site-lisp\\copilot\\copilot.el")

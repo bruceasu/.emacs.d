@@ -12,7 +12,7 @@
 ;; pyim
 ;; 在windows下输入法都是正常的，就是linux比较恶心了。
 (when sys/linuxp
-(require 'pyim-init))
+  (require 'pyim-init))
 
 
 (provide 'init-im)

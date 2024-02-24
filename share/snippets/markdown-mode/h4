@@ -1,6 +1,9 @@
-#name : Header 4
-#contributor: Peng Deng <dengpeng@gmail.com>
+# -*- mode: snippet -*-
+# name: Header4
+# contributor: liuyinz <liuyinz95@gmail.com>
+# key: h4
 # --
-#### ${1:Header 4} ####
+
+#### ${1:Header4}
 
 $0

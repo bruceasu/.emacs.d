@@ -25,6 +25,16 @@
  ;; '("C-z" "s-W"))
  '("C-z" "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
 
+;;; ### sudo ###
+(when sys/linuxp
+	(progn
+		(lazy-load-global-keys
+		 '(("C-z C-s" . suk/sudo-actions-one-key))
+		 "init-sudo"
+		)
+	)
+)
+
 ;;; ### Sdcv ###
 ;;; --- 星际译王命令行
 (lazy-load-global-keys
@@ -37,51 +47,31 @@
    ("g" . google-translate-at-point)
    ("G" . google-translate-query-translate)
    ("s" . google-translate-smooth-translate)
+   ("C-t" . suk/translate-one-key)
    )
  "init-translate"
  "C-z")
 
 ;;; ### Insert translated name ###
+;; youdao / google
+(setq insert-translated-name-translate-engine "google")
 (lazy-load-global-keys
  '(
    ("," . insert-translated-name-insert-with-underline)
    ("." . insert-translated-name-insert-with-camel)
+   ("/" . insert-translated-name-insert)
    )
  "insert-translated-name"
  "C-z"
  )
 
-(lazy-load-global-keys
- '(
-   ("M-<f2>" . insert-translated-name-insert)
-   )
- "init-insert-translated-name")
 
 ;;; ### buffers ###
 (lazy-load-global-keys
  '(
-   ("C-x l" . suk/count-brf-lines)
-   ("C-x x" . suk/switch-major-mode)
-   ("C-x X" . suk/get-mode-name)
-
-   ("C-x k" . suk/close-current-buffer)
-   ("C-S-t" . suk/open-last-closed)		; control+shift+t
-   ("C-S-r" . suk/open-recently-closed) ; control+shift+r
-   ("C-x L" . suk/list-recently-closed) ; control+x L
-   ("S-<f2>" .  suk/new-empty-buffer)
-   ("C-c s" .  suk/create-scratch-buffer)
-   ("C-c o" .  suk/create-scratch-org)
-   ("C-c m" .  suk/switch-to-minibuffer)
-   ("C-x t m" . suk/toggle-margin-right)
-   ("M-Q" . suk/unfill-paragraph)
-   ("M-q" . suk/fill-or-unfill-paragraph)
+   ("C-x B" . suk/buffer-one-key)
    ("C-x n x" . suk/xah-narrow-to-region) ; C-x n w ,  C-x n d, C-x n n, C-x n p 系列
-   ("S-<f7>" . suk/indent-buffer)
-   ("C-<f2>" . suk/rename-file-and-buffer)
-   ("C-M-;" . suk/kill-other-window-buffer) ;关闭其他窗口的
-   ("C-x K" . suk/kill-all-buffers-except-current)
-   ("C-x M" . suk/move-buffer-file)
-   ("C-x C" . copy-buffer-file-name-as-kill)
+
    )
  "init-buffers")
 
@@ -104,7 +94,8 @@
    ("C-x M-a" . align-regexp)
    ("C-c ." . hs-toggle-hiding)
    ("C-c ," . hs-show-all)
-   ))
+   )
+)
 
 
 ;;; ### basic-toolkit ###
@@ -143,18 +134,18 @@
 ;;; --- 快速删除光标左右的内容
 (lazy-load-global-keys
  '(
-   ("M-N" . delete-block-backward)
-   ("M-M" . delete-block-forward))
+   ("M-," . delete-block-backward)
+   ("M-." . delete-block-forward))
  "delete-block")
 
 ;;; ### watch other window ###
 ;;; --- 滚动其他窗口
 (lazy-load-global-keys
  '(
-   ("M-I" . other-window-move-up)		;向下滚动其他窗口
-   ("M-K" . other-window-move-down)		;向上滚动其他窗口
-   ("s-I" . window-move-up)				;向下滚动当前窗口
-   ("s-K" . window-move-down)			;向上滚动当前窗口
+   ("C-P" . other-window-move-up)		;向下滚动其他窗口
+   ("C-N" . other-window-move-down)		;向上滚动其他窗口
+   ("M-p" . window-move-up)				;向下滚动当前窗口
+   ("M-n" . window-move-down)			;向上滚动当前窗口
    )
  "win-move")
 
@@ -245,8 +236,8 @@
 ;;; --- 字体命令
 (lazy-load-set-keys
  '(
-   ("s-_" . text-scale-decrease)        ;减小字体大小
-   ("s-+" . text-scale-increase)        ;增加字体大小
+   ("C--" . text-scale-decrease)        ;减小字体大小
+   ("C-=" . text-scale-increase)        ;增加字体大小
    ))
 
 ;;; ### 调整数字 ###
@@ -277,33 +268,6 @@
    )
  "window-extension")
 
-
-;;; ### Awesome-Tab ###
-;;; --- 多标签浏览
-(lazy-load-set-keys
- '(
-   ("s-j" . awesome-tab-ace-jump)        ;Ace jump
-   ("M-7" . awesome-tab-backward-tab)    ;移动到后一个标签
-   ("M-8" . awesome-tab-forward-tab)     ;移动到前一个标签
-   ("M-9" . awesome-tab-backward-group)  ;移动到后一个标签组
-   ("M-0" . awesome-tab-forward-group)   ;移动到前一个标签组
-   ("<C-tab>" . awesome-tab-forward-tab) ;移动到后一个标签
-   ("<C-S-iso-lefttab>" . awesome-tab-backward-tab) ;移动到前一个标签
-   ))
-
-(lazy-load-global-keys
- '(
-   ("M-&" . awesome-tab-backward-tab-other-window)
-   ("M-*" . awesome-tab-forward-tab-other-window)
-   ("M-s-7" . awesome-tab-select-beg-tab)
-   ("M-s-8" . awesome-tab-select-end-tab)
-   ("M-s-9" . awesome-tab-move-current-tab-to-beg)
-   ("s-q" . awesome-tab-kill-other-buffers-in-current-group)
-   ("s-Q" . awesome-tab-kill-all-buffers-in-current-group)
-   ("s-w" . awesome-tab-keep-match-buffers-in-current-group)
-   ("s-W" . awesome-tab-kill-match-buffers-in-current-group)
-   )
- "awesome-tab")
 ;;; ### Functin key ###
 ;;; --- 功能函数
 (lazy-load-set-keys
@@ -355,16 +319,6 @@
  "C-z"
  )
 
-;;; ### Aweshell ###
-;;; --- 多标签式的shell
-;; (lazy-load-global-keys
-;;  '(
-;;    ("s-n" . aweshell-new)
-;;    ("s-h" . aweshell-toggle)
-;;    ("s-x s-x" . aweshell-dedicated-toggle)
-;;    )
-;;  "aweshell")
-
 ;;; ### Dired ###
 ;;; --- Dired
 (lazy-load-global-keys
@@ -407,7 +361,7 @@
 ;;; ### expand-region ###
 (lazy-load-global-keys
  '(
-   ("C-=" . er/expand-region))
+   ("C-+" . er/expand-region))
  "expand-region")
 
 ;; ### vdiff ###
@@ -435,16 +389,15 @@
  "company-english-helper")
 
 
-;;; Elisp
+
 (lazy-load-set-keys
  '(
-   ("RET" . comment-indent-new-line)    ;自动换行并注释
+   ("C-x g" . suk/magit-actions-one-key)
+   ("C-z S g" . suk/google-search)
+   ("C-z S c" .  suk/github-code-search)
    )
- emacs-lisp-mode-map
  )
 
-
-;;; ### Org ###
 ;;; --- 笔记管理和组织
 (define-prefix-command 'F9-map)
 (global-set-key (kbd "<f9>") 'F9-map)
@@ -578,9 +531,9 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;;(global-set-key (kbd "<C-f6>") '(lambda () (interactive) (bookmark-set "SAVED")))
 ;;(global-set-key (kbd "<f6>") '(lambda () (interactive) (bookmark-jump "SAVED")))
 
-;; C-x LEFT/RIGHT
-;;(global-set-key (kbd "C-<f9>") 'previous-buffer)
-;;(global-set-key (kbd "C-<f10>") 'next-buffer)
+;; default keys: C-x LEFT/RIGHT
+(global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
+(global-set-key (kbd "<C-tab>") 'next-buffer)
 
 ;;;
 ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
