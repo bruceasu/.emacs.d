@@ -1,4 +1,4 @@
-;;; init-line-number.el --- Configuration for display line number
+﻿;;; init-line-number.el --- Configuration for display line number
 
 ;; Filename: init-line-number.el
 ;; Description: Configuration for display line number
@@ -89,7 +89,7 @@
 (global-display-line-numbers-mode 1)
 ;; Alternatively, to use it only in programming modes:
 ;;(add-hook 'prog-mode-hook #'display-line-numbers-mode)
-    
+
 ;; Line numbers are not displayed when large files are used.
 (setq line-number-display-limit large-file-warning-threshold)
 (setq line-number-display-limit-width 1000)

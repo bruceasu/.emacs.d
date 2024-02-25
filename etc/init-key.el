@@ -1,4 +1,4 @@
-(eval-when-compile
+﻿(eval-when-compile
   (require '+const)
   (require '+custom))
 
@@ -531,9 +531,11 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;;(global-set-key (kbd "<C-f6>") '(lambda () (interactive) (bookmark-set "SAVED")))
 ;;(global-set-key (kbd "<f6>") '(lambda () (interactive) (bookmark-jump "SAVED")))
 
-;; default keys: C-x LEFT/RIGHT
+;; default keys: C-x LEFT/RIGHT C-, C-.
 (global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
 (global-set-key (kbd "<C-tab>") 'next-buffer)
+;(global-set-key (kbd "C-x C-b") 'buffer-menu)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
 
 ;;;
 ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
@@ -623,7 +625,6 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;; 等到如下类似的配置
 (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
 
-
 (define-prefix-command 'leader-key)
 (global-set-key (kbd "M-s-SPC") 'leader-key)
 
@@ -634,4 +635,11 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 (global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
 (global-set-key (kbd "C-x t f") 'global-flycheck-mode)
 (global-set-key (kbd "C-x R") 'recentf)
+
+;; Toggle fullscreen <F11> also bind to fullscreen
+(bind-keys ("C-<f11>" . toggle-frame-fullscreen)
+           ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
+           ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
+           )
+
 (provide 'init-key)

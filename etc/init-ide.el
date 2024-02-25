@@ -1,4 +1,4 @@
-;;; init-ide.el --- IDE configuration
+﻿;;; init-ide.el --- IDE configuration
 
 ;; Filename: init-ide.el
 ;; Description: IDE configuration
@@ -72,10 +72,11 @@
   :defer 1
   :diminish hs-minor-mode
   :bind (:map prog-mode-map
-        ("C-c ." . hs-toggle-hiding)
-        ("C-c ," . hs-show-all)
-        )
+              ("C-c ." . hs-toggle-hiding)
+              ("C-c ," . hs-show-all)
+              )
   :hook (prog-mode . hs-minor-mode))
+
 ;;代码折叠
 (add-hook 'c-mode-common-hook   'hs-minor-mode)
 (add-hook 'emacs-lisp-mode-hook 'hs-minor-mode)
@@ -89,8 +90,8 @@
 (require 'yasnippet)
 (yas-global-mode 1)
 (autoload 'yas-minor-mode-on "yasnippet")
-  (setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
-  (dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook))
+(setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
+(dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook))
   (add-hook x #'yas-minor-mode-on))
 
 
@@ -103,18 +104,16 @@
   (projectile-mode 1)
 
   ;; Set akeybinding for projectile commands
-  (global-set-key (kbd "C-c p") 'projectitle-command-map)
-)
+  (global-set-key (kbd "C-c p") 'projectitle-command-map))
 
 
 (defvar user-home-dir (getenv "HOME"))
 (if sys/win32p
-    (defvar user-home-dir (getenv "USERPROFILE"))
-)
+    (defvar user-home-dir (getenv "USERPROFILE")))
 
 (setq lsp-maven-path (concat user-home-dir "/.m2/settings.xml"))  ;; maven setting path
-(setq org-directory (concat user-home-dir "/org") ;; org root path
-(setq org-roam-directory (concat org-dirctory "/org-roam") ;; org roam root path
+(setq org-directory (concat user-home-dir "/org")) ;; org root path
+(setq org-roam-directory (concat org-dirctory "/org-roam")) ;; org roam root path
 (setq lsp-java-java-path (concat (getenv "JAVA_HOME") "/bin/java"))    ;; java11 exec path
 
 (use-package lsp-mode
@@ -131,7 +130,7 @@
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode)
-    
+
 (use-package eglot-java)
 
 (add-hook 'java-mode-hook 'eglot-java-mode)
@@ -162,47 +161,46 @@
 
 ;; 快速编写 HTML 代码
 (use-package emmet-mode
-	:defer 3
-	:init (setq emmet-expand-jsx-className? t)
-	:hook (web-mode typescript-mode js-mode js2-mode rjsx-mode css-mode scss-mode sgml-mode))
+  :defer 3
+  :init (setq emmet-expand-jsx-className? t)
+  :hook (web-mode typescript-mode js-mode js2-mode rjsx-mode css-mode scss-mode sgml-mode))
 
 
 ;; New `less-cs-mde' in Emacs 26
 (unless (fboundp 'less-css-mode)
-	(use-package less-css-mode))
+  (use-package less-css-mode))
 
 ;;JSON mode
 (use-package json-mode
-	:defer 3
-	:mode "\\.json\\'")
+  :defer 3
+  :mode "\\.json\\'")
 
 ;; Improved JavaScript editing mode
 (use-package js2-mode)
 ;; Major mode for editing web templates
 (use-package web-mode
-	:ensure t
-	:defines company-backends
-	:mode "\\.\\(phtml\\|php|[gj]sp\\|as[cp]x\\|erb\\|djhtml\\|html?\\|hbs\\|ejs\\|jade\\|swig\\|tm?pl\\|vue\\|jsx?$\\)$"
-)
+  :ensure t
+  :defines company-backends
+  :mode "\\.\\(phtml\\|php|[gj]sp\\|as[cp]x\\|erb\\|djhtml\\|html?\\|hbs\\|ejs\\|jade\\|swig\\|tm?pl\\|vue\\|jsx?$\\)$"
+  )
 
 
 (use-package rjsx-mode
-	:ensure t
-	:mode ("\\.js\\'")
-	:config
-	(add-hook 'rjsx-mode-hook (lambda()
-	              (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
-	              (flycheck-select-checker 'javascript-eslint)))
-)
+  :ensure t
+  :mode ("\\.js\\'")
+  :config
+  (add-hook 'rjsx-mode-hook (lambda()
+	                          (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
+	                          (flycheck-select-checker 'javascript-eslint)))
+  )
 
 (use-package prettier-js
-	:ensure t
-	:defer 3
-	:hook ((css-mode web-mode typescript-mode js-mode json-mode js2-mode) . prettier-js-mode))
+  :ensure t
+  :defer 3
+  :hook ((css-mode web-mode typescript-mode js-mode json-mode js2-mode) . prettier-js-mode))
 
 ;; 直接编辑 HTML 文件时的设置
 (add-hook 'mhtml-mode-hook 'web-dev-attached)
-
 (provide 'init-ide)
 
 ;;; init-ide.el ends here

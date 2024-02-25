@@ -1,4 +1,4 @@
-;; init-basic.el --- Initialize basic configurations.	-*- lexical-binding: t -*-
+﻿;; init-basic.el --- Initialize basic configurations.	-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -31,7 +31,8 @@
 
 (eval-when-compile
   (require '+const)
-  (require '+custom))
+  (require '+custom)
+  )
 
 ;; Speed up startup
 (defvar default-file-name-handler-alist file-name-handler-alist)
@@ -89,7 +90,7 @@
 (setq-default c-basic-offset   4
               tab-width        4
               indent-tabs-mode t)
-              
+
 ;; 创建新行的动作
 ;; 回车时创建新行并且对齐
 (global-set-key (kbd "RET") 'newline-and-indent)
@@ -100,8 +101,6 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 ;; 忽略 cl 过期警告
 (setq byte-compile-warnings '(cl-function))
-
-
 
 ;; Frequently-accessed files
 
@@ -147,39 +146,6 @@
 ;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
 ;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
 ;; (my-defshortcut ?Q "~/personal/questions.org")
-
-
-
-;; 字体
-(require 'load-set-font)
-
-;; clean up the mode line
-(display-time-mode -1)
-(setq column-number-mode t)
-
-;; Title
-(setq frame-title-format
-      '("Emacs - "
-        (:eval (if (buffer-file-name)
-                   (abbreviate-file-name (buffer-file-name))
-                 "%b"))))
-
-;; ===================================
-;; Theme
-;; -----------------------------------
-(require 'lazycat-theme)
-(lazycat-theme-load-dark)
-
-(setq-default fill-column 80)
-(setq column-number-mode t)
-
-
-;; Toggle fullscreen <F11> also bind to fullscreen
-(bind-keys ("C-<f11>" . toggle-frame-fullscreen)
-           ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
-           ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
-           )
-
 
 ;;;###autoload
 (defun  term()
@@ -261,6 +227,22 @@
 (defun suk/plus-alpha ()
   (interactive)
   (suk/adjust-opacity nil 2))
+;; set the alpha background
+(setq-default alpha-list '((90 100) (100 100)))
+
+;;;###autoload
+(defun loop-alpha ()
+  ;;doc
+  (interactive)
+  (let ((h (car alpha-list)))
+    ((lambda (a ab)
+       (set-frame-parameter (selected-frame) 'alpha (list a ab))
+       (add-to-list 'default-frame-alist (cons 'alpha (list a ab)))
+       ) (car h) (car (cdr h)))
+    (setq alpha-list (cdr (append alpha-list (list h))))
+    )
+)
+;; (loop-alpha)
 
 (when  (eq system-type 'gnu/linux)
 ;; 调节屏幕亮度
@@ -330,7 +312,7 @@
   (if url-proxy-services
       (message "Current HTTP proxy is \"%s\"" suk-proxy)
     (message "No proxy")))
-    
+
 ;;;###autoload
 (defun suk/proxy-http-enable ()
   "Enable http/https proxy."
@@ -381,28 +363,25 @@
 
 
 
-;; set the alpha background
-(setq-default alpha-list '((90 100) (100 100)))
-(defun loop-alpha ()
-  ;;doc
-  (interactive)
-  (let ((h (car alpha-list)))
-    ((lambda (a ab)
-       (set-frame-parameter (selected-frame) 'alpha (list a ab))
-       (add-to-list 'default-frame-alist (cons 'alpha (list a ab)))
-       ) (car h) (car (cdr h)))
-    (setq alpha-list (cdr (append alpha-list (list h))))
-    )
-)
-(loop-alpha)
-
 ;; 编码设置 begin
+(prefer-coding-system 'utf-8)
 (setq default-buffer-file-coding-system 'utf-8-unix)            ;缓存文件编码
 (setq default-file-name-coding-system 'utf-8-unix)              ;文件名编码
 (setq default-keyboard-coding-system 'utf-8-unix)               ;键盘输入编码
 (setq default-process-coding-system '(utf-8-unix . utf-8-unix)) ;进程输出输入编码
 (setq default-sendmail-coding-system 'utf-8-unix)               ;发送邮件编码
 (setq default-terminal-coding-system 'utf-8-unix)               ;终端编码
+
+
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(setq-default buffer-file-coding-system 'utf-8)
+
+;; 尝试更智能地处理不同系统的换行模式
+(setq-default coding-system-for-read 'utf-8-auto)
+(setq-default coding-system-for-write 'utf-8-auto)
+
 
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)

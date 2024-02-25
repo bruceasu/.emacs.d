@@ -1,4 +1,4 @@
-;;; init-idle.el --- Configure file that can load when emacs idle.
+﻿;;; init-idle.el --- Configure file that can load when emacs idle.
 
 ;; Filename: init-idle.el
 ;; Description: Configure file that can load when emacs idle.
@@ -92,8 +92,8 @@
 (autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
   "Convert a region from simple chinese to tradition chinese or
 from tradition chinese to simple chinese" t)
-(autoload 'irfc "init-irfc")
-(custom-set-variables '(tramp-verbose 0)) ;设置tramp的响应方式, 关闭后不弹出消息
+;;(autoload 'irfc "init-irfc")
+;;(custom-set-variables '(tramp-verbose 0)) ;设置tramp的响应方式, 关闭后不弹出消息
 (setq max-lisp-eval-depth 40000)          ;lisp最大执行深度
 (setq max-specpdl-size 10000)             ;最大容量
 (setq kill-ring-max 1024)                 ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
@@ -105,7 +105,7 @@ from tradition chinese to simple chinese" t)
 (setq global-mark-ring-max 1024)          ;设置最大的全局标记容量
 (global-hl-line-mode 1)                   ;高亮当前行
 (setq isearch-allow-scroll t)             ;isearch搜索时是可以滚动屏幕的
-(setq one-key-popup-window nil)           ;禁止自动弹出窗口
+;;(setq one-key-popup-window nil)           ;禁止自动弹出窗口
 (setq enable-recursive-minibuffers t)     ;minibuffer 递归调用命令
 (setq history-delete-duplicates t)        ;删除minibuffer的重复历史
 (setq minibuffer-message-timeout 1)       ;显示消息超时的时间
@@ -154,8 +154,7 @@ from tradition chinese to simple chinese" t)
 (auto-compression-mode 1)
 (size-indication-mode 1)
 (blink-cursor-mode -1)
-;; 高亮对应的括号
-(show-paren-mode 1)
+
 ;;; ### Advice ###
 ;;; --- 各种emacs行为建议
 ;; 在特定地模式下粘贴时自动缩进
@@ -179,10 +178,6 @@ from tradition chinese to simple chinese" t)
 ;;; ### Modeline-posn-column-limit ###
 ;;; --- 列数限制
 (setq modelinepos-column-limit 80)      ;设置列数限制, 并在mode-line上显示
-
-;; (setq package-archives ;设置中国的镜像源，国外的太慢了，偶尔去偷点 *.el 文件
-;;       '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
-;;         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
 
 
 ;; 如果有两个重名buffer, 则再前面加上路径区别
@@ -212,7 +207,7 @@ from tradition chinese to simple chinese" t)
   :ensure nil
   :defer 1
   :hook (after-init . save-place-mode)
-  :config (setq save-place-file "~/.emacs.d/var/saveplace")
+  :init (setq save-place-file "~/.emacs.d/var/saveplace")
 
   )
 (use-package recentf
@@ -226,7 +221,7 @@ from tradition chinese to simple chinese" t)
   (add-hook 'after-init-hook #'recentf-mode)
   (setq recentf-max-saved-items 500)
   (setq recentf-max-saved-items 17)
-  (setq recentf-save-file "~/.emacs.d/var/recentf")
+  ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
   :config
   (add-to-list 'recentf-exclude (expand-file-name package-user-dir))
   (add-to-list 'recentf-exclude ".cache")

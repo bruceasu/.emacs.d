@@ -1,4 +1,4 @@
-;;; init-buffers.el --- Initialize buffers configurations. -*- lexical-binding: t -*-
+﻿;;; init-buffers.el --- Initialize buffers configurations. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -309,7 +309,7 @@ It returns the buffer."
         (setq min (point-min))
         (setq max (point-max)))
       (if (or (= 1 (point-min)) mark-active)
-          (if mark-active
+ mark-active
               (message "当前region内共有%d行, %d个字符" (count-lines min max) (- max min))
             (message "当前buffer内共有%d行, %d个字符" (count-lines min max) (- max min)))
         (let ((nmin min) (nmax max))
@@ -319,7 +319,8 @@ It returns the buffer."
               (setq min (point-min))
               (setq max (point-max))))
           (message "narrow下buffer内共有%d行, %d个字符, 非narrow下buffer内共有%d行, %d个字符"
-                   (count-lines nmin nmax) (- nmax nmin) (count-lines min max) (- max min)))))))
+                   (count-lines nmin nmax) (- nmax nmin) (count-lines min max) (- max min))))))
+
 
 ;; =========================================================
 ;;;###autoload
@@ -443,22 +444,21 @@ This command is convenient when reading novel, documentation."
      (("t" . "Reopen the last closed file") . suk/open-last-closed)		; control+shift+t
      (("r" . "Reopen teh recently closed file") . suk/open-recently-closed) ; control+shift+r
      (("L" . "List the recently closed files" ). suk/list-recently-closed) ; control+x L
-     ("n" . "New file") .  suk/new-empty-buffer)
+     (("n" . "New file") .  suk/new-empty-buffer)
      (("S" . "Create a scratch buffer" ) .  suk/create-scratch-buffer)
      (("o" . "Create a scratch org-mode buffer") . suk/create-scratch-org)
      (("m" . "Switch to the minibuffer") . suk/switch-to-minibuffer)
      (("t m" . "Toggle the margin right"). suk/toggle-margin-right)
      (("Q" . "Unfill paragraph") . suk/unfill-paragraph)
      (("q" . "file or unfill paragraph" ). suk/fill-or-unfill-paragraph)
-     ("S-<f7>" . suk/indent-buffer)
-     ("C-<f2>" . suk/rename-file-and-buffer)
-     ("C-M-;" . suk/kill-other-window-buffer) ;关闭其他窗口的
-     ("C-x K" . suk/kill-all-buffers-except-current)
-     ("C-x M" . suk/move-buffer-file)
-     ("C-x C" . copy-buffer-file-name-as-kill)
-	 )
-   t)
-  )
+     (("<f7>" . "Indent buffer") . suk/indent-buffer)
+     (("<f2>" . "Rename file and buffer") suk/rename-file-and-buffer)
+     ((";" . "Kill other window buffer") . suk/kill-other-window-buffer) ;关闭其他窗口的
+     (("K" . "Kill all buffers except current") . suk/kill-all-buffers-except-current)
+     (("M" . "Move buffer file"). suk/move-buffer-file)
+     (("C" . "Copy buffer file name to kill ring") . copy-buffer-file-name-as-kill)
+     )
+   t))
 ;; bind the hotkey in init-key.el
 (provide 'init-buffers)
 ;;; init-buffers.el ends here

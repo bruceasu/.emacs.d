@@ -1,4 +1,4 @@
-;;k; init.el --- Emacs configurations.    -*- lexical-binding: t no-byte-compile: t; -*-
+﻿;;k; init.el --- Emacs configurations.    -*- lexical-binding: t no-byte-compile: t; -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -40,6 +40,7 @@
 (defvar suk-emacs-elpa-dir (concat suk-emacs-root-dir "/elpa"))
 (defvar suk-emacs-var-dir (concat suk-emacs-root-dir "/var"))
 (defvar suk-emacs-tmp-dir (concat suk-emacs-var-dir "/tmp"))
+(defvar suk-emacs-backup-dir (concat suk-emacs-tmp-dir "/backup"))
 
 (defvar user-home-dir (getenv "HOME"))
 (if (eq system-type 'windows-nt)
@@ -56,6 +57,7 @@
 (setq save-place-file (concat suk-emacs-var-dir "/saveplace"))
 ;; Recentf
 (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
+;;(setq recentf-save-file "~/.emacs.d/var/recentf")
 ;; History
 (setq savehist-file (concat suk-emacs-var-dir "/history"))
 ; Amx
@@ -67,11 +69,11 @@
 (setq eshell-history-file-name (concat eshell-directory-name "/history"))
 ;; projectitle-bookmarks
 (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
-(setq backup-directory-alist '(("" . (concat suk-emacs-tmp-dir "/backup"))))
+(setq backup-directory-alist `(("" . ,suk-emacs-tmp-dir)))
 ;; Bookmark
 (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
 ;; Diary
-(setq diary-file (concat "~/diary"))
+(setq diary-file (concat user-home-dir "/diary"))
 
 
 ;; 忽略 cl 过期警告
@@ -154,16 +156,13 @@
 
     ;; Customization
     (require '+custom)
+    ;; Packages
+    (require 'init-package)
     (require 'init-basic)
-    
     (require 'lazy-load)
     (require 'init-key)
-
-    ;; Packages
-    
-    (require 'init-package)
- 
-  
+    (require 'init-ui)
+    (require 'init-ext-packages)
     ;; (use-package esup
     ;;              :ensure t
     ;;              ;; To use MELPA Stable use ":pin melpa-stable",
@@ -181,6 +180,10 @@
     (run-with-idle-timer
      1 nil
      #'(lambda ()
+         ;; Restore session at last.
+         ;; 速度有点慢
+         (require 'init-session)
+         (emacs-session-restore)
          (require 'init-line-number)
          (require 'init-idle)
          ;;(require 'highlight-parentheses)
@@ -191,10 +194,7 @@
          ;; Programming
          (require 'init-ide)
          (server-start)
-	 ;; Restore session at last.
-         ;; 速度有点慢
-         (require 'init-session)
-         (emacs-session-restore)
+
 		 ;; Make gc pauses faster by decreasing the threshold.
 		 (setq gc-cons-threshold (* 8 1000 1000))
 
