@@ -1,4 +1,4 @@
-;; +custom.el --- Define customizations.	-*- lexical-binding: t -*-
+﻿;; +custom.el --- Define customizations.	-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -51,6 +51,23 @@
 (defcustom suk-cnfonts nil
   "Use cnfonts or not."
   :type 'boolean)
+
+(defcustom user-home-dir (getenv "HOME")
+  "User home directory."
+  :type 'string)
+
+(if sys/win32p
+    (setq user-home-dir (getenv "USERPROFILE"))
+)
+
+(defcustom org-roam-directory (expand-file-name "RoamNotes" user-home-dir)
+  "The org roam directory."
+  :type 'strig)
+
+(defcustom org-files-directory (expand-file-name "org" user-home-dir)
+  "The org roam directory."
+  :type 'strig)
+
 
 ;; Load `custom-file'
 ;; If it doesn't exist, copy from the template, then load it.

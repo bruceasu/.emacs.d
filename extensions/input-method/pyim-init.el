@@ -4,7 +4,7 @@
 (setq pyim-default-scheme 'hyly)
 (setq pyim-assistant-scheme 'xiaohe-shuangpin)
 ;; 拼音小词库
-;;(use-pacakge pyim-basedict) ; 拼音词库设置，五笔用户 *不需要* 此行设置
+;;(use-package pyim-basedict) ; 拼音词库设置，五笔用户 *不需要* 此行设置
 ;;(pyim-basedict-enable)   ; 拼音词库，五笔用户 *不需要* 此行设置
 
 ;; 我使用全拼
@@ -12,7 +12,7 @@
 ;; 开启拼音搜索功能
 ;; (setq pyim-isearch-enable-pinyin-search t)
 ;; 拼音大词库
-;; (use-pacakge pyim-greatdict)
+;; (use-package pyim-greatdict)
 ;; (pyim-greatdict-enable)
 
 ;; 五笔用户使用 wbdict 词库

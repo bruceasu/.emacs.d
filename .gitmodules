@@ -64,3 +64,6 @@
 [submodule "extensions/cal-china-x"]
 	path = extensions/cal-china-x
 	url = git@github.com:xwl/cal-china-x
+[submodule "extensions/org-pretty-table"]
+	path = extensions/org-pretty-table
+	url = https://github.com/Fuco1/org-pretty-table

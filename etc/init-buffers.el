@@ -430,6 +430,7 @@ This command is convenient when reading novel, documentation."
 
 ;;;###autoload
 (defun suk/buffer-one-key()
+  "Buffer ACTION."
   (interactive)
   (require 'one-key)
   (one-key-create-menu
@@ -438,24 +439,24 @@ This command is convenient when reading novel, documentation."
 	 (("l" . "Count lines") . suk/count-bfr-lines)
 	 (("f" . "Sudo Find") . suk/sudo-find-file)
 	 (("e" . "Sudo edit") . suk/sudo-edit)
-     (("x" . "Switch major mode" ). suk/switch-major-mode)
+     (("x" . "Switch major mode" ) . suk/switch-major-mode)
      (("X" . "Get current major mode") . suk/get-mode-name)
      (("k" . "Close current buffer") . suk/close-current-buffer)
      (("t" . "Reopen the last closed file") . suk/open-last-closed)		; control+shift+t
      (("r" . "Reopen teh recently closed file") . suk/open-recently-closed) ; control+shift+r
-     (("L" . "List the recently closed files" ). suk/list-recently-closed) ; control+x L
-     (("n" . "New file") .  suk/new-empty-buffer)
-     (("S" . "Create a scratch buffer" ) .  suk/create-scratch-buffer)
+     (("L" . "List the recently closed files" ) . suk/list-recently-closed) ; control+x L
+     (("n" . "New file") . suk/new-empty-buffer)
+     (("S" . "Create a scratch buffer" ) . suk/create-scratch-buffer)
      (("o" . "Create a scratch org-mode buffer") . suk/create-scratch-org)
      (("m" . "Switch to the minibuffer") . suk/switch-to-minibuffer)
-     (("t m" . "Toggle the margin right"). suk/toggle-margin-right)
+     (("T" . "Toggle the margin right") . suk/toggle-margin-right)
      (("Q" . "Unfill paragraph") . suk/unfill-paragraph)
-     (("q" . "file or unfill paragraph" ). suk/fill-or-unfill-paragraph)
+     (("q" . "file or unfill paragraph" ) . suk/fill-or-unfill-paragraph)
      (("<f7>" . "Indent buffer") . suk/indent-buffer)
      (("<f2>" . "Rename file and buffer") suk/rename-file-and-buffer)
      ((";" . "Kill other window buffer") . suk/kill-other-window-buffer) ;关闭其他窗口的
      (("K" . "Kill all buffers except current") . suk/kill-all-buffers-except-current)
-     (("M" . "Move buffer file"). suk/move-buffer-file)
+     (("M" . "Move buffer file") . suk/move-buffer-file)
      (("C" . "Copy buffer file name to kill ring") . copy-buffer-file-name-as-kill)
      )
    t))

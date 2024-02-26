@@ -49,8 +49,7 @@
 (eval-when-compile
   (require '+const)
   (require '+custom)
-  (require 'init-package)
-  )
+  (require 'init-package))
 
 ;; 语法检查包
 (use-package flycheck
@@ -88,9 +87,16 @@
 
 ;; 代码片段
 (require 'yasnippet)
-(yas-global-mode 1)
-(autoload 'yas-minor-mode-on "yasnippet")
-(setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
+(use-package yasnippet
+  :ensure t
+  :load-path "~/.emacs.d/extensions/yasnippet"
+  :config
+  (setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
+  (yas-global-mode 1)
+  (autoload 'yas-minor-mode-on "yasnippet")
+  )
+
+
 (dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook))
   (add-hook x #'yas-minor-mode-on))
 
@@ -98,13 +104,13 @@
 (use-package projectile
   :ensure t
   :config
+  ;;(setq projectile-completion-system 'ido)
+  ;;(setq ido-enable-flex-matching t)
+  (setq projectile-completion-system 'ivy)
   ;; Eanble Projectile globally
-  (setq projectile-completion-system 'ido)
-  (setq ido-enable-flex-matching t)
   (projectile-mode 1)
-
   ;; Set akeybinding for projectile commands
-  (global-set-key (kbd "C-c p") 'projectitle-command-map))
+  (global-set-key (kbd "C-c p") 'projectile-commander))
 
 
 (defvar user-home-dir (getenv "HOME"))
@@ -112,8 +118,6 @@
     (defvar user-home-dir (getenv "USERPROFILE")))
 
 (setq lsp-maven-path (concat user-home-dir "/.m2/settings.xml"))  ;; maven setting path
-(setq org-directory (concat user-home-dir "/org")) ;; org root path
-(setq org-roam-directory (concat org-dirctory "/org-roam")) ;; org roam root path
 (setq lsp-java-java-path (concat (getenv "JAVA_HOME") "/bin/java"))    ;; java11 exec path
 
 (use-package lsp-mode
@@ -144,15 +148,19 @@
 
 
 
-(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
-(add-to-list 'load-path "C:\\green\\emacs-29.1\\.emacs.d\\site-lisp\\copilot\\copilot.el")
-(require 'copilot)
-(add-hook 'prog-mode-hook 'copilot-mode)
+;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
+;;(add-to-list 'load-path "C:\\green\\emacs-29.1\\.emacs.d\\extensions\\copilot\\copilot.el")
+
+;;(require 'copilot)
+;;(add-hook 'prog-mode-hook 'copilot-mode)
+
 ;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
 ;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
-(define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-(add-to-list 'copilot-major-mode-alist '("c" . "cpp" . "css" . "go" . "java" . "html" . "javascript" . "javascriptreact" . "json" . "python" . "sql" . "shellscript"))
+;;(define-key copilot-completion-map
+;;            (kbd "<tab>")
+;;            'copilot-accept-completion)
+;;(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+;; (add-to-list 'copilot-major-mode-alist '("c" . "cpp" . "css" . "go" . "java" . "html" . "javascript" . "javascriptreact" . "json" . "python" . "sql" . "shellscript"))
 ;; Login to Copilot by M-x copilot-login. You can also check the status by M-x copilot-diagnose (NotAuthorized means you don't have a valid subscription).
 
 ;;--------------------------------------

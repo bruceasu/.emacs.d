@@ -228,9 +228,7 @@
 
 (use-package alert
   :ensure t)
-(use-package yasnippet
-  :ensure t
-  :load-path "~/.emacs.d/extensions/yasnippet")
+
 
 
 (provide 'init-ext-packages)

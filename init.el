@@ -180,7 +180,8 @@
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-         ;; Restore session at last.
+     	;;  (require 'init-org)
+		 ;; Restore session at last.
          ;; 速度有点慢
          (require 'init-session)
          (emacs-session-restore)
@@ -194,9 +195,8 @@
          ;; Programming
          (require 'init-ide)
          (server-start)
-
-		 ;; Make gc pauses faster by decreasing the threshold.
-		 (setq gc-cons-threshold (* 8 1000 1000))
+	     ;; Make gc pauses faster by decreasing the threshold.
+	     (setq gc-cons-threshold (* 16 1000 1000))
 
          ))
     )

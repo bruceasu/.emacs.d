@@ -1,4 +1,4 @@
-﻿;; init-basic.el --- Initialize basic configurations.	-*- lexical-binding: t -*-
+;; init-basic.el --- Initialize basic configurations.	-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -191,16 +191,16 @@
 ;; 切换透明
 ;;;###autoload
 (defun suk/toggle-transparency ()
-        (interactive)
-        (let ((alpha (frame-parameter nil 'alpha)))
-          (set-frame-parameter
-           nil 'alpha
-           (if (eql (cond ((numberp alpha) alpha)
-                          ((numberp (cdr alpha)) (cdr alpha))
-                          ;; Also handle undocumented (<active> <inactive>) form.
-                          ((numberp (cadr alpha)) (cadr alpha)))
-                    100)
-               '(85 . 85) '(100 . 100)))))
+  (interactive)
+  (let ((alpha (frame-parameter nil 'alpha)))
+    (set-frame-parameter
+     nil 'alpha
+     (if (eql (cond ((numberp alpha) alpha)
+                    ((numberp (cdr alpha)) (cdr alpha))
+                    ;; Also handle undocumented (<active> <inactive>) form.
+                    ((numberp (cadr alpha)) (cadr alpha)))
+              100)
+         '(85 . 85) '(100 . 100)))))
 
 
 ;; 增加或减少透明
@@ -380,7 +380,7 @@
 
 ;; 尝试更智能地处理不同系统的换行模式
 (setq-default coding-system-for-read 'utf-8-auto)
-(setq-default coding-system-for-write 'utf-8-auto)
+(setq-default coding-system-for-write 'utf-8)
 
 
 (set-terminal-coding-system 'utf-8)

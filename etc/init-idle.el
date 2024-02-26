@@ -1,4 +1,4 @@
-﻿;;; init-idle.el --- Configure file that can load when emacs idle.
+;;; init-idle.el --- Configure file that can load when emacs idle.
 
 ;; Filename: init-idle.el
 ;; Description: Configure file that can load when emacs idle.
@@ -258,10 +258,14 @@ from tradition chinese to simple chinese" t)
 
 ;; =========================================================
 ;; Start server
-(use-package server
-  :ensure nil
-  :defer 1
-  :hook (after-init . server-mode))
+;; ---------------------------------------------------------
+;; (use-package server
+;;   :ensure t
+;;   :hook (after-init . server-mode)
+;;   )
+(use-package magit
+  :ensure t
+  :defer 1)
 
 ;; Emacs可以做为一个server, 然后用emacsclient连接这个server,
 ;; 无需再打开两个Emacs，windows下还不支持daemon的方式。
