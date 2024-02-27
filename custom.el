@@ -1,4 +1,4 @@
-﻿;;; custom.el --- user customization file    -*- no-byte-compile: t -*-
+;;; custom.el --- user customization file    -*- no-byte-compile: t -*-
 ;;; Commentary:
 ;;;       Copy custom-template.el to custom.el and change the configurations, then restart Emacs.
 ;;;       Put your own configurations in custom-post.el to override default configurations.
@@ -11,7 +11,8 @@
 (setq suk-cnfonts nil)                       ; Use cnfonts not: t or nil
 ;; Misc.
 (setq confirm-kill-emacs 'y-or-n-p)
-(setq org-roam-directory "D:\\suk\\RoamNotes")
-(setq org-files-directory "D:\\suk\\org")
-
+(setq org-roam-directory "D:\\suk\\RoamNotes") ; default $home/RoamNotes
+(setq org-files-directory "D:\\suk\\org") ; default $home/org
+;; (setq org-css-file "~/.emacs.d/documents/my-org-style-min.css")
+;; (setq windows-bash-path "C:/Program Files/Git/bin/bash")
 ;;; custom.el ends here

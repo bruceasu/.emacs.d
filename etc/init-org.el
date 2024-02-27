@@ -1,4 +1,4 @@
-﻿;; init-org.el --- Initialize org configurations.	-*- lexical-binding: t -*-
+;; init-org.el --- Initialize org configurations.	-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -78,7 +78,8 @@
              (abbrev-mode 1)
              (setq truncate-lines nil)
              (set-fill-column 70)
-             (turn-on-font-lock)
+             ;; (turn-on-font-lock)
+             (load-org-font)
              )
           'append)
 
@@ -614,6 +615,22 @@ A prefix arg forces clock in of the default task."
 
 
 
+;; 运行 Org Babel Tangle 命令：`M-x org-babel-tangle`。
+;; 从 org 文件中生成 el 配置文件
+;; 保存 user-emacs-directory(~/.emacs.d/) 文件下的 org 时，
+;; 导出文件中 elisp 代码到文件中。
+(defun suk/org-babel-tangle-config ()
+  (when (string-equal (file-name-directory (buffer-file-name))
+                      (expand-file-name user-emacs-directory)) ; ~/.emacs.d
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
+
+(add-hook 'org-mode-hook
+          (lambda ()
+            (add-hook 'after-save-hook #'suk/org-babel-tangle-config)))
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 快捷键设置 keys are set in init-key.el
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -623,12 +640,13 @@ A prefix arg forces clock in of the default task."
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
+
 ;; C-',  C-, is org-cycle-agenda-files keys
 ;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。
 
 ;; https://github.com/Fuco1/org-pretty-table
-(require 'org-pretty-table)
-(add-hook 'org-mode-hook (lambda () (org-pretty-table-mode)))
+;;(require 'org-pretty-table)
+;;(add-hook 'org-mode-hook (lambda () (org-pretty-table-mode)))
 
 (use-package org-roam
   :ensure t

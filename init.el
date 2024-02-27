@@ -1,54 +1,23 @@
-﻿;;k; init.el --- Emacs configurations.    -*- lexical-binding: t no-byte-compile: t; -*-
-
-;; Copyright (C) 2018 Suk
-
-;; Author: Suk
-;; Version: 1.0.0
-;; Keywords: .emacs.d
-
-;; This file is not part of GNU Emacs.
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or
-;; (at your option) any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-;;
-
-;;; Commentary:
-;;
-;; Emacs configurations.
-;;
-
-;;; Code:
-
 ;; 定义一些启动目录，方便下次迁移修改
 (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
-(defvar suk-emacs-config-dir (concat suk-emacs-root-dir "/etc"))
+(defvar suk-emacs-config-dir (concat suk-emacs-root-dir    "/etc"))
 (defvar suk-emacs-extension-dir (concat suk-emacs-root-dir "/extensions"))
-(defvar suk-emacs-share-dir (concat suk-emacs-root-dir "/share"))
-(defvar suk-emacs-themes-dir (concat suk-emacs-share-dir "/themes"))
-(defvar suk-emacs-elpa-dir (concat suk-emacs-root-dir "/elpa"))
-(defvar suk-emacs-var-dir (concat suk-emacs-root-dir "/var"))
-(defvar suk-emacs-tmp-dir (concat suk-emacs-var-dir "/tmp"))
-(defvar suk-emacs-backup-dir (concat suk-emacs-tmp-dir "/backup"))
+(defvar suk-emacs-share-dir (concat suk-emacs-root-dir     "/share"))
+(defvar suk-emacs-themes-dir (concat suk-emacs-share-dir   "/themes"))
+(defvar suk-emacs-elpa-dir (concat suk-emacs-root-dir      "/elpa"))
+(defvar suk-emacs-var-dir (concat suk-emacs-root-dir       "/var"))
+(defvar suk-emacs-tmp-dir (concat suk-emacs-var-dir        "/tmp"))
+(defvar suk-emacs-backup-dir (concat suk-emacs-tmp-dir     "/backup"))
+
 
 (defvar user-home-dir (getenv "HOME"))
+
 (if (eq system-type 'windows-nt)
-    (defvar user-home-dir (getenv "USERPROFILE"))
-)
+    (defvar user-home-dir (getenv "USERPROFILE")))
 
 ;; 设置缓存文件/杂七杂八的文件存放的地址
 ;; 不好的做法
+
 ;; (setq user-emacs-directory "~/.emacs.d/var")
 
 ;; blink search
@@ -75,11 +44,10 @@
 ;; Diary
 (setq diary-file (concat user-home-dir "/diary"))
 
-
-;; 忽略 cl 过期警告
+;; Ignore `cl` expiration warnings
 (setq byte-compile-warnings '(cl-function))
 
-
+;; original version
 ;;(defun add-subdirs-to-load-path (dir)
 ;;  "Recursive add directories to `load-path'."
 ;;  (let ((default-directory (file-name-as-directory dir)))
@@ -122,21 +90,22 @@
         ;; 继续递归搜索子目录
         (add-subdirs-to-load-path subdir-path nil)))))
 
-
+;; 加载指定的目录
 (add-subdirs-to-load-path suk-emacs-config-dir t)
 (add-subdirs-to-load-path suk-emacs-extension-dir t)
 (add-subdirs-to-load-path suk-emacs-themes-dir t)
 (add-subdirs-to-load-path suk-emacs-elpa-dir t)
 
+;; The contents of the Emacs configuration file are written below.
 
-(let (;; 加载的时候临时增大`gc-cons-threshold'以加速启动速度。
+(let (;;  Temporarily increase `gc-cons-threshold' when loading to speed up startup.
       (gc-cons-threshold most-positive-fixnum)
       (gc-cons-percentage 0.8)
-      ;; 清空避免加载远程文件的时候分析文件。
+      ;; Clear to avoid analyzing files when loading remote files.
       (file-name-handler-alist nil))
 
   ;; Emacs配置文件内容写到下面.
-   (add-hook 'emacs-startup-hook
+  (add-hook 'emacs-startup-hook
             (lambda ()
               "Restore defalut values after init."
               (setq file-name-handler-alist default-file-name-handler-alist)
@@ -150,7 +119,7 @@
               (add-hook 'focus-out-hook 'garbage-collect)))
 
 
-  (with-temp-message ""                 ;抹掉插件启动的输出
+  (with-temp-message ""     ;Erase the output of plug-in startup
     ;; Constants
     (require '+const)
 
@@ -173,15 +142,15 @@
     (when sys/linuxp
       (progn
         (require 'init-im)
-		(require 'init-sudo)
+        (require 'init-sudo)
         )
       )
-     ;; 可以延后加载的
+    ;; delay load
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-     	;;  (require 'init-org)
-		 ;; Restore session at last.
+         (require 'init-org)
+         ;; Restore session at last.
          ;; 速度有点慢
          (require 'init-session)
          (emacs-session-restore)
@@ -195,13 +164,9 @@
          ;; Programming
          (require 'init-ide)
          (server-start)
-	     ;; Make gc pauses faster by decreasing the threshold.
-	     (setq gc-cons-threshold (* 16 1000 1000))
+         ;; Make gc pauses faster by decreasing the threshold.
+         (setq gc-cons-threshold (* 16 1000 1000))
 
          ))
     )
   )
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init.el ends here

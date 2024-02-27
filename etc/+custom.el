@@ -1,4 +1,4 @@
-﻿;; +custom.el --- Define customizations.	-*- lexical-binding: t -*-
+;; +custom.el --- Define customizations.	-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Suk
 
@@ -62,12 +62,19 @@
 
 (defcustom org-roam-directory (expand-file-name "RoamNotes" user-home-dir)
   "The org roam directory."
-  :type 'strig)
+  :type 'string)
 
 (defcustom org-files-directory (expand-file-name "org" user-home-dir)
   "The org roam directory."
-  :type 'strig)
+  :type 'string)
 
+(defcustom  org-css-file "~/.emacs.d/documents/my-org-style-min.css"
+  "The org css style file."
+  :type 'string)
+
+(defcustom windows-bash-path "C:/Program Files/Git/bin/bash"
+  "The windows version of bash"
+  :type 'string)
 
 ;; Load `custom-file'
 ;; If it doesn't exist, copy from the template, then load it.

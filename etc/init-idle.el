@@ -221,6 +221,7 @@ from tradition chinese to simple chinese" t)
   (add-hook 'after-init-hook #'recentf-mode)
   (setq recentf-max-saved-items 500)
   (setq recentf-max-saved-items 17)
+  (recentf-mode t)
   ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
   :config
   (add-to-list 'recentf-exclude (expand-file-name package-user-dir))
@@ -233,12 +234,14 @@ from tradition chinese to simple chinese" t)
   (add-to-list 'recentf-exclude "recentf")
   (add-to-list 'recentf-exclude "url")
   (add-to-list 'recentf-exclude "COMMIT_EDITMSG\\'")
-  (defun simon-recentf-exclude-p (file)
+  (defun suk/recentf-exclude-p (file)
     (let ((file-dir (file-truename (file-name-directory file))))
       (-any-p (lamdba (dir)
                       (string-prefix-p dir file-dir))
               (mapcar 'file-truename (list var package-user-dir)))))
-  (add-to-list 'recentf-exclude 'simon-recentf-exclude-p))
+  (add-to-list 'recentf-exclude #'suk/recentf-exclude-p)
+  (recentf-mode t)
+  )
 
 (use-package savehist
   :ensure nil
@@ -259,10 +262,10 @@ from tradition chinese to simple chinese" t)
 ;; =========================================================
 ;; Start server
 ;; ---------------------------------------------------------
-;; (use-package server
-;;   :ensure t
-;;   :hook (after-init . server-mode)
-;;   )
+(use-package server
+   :ensure t
+   :hook (after-init . server-mode)
+)
 (use-package magit
   :ensure t
   :defer 1)

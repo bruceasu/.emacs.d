@@ -1,4 +1,4 @@
-﻿;;; init-ide.el --- IDE configuration
+;;; init-ide.el --- IDE configuration
 
 ;; Filename: init-ide.el
 ;; Description: IDE configuration

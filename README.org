@@ -1,0 +1,243 @@
+;; -*- coding: utf-8
+#+OPTIONS: ^:{}
+#+TITLE: Suk's Emacs Config
+
+This is an Emacs distribution designed to enhance the default Emacs experience.
+It modifies many default settings and bundles a large number of additional
+packages and adds its own core library into the mix. The final product provides
+Emacs newbies with an easy-to-use configuration, and provides a wealth of
+additional capabilities for power users of Emacs.
+
+Run the Org Babel Tangle command: `M-x org-babel-tangle` to generate the el
+file.
+
+* early-init.el
+  Some code that needs to be executed in advance.
+  #+begin_src emacs-lisp :tangle early-init.el
+    ;; Defer garbage collection further back in the startup process
+    (setq gc-cons-threshold most-positive-fixnum gc-cons-percentage 0.6)
+
+    ;; In Emacs 27+, package initialization occurs before `user-init-file' is
+    ;; loaded, but after `early-init-file'. Doom handles package initialization, so
+    ;; we must prevent Emacs from doing it early!
+    (setq package-enable-at-startup nil)
+    ;; Do not allow loading from the package cache (same reason).
+    (setq package-quickstart nil)
+
+    ;; Prevent the glimpse of un-styled Emacs by disabling these UI elements early.
+    (push '(menu-bar-lines . 0) default-frame-alist)
+    (push '(tool-bar-lines . 0) default-frame-alist)
+    (push '(vertical-scroll-bars) default-frame-alist)
+
+    ;; Resizing the Emacs frame can be a terribly expensive part of changing the
+    ;; font. By inhibiting this, we easily halve startup times with fonts that are
+    ;; larger than the system default.
+    (setq frame-inhibit-implied-resize t)
+
+    ;; Disable GUI elements
+    (menu-bar-mode -1)
+    (tool-bar-mode -1)
+    (scroll-bar-mode -1)
+    (setq inhibit-splash-screen t)
+    (setq use-file-dialog nil)
+
+    ;; Prevent unwanted runtime builds in gccemacs (native-comp); packages are
+    ;; compiled ahead-of-time when they are installed and site files are compiled
+    ;; when gccemacs is installed.
+    (setq comp-deferred-compilation nil)
+    ;;(global-unset-key (kbd "C-SPC"))
+
+  #+end_src
+
+* init.el
+The configuration entrance is mainly used to load other settings and plug-ins.
+
+** Define some startup directories to facilitate next migration and modification
+#+BEGIN_SRC emacs-lisp :tangle init.el
+
+    ;; 定义一些启动目录，方便下次迁移修改
+    (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
+    (defvar suk-emacs-config-dir (concat suk-emacs-root-dir    "/etc"))
+    (defvar suk-emacs-extension-dir (concat suk-emacs-root-dir "/extensions"))
+    (defvar suk-emacs-share-dir (concat suk-emacs-root-dir     "/share"))
+    (defvar suk-emacs-themes-dir (concat suk-emacs-share-dir   "/themes"))
+    (defvar suk-emacs-elpa-dir (concat suk-emacs-root-dir      "/elpa"))
+    (defvar suk-emacs-var-dir (concat suk-emacs-root-dir       "/var"))
+    (defvar suk-emacs-tmp-dir (concat suk-emacs-var-dir        "/tmp"))
+    (defvar suk-emacs-backup-dir (concat suk-emacs-tmp-dir     "/backup"))
+
+
+    (defvar user-home-dir (getenv "HOME"))
+
+    (if (eq system-type 'windows-nt)
+        (defvar user-home-dir (getenv "USERPROFILE")))
+  #+END_SRC
+
+** Set the path to some temporary files and folders
+    #+BEGIN_SRC emacs-lisp :tangle init.el
+      ;; 设置缓存文件/杂七杂八的文件存放的地址
+      ;; 不好的做法
+
+      ;; (setq user-emacs-directory "~/.emacs.d/var")
+
+      ;; blink search
+      (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
+      ;; Saveplace
+      (setq save-place-file (concat suk-emacs-var-dir "/saveplace"))
+      ;; Recentf
+      (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
+      ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
+      ;; History
+      (setq savehist-file (concat suk-emacs-var-dir "/history"))
+      ; Amx
+      (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
+      ;; Auto save
+      (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
+      ;; Eshell
+      (setq eshell-directory-name (concat suk-emacs-var-dir "eschell"))
+      (setq eshell-history-file-name (concat eshell-directory-name "/history"))
+      ;; projectitle-bookmarks
+      (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
+      (setq backup-directory-alist `(("" . ,suk-emacs-tmp-dir)))
+      ;; Bookmark
+      (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
+      ;; Diary
+      (setq diary-file (concat user-home-dir "/diary"))
+
+   #+END_SRC
+
+** A function: recursively loads emacs settings and plug-in files
+   #+BEGIN_SRC emacs-lisp :tangle init.el
+     ;; Ignore `cl` expiration warnings
+     (setq byte-compile-warnings '(cl-function))
+
+     ;; original version
+     ;;(defun add-subdirs-to-load-path (dir)
+     ;;  "Recursive add directories to `load-path'."
+     ;;  (let ((default-directory (file-name-as-directory dir)))
+     ;;     (add-to-list 'load-path dir)
+     ;;     (normal-top-level-add-subdirs-to-load-path)))
+
+     ;; 王勇的版本 https://manateelazycat.github.io/emacs/2022/03/02/emacs-load-directory-recursively.html
+     (require 'cl-lib)
+     (defun add-subdirs-to-load-path (search-dir isFirst)
+       (interactive)
+       (when isFirst
+         ;; 原来的版本没有把第1个 search-dir 本身添加到load path
+         ;; 递归时的search-dir是在递归前加入了。
+         (add-to-list 'load-path search-dir))
+       (let* ((dir (file-name-as-directory search-dir)))
+         (dolist (subdir
+                  ;; 过滤出不必要的目录，提升Emacs启动速度
+                  (cl-remove-if
+                   #'(lambda (subdir)
+                       (or
+                        ;; 不是文件的都移除
+                        (not (file-directory-p (concat dir subdir)))
+                        ;; 目录匹配下面规则的都移除
+                        (member subdir '("." ".." ;Linux当前目录和父目录
+                                         "dist" "node_modules" "__pycache__" ;语言相关的模块目录
+                                         "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ;版本控制目录
+                   (directory-files dir)))
+           (let ((subdir-path (concat dir (file-name-as-directory subdir))))
+             ;; 目录下有 .el .so .dll 文件的路径才添加到 load-path 中，提升Emacs启动速度
+             (when (cl-some #'(lambda (subdir-file)
+                                (and (file-regular-p (concat subdir-path subdir-file))
+                                     ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
+                                     (member (file-name-extension subdir-file) '("el" "so" "dll"))))
+                            (directory-files subdir-path))
+
+               ;; 注意：add-to-list 函数的第三个参数必须为 t ，表示加到列表末尾
+               ;; 这样Emacs会从父目录到子目录的顺序搜索Elisp插件，顺序反过来会导致Emacs无法正常启动
+               (add-to-list 'load-path subdir-path t))
+
+             ;; 继续递归搜索子目录
+             (add-subdirs-to-load-path subdir-path nil)))))
+
+     ;; 加载指定的目录
+     (add-subdirs-to-load-path suk-emacs-config-dir t)
+     (add-subdirs-to-load-path suk-emacs-extension-dir t)
+     (add-subdirs-to-load-path suk-emacs-themes-dir t)
+     (add-subdirs-to-load-path suk-emacs-elpa-dir t)
+
+   #+END_SRC
+
+** Recursively load files, load emacs settings and plug-ins
+   #+BEGIN_SRC emacs-lisp :tangle init.el
+     ;; The contents of the Emacs configuration file are written below.
+
+     (let (;;  Temporarily increase `gc-cons-threshold' when loading to speed up startup.
+           (gc-cons-threshold most-positive-fixnum)
+           (gc-cons-percentage 0.8)
+           ;; Clear to avoid analyzing files when loading remote files.
+           (file-name-handler-alist nil))
+
+       ;; Emacs配置文件内容写到下面.
+       (add-hook 'emacs-startup-hook
+                 (lambda ()
+                   "Restore defalut values after init."
+                   (setq file-name-handler-alist default-file-name-handler-alist)
+                   ;; The default is 0.8MB
+                   ;;(setq gc-cons-threshold 80000000)
+                   (message "Emacs ready in %s with %d garbage collections."
+                            (format "%.2f seconds"
+                                    (float-time
+                                     (time-subtract after-init-time before-init-time)))
+                            gcs-done)
+                   (add-hook 'focus-out-hook 'garbage-collect)))
+
+
+       (with-temp-message ""     ;Erase the output of plug-in startup
+         ;; Constants
+         (require '+const)
+
+         ;; Customization
+         (require '+custom)
+         ;; Packages
+         (require 'init-package)
+         (require 'init-basic)
+         (require 'lazy-load)
+         (require 'init-key)
+         (require 'init-ui)
+         (require 'init-ext-packages)
+         ;; (use-package esup
+         ;;              :ensure t
+         ;;              ;; To use MELPA Stable use ":pin melpa-stable",
+         ;;              :pin melpa
+         ;;              :commands (esup))
+
+         ;; windows 下表现不好
+         (when sys/linuxp
+           (progn
+             (require 'init-im)
+             (require 'init-sudo)
+             )
+           )
+         ;; delay load
+         (run-with-idle-timer
+          1 nil
+          #'(lambda ()
+              (require 'init-org)
+
+              (require 'init-line-number)
+              (require 'init-idle)
+              ;;(require 'highlight-parentheses)
+              (require 'init-auto-save)
+              (require 'init-awsome-pair)
+              (require 'init-calendar)
+              (require 'load-abbrev)
+              ;; Programming
+              (require 'init-ide)
+              (server-start)
+              ;; Restore session at last.
+              (require 'init-session)
+              (emacs-session-restore)
+              ;; Make gc pauses faster by decreasing the threshold.
+              (setq gc-cons-threshold (* 16 1000 1000))
+
+              ))
+         )
+       )
+
+
+   #+END_SRC

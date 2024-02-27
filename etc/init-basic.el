@@ -148,12 +148,12 @@
 ;; (my-defshortcut ?Q "~/personal/questions.org")
 
 ;;;###autoload
-(defun  term()
+(defun term()
   ;; bash in windows.
   (interactive)
   (if sys/win32p
 	  (let (
-			(explicit-shell-file-name "C:/Program Files/Git/bin/bash")
+			(explicit-shell-file-name windows-bash-path)
 			)
 		(call-interactively 'shell))
   (let ((explicit-shell-file-name "/bin/bash"))
@@ -377,11 +377,6 @@
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (setq-default buffer-file-coding-system 'utf-8)
-
-;; 尝试更智能地处理不同系统的换行模式
-(setq-default coding-system-for-read 'utf-8-auto)
-(setq-default coding-system-for-write 'utf-8)
-
 
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)

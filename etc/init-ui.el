@@ -1,4 +1,4 @@
-﻿;;; init-ui.el --- Initialize UI configurations.	-*- lexical-binding: t -*-
+;;; init-ui.el --- Initialize UI configurations.	-*- lexical-binding: t -*-
 ;; Copyright (C) 2018 Suk
 ;; Author: Suk
 
@@ -73,20 +73,21 @@
 
 (use-package doom-themes
   :ensure t
-  :config
+  ;;:config
   ;; 加载一个主题，DOOM One 是 DOOM Emacs 的默认主题，非常美观
+  :init
   (load-theme 'doom-one t))
 
 ;; 似乎冇加载，手工处理一下。
-(load-theme 'doom-one t)
+;;(load-theme 'doom-one t)
 
 
 (use-package doom-modeline
   :ensure t
-  ;;:init
+  :init
+  (doom-modeline-mode 1)
   :config
   (column-number-mode 1)
-  (doom-modeline-mode 1)
   :custom
   (doom-modeline-height 30)
   (doom-modeline-window-width-limit nil)
