@@ -32,6 +32,7 @@
 (eval-when-compile
   (require '+const)
   (require '+custom)
+  (require 'subr-x)
   )
 
 ;; Speed up startup
@@ -90,12 +91,62 @@
 (setq-default c-basic-offset   4
               tab-width        4
               indent-tabs-mode t)
+;; M-x global-set-key RET 交互式的绑定你的键。
+;; C-x Esc Esc 调出上一条“复杂命令”
+;; 设置绑定
+(defun suk-set-key-bindings (ACTION BINDINGLIST)
+  "Map keys.
+ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
-;; 创建新行的动作
-;; 回车时创建新行并且对齐
-(global-set-key (kbd "RET") 'newline-and-indent)
-;; 取消对齐创建的新行
-(global-set-key (kbd "S-<return>") 'comment-indent-new-line)
+  (mapcar (lambda(lst)
+            ""
+            (let ((x (car lst))
+                  (y (car (last lst))))
+              (funcall ACTION x y))) BINDINGLIST ))
+
+;; 使用方式
+;; (suk-set-key-bindings 'global-set-key
+;;   (list
+;;      '([f2]                            calendar)
+;;      '([(shift f2)]                    remember)
+;;      '([f5]                            revert-buffer)
+;;      (list (kbd "C-c l")               'copy-line)
+;;    )
+;; )
+
+(suk-set-key-bindings 'global-set-key
+                      (list
+                       (list (kbd "C-x M-a") 'align-regexp)
+                       ;;                      '([C-t]               transpose-chars)
+                       ;;                      '([S-f6]              hs-minor-mode)
+                       ;;                      '([S-f5]              toggle-truncate-lines)
+                       ;; '([S-f11]          insert-translated-name-insert) ;; Chinese to English
+                       ;; '([S-f12]          toggle-company-english-helper) ;; popup English tips
+                       ;; '([M-f12]          aweshell-dedicated-toggle)
+                       ;; '([M-f11]          aweshell-sudo-toggle)
+                       ;; '([M-f10]          aweshell-prev)
+                       ;; '([M-f11]          aweshell-next)
+                       ;; '([M-f9]           aweshell-new)
+                       ;; '([S-f2]           suk/new-empty-buffer)
+                       ;; '([f2]                hs-toggle-hiding)
+                       ;;'([M-f12]             vterm)
+                       ;; '([S-f1]              snails)
+                       (list (kbd "C-(") 'backward-sexp)
+                       (list (kbd "C-)") 'forward-sexp)
+                       (list (kbd "C-x t T") 'suk/toggle-transparency)
+                       (list (kbd "C-x t p") 'suk/toggle-toggle-proxy)
+                       (list (kbd "C-x t f") 'global-flycheck-mode)
+                       (list (kbd "C-x R") 'recentf-open)
+                       (list (kbd "C-<f11>")  'toggle-frame-fullscreen)
+                       ;; (list (kbd "C-S-f")  'toggle-frame-fullscreen) ; Compatible with macOS
+                       (list (kbd "M-S-<return>")  'toggle-frame-fullscreen)
+                       ;; 创建新行的动作
+                       (list (kbd "RET") 'newline-and-indent) ;; 回车时创建新行并且对齐
+                       (list (kbd "S-<return>") 'comment-indent-new-line) ;; 取消对齐创建的新行
+
+                       ))
+
+
 
 ;; Misc
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -188,120 +239,25 @@
     (google-search-str (read-from-minibuffer "Search: "))))
 
 
-;; 切换透明
-;;;###autoload
-(defun suk/toggle-transparency ()
-  (interactive)
-  (let ((alpha (frame-parameter nil 'alpha)))
-    (set-frame-parameter
-     nil 'alpha
-     (if (eql (cond ((numberp alpha) alpha)
-                    ((numberp (cdr alpha)) (cdr alpha))
-                    ;; Also handle undocumented (<active> <inactive>) form.
-                    ((numberp (cadr alpha)) (cadr alpha)))
-              100)
-         '(85 . 85) '(100 . 100)))))
+;; Browse URL
+(defun suk-webkit-browse-url (url &optional pop-buffer new-session)
+  "Browse URL with xwidget-webkit' and switch or pop to the buffer.
 
+  POP-BUFFER specifies whether to pop to the buffer.
+  NEW-SESSION specifies whether to create a new xwidget-webkit session."
+  (interactive (progn
+                 (require 'browse-url)
+                 (browse-url-interactive-arg "xwidget-webkit URL: ")))
+  (or (featurep 'xwidget-internal)
+      (user-error "Your Emacs was not compiled with xwidgets support"))
 
-;; 增加或减少透明
-;;;###autoload
-(defun suk/adjust-opacity (frame incr)
-  "Adjust the background opacity of FRAME by increment INCR."
-  (unless (display-graphic-p frame)
-    (error "Cannot adjust opacity of this frame"))
-  (let* ((oldalpha (or (frame-parameter frame 'alpha) 100))
-         ;; The 'alpha frame param became a pair at some point in
-         ;; emacs 24.x, e.g. (100 100)
-         (oldalpha (if (listp oldalpha) (car oldalpha) oldalpha))
-         (newalpha (+ incr oldalpha)))
-    (when (and (<= frame-alpha-lower-limit newalpha) (>= 100 newalpha))
-      (modify-frame-parameters frame (list (cons 'alpha newalpha))))))
-
-;; 增加透明度
-;;;###autoload
-(defun suk/less-alpha ()
-  (interactive)
-  (suk/adjust-opacity nil -2))
-;; 减少透明度
-;;;###autoload
-(defun suk/plus-alpha ()
-  (interactive)
-  (suk/adjust-opacity nil 2))
-;; set the alpha background
-(setq-default alpha-list '((90 100) (100 100)))
-
-;;;###autoload
-(defun loop-alpha ()
-  ;;doc
-  (interactive)
-  (let ((h (car alpha-list)))
-    ((lambda (a ab)
-       (set-frame-parameter (selected-frame) 'alpha (list a ab))
-       (add-to-list 'default-frame-alist (cons 'alpha (list a ab)))
-       ) (car h) (car (cdr h)))
-    (setq alpha-list (cdr (append alpha-list (list h))))
-    )
-)
-;; (loop-alpha)
-
-(when  (eq system-type 'gnu/linux)
-;; 调节屏幕亮度
-;;;###autoload
-  (defun suk/set-backlight (&optional light-value)
-    (interactive "s请输入亮度(小数表示的百分比): ")
-    (let ((max-backlight (string-to-number (string-trim-right
-					    (shell-command-to-string
-					     "cat /sys/class/backlight/intel_backlight/max_brightness")))))
-      (when (and light-value (floatp (string-to-number light-value)))
-	(shell-command
-	 (concat "echo "
-		 (format "%d" (* max-backlight (string-to-number light-value)))
-		 " > /sys/class/backlight/intel_backlight/brightness")))))
-
-;; 增加10%屏幕亮度
-;;;###autoload
-  (defun suk/plus-backlight ()
-    (interactive)
-    (let* (
-	   ;; 最大亮度
-	   (max-backlight (string-to-number (string-trim-right
-					     (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
-	   ;; 当前亮度
-	   (current-backlight (string-to-number (string-trim-right
-						 (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
-	   ;; 增加后的亮度
-	   (add-backlight (+ current-backlight (* max-backlight 0.1))))
-      (if (< add-backlight max-backlight)
-	  (progn (shell-command
-		  (concat "echo "
-			  (format "%d" add-backlight)
-			  " > /sys/class/backlight/intel_backlight/brightness"))
-		 (message "亮度+10%"))
-	(message "亮度MAX!!"))))
-
-;; 减少屏幕亮度
-;;;###autoload
-  (defun suk/less-backlight ()
-    (interactive)
-    (let* (
-	   ;; 最大亮度
-	   (max-backlight (string-to-number (string-trim-right
-					     (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
-	   ;; 当前亮度
-	   (current-backlight (string-to-number (string-trim-right
-						 (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
-	   ;; 减少后的亮度
-	   (less-backlight (- current-backlight (* max-backlight 0.1))))
-      (if (> less-backlight (* max-backlight 0.1) )
-	  (progn (shell-command
-		  (concat "echo "
-			  (format "%d" less-backlight)
-			  " > /sys/class/backlight/intel_backlight/brightness"))
-		 (message "亮度-10%"))
-	(message "亮度Min!!"))))
-)
-
-
+  (xwidget-webkit-browse-url url new-session)
+  (let ((buf (xwidget-buffer (xwidget-webkit-current-session))))
+    (when (buffer-live-p buf)
+      (and (eq buf (current-buffer)) (quit-window))
+      (if pop-buffer
+          (pop-to-buffer buf)
+        (switch-to-buffer buf)))))
 ;; ==============================================================
 ;; Network Proxy
 ;; --------------------------------------------------------------
@@ -361,9 +317,17 @@
 
 (autoload 'calendar "init-calendar" "Config Chinese calendar " t)
 
+;; Increase how much is read from processes in a single chunk (default is 4kb)
+(setq read-process-output-max #x10000)  ; 64kb
 
 
+;;====================================================
 ;; 编码设置 begin
+;;---------------------------------------------------
+;; Set UTF-8 as the default coding system
+(when (fboundp 'set-charset-priority)
+  (set-charset-priority 'unicode))
+
 (prefer-coding-system 'utf-8)
 (setq default-buffer-file-coding-system 'utf-8-unix)            ;缓存文件编码
 (setq default-file-name-coding-system 'utf-8-unix)              ;文件名编码
@@ -393,30 +357,32 @@
 ;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
 ;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
 ;; utf-16 (utf-16 实际上还细分为 utf-16le, utf-16be, utf-16le-with-signature等多种)
+;; Unicode
+;; (prefer-coding-system 'utf-16le-with-signature)
+;; (prefer-coding-system 'utf-16)
+;; (prefer-coding-system 'utf-8-dos)
 ;; 新建文件以utf-8编码，行末结束符平台相关
 (prefer-coding-system 'utf-8)
 
 (if sys/win32p
-   ;; (setq file-name-coding-system 'cp932)      ;; Japanese
-   ;; (setq file-name-coding-system 'big5-hkscs) ;; Hong Kong and Taiwan
-   ;; (setq file-name-coding-system 'euc-cn)
-   (setq file-name-coding-system 'gb18030)
-   (setq locale-coding-system 'gb18030)    ; 此句保证中文字体设置有效
    (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
-   ;; (setq-default pathname-coding-system 'euc-cn)
+
    ;; 简体
    ;;(prefer-coding-system 'gb2312)
    ;;(prefer-coding-system 'cp936)
    ;;(prefer-coding-system 'gb18030)
+   (setq file-name-coding-system 'gb18030)
+   (setq locale-coding-system 'gb18030)    ; 此句保证中文字体设置有效
 
    ;; 繁体
    ;; (prefer-coding-system 'cp950)
    ;; (prefer-coding-system 'big5-hkscs)
+   ;; (setq file-name-coding-system 'big5-hkscs) ; Hong Kong and Taiwan
+   ;; (setq locale-coding-system 'big5-hkscs)
 
-   ;; Unicode
-   ;; (prefer-coding-system 'utf-16le-with-signature)
-   ;; (prefer-coding-system 'utf-16)
-   ;; (prefer-coding-system 'utf-8-dos)
+   ;; (setq file-name-coding-system 'cp932)      ; Japanese
+   ;; (setq locale-coding-system 'cp932)
+
    ;; Key Modifiers
    ;; make PC keyboard's Win key or other to type Super or Hyper
    ;; (setq w32-pass-lwindow-to-system nil)
@@ -435,6 +401,11 @@
    (w32-register-hot-key [s-t])
    ;; scroll-bar
    (set-scroll-bar-mode 'right)
+   ;; Optimization
+   (setq w32-get-true-file-attributes nil   ; decrease file IO workload
+         w32-use-native-image-API t         ; use native w32 API
+         w32-pipe-read-delay 0              ; faster IPC
+         w32-pipe-buffer-size 65536)       ; read more at a time (64K, was 4K)
 )
 
 ;; Unix like OS.
@@ -442,10 +413,21 @@
    ;; 新建文件使用utf-8-unix方式
    (prefer-coding-system 'utf-8-unix)
    (setq system-time-locale "C")
-)
+   (set-selection-coding-system 'utf-8))
+
+(unless sys/macp
+  (setq command-line-ns-option-alist nil))
+
+(unless sys/linuxp
+  (setq command-line-x-option-alist nil))
+
+(when (or sys/mac-x-p sys/linux-x-p (daemonp))
+  (use-package exec-path-from-shell
+    :custom (exec-path-from-shell-arguments '("-l"))
+    :init (exec-path-from-shell-initialize)))
 
 ;; GUI Environment
-(when (or sys/mac-x-p sys/linux-x-p sys/win32p)
+(when (display-graphic-p)
 	(progn
 	;; 隐藏垂直滚动条。
 	;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
@@ -454,8 +436,174 @@
 )
 
 
-(require 'file-encoding)
+;;;###autoload
+(defun byte-compile-elpa ()
+  "Compile packages in elpa directory. Useful if you switch Emacs versions."
+  (interactive)
+  (if (fboundp 'async-byte-recompile-directory)
+      (async-byte-recompile-directory package-user-dir)
+    (byte-recompile-directory package-user-dir 0 t)))
 
+;;;###autoload
+(defun byte-compile-site-lisp ()
+  "Compile packages in site-lisp directory."
+  (interactive)
+  (let ((dir (locate-user-emacs-file "site-lisp")))
+    (if (fboundp 'async-byte-recompile-directory)
+        (async-byte-recompile-directory dir)
+      (byte-recompile-directory dir 0 t))))
+
+;;;###autoload
+(defun native-compile-elpa ()
+  "Native-compile packages in elpa directory."
+  (interactive)
+  (if (fboundp 'native-compile-async)
+      (native-compile-async package-user-dir t)))
+
+;;;###autoload
+(defun native-compile-site-lisp ()
+  "Native compile packages in site-lisp directory."
+  (interactive)
+  (let ((dir (locate-user-emacs-file "site-lisp")))
+    (if (fboundp 'native-compile-async)
+        (native-compile-async dir t))))
+
+;;;###autoload
+(defun suk-set-variable (variable value &optional no-save)
+  "Set the VARIABLE to VALUE, and return VALUE.
+
+  Save to option `custom-file' if NO-SAVE is nil."
+  (customize-set-variable variable value)
+  (when (and (not no-save)
+             (file-writable-p custom-file))
+    (with-temp-buffer
+      (insert-file-contents custom-file)
+      (goto-char (point-min))
+      (while (re-search-forward
+              (format "^[\t ]*[;]*[\t ]*(setq %s .*)" variable)
+              nil t)
+        (replace-match (format "(setq %s '%s)" variable value) nil nil))
+      (write-region nil nil custom-file)
+      (message "Saved %s (%s) to %s" variable value custom-file))))
+
+;;;###autoload
+(defun too-long-file-p ()
+  "Check whether the file is too long."
+  (or (> (buffer-size) 100000)
+      (and (fboundp 'buffer-line-statistics)
+           (> (car (buffer-line-statistics)) 10000))))
+
+;;===================================================
+;; Update
+;;===================================================
+;;;###autoload
+(defun update-config ()
+  "Update Suk's Emacs configurations to the latest version."
+  (interactive)
+  (let ((dir (expand-file-name user-emacs-directory)))
+    (unless (file-exists-p dir)
+      (user-error "\"%s\" doesn't exist" dir))
+
+    (message "Updating configurations...")
+    (cd dir)
+    (shell-command "git pull")
+    (message "Updating configurations...done")))
+(defalias 'suk-update-config #'update-config)
+
+;;;###autoload
+(defun update-packages ()
+  "Refresh package contents and update all packages."
+  (interactive)
+  (message "Updating packages...")
+  (package-upgrade-all)
+  (message "Updating packages...done"))
+(defalias 'suk-update-packages #'update-packages)
+
+;;;###autoload
+(defun update-config-and-packages()
+  "Update confgiurations and packages."
+  (interactive)
+  (update-config)
+  (update-packages))
+(defalias 'suk-update #'update-config-and-packages)
+
+;;;###autoload
+(defun update-dotfiles ()
+  "Update the dotfiles to the latest version."
+  (interactive)
+  (let ((dir (or (getenv "DOTFILES")
+                 (expand-file-name "~/.dotfiles/"))))
+    (if (file-exists-p dir)
+        (progn
+          (message "Updating dotfiles...")
+          (cd dir)
+          (shell-command "git pull")
+          (message "Updating dotfiles...done"))
+      (message "\"%s\" doesn't exist" dir))))
+(defalias 'suk-update-dotfiles #'update-dotfiles)
+
+;;;###autoload
+(defun update-org ()
+  "Update Org files to the latest version."
+  (interactive)
+  (let ((dir (expand-file-name "~/org/")))
+    (if (file-exists-p dir)
+        (progn
+          (message "Updating org files...")
+          (cd dir)
+          (shell-command "git pull")
+          (message "Updating org files...done"))
+      (message "\"%s\" doesn't exist" dir))))
+(defalias 'suk-update-org #'update-org)
+
+(defun update-all()
+  "Update dotfiles, org files, configurations and packages to the latest."
+  (interactive)
+  (update-org)
+  (update-dotfiles)
+  (update-config-and-packages))
+(defalias 'suk-update-all #'update-all)
+
+;; Garbage Collector Magic Hack
+(use-package gcmh
+  :diminish
+  :hook (emacs-startup . gcmh-mode)
+  :init
+  (setq gcmh-idle-delay 'auto
+        gcmh-auto-idle-delay-factor 10
+        gcmh-high-cons-threshold #x1000000)) ; 16MB
+
+;; Sqlite
+(when (fboundp 'sqlite-open)
+  (use-package emacsql-sqlite-builtin))
+
+;;;###autoload
+(defun childframe-workable-p ()
+  "Whether childframe is workable."
+  (not (or noninteractive
+           emacs-basic-display
+           (not (display-graphic-p)))))
+
+;;;###autoload
+(defun childframe-completion-workable-p ()
+  "Whether childframe completion is workable."
+  (and (eq suk-completion-style 'childframe)
+       (childframe-workable-p)))
+
+;;;###autoload
+(defun icons-displayable-p ()
+  "Return non-nil if icons are displayable."
+  (and suk-icon
+       (or (featurep 'nerd-icons)
+           (require 'nerd-icons nil t))))
+
+;;;###autoload
+(defun suk-treesit-available-p ()
+  "Check whether tree-sitter is available.
+Native tree-sitter is introduced since 29.1."
+  (and suk-tree-sitter
+       (fboundp 'treesit-available-p)
+       (treesit-available-p)))
 
 
 ;; =========================================================

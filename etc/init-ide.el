@@ -1,42 +1,5 @@
 ;;; init-ide.el --- IDE configuration
 
-;; Filename: init-ide.el
-;; Description: IDE configuration
-;; Author: Bruce bruceasu@gmail.com
-;; Maintainer: Bruce bruceasu@gmail.com
-;; Copyright (C) 2008, 2009, Bruce, all rights reserved.
-;; Created: 2008-10-20 09:22:09
-;; Version: 0.1
-;; Last-Updated: 2022-01-20 09:30:45
-;;       By: Bruce
-;; URL:
-;; Keywords: ide
-;; Compatibility: GNU Emacs 23.0.60.1
-;;
-;; Features that might be required by this library:
-;;
-;;
-;;
-
-;;; This file is NOT part of GNU Emacs
-
-;;; License
-;;
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-
 ;;; Commentary:
 ;;
 ;; IDE configuration
@@ -67,14 +30,90 @@
 
 ;; 折叠和收缩代码
 (use-package hideshow
-  :ensure t
-  :defer 1
+  :ensure nil
   :diminish hs-minor-mode
-  :bind (:map prog-mode-map
+  :pretty-hydra
+  ((:title (pretty-hydra-title "HideShow" 'octicon "nf-oct-fold")
+           :color amaranth :quit-key ("q" "C-g"))
+   ("Fold"
+    (("t" hs-toggle-all "toggle all")
+     ("a" hs-show-all "show all")
+     ("i" hs-hide-all "hide all")
+     ("g" hs-toggle-hiding "toggle hiding")
+     ("c" hs-cycle "cycle block")
+     ("s" hs-show-block "show block")
+     ("h" hs-hide-block "hide block")
+     ("l" hs-hide-level "hide level"))
+    "Move"
+    (("C-a" mwim-beginning-of-code-or-line "⭰")
+     ("C-e" mwim-end-of-code-or-line "⭲")
+     ("C-b" backward-char "←")
+     ("C-n" next-line "↓")
+     ("C-p" previous-line "↑")
+     ("C-f" forward-char "→")
+     ("C-v" pager-page-down "↘")
+     ("M-v" pager-page-up "↖")
+     ("M-<" beginning-of-buffer "⭶")
+     ("M->" end-of-buffer "⭸"))))
+  :bind
+  (:map hs-minor-mode-map
+              ("C-~" . hideshow-hydra/body)
+              ("C-S-<escape>" . hideshow-hydra/body)
               ("C-c ." . hs-toggle-hiding)
               ("C-c ," . hs-show-all)
               )
-  :hook (prog-mode . hs-minor-mode))
+  :hook (prog-mode . hs-minor-mode)
+  :config
+  ;; More functions
+  ;; @see https://karthinks.com/software/simple-folding-with-hideshow/
+  (defun hs-cycle (&optional level)
+    (interactive "p")
+    (let (message-log-max
+          (inhibit-message t))
+      (if (= level 1)
+          (pcase last-command
+            ('hs-cycle
+             (hs-hide-level 1)
+             (setq this-command 'hs-cycle-children))
+            ('hs-cycle-children
+             (save-excursion (hs-show-block))
+             (setq this-command 'hs-cycle-subtree))
+            ('hs-cycle-subtree
+             (hs-hide-block))
+            (_
+             (if (not (hs-already-hidden-p))
+                 (hs-hide-block)
+               (hs-hide-level 1)
+               (setq this-command 'hs-cycle-children))))
+        (hs-hide-level level)
+        (setq this-command 'hs-hide-level))))
+
+  (defun hs-toggle-all ()
+    "Toggle hide/show all."
+    (interactive)
+    (pcase last-command
+      ('hs-toggle-all
+       (save-excursion (hs-show-all))
+       (setq this-command 'hs-global-show))
+      (_ (hs-hide-all))))
+
+  ;; Display line counts
+  (defun hs-display-code-line-counts (ov)
+    "Display line counts when hiding codes."
+    (when (eq 'code (overlay-get ov 'hs))
+      (overlay-put ov 'display
+                   (concat
+                    " "
+                    (propertize
+                     (if (char-displayable-p ?⏷) "⏷" "...")
+                     'face 'shadow)
+                    (propertize
+                     (format " (%d lines)"
+                             (count-lines (overlay-start ov)
+                                          (overlay-end ov)))
+                     'face '(:inherit shadow :height 0.8))
+                    " "))))
+  (setq hs-set-up-overlay #'hs-display-code-line-counts))
 
 ;;代码折叠
 (add-hook 'c-mode-common-hook   'hs-minor-mode)
@@ -88,7 +127,6 @@
 ;; 代码片段
 (require 'yasnippet)
 (use-package yasnippet
-  :ensure t
   :load-path "~/.emacs.d/extensions/yasnippet"
   :config
   (setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
@@ -112,42 +150,6 @@
   ;; Set akeybinding for projectile commands
   (global-set-key (kbd "C-c p") 'projectile-commander))
 
-
-(defvar user-home-dir (getenv "HOME"))
-(if sys/win32p
-    (defvar user-home-dir (getenv "USERPROFILE")))
-
-(setq lsp-maven-path (concat user-home-dir "/.m2/settings.xml"))  ;; maven setting path
-(setq lsp-java-java-path (concat (getenv "JAVA_HOME") "/bin/java"))    ;; java11 exec path
-
-(use-package lsp-mode
-  :ensure t
-  :hook (java-mode . lsp-deferred)
-  :commands (lsp lsp-deferred))
-
-(use-package lsp-java
-  :ensure t
-  :after lsp-mode
-  :config
-  (add-hook 'java-mode-hook 'lsp))  ;; 在打开 Java 文件时启动 lsp
-
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode)
-
-(use-package eglot-java)
-
-(add-hook 'java-mode-hook 'eglot-java-mode)
-(add-hook 'eglot-java-mode-hook (lambda ()
-								  (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
-								  (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
-								  (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
-								  (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
-								  (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
-								  (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh)))
-
-
-
 ;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
 ;;(add-to-list 'load-path "C:\\green\\emacs-29.1\\.emacs.d\\extensions\\copilot\\copilot.el")
 
@@ -163,52 +165,97 @@
 ;; (add-to-list 'copilot-major-mode-alist '("c" . "cpp" . "css" . "go" . "java" . "html" . "javascript" . "javascriptreact" . "json" . "python" . "sql" . "shellscript"))
 ;; Login to Copilot by M-x copilot-login. You can also check the status by M-x copilot-diagnose (NotAuthorized means you don't have a valid subscription).
 
-;;--------------------------------------
-;; web develop
-;;--------------------------------------
+;; Prettify Symbols
+;; e.g. display “lambda” as “λ”
+(use-package prog-mode
+  :ensure nil
+  :hook (prog-mode . prettify-symbols-mode)
+  :init
+  (setq-default prettify-symbols-alist suk-prettify-symbols-alist)
+  (setq prettify-symbols-unprettify-at-point 'right-edge))
 
-;; 快速编写 HTML 代码
-(use-package emmet-mode
-  :defer 3
-  :init (setq emmet-expand-jsx-className? t)
-  :hook (web-mode typescript-mode js-mode js2-mode rjsx-mode css-mode scss-mode sgml-mode))
-
-
-;; New `less-cs-mde' in Emacs 26
-(unless (fboundp 'less-css-mode)
-  (use-package less-css-mode))
-
-;;JSON mode
-(use-package json-mode
-  :defer 3
-  :mode "\\.json\\'")
-
-;; Improved JavaScript editing mode
-(use-package js2-mode)
-;; Major mode for editing web templates
-(use-package web-mode
-  :ensure t
-  :defines company-backends
-  :mode "\\.\\(phtml\\|php|[gj]sp\\|as[cp]x\\|erb\\|djhtml\\|html?\\|hbs\\|ejs\\|jade\\|swig\\|tm?pl\\|vue\\|jsx?$\\)$"
-  )
+;; Tree-sitter support
+(when (suk-treesit-available-p)
+  (use-package treesit-auto
+    :hook (after-init . global-treesit-auto-mode)
+    :init (setq treesit-auto-install 'prompt)))
 
 
-(use-package rjsx-mode
-  :ensure t
-  :mode ("\\.js\\'")
-  :config
-  (add-hook 'rjsx-mode-hook (lambda()
-	                          (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
-	                          (flycheck-select-checker 'javascript-eslint)))
-  )
+;; Show function arglist or variable docstring
+;; (use-package eldoc
+;;   :ensure nil
+;;   :diminish
+;;   :config
+;;   (when (childframe-workable-p)
+;;     (use-package eldoc-box
+;;       :diminish (eldoc-box-hover-mode eldoc-box-hover-at-point-mode)
+;;       :custom
+;;       (eldoc-box-lighter nil)
+;;       (eldoc-box-only-multi-line t)
+;;       (eldoc-box-clear-with-C-g t)
+;;       :custom-face
+;;       (eldoc-box-border ((t (:inherit posframe-border :background unspecified))))
+;;       (eldoc-box-body ((t (:inherit tooltip))))
+;;       :hook ((eglot-managed-mode . eldoc-box-hover-at-point-mode))
+;;       :config
+;;       ;; Prettify `eldoc-box' frame
+;;       (setf (alist-get 'left-fringe eldoc-box-frame-parameters) 8
+;;             (alist-get 'right-fringe eldoc-box-frame-parameters) 8))))
 
-(use-package prettier-js
-  :ensure t
-  :defer 3
-  :hook ((css-mode web-mode typescript-mode js-mode json-mode js2-mode) . prettier-js-mode))
 
-;; 直接编辑 HTML 文件时的设置
-(add-hook 'mhtml-mode-hook 'web-dev-attached)
+;; Cross-referencing commands
+(use-package xref
+  :bind (("M-g ." . xref-find-definitions)
+         ("M-g ," . xref-go-back))
+  :init
+  ;; Use faster search tool
+  (when (executable-find "rg")
+    (setq xref-search-program 'ripgrep))
+
+  ;; Select from xref candidates in minibuffer
+  (setq xref-show-definitions-function #'xref-show-definitions-completing-read
+        xref-show-xrefs-function #'xref-show-definitions-completing-read))
+
+
+;; Jump to definition
+(use-package dumb-jump
+  :pretty-hydra
+  ((:title (pretty-hydra-title "Dump Jump" 'faicon "nf-fa-anchor")
+    :color blue :quit-key ("q" "C-g"))
+   ("Jump"
+    (("j" dumb-jump-go "Go")
+     ("o" dumb-jump-go-other-window "Go other window")
+     ("e" dumb-jump-go-prefer-external "Go external")
+     ("x" dumb-jump-go-prefer-external-other-window "Go external other window"))
+    "Other"
+    (("i" dumb-jump-go-prompt "Prompt")
+     ("l" dumb-jump-quick-look "Quick look")
+     ("b" dumb-jump-back "Back"))))
+  :bind (("C-M-j" . dumb-jump-hydra/body))
+  :init
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+  (setq dumb-jump-selector 'completing-read))
+
+;; Misc. programming modes
+(use-package csv-mode)
+(unless emacs/>=29p
+  (use-package csharp-mode))
+(use-package cmake-mode)
+(use-package powershell)
+(use-package vimrc-mode)
+(use-package yaml-mode)
+(use-package typescript-mode
+ :load-path "~/.emacs.d/extensions/typescript")
+
+(require 'init-treemacs)
+(require 'init-lang-vcs)
+(require 'init-lang-lsp)
+(require 'init-lang-check)
+(require 'init-lang-dap)
+(require 'init-lang-web)
+(require 'init-lang-elisp)
+(require 'init-lang-c)
+(require 'init-lang-python)
 (provide 'init-ide)
 
 ;;; init-ide.el ends here

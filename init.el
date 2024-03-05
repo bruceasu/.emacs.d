@@ -1,3 +1,6 @@
+(when (version< emacs-version "27.1")
+  (error "This requires Emacs 27.1 and above!"))
+
 ;; 定义一些启动目录，方便下次迁移修改
 (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
 (defvar suk-emacs-config-dir (concat suk-emacs-root-dir    "/etc"))
@@ -24,9 +27,7 @@
 (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
 ;; Saveplace
 (setq save-place-file (concat suk-emacs-var-dir "/saveplace"))
-;; Recentf
-(setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
-;;(setq recentf-save-file "~/.emacs.d/var/recentf")
+
 ;; History
 (setq savehist-file (concat suk-emacs-var-dir "/history"))
 ; Amx
@@ -43,7 +44,7 @@
 (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
 ;; Diary
 (setq diary-file (concat user-home-dir "/diary"))
-
+(setq org-clock-persist-file (expand-file-name "org-clock-save.el" suk-emacs-var-dir ))
 ;; Ignore `cl` expiration warnings
 (setq byte-compile-warnings '(cl-function))
 
@@ -98,11 +99,31 @@
 
 ;; The contents of the Emacs configuration file are written below.
 
-(let (;;  Temporarily increase `gc-cons-threshold' when loading to speed up startup.
-      (gc-cons-threshold most-positive-fixnum)
-      (gc-cons-percentage 0.8)
-      ;; Clear to avoid analyzing files when loading remote files.
-      (file-name-handler-alist nil))
+(let
+  (
+     ;;  Temporarily increase `gc-cons-threshold' when loading to speed up
+     ;;  startup.
+     (gc-cons-threshold most-positive-fixnum)
+     (gc-cons-percentage 0.8)
+
+     ;; Clear to avoid analyzing files when loading remote files.
+     (file-name-handler-alist nil))
+  ;; Don't pass case-insensitive to `auto-mode-alist'
+  (setq auto-mode-case-fold nil)
+  ;; Prevent flashing of unstyled modeline at startup
+  (setq-default mode-line-format nil)
+  (unless (or (daemonp) noninteractive init-file-debug)
+    ;; Suppress file handlers operations at startup
+    ;; `file-name-handler-alist' is consulted on each call to `require' and `load'
+    (let ((old-value file-name-handler-alist))
+      (setq file-name-handler-alist nil)
+      (set-default-toplevel-value 'file-name-handler-alist file-name-handler-alist)
+      (add-hook 'emacs-startup-hook
+                (lambda ()
+                  "Recover file name handlers."
+                  (setq file-name-handler-alist
+                        (delete-dups (append file-name-handler-alist old-value))))
+                101)))
 
   ;; Emacs配置文件内容写到下面.
   (add-hook 'emacs-startup-hook
@@ -127,43 +148,51 @@
     (require '+custom)
     ;; Packages
     (require 'init-package)
+
     (require 'init-basic)
     (require 'lazy-load)
     (require 'init-key)
     (require 'init-ui)
-    (require 'init-ext-packages)
-    ;; (use-package esup
-    ;;              :ensure t
-    ;;              ;; To use MELPA Stable use ":pin melpa-stable",
-    ;;              :pin melpa
-    ;;              :commands (esup))
+    (require 'init-completion)
+    (require 'init-org)
+    (require 'init-utils)
 
-    ;; windows 下表现不好
+
     (when sys/linuxp
       (progn
-        (require 'init-im)
+
+        (require 'init-shell)
+        (require 'init-im)  ;; windows 下表现不好
         (require 'init-sudo)
         )
       )
+      ;; Restore session at last.
+              (require 'init-session)
+              (emacs-session-restore)
+              (server-start)
     ;; delay load
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-         (require 'init-org)
-         ;; Restore session at last.
-         ;; 速度有点慢
-         (require 'init-session)
-         (emacs-session-restore)
-         (require 'init-line-number)
-         (require 'init-idle)
-         ;;(require 'highlight-parentheses)
+     (require 'init-buffers)
+     (require 'init-recentf)
+         (require 'init-dired)
          (require 'init-auto-save)
+         (require 'init-edit)
+         (require 'init-eshell)
+         (require 'init-idle)
+         (require 'init-highlight)
+         ;;(require 'highlight-parentheses)
+         (require 'init-window)
+         (require 'init-markdown)
+         (require 'init-reader)
          (require 'init-awsome-pair)
          (require 'init-calendar)
          (require 'load-abbrev)
+         (require 'init-ext-packages)
          ;; Programming
          (require 'init-ide)
-         (server-start)
+
          ;; Make gc pauses faster by decreasing the threshold.
          (setq gc-cons-threshold (* 16 1000 1000))
 

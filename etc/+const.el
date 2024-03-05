@@ -28,6 +28,9 @@
 ;;
 
 ;;; Code:
+(defconst custom-template-file
+  (expand-file-name "custom-template.el" user-emacs-directory)
+  "Custom template file of Suk's Emacs.")
 
 (defconst suk-homepage
   "https://github.com/bruceasu/.emacs.d"
@@ -80,7 +83,11 @@
 (defconst emacs/>=29p
   (>= emacs-major-version 29)
   "Emacs is 29 or above.")
-  
+
+(defconst emacs/>=30p
+  (>= emacs-major-version 30)
+  "Emacs is 30 or above.")
+
 (provide '+const)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

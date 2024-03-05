@@ -78,48 +78,97 @@
   (setq-default google-translate-enable-ido-completion t)
   :bind(
 		;; 配置快捷键
-		;; (global-set-key "\C-ct" 'google-translate-at-point)
-		;; (global-set-key "\C-cT" 'google-translate-query-translate)
-		;; (global-set-key (kbd "\C-cq") 'google-translate-smooth-translate)
 		("C-x t s" . google-translate-at-point)
 		("C-x t q" . google-translate-query-translate)
 		("C-x t S" . google-translate-smooth-translate)
   ))
+;; A multi dictionaries interface
+(use-package fanyi
+  :bind (("C-c d f" . fanyi-dwim)
+         ("C-c d d" . fanyi-dwim2)
+         ("C-c d h" . fanyi-from-history))
+  :custom (fanyi-providers '(fanyi-haici-provider fanyi-longman-provider))
 
+  (use-package go-translate
+    :bind (("C-c d g" . gts-do-translate))
+    :init (setq gts-translate-list '(("en" "zh") ("zh" "en")))))
+    
 ;; Youdao Dictionay
 (use-package youdao-dictionary
   :defer 2
   :ensure t
-  :bind (("C-x y y" . youdao-dictionary-search-at-point)
-		 ("C-x y Y" . youdao-dictionary-search-at-point-tooltip)
-		 ("C-x y g" . 'youdao-dictionary-search-at-point-posframe)
-		 ("C-x y p" . 'youdao-dictionary-play-voice-at-point)
-		 ("C-x y r" . 'youdao-dictionary-search-and-replace)
-		 ("C-x y i" . 'youdao-dictionary-search-from-input))
+  :bind (
+  		("C-c y"   . my-youdao-dictionary-search-at-point)
+         ("C-c d Y" . youdao-dictionary-search-async)
+         ("C-c d y" . youdao-dictionary-search-at-point)
+		 ;;("C-x y Y" . youdao-dictionary-search-at-point-tooltip)
+		 ;;("C-c d p" . 'youdao-dictionary-search-at-point-posframe)
+		 ;;("C-c d v" . 'youdao-dictionary-play-voice-at-point)
+		 ("C-c d r" . 'youdao-dictionary-search-and-replace)
+		 ("C-c d i" . 'youdao-dictionary-search-from-input)
+		 :map youdao-dictionary-mode-map
+         ("h"       . my-youdao-dictionary-help)
+         ("?"       . my-youdao-dictionary-help)
+  :init
+  (setq url-automatic-caching t)
+  (setq youdao-dictionary-use-chinese-word-segmentation t) ; 中文分词
   :config
   ;; Cache documents
   (setq url-automatic-caching t)
-  (which-key-add-key-based-replacements "C-x y" "有道翻译")
+  (which-key-add-key-based-replacements "C-c d" "有道翻译")
   ;; Enable Chinese word segmentation support (支持中文分词)
-  (setq youdao-dictionary-use-chinese-word-segmentation t))
+  (with-no-warnings
+    (with-eval-after-load 'hydra
+      (defhydra youdao-dictionary-hydra (:color blue)
+        ("p" youdao-dictionary-play-voice-of-current-word "play voice of current word")
+        ("y" youdao-dictionary-play-voice-at-point "play voice at point")
+        ("q" quit-window "quit")
+        ("C-g" nil nil)
+        ("h" nil nil)
+        ("?" nil nil))
+      (defun my-youdao-dictionary-help ()
+        "Show help in `hydra'."
+        (interactive)
+        (let ((hydra-hint-display-type 'message))
+          (youdao-dictionary-hydra/body))))
 
-(defun suk/translate-one-key ()
-		    (interactive)
-		    (require 'one-key)
-		    (one-key-create-menu
-			  "Translate"
-			  '(
-			    (("p" . "SDCV Translate pointer" ). sdcv-search-pointer)		   ;光标处的单词, buffer显示
-			   (("P" . "SDCV Translate pointer+") . sdcv-search-pointer+)		   ;光标处的单词, tooltip显示
-			   (("i" . "SDCV Translate input" ) . sdcv-search-input)		   ;输入的单词, buffer显示
-			   ((";" . "SDCV Translate input+") . sdcv-search-input+)
-			   (("y" . "Youdao Translate pointer") . youdao-dictionary-search-at-point)
-			   (("Y" . "Youdao Translate pointer+") . youdao-dictionary-search-at-point-tooltip)
-			   (("g" . "Google Translate pointer") . google-translate-at-point)
-			   (("G" . "Googole Translate query") . google-translate-query-translate)
-			   (("s" . "Goold Translate smooth") . google-translate-smooth-translate)
-			   )
-			t)
-		)
+    (defun my-youdao-dictionary-search-at-point ()
+      "Search word at point and display result with `posframe', `pos-tip' or buffer."
+      (interactive)
+      (if (posframe-workable-p)
+          (youdao-dictionary-search-at-point-posframe)
+        (youdao-dictionary-search-at-point)))
+
+    (defun my-youdao-dictionary--posframe-tip (string)
+      "Show STRING using `posframe-show'."
+      (unless (posframe-workable-p)
+        (error "Posframe not workable"))
+
+      (if-let ((word (youdao-dictionary--region-or-word)))
+          (progn
+            (with-current-buffer (get-buffer-create youdao-dictionary-buffer-name)
+              (let ((inhibit-read-only t))
+                (erase-buffer)
+                (youdao-dictionary-mode)
+                (insert string)
+                (set (make-local-variable 'youdao-dictionary-current-buffer-word) word)))
+            (posframe-show
+             youdao-dictionary-buffer-name
+             :position (point)
+             :left-fringe 8
+             :right-fringe 8
+             :max-width (/ (frame-width) 2)
+             :max-height (/ (frame-height) 2)
+             :background-color (face-background 'tooltip nil t)
+             :internal-border-color (face-background 'posframe-border nil t)
+             :internal-border-width 1)
+            (unwind-protect
+                (push (read-event) unread-command-events)
+              (progn
+                (posframe-hide youdao-dictionary-buffer-name)
+                (other-frame 0)))
+            (message "Nothing to look up"))))
+    (advice-add #'youdao-dictionary--posframe-tip
+                :override #'my-youdao-dictionary--posframe-tip)))
 		
 (provide 'init-translate)

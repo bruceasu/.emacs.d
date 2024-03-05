@@ -9,7 +9,7 @@
 ;;;       Put your own configurations in custom-post.el to override default configurations.
 ;;; Code:
 
-;; 很个人的设置
+;; 寰堜釜浜虹殑璁剧疆
 (setq suk-full-name "your name")             ; User full name
 (setq suk-mail-address "your mail address")   ; Email address
 ;; (setq suk-proxy "127.0.0.1:1080")         ; Network proxy

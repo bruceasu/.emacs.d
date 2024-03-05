@@ -25,9 +25,6 @@
 [submodule "extensions/copilot"]
 	path = extensions/copilot
 	url = git@github.com:zerolfx/copilot.el.git
-[submodule "extensions/one-key"]
-	path = extensions/one-key
-	url = git@github.com:manateelazycat/one-key
 [submodule "extensions/move-text"]
 	path = extensions/move-text
 	url = git@github.com:manateelazycat/move-text.git
@@ -67,3 +64,12 @@
 [submodule "extensions/org-pretty-table"]
 	path = extensions/org-pretty-table
 	url = https://github.com/Fuco1/org-pretty-table
+[submodule "extensions/vundo"]
+	path = extensions/vundo
+	url = https://github.com/casouri/vundo
+[submodule "extensions/dape"]
+	path = extensions/dape
+	url = https://github.com/svaante/dape
+[submodule "extensions/consult-eglot"]
+	path = extensions/consult-eglot
+	url = https://github.com/mohkale/consult-eglot

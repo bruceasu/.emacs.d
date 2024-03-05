@@ -7,7 +7,7 @@
 ;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
+;; modify it under the terms of the GNU General Public License ass
 ;; published by the Free Software Foundation; either version 2, or
 ;; (at your option) any later version.
 ;;
@@ -43,22 +43,27 @@
 
 (require 'package)
 ;; gnu：
-;; https://elpa.gnu.org/packages/
+;; http://elpa.gnu.org/packages/
 ;; https://elpa.emacs-china.org/gnu/ http://1.15.88.122/gnu/
 ;; https://mirrors.163.com/elpa/gnu/
 ;; https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/
 ;; melpa:
-;; https://melpa.org/packages/
+;; http://melpa.org/packages/
 ;; https://www.mirrorservice.org/sites/melpa.org/packages/
 ;; https://elpa.emacs-china.org/melpa/ http://1.15.88.122/melpa/
 ;; https://mirrors.163.com/elpa/melpa/
 ;; https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/
+
+;;(setq package-archives '(("melpa" . "http://melpa.org/packages/")
+;;                         ("gnu" . "http://elpa.gnu.org/packages/")
+;;                         ("nongnu" . "https://elpa.nongnu.org/nongnu/"))
+
 (add-to-list 'package-archives
-   '("melpa" . "http://1.15.88.122/melpa/"))
+             '("melpa" . "https://melpa.org/packages/"))
 (add-to-list 'package-archives
    '("org" . "https://orgmode.org/elpa/"))
 (add-to-list 'package-archives
-   '("gnu" . "http://1.15.88.122/gnu/"))
+             '("gnu" . " https://elpa.gnu.org/packages/"))
 (add-to-list 'package-archives
    '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
 

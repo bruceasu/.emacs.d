@@ -22,18 +22,18 @@
 ;;; ### Unset key ###
 ;;; --- 卸载按键
 (lazy-load-unset-keys                   ;全局按键的卸载
- ;; '("C-z" "s-W"))
- '("C-z" "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
+ ;; '("C-z"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
+ '("C-z" ))
 
 ;;; ### sudo ###
 (when sys/linuxp
-	(progn
-		(lazy-load-global-keys
-		 '(("C-z C-s" . suk/sudo-actions-one-key))
-		 "init-sudo"
-		)
+  (progn
+	(lazy-load-global-keys
+	 '(("C-z C-s" . suk/sudo-actions-one-key))
+	 "init-sudo"
+	 )
 	)
-)
+  )
 
 ;;; ### Sdcv ###
 ;;; --- 星际译王命令行
@@ -42,12 +42,14 @@
    ("P" . sdcv-search-pointer+)		   ;光标处的单词, tooltip显示
    ("i" . sdcv-search-input)		   ;输入的单词, buffer显示
    (";" . sdcv-search-input+)
-   ("y" . youdao-dictionary-search-at-point)
-   ("Y" . youdao-dictionary-search-at-point-tooltip)
+   ("y" . my-youdao-dictionary-search-at-point)
+   ("Y" . youdao-dictionary-search-at-point)
    ("g" . google-translate-at-point)
    ("G" . google-translate-query-translate)
    ("s" . google-translate-smooth-translate)
-   ("C-t" . suk/translate-one-key)
+   ("f" . fanyi-dwim)
+   ("d" . fanyi-dwim2)
+   ("h" . fanyi-from-history)
    )
  "init-translate"
  "C-z")
@@ -64,16 +66,6 @@
  "insert-translated-name"
  "C-z"
  )
-
-
-;;; ### buffers ###
-(lazy-load-global-keys
- '(
-   ("C-x B" . suk/buffer-one-key)
-   ("C-x n x" . suk/xah-narrow-to-region) ; C-x n w ,  C-x n d, C-x n n, C-x n p 系列
-
-   )
- "init-buffers")
 
 
 ;;; ### Toolkit ###
@@ -127,7 +119,7 @@
 ;;; ### goto-line-preview ###
 (lazy-load-global-keys
  '(
-   ("M-g" . goto-line-preview))
+   ("M-g p" . goto-line-preview))
  "goto-line-preview")
 
 ;;; ### Delete block ###
@@ -204,15 +196,6 @@
    ("M-SPC" . just-one-space)              ;只有一个空格在光标处
    ))
 
-;;; ### undo-tree ###
-(lazy-load-global-keys
- '(
-   ("C-/" . undo-tree-undo)             ;撤销
-   ("C-?" . undo-tree-redo)             ;重做)
-   )
- "undo-tree")
-
-
 ;;; ### Rect ###
 ;;; --- 矩形操作
 (lazy-load-global-keys
@@ -268,11 +251,18 @@
    )
  "window-extension")
 
+(lazy-load-global-keys
+ '(
+   ("C-c C-m" . rg-menu)	
+   ("C-c C-/" . webjump) 
+   )
+ "init-search")
+ 
 ;;; ### Functin key ###
 ;;; --- 功能函数
 (lazy-load-set-keys
  '(
-   ("<f5>" . emacs-session-save )
+   ("<f9>" . emacs-session-save )
    ("C-4" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
    ("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
    ))
@@ -319,15 +309,6 @@
  "C-z"
  )
 
-;;; ### Dired ###
-;;; --- Dired
-(lazy-load-global-keys
- '(
-   ("<f8>" . dired-jump)
-   ;;   ("C-x C-f" . find-file)
-   )
- "init-dired")
-
 ;;; ### Isearch ###
 ;;; --- 交互式搜索
 (lazy-load-set-keys
@@ -373,11 +354,13 @@
 ;;; ### Ace jump ###
 (lazy-load-global-keys
  '(
-   ("s-<" . ace-jump-word-mode)
-   ("s->" . ace-jump-char-mode)
-   ("s-?" . ace-jump-line-mode)
+   ("C-c w" . ace-jump-word-mode)
+   ("C-c c" . ace-jump-char-mode)
+   ("C-c l" . ace-jump-line-mode)
    )
- "ace-jump-mode")
+ "ace-jump-mode"
+ "C-z"
+ )
 
 
 ;;; ### Company en words ###
@@ -392,27 +375,27 @@
 
 (lazy-load-set-keys
  '(
-   ("C-x g" . suk/magit-actions-one-key)
    ("C-z S g" . suk/google-search)
    ("C-z S c" .  suk/github-code-search)
    )
  )
 
 ;;; --- 笔记管理和组织
-(define-prefix-command 'F9-map)
-(global-set-key (kbd "<f9>") 'F9-map)
-(lazy-load-global-keys
- '(("a" . org-agenda)
-   ("s" . show-org-agenda)
-   ("c" . org-capture)
-   ("i" . org-toggle-inline-images)
-   ("l" . org-toggle-link-display)
-   ("d" . calendar)
-   ("f" . boxquote-insert-file)
-   ("r" . boxquote-region)
-   ("v" . visible-mode))
- "init-org"
- "<f9>")
+;; (define-prefix-command 'F9-map)
+;; (global-set-key (kbd "<f9>") 'F9-map)
+;; (lazy-load-global-keys
+;;  '(("a" . org-agenda)
+;;    ("A" . org-attach)
+;;    ("s" . show-org-agenda)
+;;    ("c" . org-capture)
+;;    ("i" . org-toggle-inline-images)
+;;    ("l" . org-toggle-link-display)
+;;    ("d" . calendar)
+;;    ("f" . boxquote-insert-file)
+;;    ("r" . boxquote-region)
+;;    ("v" . visible-mode))
+;;  "init-org"
+;;  "<f9>")
 
 ;;; ### String Inflection ###
 ;; --- 单词语法风格快速转换
@@ -455,7 +438,7 @@
    ("<f7>"   . suk/ska-jump-to-register )
    )
  "init-bookmark")
-
+ 
 ;; f3 start macro(kmacro-start-macro-or-insert-counter),
 ;; f4 done macro or run marcro (kmacro-end-or-call-macro).
 ;; C-x ( start macro (kmacro-start-macro),
@@ -470,62 +453,37 @@
 
 
 
-;; M-x global-set-key RET 交互式的绑定你的键。
-;; C-x Esc Esc 调出上一条“复杂命令”
-;; 设置绑定
-(defun suk-set-key-bindings (ACTION BINDINGLIST)
-  "Map keys.
-ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
-
-  (mapcar (lambda(lst)
-            ""
-            (let ((x (car lst))
-                  (y (car (last lst))))
-              (funcall ACTION x y))) BINDINGLIST ))
-
-;; 使用方式
-;; (suk-set-key-bindings 'global-set-key
-;;   (list
-;;      '([f2]                            calendar)
-;;      '([(shift f2)]                    remember)
-;;      '([f5]                            revert-buffer)
-;;      (list (kbd "C-c l")               'copy-line)
-;;    )
-;; )
-
-(suk-set-key-bindings 'global-set-key
-                      (list
-                       ;;                      (list (kbd "C-x l")   'suk/count-brf-lines)
-                       (list (kbd "C-x M-a") 'align-regexp)
-                       ;;                      (list (kbd "C-x x")   'suk/switch-major-mode)
-                       ;;                      (list (kbd "C-x X")   'suk/get-mode-name)
-                       ;;(list (kbd "C-x U") 'suk/revert-buffer-with-utf8)
-                       ;;(list (kbd "C-x K") 'suk/revert-buffer-with-gbk)
-                       ;;                      '([C-t]               transpose-chars)
-                       ;;                      '([S-f6]              hs-minor-mode)
-                       ;;                      '([S-f5]              toggle-truncate-lines)
-                       ;; '([S-f11]          insert-translated-name-insert) ;; Chinese to English
-                       ;; '([S-f12]          toggle-company-english-helper) ;; popup English tips
-                       ;; '([M-f12]          aweshell-dedicated-toggle)
-                       ;; '([M-f11]          aweshell-sudo-toggle)
-                       ;; '([M-f10]          aweshell-prev)
-                       ;; '([M-f11]          aweshell-next)
-                       ;; '([M-f9]           aweshell-new)
-                       ;; '([S-f2]           suk/new-empty-buffer)
-                       ;; '([f2]                hs-toggle-hiding)
-                       ;;'([M-f12]             vterm)
-                       ;; '([S-f1]              snails)
-                       ))
-(unless sys/win32p
-  (global-set-key  (kbd "S-SPC") 'set-mark-command))
-
-;; C-c TAB indent-region
-;; C-u C-c TAB => (un)indent-region
 
 ;; global-set-key examples:
 ;; (global-set-key (kbd "C-x C-\\") 'next-line)
 ;; (global-set-key [?\C-x ?\C-\\] 'next-line)
 ;; (global-set-key [(control ?x) (control ?\\)] 'next-line)
+
+;;(global-set-key (kbd "C-(") 'backward-sexp)
+;;(global-set-key (kbd "C-)") 'forward-sexp)
+
+;;(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
+;;(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
+;;(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
+;;(global-set-key (kbd "C-x R") 'recentf)
+
+;; bind-keys 是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个键。虽然
+;; bind-keys 可以独立于 use-package 使用，但它通常与 use-package 结合使用，以提
+;; 供更清晰和模块化的键绑定配置。
+
+;; Toggle fullscreen <F11> also bind to fullscreen
+;; (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
+;;            ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
+;;            ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
+;;            )
+
+(unless sys/win32p
+  (global-set-key  (kbd "C-S-SPC") 'set-mark-command))
+
+;; C-c TAB indent-region
+;; C-u C-c TAB => (un)indent-region
+
+
 
 ;; has set to f7, c-f7
 ;;(global-set-key (kbd "<C-f6>") '(lambda () (interactive) (bookmark-set "SAVED")))
@@ -534,8 +492,8 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;; default keys: C-x LEFT/RIGHT C-, C-.
 (global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
 (global-set-key (kbd "<C-tab>") 'next-buffer)
-;(global-set-key (kbd "C-x C-b") 'buffer-menu)
-(global-set-key (kbd "C-x C-b") 'ibuffer)
+;;(global-set-key (kbd "C-x C-b") 'buffer-menu)
+;;(global-set-key (kbd "C-x C-b") 'ibuffer)
 
 ;;;
 ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
@@ -628,18 +586,5 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 (define-prefix-command 'leader-key)
 (global-set-key (kbd "M-s-SPC") 'leader-key)
 
-(global-set-key (kbd "C-(") 'backward-sexp)
-(global-set-key (kbd "C-)") 'forward-sexp)
-
-(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
-(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
-(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
-(global-set-key (kbd "C-x R") 'recentf)
-
-;; Toggle fullscreen <F11> also bind to fullscreen
-(bind-keys ("C-<f11>" . toggle-frame-fullscreen)
-           ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
-           ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
-           )
 
 (provide 'init-key)

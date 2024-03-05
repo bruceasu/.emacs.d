@@ -63,6 +63,16 @@
   (require '+const)
   (require '+custom))
 
+;;===================================================
+;; Fonts
+;;===================================================
+;;;###autoload
+(defun suk-install-fonts ()
+  "Install necessary fonts."
+  (interactive)
+  (all-the-icons-install-fonts)
+  (nerd-icons-install-fonts))
+
 ;; 解决卡顿
 (setq inhibit-compacting-font-caches t)
 ;;只渲染当前屏幕语法高亮，加快显示速度
@@ -135,14 +145,14 @@
   "The font name for CJK.")
 (defvar emacs-font-size-pair nil
   "Default font size pair for (latin . cjk)")
-  
+
 (defun font-exist-p (fontname)
   "test if this font is exist or not."
   (if (or (not fontname) (string= fontname ""))
       nil
     (if (not (x-list-fonts fontname))
         nil t)))
-        
+
 (defun set-font (latin cjk size-pair)
   "Setup emacs Latin and CJK font on x window-system."
   (if (font-exist-p latin)
@@ -152,7 +162,7 @@
       (dolist (charset '(kana han symbol cjk-misc bopomofo))
         (set-fontset-font (frame-parameter nil 'font) charset
                           (font-spec :family cjk :size (cdr size-pair))))))
-                          
+
 (defun emacs-step-font-size (step)
   "Increase/Decrease emacs's font size."
   (let ((scale-steps emacs-font-size-pair-list))
@@ -163,7 +173,7 @@
     (when emacs-font-size-pair
       (message "emacs font size set to %.1f" (car emacs-font-size-pair))
       (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair))))
-      
+
 (defun increase-emacs-font-size ()
   "Decrease emacs's font-size acording emacs-font-size-pair-list."
   (interactive) (emacs-step-font-size 1))
@@ -171,7 +181,7 @@
 (defun decrease-emacs-font-size ()
   "Increase emacs's font-size acording emacs-font-size-pair-list."
   (interactive) (emacs-step-font-size -1))
-  
+
 
 (when sys/win32p
   ;; (set-frame-font "Simsun 12")
@@ -240,7 +250,7 @@
       ((member "Consolas" (font-family-list))
        (set-face-attribute 'default nil :font "Consolas")))
 
-    
+
     ;; Specify font for chinese characters
     ;; (set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")
 

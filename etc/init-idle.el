@@ -210,38 +210,6 @@ from tradition chinese to simple chinese" t)
   :init (setq save-place-file "~/.emacs.d/var/saveplace")
 
   )
-(use-package recentf
-  :ensure nil
-  :defer 1
-  ;; lazy load recentf
-  :hook (find-file . (lambda () (unless recentf-mode
-                                  (recentf-mode)
-                                  (recentf-track-opened-file))))
-  :init
-  (add-hook 'after-init-hook #'recentf-mode)
-  (setq recentf-max-saved-items 500)
-  (setq recentf-max-saved-items 17)
-  (recentf-mode t)
-  ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
-  :config
-  (add-to-list 'recentf-exclude (expand-file-name package-user-dir))
-  (add-to-list 'recentf-exclude ".cache")
-  (add-to-list 'recentf-exclude ".cask")
-  (add-to-list 'recentf-exclude ".elfeed")
-  (add-to-list 'recentf-exclude "bookmarks")
-  (add-to-list 'recentf-exclude "cache")
-  (add-to-list 'recentf-exclude "persp-confs")
-  (add-to-list 'recentf-exclude "recentf")
-  (add-to-list 'recentf-exclude "url")
-  (add-to-list 'recentf-exclude "COMMIT_EDITMSG\\'")
-  (defun suk/recentf-exclude-p (file)
-    (let ((file-dir (file-truename (file-name-directory file))))
-      (-any-p (lamdba (dir)
-                      (string-prefix-p dir file-dir))
-              (mapcar 'file-truename (list var package-user-dir)))))
-  (add-to-list 'recentf-exclude #'suk/recentf-exclude-p)
-  (recentf-mode t)
-  )
 
 (use-package savehist
   :ensure nil
@@ -266,41 +234,66 @@ from tradition chinese to simple chinese" t)
    :ensure t
    :hook (after-init . server-mode)
 )
-(use-package magit
-  :ensure t
-  :defer 1)
+
+;; Misc.
+(use-package simple
+  :ensure nil
+  :hook ((after-init . size-indication-mode)
+         (text-mode . visual-line-mode)
+         ((prog-mode markdown-mode conf-mode) . enable-trailing-whitespace))
+  :init
+  (setq column-number-mode t
+        line-number-mode t
+        ;; kill-whole-line t               ; Kill line including '\n'
+        line-move-visual nil
+        track-eol t                     ; Keep cursor at end of lines. Require line-move-visual is nil.
+        set-mark-command-repeat-pop t)  ; Repeating C-SPC after popping mark pops it again
+
+  ;; Visualize TAB, (HARD) SPACE, NEWLINE
+  (setq-default show-trailing-whitespace nil) ; Don't show trailing whitespace by default
+  (defun enable-trailing-whitespace ()
+    "Show trailing spaces and delete on saving."
+    (setq show-trailing-whitespace t)
+    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+
+  ;; Prettify the process list
+  (with-no-warnings
+    (defun my-list-processes--prettify ()
+      "Prettify process list."
+      (when-let ((entries tabulated-list-entries))
+        (setq tabulated-list-entries nil)
+        (dolist (p (process-list))
+          (when-let* ((val (cadr (assoc p entries)))
+                      (name (aref val 0))
+                      (pid (aref val 1))
+                      (status (aref val 2))
+                      (status (list status
+                                    'face
+                                    (if (memq status '(stop exit closed failed))
+                                        'error
+                                      'success)))
+                      (buf-label (aref val 3))
+                      (tty (list (aref val 4) 'face 'font-lock-doc-face))
+                      (thread (list (aref val 5) 'face 'font-lock-doc-face))
+                      (cmd (list (aref val 6) 'face 'completions-annotations)))
+            (push (list p (vector name pid status buf-label tty thread cmd))
+		          tabulated-list-entries)))))
+    (advice-add #'list-processes--refresh :after #'my-list-processes--prettify)))
+
+;; Misc
+(if (boundp 'use-short-answers)
+    (setq use-short-answers t)
+  (fset 'yes-or-no-p 'y-or-n-p))
+(setq-default major-mode 'text-mode
+              fill-column 80
+              tab-width 4
+              indent-tabs-mode nil)     ; Permanently indent with spaces, never with TABs
 
 ;; Emacs可以做为一个server, 然后用emacsclient连接这个server,
 ;; 无需再打开两个Emacs，windows下还不支持daemon的方式。
 ;;(server-force-delete)
 ;;(server-start)
-;;;###autoload
-(defun suk/magit-actions-one-key ()
-  (interactive)
-  (require 'one-key)
-  (one-key-create-menu
-   "MAGIT"
-   '(
-	 (("s" . "Magit status") . magit-status+)
-	 (("c" . "Magit checkout") . magit-checkout)
-	 (("C" . "Magit commit") . magit-commit)
-	 (("u" . "Magit push to remote") . magit-push-current-to-pushremote)
-	 (("p" . "Magit delete remote branch") . magit-delete-remote-branch)
-	 (("i" . "Magit pull") . magit-pull-from-upstream)
-	 (("r" . "Magit rebase") . magit-rebase)
-	 (("e" . "Magit merge") . magit-merge)
-	 (("l" . "Magit log") . magit-log-all)
-	 (("L" . "Magit blame") . magit-blame+)
-	 (("b" . "Magit branch") . magit-branch)
-	 (("B" . "Magit buffer") . magit-process-buffer)
-	 (("D" . "Magit discarded") . magit-discard)
-	 (("," . "Magit init") . magit-init)
-	 (("." . "Magit add remote") . magit-remote-add)
-	 )
-   t)
-)
-;; Then binding function one-key-menu-magit with one global key to call it.
-;;
+
 (provide 'init-idle)
 
 ;;; init-idle.el ends here
