@@ -8,6 +8,14 @@
 ;;; Code:
 (eval-when-compile
   (require 'init-package))
+
+
+;; 语法检查包
+(use-package flycheck
+  :ensure t
+  :defer 3)
+
+
 (use-package flymake
   :diminish
   :functions my-elisp-flymake-byte-compile
@@ -24,12 +32,12 @@
       (apply fn args)))
   (advice-add 'elisp-flymake-byte-compile :around #'my-elisp-flymake-byte-compile))
 
-(use-package sideline-flymake
-  :ensure nil
-  :diminish sideline-mode
-  :hook (flymake-mode . sideline-mode)
-  :init (setq sideline-flymake-display-mode 'point
-              sideline-backends-right '(sideline-flymake)))
+;; (use-package sideline-flymake
+;;   :ensure nil
+;;   :diminish sideline-mode
+;;   :hook (flymake-mode . sideline-mode)
+;;   :init (setq sideline-flymake-display-mode 'point
+;;               sideline-backends-right '(sideline-flymake)))
 
 (provide 'init-lang-check)
 

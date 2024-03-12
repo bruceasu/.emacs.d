@@ -1,6 +1,6 @@
 ;; +const.el --- Define constants.	-*- lexical-binding: t -*-
 
-;; Copyright (C) 2018 Suk
+;; Copyright (C) 1999 - 2024 Suk
 
 ;; Author: Suk
 

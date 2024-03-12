@@ -14,11 +14,6 @@
   (require '+custom)
   (require 'init-package))
 
-;; 语法检查包
-(use-package flycheck
-  :ensure t
-  :defer 3)
-
 ;; format all, formatter for almost languages
 ;; great for programmers
 (use-package format-all
