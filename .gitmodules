@@ -73,3 +73,6 @@
 [submodule "extensions/consult-eglot"]
 	path = extensions/consult-eglot
 	url = https://github.com/mohkale/consult-eglot
+[submodule "extensions/doom-modeline"]
+	path = extensions/doom-modeline
+	url = https://github.com/seagle0128/doom-modeline

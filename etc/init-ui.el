@@ -487,7 +487,7 @@
   )
 
 (use-package doom-modeline
-  :ensure t
+  :load-path "~/.emacs.d/extensions/doom-modeline"
   :hook (after-init . doom-modeline-mode)
   :init
   ;;(doom-modeline-mode 1)

@@ -89,13 +89,13 @@
   :group 'suk
   :type 'string)
 
-(defcustom  org-css-file "~/.emacs.d/documents/my-org-style-min.css"
+(defcustom  org-css-file "~/.emacs.d/share/my-org-style-min.css"
   "The org css style file."
   :group 'suk
   :type 'string)
 
-(defcustom windows-bash-path "C:/Program Files/Git/bin/bash"
-  "The windows version of bash"
+(defcustom windows-bash-path (expand-file-name "C:/Program Files/Git/bin/bash.exe")
+  "The windows version of bash."
   :group 'suk
   :type 'string)
 

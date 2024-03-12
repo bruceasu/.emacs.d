@@ -1,16 +1,45 @@
+;;; init.el --- Initialize configurations.  -*- lexical-binding: t -*-
+;; Copyright (C) 1999 - 2024 Suk
+;; Author: Suk
+
+;; This file is not part of GNU Emacs.
+;;
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2, or
+;; (at your option) any later version.
+;;
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; see the file COPYING.  If not, write to
+;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+;; Floor, Boston, MA 02110-1301, USA.
+;;
+;;; Commentary
+;;
+;; Emacs configurations.
+;;
+
+;;; Code:
+
+
 (when (version< emacs-version "27.1")
   (error "This requires Emacs 27.1 and above!"))
 
 ;; 定义一些启动目录，方便下次迁移修改
 (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
-(defvar suk-emacs-config-dir (concat suk-emacs-root-dir    "/etc"))
-(defvar suk-emacs-extension-dir (concat suk-emacs-root-dir "/extensions"))
-(defvar suk-emacs-share-dir (concat suk-emacs-root-dir     "/share"))
-(defvar suk-emacs-themes-dir (concat suk-emacs-share-dir   "/themes"))
-(defvar suk-emacs-elpa-dir (concat suk-emacs-root-dir      "/elpa"))
-(defvar suk-emacs-var-dir (concat suk-emacs-root-dir       "/var"))
-(defvar suk-emacs-tmp-dir (concat suk-emacs-var-dir        "/tmp"))
-(defvar suk-emacs-backup-dir (concat suk-emacs-tmp-dir     "/backup"))
+(defvar suk-emacs-config-dir (expand-file-name "etc" suk-emacs-root-dir))
+(defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
+(defvar suk-emacs-share-dir (expand-file-name "share" suk-emacs-root-dir))
+(defvar suk-emacs-themes-dir (expand-file-name "themes" suk-emacs-share-dir))
+(defvar suk-emacs-elpa-dir (expand-file-name "elpa" suk-emacs-root-dir))
+(defvar suk-emacs-var-dir (expand-file-name "var" suk-emacs-root-dir))
+(defvar suk-emacs-tmp-dir (expand-file-name "tmp" suk-emacs-var-dir))
+(defvar suk-emacs-backup-dir (expand-file-name "backup" suk-emacs-tmp-dir))
 
 
 (defvar user-home-dir (getenv "HOME"))
@@ -27,7 +56,9 @@
 (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
 ;; Saveplace
 (setq save-place-file (concat suk-emacs-var-dir "/saveplace"))
-
+;; Recentf
+(setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
+;;(setq recentf-save-file "~/.emacs.d/var/recentf")
 ;; History
 (setq savehist-file (concat suk-emacs-var-dir "/history"))
 ; Amx
@@ -44,7 +75,7 @@
 (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
 ;; Diary
 (setq diary-file (concat user-home-dir "/diary"))
-(setq org-clock-persist-file (expand-file-name "org-clock-save.el" suk-emacs-var-dir ))
+
 ;; Ignore `cl` expiration warnings
 (setq byte-compile-warnings '(cl-function))
 
@@ -100,7 +131,7 @@
 ;; The contents of the Emacs configuration file are written below.
 
 (let
-  (
+    (
      ;;  Temporarily increase `gc-cons-threshold' when loading to speed up
      ;;  startup.
      (gc-cons-threshold most-positive-fixnum)
@@ -147,52 +178,51 @@
     ;; Customization
     (require '+custom)
     ;; Packages
-    (require 'init-package)
-
     (require 'init-basic)
+    (require 'init-awsome-pair)
     (require 'lazy-load)
     (require 'init-key)
-    (require 'init-ui)
+    (require 'init-package)
     (require 'init-completion)
+    (require 'init-ui)
     (require 'init-org)
     (require 'init-utils)
-
-
+    (require 'init-mode)
     (when sys/linuxp
       (progn
-
         (require 'init-shell)
-        (require 'init-im)  ;; windows 下表现不好
+        (require 'init-im)   ;; windows 下表现不好
         (require 'init-sudo)
         )
       )
-      ;; Restore session at last.
-              (require 'init-session)
-              (emacs-session-restore)
-              (server-start)
+    ;; Restore session at last.
+    (require 'init-session)
+    (emacs-session-restore)
+    (server-start)
     ;; delay load
     (run-with-idle-timer
      1 nil
      #'(lambda ()
-     (require 'init-buffers)
-     (require 'init-recentf)
+         (require 'init-bookmark)
+         (require 'init-buffers)
+         (require 'init-recentf)
          (require 'init-dired)
+
          (require 'init-auto-save)
          (require 'init-edit)
-         (require 'init-eshell)
          (require 'init-idle)
-         (require 'init-highlight)
+         (require 'init-eshell)
          ;;(require 'highlight-parentheses)
+         (require 'init-highlight)
          (require 'init-window)
          (require 'init-markdown)
          (require 'init-reader)
-         (require 'init-awsome-pair)
+
          (require 'init-calendar)
          (require 'load-abbrev)
          (require 'init-ext-packages)
          ;; Programming
          (require 'init-ide)
-
          ;; Make gc pauses faster by decreasing the threshold.
          (setq gc-cons-threshold (* 16 1000 1000))
 

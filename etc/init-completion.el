@@ -46,9 +46,9 @@
          ))
   )
 (use-package company-anaconda
-  :ensure t)
+  :ensure nil)
 (use-package company-box
-  :ensure t)
+  :ensure nil)
 (use-package emacs
   :init
   ;; TAB cycle if there are only few candidates
@@ -104,7 +104,7 @@
 
 (use-package marginalia
   :hook (after-init . marginalia-mode))
-  
+
 ;; 增强了搜索功能
 ;; (use-package swiper
 ;;   :bind
@@ -120,13 +120,13 @@
 ;;     (setq ivy-display-style 'fancy)
 ;;     ;;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
 ;;     ))
-    
+
 ;;(use-package bind-key)
 ;;(bind-key "C-c x" #'some-function some-package-mode-map)
 ;;(bind-key "C-c y" #'another-function)
 (use-package consult
   :bind (;; C-c bindings in `mode-specific-map'
-          ("C-c M-x" . consult-mode-command)
+         ("C-c M-x" . consult-mode-command)
          ("C-c h"   . consult-history)
          ("C-c k"   . consult-kmacro)
          ("C-c m"   . consult-man)
@@ -292,7 +292,6 @@ value of the selected COLOR."
 (unless sys/win32p
   (progn
     ;;在Windows下会导致内存泄漏和无响应
-
 	(use-package corfu
 	  :custom
 	  (corfu-auto t)
@@ -305,8 +304,6 @@ value of the selected COLOR."
 	  :bind ("M-/" . completion-at-point)
 	  :hook ((after-init . global-corfu-mode)
 			 (global-corfu-mode . corfu-popupinfo-mode)))
-
-
 
     (use-package embark
       :bind (("s-."   . embark-act)

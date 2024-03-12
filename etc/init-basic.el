@@ -44,23 +44,22 @@
 ;; 关闭工具栏
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 ;; 关闭菜单栏
-(menu-bar-mode -1)
-(when (fboundp 'tooltip-mode) (tooltip-mode -1))
+(when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 ;; Personal information
 (setq user-full-name suk-full-name)
 (setq user-mail-address suk-mail-address)
 
+(setq-default major-mode 'text-mode
+               fill-column 80
+              tab-width 4
+              c-basic-offset 4
+              indent-tabs-mode nil)     ;; Permanently indent with spaces, never with TABs
+
 ;; follow symlinks
 (setq vc-follow-symlinks t)
-;; enable winner mode globally for undo/redo window layout changes
-(winner-mode t)
 
-(show-paren-mode t)
-
-;; 当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
-(setq suggest-key-bindings 1)
 ;;只渲染当前屏幕语法高亮，加快显示速度
 (setq font-lock-maximum-decoration t)
 (setq initial-scratch-message nil)
@@ -86,160 +85,10 @@
       scroll-up-aggressively 0.01
       scroll-down-aggressively 0.01
       scroll-preserve-screen-position 'always)
-;; Tab and Space
-;; Permanently indent with spaces, never with TABs
-(setq-default c-basic-offset   4
-              tab-width        4
-              indent-tabs-mode t)
-;; M-x global-set-key RET 交互式的绑定你的键。
-;; C-x Esc Esc 调出上一条“复杂命令”
-;; 设置绑定
-(defun suk-set-key-bindings (ACTION BINDINGLIST)
-  "Map keys.
-ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
-
-  (mapcar (lambda(lst)
-            ""
-            (let ((x (car lst))
-                  (y (car (last lst))))
-              (funcall ACTION x y))) BINDINGLIST ))
-
-;; 使用方式
-;; (suk-set-key-bindings 'global-set-key
-;;   (list
-;;      '([f2]                            calendar)
-;;      '([(shift f2)]                    remember)
-;;      '([f5]                            revert-buffer)
-;;      (list (kbd "C-c l")               'copy-line)
-;;    )
-;; )
-
-(suk-set-key-bindings 'global-set-key
-                      (list
-                       (list (kbd "C-x M-a") 'align-regexp)
-                       ;;                      '([C-t]               transpose-chars)
-                       ;;                      '([S-f6]              hs-minor-mode)
-                       ;;                      '([S-f5]              toggle-truncate-lines)
-                       ;; '([S-f11]          insert-translated-name-insert) ;; Chinese to English
-                       ;; '([S-f12]          toggle-company-english-helper) ;; popup English tips
-                       ;; '([M-f12]          aweshell-dedicated-toggle)
-                       ;; '([M-f11]          aweshell-sudo-toggle)
-                       ;; '([M-f10]          aweshell-prev)
-                       ;; '([M-f11]          aweshell-next)
-                       ;; '([M-f9]           aweshell-new)
-                       ;; '([S-f2]           suk/new-empty-buffer)
-                       ;; '([f2]                hs-toggle-hiding)
-                       ;;'([M-f12]             vterm)
-                       ;; '([S-f1]              snails)
-                       (list (kbd "C-(") 'backward-sexp)
-                       (list (kbd "C-)") 'forward-sexp)
-                       (list (kbd "C-x t T") 'suk/toggle-transparency)
-                       (list (kbd "C-x t p") 'suk/toggle-toggle-proxy)
-                       (list (kbd "C-x t f") 'global-flycheck-mode)
-                       (list (kbd "C-x R") 'recentf-open)
-                       (list (kbd "C-<f11>")  'toggle-frame-fullscreen)
-                       ;; (list (kbd "C-S-f")  'toggle-frame-fullscreen) ; Compatible with macOS
-                       (list (kbd "M-S-<return>")  'toggle-frame-fullscreen)
-                       ;; 创建新行的动作
-                       (list (kbd "RET") 'newline-and-indent) ;; 回车时创建新行并且对齐
-                       (list (kbd "S-<return>") 'comment-indent-new-line) ;; 取消对齐创建的新行
-
-                       ))
-
-
-
-;; Misc
-(fset 'yes-or-no-p 'y-or-n-p)
-;; 忽略 cl 过期警告
-(setq byte-compile-warnings '(cl-function))
-
-;; Frequently-accessed files
-
-;; Registers allow you to jump to a file or other location quickly.
-;; To jump to a register, use C-x r j followed by the letter of the register.
-;; Using registers for all these file shortcuts is probably a bit of
-;; a waste since I can easily define my own keymap, but since I rarely
-;; go beyond register A anyway. Also, I might as well add shortcuts for refiling.
-
-(require 'bookmark)
-(defvar my-refile-map (make-sparse-keymap))
-(defmacro my-defshortcut (key file)
-  `(progn
-     (set-register ,key (cons 'file ,file))
-     (define-key my-refile-map
-       (char-to-string ,key)
-       (lambda (prefix)
-         (interactive "p")
-         (let ((org-refile-targets '(((,file) :maxlevel . 6)))
-               (current-prefix-arg (or current-prefix-arg '(4))))
-           (call-interactively 'org-refile))))))
-
-;;(define-key my-refile-map "," 'my-org-refile-to-previous-in-file)
-(my-defshortcut ?e "~/.emacs.d/init.el")
-(my-defshortcut ?E "~/.emacs.d/custom.el")
-;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
-;; (my-defshortcut ?o "~/cloud/orgzly/organizer.org")
-;; (my-defshortcut ?s "~/personal/sewing.org")
-;; (my-defshortcut ?b "~/personal/business.org")
-;; (my-defshortcut ?p "~/personal/google-inbox.org")
-;; (my-defshortcut ?P "~/personal/google-ideas.org")
-;; (my-defshortcut ?B "~/Dropbox/books")
-(my-defshortcut ?n "~/notes")
-;; (my-defshortcut ?N "~/sync/notes/QuickNote.md")
-;; (my-defshortcut ?w "~/Dropbox/public/sharing/index.org")
-;; (my-defshortcut ?W "~/Dropbox/public/sharing/blog.org")
-;; (my-defshortcut ?j "~/personal/journal.org")
-;; (my-defshortcut ?J "~/cloud/a/Journal.csv")
-;; (my-defshortcut ?I "~/Dropbox/Inbox")
-;; (my-defshortcut ?g "~/sachac.github.io/evil-plans/index.org")
-;; (my-defshortcut ?c "~/code/dev/elisp-course.org")
-;; (my-defshortcut ?C "~/personal/calendar.org")
-;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
-;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
-;; (my-defshortcut ?Q "~/personal/questions.org")
-
-;;;###autoload
-(defun term()
-  ;; bash in windows.
-  (interactive)
-  (if sys/win32p
-	  (let (
-			(explicit-shell-file-name windows-bash-path)
-			)
-		(call-interactively 'shell))
-  (let ((explicit-shell-file-name "/bin/bash"))
-	(call-interactively 'shell)))
-)
-
-;;;###autoload
-(defun github-code-search ()
-  "Search code on github for a given language."
-  (interactive)
-  (let ((language (completing-read
-                   "Language: "
-                   '("Java" "C/C++" "Emacs Javascript" "Lisp"  "Python" "Rust")))
-        (code (read-string "Code: ")))
-    (browse-url
-     (concat "https://github.com/search?l=" language
-             "&type=code&q=" code))))
-
-;;;###autoload
-(defun google-search-str (str)
-  (browse-url
-   (concat "https://www.google.com/search?q=" str)))
-
-;;;###autoload
-(defun google-search ()
-  "Google search region, if active, or ask for search string."
-  (interactive)
-  (if (region-active-p)
-      (google-search-str
-       (buffer-substring-no-properties (region-beginning)
-                                       (region-end)))
-    (google-search-str (read-from-minibuffer "Search: "))))
 
 
 ;; Browse URL
+;;;###autoload
 (defun suk-webkit-browse-url (url &optional pop-buffer new-session)
   "Browse URL with xwidget-webkit' and switch or pop to the buffer.
 
@@ -258,62 +107,8 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
       (if pop-buffer
           (pop-to-buffer buf)
         (switch-to-buffer buf)))))
-;; ==============================================================
-;; Network Proxy
-;; --------------------------------------------------------------
-;;;###autoload
-(defun suk/proxy-http-show ()
-  "Show http/https proxy."
-  (interactive)
-  (if url-proxy-services
-      (message "Current HTTP proxy is \"%s\"" suk-proxy)
-    (message "No proxy")))
 
-;;;###autoload
-(defun suk/proxy-http-enable ()
-  "Enable http/https proxy."
-  (interactive)
-  (setq url-proxy-services `(("http" . suk-proxy)
-                             ("https" . suk-proxy)
-                             ("no_proxy" . "^\\(localhost\\|192.168.*\\|10.*\\)")))
-  (suk/proxy-http-show))
 
-;;;###autoload
-(defun suk/proxy-http-disable ()
-  "Disable http/https proxy."
-  (interactive)
-  (setq url-proxy-services nil)
-  (suk/proxy-http-show))
-
-;;;###autoload
-(defun suk/proxy-http-toggle ()
-  "Toggle http/https proxy."
-  (interactive)
-  (if url-proxy-services
-      (suk/proxy-http-disable)
-    (suk/proxy-http-enable)))
-
-;;;###autoload
-(defun suk/proxy-socks-enable ()
-  "Enable Socks proxy."
-  (interactive)
-  (setq url-gateway-method 'socks)
-  (setq socks-noproxy '("localhost"))
-  (setq socks-server '("Default server" "127.0.0.1" 1080 5))
-  (message "Enable socks proxy."))
-
-;;;###autoload
-(defun suk/proxy-socks-disable ()
-  "Disable Socks proxy."
-  (interactive)
-  (setq url-gateway-method 'native)
-  (setq socks-noproxy nil)
-  (message "Disable socks proxy."))
-
-;;;###autoload
-(defun now ()
-  (interactive)
-  ( insert (org-time-stamp)))
 
 (autoload 'calendar "init-calendar" "Config Chinese calendar " t)
 
@@ -323,7 +118,7 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
 ;;====================================================
 ;; 编码设置 begin
-;;---------------------------------------------------
+;;====================================================
 ;; Set UTF-8 as the default coding system
 (when (fboundp 'set-charset-priority)
   (set-charset-priority 'unicode))
@@ -421,183 +216,25 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 (unless sys/linuxp
   (setq command-line-x-option-alist nil))
 
-(when (or sys/mac-x-p sys/linux-x-p (daemonp))
-  (use-package exec-path-from-shell
-    :custom (exec-path-from-shell-arguments '("-l"))
-    :init (exec-path-from-shell-initialize)))
-
-;; GUI Environment
-(when (display-graphic-p)
-	(progn
-	;; 隐藏垂直滚动条。
-	;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
-	;;  (modify-all-frames-parameters '((vertical-scroll-bars)))
-	)
-)
 
 
-;;;###autoload
-(defun byte-compile-elpa ()
-  "Compile packages in elpa directory. Useful if you switch Emacs versions."
-  (interactive)
-  (if (fboundp 'async-byte-recompile-directory)
-      (async-byte-recompile-directory package-user-dir)
-    (byte-recompile-directory package-user-dir 0 t)))
-
-;;;###autoload
-(defun byte-compile-site-lisp ()
-  "Compile packages in site-lisp directory."
-  (interactive)
-  (let ((dir (locate-user-emacs-file "site-lisp")))
-    (if (fboundp 'async-byte-recompile-directory)
-        (async-byte-recompile-directory dir)
-      (byte-recompile-directory dir 0 t))))
-
-;;;###autoload
-(defun native-compile-elpa ()
-  "Native-compile packages in elpa directory."
-  (interactive)
-  (if (fboundp 'native-compile-async)
-      (native-compile-async package-user-dir t)))
-
-;;;###autoload
-(defun native-compile-site-lisp ()
-  "Native compile packages in site-lisp directory."
-  (interactive)
-  (let ((dir (locate-user-emacs-file "site-lisp")))
-    (if (fboundp 'native-compile-async)
-        (native-compile-async dir t))))
-
-;;;###autoload
-(defun suk-set-variable (variable value &optional no-save)
-  "Set the VARIABLE to VALUE, and return VALUE.
-
-  Save to option `custom-file' if NO-SAVE is nil."
-  (customize-set-variable variable value)
-  (when (and (not no-save)
-             (file-writable-p custom-file))
-    (with-temp-buffer
-      (insert-file-contents custom-file)
-      (goto-char (point-min))
-      (while (re-search-forward
-              (format "^[\t ]*[;]*[\t ]*(setq %s .*)" variable)
-              nil t)
-        (replace-match (format "(setq %s '%s)" variable value) nil nil))
-      (write-region nil nil custom-file)
-      (message "Saved %s (%s) to %s" variable value custom-file))))
-
-;;;###autoload
-(defun too-long-file-p ()
-  "Check whether the file is too long."
-  (or (> (buffer-size) 100000)
-      (and (fboundp 'buffer-line-statistics)
-           (> (car (buffer-line-statistics)) 10000))))
-
-;;===================================================
-;; Update
-;;===================================================
-;;;###autoload
-(defun update-config ()
-  "Update Suk's Emacs configurations to the latest version."
-  (interactive)
-  (let ((dir (expand-file-name user-emacs-directory)))
-    (unless (file-exists-p dir)
-      (user-error "\"%s\" doesn't exist" dir))
-
-    (message "Updating configurations...")
-    (cd dir)
-    (shell-command "git pull")
-    (message "Updating configurations...done")))
-(defalias 'suk-update-config #'update-config)
-
-;;;###autoload
-(defun update-packages ()
-  "Refresh package contents and update all packages."
-  (interactive)
-  (message "Updating packages...")
-  (package-upgrade-all)
-  (message "Updating packages...done"))
-(defalias 'suk-update-packages #'update-packages)
-
-;;;###autoload
-(defun update-config-and-packages()
-  "Update confgiurations and packages."
-  (interactive)
-  (update-config)
-  (update-packages))
-(defalias 'suk-update #'update-config-and-packages)
-
-;;;###autoload
-(defun update-dotfiles ()
-  "Update the dotfiles to the latest version."
-  (interactive)
-  (let ((dir (or (getenv "DOTFILES")
-                 (expand-file-name "~/.dotfiles/"))))
-    (if (file-exists-p dir)
-        (progn
-          (message "Updating dotfiles...")
-          (cd dir)
-          (shell-command "git pull")
-          (message "Updating dotfiles...done"))
-      (message "\"%s\" doesn't exist" dir))))
-(defalias 'suk-update-dotfiles #'update-dotfiles)
-
-;;;###autoload
-(defun update-org ()
-  "Update Org files to the latest version."
-  (interactive)
-  (let ((dir (expand-file-name "~/org/")))
-    (if (file-exists-p dir)
-        (progn
-          (message "Updating org files...")
-          (cd dir)
-          (shell-command "git pull")
-          (message "Updating org files...done"))
-      (message "\"%s\" doesn't exist" dir))))
-(defalias 'suk-update-org #'update-org)
-
-(defun update-all()
-  "Update dotfiles, org files, configurations and packages to the latest."
-  (interactive)
-  (update-org)
-  (update-dotfiles)
-  (update-config-and-packages))
-(defalias 'suk-update-all #'update-all)
-
-;; Garbage Collector Magic Hack
-(use-package gcmh
-  :diminish
-  :hook (emacs-startup . gcmh-mode)
-  :init
-  (setq gcmh-idle-delay 'auto
-        gcmh-auto-idle-delay-factor 10
-        gcmh-high-cons-threshold #x1000000)) ; 16MB
-
-;; Sqlite
-(when (fboundp 'sqlite-open)
-  (use-package emacsql-sqlite-builtin))
-
-;;;###autoload
 (defun childframe-workable-p ()
   "Whether childframe is workable."
   (not (or noninteractive
            emacs-basic-display
            (not (display-graphic-p)))))
 
-;;;###autoload
 (defun childframe-completion-workable-p ()
   "Whether childframe completion is workable."
   (and (eq suk-completion-style 'childframe)
        (childframe-workable-p)))
 
-;;;###autoload
 (defun icons-displayable-p ()
   "Return non-nil if icons are displayable."
   (and suk-icon
        (or (featurep 'nerd-icons)
            (require 'nerd-icons nil t))))
 
-;;;###autoload
 (defun suk-treesit-available-p ()
   "Check whether tree-sitter is available.
 Native tree-sitter is introduced since 29.1."
@@ -605,6 +242,29 @@ Native tree-sitter is introduced since 29.1."
        (fboundp 'treesit-available-p)
        (treesit-available-p)))
 
+(defun too-long-file-p ()
+  "Check whether the file is too long."
+  (or (> (buffer-size) 100000)
+      (and (fboundp 'buffer-line-statistics)
+           (> (car (buffer-line-statistics)) 10000))))
+
+;; Increase selected region by semantic units
+(defun suk-treesit-available-p ()
+  "Check whether tree-sitter is available.
+Native tree-sitter is introduced since 29.1."
+  (and suk-tree-sitter
+	   (fboundp 'treesit-available-p)
+	   (treesit-available-p)))
+
+
+;; GUI Environment
+(when (display-graphic-p)
+  (progn
+	;; 隐藏垂直滚动条。
+	;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
+	;;  (modify-all-frames-parameters '((vertical-scroll-bars)))
+	)
+  )
 
 ;; =========================================================
 ;; 通过编辑配置文件使其可以调用外部程序，来为其添加功能。

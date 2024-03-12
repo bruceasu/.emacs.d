@@ -4,13 +4,6 @@
   (require 'init-package)
   )
 
-;; Increase selected region by semantic units
-(defun suk-treesit-available-p ()
-  "Check whether tree-sitter is available.
-Native tree-sitter is introduced since 29.1."
-  (and suk-tree-sitter
-	   (fboundp 'treesit-available-p)
-	   (treesit-available-p)))
 
 (use-package expand-region
   :load-path "~/.emacs.d/extensions/expand-region"
@@ -131,7 +124,7 @@ Native tree-sitter is introduced since 29.1."
             browse-url-browser-function 'browse-url-generic)
       (when (daemonp)
         (advice-add #'browse-url :override #'browse-url-generic)))))
-        
+
 ;; Click to browse URL or to send to e-mail address
 (use-package goto-addr
   :ensure nil
@@ -155,7 +148,7 @@ Native tree-sitter is introduced since 29.1."
 ;; Kill text between the point and the character CHAR
 (use-package avy-zap
   :bind (("M-z" . avy-zap-to-char-dwim)
-         ("M-Z" . avy-zap-up-to-char-dwim)))  
+         ("M-Z" . avy-zap-up-to-char-dwim)))
 
 ;; Show number of matches in mode-line while searching
 (use-package anzu
@@ -222,7 +215,7 @@ Native tree-sitter is introduced since 29.1."
     (add-to-list 'desktop-minor-mode-table
                  '(iedit-mode nil))))
 
- 
+
 ;; Multiple cursors
 (use-package multiple-cursors
   :bind (("C-c m" . multiple-cursors-hydra/body)
@@ -256,12 +249,12 @@ Native tree-sitter is introduced since 29.1."
     "% 2(mc/num-cursors) cursor%s(if (> (mc/num-cursors) 1) \"s\" \"\")"
 	(("0" mc/insert-numbers "insert numbers" :exit t)
 	 ("A" mc/insert-letters "insert letters" :exit t)))))
-	 
+
 ;; Smartly select region, rectangle, multi cursors
 (use-package smart-region
   :hook (after-init . smart-region-on))
 
-	                         
+
 
 
 ;; Copy&paste GUI clipboard from text terminal
@@ -275,7 +268,7 @@ Native tree-sitter is introduced since 29.1."
             (lambda (text)
               (start-process "xclip"  nil xclip-program "--trim-newline" "--type" "text/plain;charset=utf-8" text)))))
 
-  
+
 ;; Hungry deletion
 (use-package hungry-delete
   :diminish
@@ -321,7 +314,7 @@ Native tree-sitter is introduced since 29.1."
   :diminish
   :hook ((prog-mode . subword-mode)
          (minibuffer-setup . subword-mode)))
-         
+
 ;; Flexible text folding
 (use-package hideshow
   :ensure nil
@@ -412,9 +405,9 @@ Native tree-sitter is introduced since 29.1."
 
 ;; Hanlde minified code
 (use-package so-long
-  :hook (after-init . global-so-long-mode))  
+  :hook (after-init . global-so-long-mode))
 
- 
+
 ;; Nice writing
 (use-package olivetti
   :diminish
@@ -433,7 +426,7 @@ Native tree-sitter is introduced since 29.1."
     (setq atomic-chrome-url-major-mode-alist
 		  '(("github\\.com" . gfm-mode)
             ("gitlab\\.com" . gfm-mode)))))
-             
+
 (unless sys/win32p
 	;; Open files as another user
 	(use-package sudo-edit)
@@ -453,6 +446,6 @@ Native tree-sitter is introduced since 29.1."
     (setq flyspell-issue-message-flag nil)
     (setq ispell-program-name "aspell")
     (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together")))
-  
+
   )
 (provide 'init-edit)

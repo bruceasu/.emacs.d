@@ -108,7 +108,7 @@
 (unless sys/win32p
   (use-package daemons)                 ; system services/daemons
   (use-package tldr))
-  			  
+
 ;; 一些我不知道用途的依赖
 (use-package slime
   :ensure t)

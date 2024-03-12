@@ -619,7 +619,7 @@ This command is convenient when reading novel, documentation."
                        (list (kbd "C-x x Q") #'suk/unfill-paragraph)
                        (list (kbd "C-x k")   #'suk/close-current-buffer)
                        (list (kbd "C-x C-k")   #'suk/kill-all-buffers-except-current)
-					   (list (kbd "C-x K")  #'suk/kill-other-window-buffer) ;关闭其他窗口的           
+					   (list (kbd "C-x K")  #'suk/kill-other-window-buffer) ;关闭其他窗口的
                        (list (kbd "C-x x u") #'suk/revert-buffer-with-utf8)
                        (list (kbd "C-x x g") #'suk/revert-buffer-with-gbk)
                        ;;'([C-t]               transpose-chars)

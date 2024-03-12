@@ -242,7 +242,7 @@
   (when (eq exporter 'html)
     (let* ((dir (ignore-errors (file-name-directory (buffer-file-name))))
            ;;(path (concat dir "style.css"))
-           (path  "~/.emacs.d/share/my-org-style-min.css")
+           (path  org-css-file)
            (homestyle (and (or (null dir) (null (file-exists-p path)))
                            (not (null-or-unboundp 'my-org-inline-css-file))))
            (final (if homestyle my-org-inline-css-file path)))
@@ -391,7 +391,7 @@
 ;; covert to html
 (use-package htmlize
   :defer 2)
-			  
+
 (provide 'init-org)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
