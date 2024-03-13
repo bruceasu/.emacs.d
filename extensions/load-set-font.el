@@ -85,7 +85,7 @@
 
 ;;(setq en-font "Consolas Mono"
 ;;      cn-font "宋体")
-(setq emacs-font-size-pair '(19 . 20))
+(setq emacs-font-size-pair '(24 . 32))
 (setq en-font "victor Mono"
       cn-font "LXGW WenKai Mono")
 (cond
@@ -105,18 +105,21 @@
     (setq en-font "Consolas"))
 )
 (cond
-  ((member "LXGW WenKai Mono" (font-family-list))
-    (setq en-font "LXGW WenKai Mono"))
-  ((member "露鹜文楷等宽" (font-family-list))
-    (setq en-font "露鹜文楷等宽"))
+  ((member "KleeOne+CJK" (font-family-list))
+    (setq en-font "KleeOne+CJK"))
+
   ((member "LXGW WenKai" (font-family-list))
     (setq en-font "LXGW WenKai"))
   ((member "露鹜文楷" (font-family-list))
     (setq en-font "露鹜文楷"))
+  ((member "LXGW WenKai Mono" (font-family-list))
+   (setq en-font "LXGW WenKai Mono"))
+  ((member "露鹜文楷等宽" (font-family-list))
+   (setq en-font "露鹜文楷等宽"))
   ((member "仓耳今楷01-27533 W04" (font-family-list))
     (setq cn-font "仓耳今楷01-27533 W04"))
-  ((member "等距更纱黑体 SC" (font-family-list))
-    (setq cn-font "等距更纱黑体 SC"))
+  ((member "Sarasa Mono SC" (font-family-list))
+    (setq cn-font "Sarasa Mono SC"))
   ((member "Simsun" (font-family-list))
     (setq cn-font "Simsun"))
   ((member "宋体" (font-family-list))
@@ -144,17 +147,17 @@
 (defvar emacs-cjk-font nil
   "The font name for CJK.")
 (defvar emacs-font-size-pair nil
-  "Default font size pair for (latin . cjk)")
+  "Default font size pair for (latin . cjk).")
 
 (defun font-exist-p (fontname)
-  "test if this font is exist or not."
+  "Test if this FONTNAME is exist or not."
   (if (or (not fontname) (string= fontname ""))
       nil
     (if (not (x-list-fonts fontname))
         nil t)))
 
 (defun set-font (latin cjk size-pair)
-  "Setup emacs Latin and CJK font on x window-system."
+  "Setup Emacs LATIN and CJK fonts with SIZE-PAIR on x window-system."
   (if (font-exist-p latin)
       (set-frame-font (format "%s:pixelsize=%d" latin (car size-pair)) t))
 
@@ -164,7 +167,7 @@
                           (font-spec :family cjk :size (cdr size-pair))))))
 
 (defun emacs-step-font-size (step)
-  "Increase/Decrease emacs's font size."
+  "Increase/Decrease Emacs's font by STEP size."
   (let ((scale-steps emacs-font-size-pair-list))
     (if (< step 0) (setq scale-steps (reverse scale-steps)))
     (setq emacs-font-size-pair
@@ -175,12 +178,19 @@
       (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair))))
 
 (defun increase-emacs-font-size ()
-  "Decrease emacs's font-size acording emacs-font-size-pair-list."
+  "Decrease Emacs's font-size acording emacs-font-size-pair-list."
   (interactive) (emacs-step-font-size 1))
 
 (defun decrease-emacs-font-size ()
-  "Increase emacs's font-size acording emacs-font-size-pair-list."
+  "Increase Emacs's font-size acording emacs-font-size-pair-list."
   (interactive) (emacs-step-font-size -1))
+
+(when (member "Symbols Nerd Font Mono" (font-family-list))
+  (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
+  ;; FontAwesome 范围
+  (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
+  ;; 扩展至可能包含 Material Design Icons 的范围
+  (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
 
 
 (when sys/win32p
@@ -296,10 +306,18 @@
         ;; 给相应的字符集设置中文字体。
         (dolist (charset '(han cjk-misc chinese-gbk))
           (cond
+           ((member "KleeOne+CJK" (font-family-list))
+            (set-fontset-font "fontset-default" charset (font-spec :family "KleeOne+CJK")))
+           ((member "LXGW WenKai Mono" (font-family-list))
+            (set-fontset-font "fontset-default" charset (font-spec :family "LXGW WenKai Mono")))
+           ((member "露鹜文楷等宽" (font-family-list))
+            (set-fontset-font "fontset-default" charset (font-spec :family "露鹜文楷等宽")))
+           ((member "Sarasa Mono SC" (font-family-list))
+            (set-fontset-font "fontset-default" charset (font-spec :family "Sarasa Mono SC")))
+           ((member "Sarasa Mono SC" (font-family-list))
+            (set-fontset-font "fontset-default" charset (font-spec :family "Sarasa Mono SC")))
            ((member "仓耳今楷01-27533 W04" (font-family-list))
             (set-fontset-font "fontset-default" charset (font-spec :family "仓耳今楷01-27533 W04")))
-           ((member "等距更纱黑体 SC" (font-family-list))
-            (set-fontset-font "fontset-default" charset (font-spec :family "等距更纱黑体 SC")))
            ((member "Simsun" (font-family-list))
             (set-fontset-font "fontset-default" charset (font-spec :family "Simsun")))
 
@@ -308,35 +326,38 @@
               '(("宋体" . 1.0)
                 ("微软雅黑" . 1.0)))))
     (message "Set program font"))
-
+(add-hook 'prog-mode-hook 'load-org-font)
 ;;----------------------------------------------------------
   (defun load-default-font ()
     "Load default font setting."
     (interactive)
-    (load-program-font)
-    ;; (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+   ;; (load-program-font)
+    (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
      (message "set default fonts")
     )
+;;----------------------------------------------------------
+
+(defun load-org-font ()
+  "Load org mode font."
+  (interactive)
+  (make-face 'width-font-face)
+  (when sys/win32p
+    ;;(set-face-attribute "fontset-default" 'han   :font "Sarasa Mono SC-12")
+    (set-face-attribute 'default nil :font "Sarasa Mono SC")
+    (set-fontset-font "fontset-default" 'han (font-spec :family "Sarasa Mono SC")))
+  (when sys/linuxp
+    (set-face-attribute 'default nil :font "Sarasa Mono SC" :size 12) ;; linux
+    )
+  (setq buffer-face-mode-face 'width-font-face)
+  (buffer-face-mode)
+  (setq loaded-font-type 3)
+  (setq-default line-spacing 5)
+  (message "Set org-mode font"))
+;; (with-eval-after-load 'org
 
 
-(with-eval-after-load 'org
-  (defun load-org-font ()
-    "Load org-mode font."
-    (interactive)
-    (make-face 'width-font-face)
-    (when sys/win32p
-      (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC-12")
-    )
-    (when sys/linuxp
-      (set-face-attribute 'width-font-face nil :font "等距更纱黑体 SC" :size 12) ;; linux
-    )
-    (setq buffer-face-mode-face 'width-font-face)
-    (buffer-face-mode)
-    (setq loaded-font-type 3)
-    (setq-default line-spacing 5)
-    (message "Set org-mode font")
-  )
-  (add-hook 'org-mode-hook 'load-org-font))
+;;   )
+  (add-hook 'org-mode-hook 'load-org-font)
 ;;; ----------------------------------------------------------
 
 ;; 解决 daemon 时， 字体无效。

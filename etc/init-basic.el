@@ -159,49 +159,51 @@
 ;; 新建文件以utf-8编码，行末结束符平台相关
 (prefer-coding-system 'utf-8)
 
-(if sys/win32p
-   (setq w32-unicode-filenames 'nil)       ; 确保file-name-coding-system变量的设置不会无效
+(when sys/win32p
+   (setq w32-unicode-filenames t) ; 启用 Unicode 文件名支持
+  (setq file-name-coding-system 'utf-8) ; 设置文件名编码为 UTF-8
+  (setq locale-coding-system 'utf-8) ; 设置区域设置编码为 UTF-8
 
-   ;; 简体
-   ;;(prefer-coding-system 'gb2312)
-   ;;(prefer-coding-system 'cp936)
-   ;;(prefer-coding-system 'gb18030)
-   (setq file-name-coding-system 'gb18030)
-   (setq locale-coding-system 'gb18030)    ; 此句保证中文字体设置有效
+  ;; 简体
+  ;;(prefer-coding-system 'gb2312)
+  ;;(prefer-coding-system 'cp936)
+  ;;(prefer-coding-system 'gb18030)
+  ;;(setq file-name-coding-system 'gb18030)
+  ;;(setq locale-coding-system 'gb18030)    ; 此句保证中文字体设置有效
 
-   ;; 繁体
-   ;; (prefer-coding-system 'cp950)
-   ;; (prefer-coding-system 'big5-hkscs)
-   ;; (setq file-name-coding-system 'big5-hkscs) ; Hong Kong and Taiwan
-   ;; (setq locale-coding-system 'big5-hkscs)
+  ;; 繁体
+  ;; (prefer-coding-system 'cp950)
+  ;; (prefer-coding-system 'big5-hkscs)
+  ;; (setq file-name-coding-system 'big5-hkscs) ; Hong Kong and Taiwan
+  ;; (setq locale-coding-system 'big5-hkscs)
 
-   ;; (setq file-name-coding-system 'cp932)      ; Japanese
-   ;; (setq locale-coding-system 'cp932)
+  ;; (setq file-name-coding-system 'cp932)      ; Japanese
+  ;; (setq locale-coding-system 'cp932)
 
-   ;; Key Modifiers
-   ;; make PC keyboard's Win key or other to type Super or Hyper
-   ;; (setq w32-pass-lwindow-to-system nil)
-   (setq w32-lwindow-modifier 'super)    ; Left Windows key
-   (setq w32-apps-modifier 'hyper)       ; Menu/App key
-   ;; w32-register-hot-key 在 Emacs 中是用来在Windows系统上注册全局热键的函数，
-   ;; 但它并不直接关联到执行 Emacs Lisp 函数。
-   ;; 这个函数更多的是告诉Windows操作系统，
-   ;; “当这个按键组合被按下时，应该通知Emacs”。
-   ;; 要使Emacs在按下这个热键时执行特定的Elisp函数，还需要在Emacs内部设置相应的
-   ;; 响应机制。这通常涉及到编写一些额外的Elisp代码来监听这个热键，
-   ;; 并在它被按下时触发相应的操作。
-   ;; 实际上，w32-register-hot-key 更多地用于在操作系统级别处理特定的按键组合，
-   ;; 而不是在Emacs的编辑环境内。如果您想在Emacs内部绑定热键并执行函数，
-   ;; 通常会使用像 global-set-key 或 define-key 这样的函数。
-   (w32-register-hot-key [s-t])
-   ;; scroll-bar
-   (set-scroll-bar-mode 'right)
-   ;; Optimization
-   (setq w32-get-true-file-attributes nil   ; decrease file IO workload
-         w32-use-native-image-API t         ; use native w32 API
-         w32-pipe-read-delay 0              ; faster IPC
-         w32-pipe-buffer-size 65536)       ; read more at a time (64K, was 4K)
-)
+  ;; Key Modifiers
+  ;; make PC keyboard's Win key or other to type Super or Hyper
+  ;; (setq w32-pass-lwindow-to-system nil)
+  (setq w32-lwindow-modifier 'super)    ; Left Windows key
+  (setq w32-apps-modifier 'hyper)       ; Menu/App key
+  ;; w32-register-hot-key 在 Emacs 中是用来在Windows系统上注册全局热键的函数，
+  ;; 但它并不直接关联到执行 Emacs Lisp 函数。
+  ;; 这个函数更多的是告诉Windows操作系统，
+  ;; “当这个按键组合被按下时，应该通知Emacs”。
+  ;; 要使Emacs在按下这个热键时执行特定的Elisp函数，还需要在Emacs内部设置相应的
+  ;; 响应机制。这通常涉及到编写一些额外的Elisp代码来监听这个热键，
+  ;; 并在它被按下时触发相应的操作。
+  ;; 实际上，w32-register-hot-key 更多地用于在操作系统级别处理特定的按键组合，
+  ;; 而不是在Emacs的编辑环境内。如果您想在Emacs内部绑定热键并执行函数，
+  ;; 通常会使用像 global-set-key 或 define-key 这样的函数。
+  (w32-register-hot-key [s-t])
+  ;; scroll-bar
+  (set-scroll-bar-mode 'right)
+  ;; Optimization
+  (setq w32-get-true-file-attributes nil   ; decrease file IO workload
+        w32-use-native-image-API t         ; use native w32 API
+        w32-pipe-read-delay 0              ; faster IPC
+        w32-pipe-buffer-size 65536)       ; read more at a time (64K, was 4K)
+  )
 
 ;; Unix like OS.
 (unless sys/win32p

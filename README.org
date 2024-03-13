@@ -624,4 +624,2096 @@ Define some variables.
   ;;; +custom.el ends here
 
 #+end_src
+* etc/init-auto-save.el
+Enable auto save file.
+#+begin_src  emacs-lisp :tangle etc/init-auto-save.el
+;;; init-auto-save.el --- Init for auto-save.el
+;; Filename: init-auto-save.el
+;;; Commentary:
+;;
+;; Init for auto-save.el
+;;
+;;; Require
 
+(require 'auto-save)
+
+;;; Code:
+
+(auto-save-enable)
+(setq auto-save-silent t)
+(setq auto-save-delete-trailing-whitespace t)
+
+(provide 'init-auto-save)
+
+;;; init-auto-save.el ends here
+
+#+end_src
+* etc/init-awsome-pair.el
+#+begin_src  emacs-lisp :tangle etc/init-awsome-pair.el
+(require 'awesome-pair)
+(dolist (hook (list
+               'c-mode-common-hook
+               'c-mode-hook
+               'c++-mode-hook
+               'java-mode-hook
+               'haskell-mode-hook
+               'emacs-lisp-mode-hook
+               'lisp-interaction-mode-hook
+               'lisp-mode-hook
+               'maxima-mode-hook
+               'ielm-mode-hook
+               'sh-mode-hook
+               'makefile-gmake-mode-hook
+               'php-mode-hook
+               'python-mode-hook
+               'js-mode-hook
+               'go-mode-hook
+               'qml-mode-hook
+               'jade-mode-hook
+               'css-mode-hook
+               'ruby-mode-hook
+               'coffee-mode-hook
+               'rust-mode-hook
+               'qmake-mode-hook
+               'lua-mode-hook
+               'swift-mode-hook
+               'minibuffer-inactive-mode-hook
+               ))
+  (add-hook hook #'(lambda () (awesome-pair-mode 1))))
+
+;; (define-key awesome-pair-mode-map (kbd "(") #'awesome-pair-open-round)
+;; (define-key awesome-pair-mode-map (kbd "[") #'awesome-pair-open-bracket)
+;; (define-key awesome-pair-mode-map (kbd "{") #'awesome-pair-open-curly)
+;; (define-key awesome-pair-mode-map (kbd ")") #'awesome-pair-close-round)
+;; (define-key awesome-pair-mode-map (kbd "]") #'awesome-pair-close-bracket)
+;; (define-key awesome-pair-mode-map (kbd "}") #'awesome-pair-close-curly)
+;; (define-key awesome-pair-mode-map (kbd "SPC") #'awesome-pair-space)
+;; (define-key awesome-pair-mode-map (kbd "=") #'awesome-pair-equal)
+;; (define-key awesome-pair-mode-map (kbd "\"") #'awesome-pair-double-quote)
+
+(define-key awesome-pair-mode-map (kbd "%") #'awesome-pair-match-paren)
+
+(define-key awesome-pair-mode-map (kbd "M-o") #'awesome-pair-backward-delete)
+(define-key awesome-pair-mode-map (kbd "C-d") #'awesome-pair-forward-delete)
+(define-key awesome-pair-mode-map (kbd "C-k") #'awesome-pair-kill)
+
+(define-key awesome-pair-mode-map (kbd "M-\"") #'awesome-pair-wrap-double-quote)
+(define-key awesome-pair-mode-map (kbd "M-[") #'awesome-pair-wrap-bracket)
+(define-key awesome-pair-mode-map (kbd "M-{") #'awesome-pair-wrap-curly)
+(define-key awesome-pair-mode-map (kbd "M-(") #'awesome-pair-wrap-round)
+(define-key awesome-pair-mode-map (kbd "M-)") #'awesome-pair-unwrap)
+
+(define-key awesome-pair-mode-map (kbd "M-p") #'awesome-pair-jump-right)
+(define-key awesome-pair-mode-map (kbd "M-n") #'awesome-pair-jump-left)
+(define-key awesome-pair-mode-map (kbd "M-:") #'awesome-pair-jump-out-pair-and-newline)
+
+
+
+(provide 'init-awsome-pair)
+
+#+end_src
+* etc/init-basic.el
+Base setting.
+#+begin_src  emacs-lisp :tangle etc/init-basic.el
+;; init-basic.el --- Initialize basic configurations.	-*- lexical-binding: t -*-
+
+;;; Commentary:
+;;
+;; Basic configuration.
+;;
+
+;;; Code:
+
+(eval-when-compile
+  (require '+const)
+  (require '+custom)
+  (require 'subr-x)
+  )
+
+;; Speed up startup
+(defvar default-file-name-handler-alist file-name-handler-alist)
+(setq file-name-handler-alist nil)
+;; 去除默认启动界面
+(setq inhibit-startup-message nil)
+(setq inhibit-startup-screen t)
+;; 关闭工具栏
+(when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+;; 关闭菜单栏
+(when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+
+;; Personal information
+(setq user-full-name suk-full-name)
+(setq user-mail-address suk-mail-address)
+
+(setq-default major-mode 'text-mode
+               fill-column 80
+              tab-width 4
+              c-basic-offset 4
+              indent-tabs-mode nil)     ;; Permanently indent with spaces, never with TABs
+
+;; follow symlinks
+(setq vc-follow-symlinks t)
+
+;;只渲染当前屏幕语法高亮，加快显示速度
+(setq font-lock-maximum-decoration t)
+(setq initial-scratch-message nil)
+(setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
+(setq adaptive-fill-first-line-regexp "^* *$")
+;; Repeating C-SPC after popping mark pops it again
+(setq set-mark-command-repeat-pop t)
+(setq-default major-mode 'text-mode)
+;; 设置 sentence-end 可以识别中文标点。不用在 fill 时在句号后插 入两个空格。
+(setq sentence-end "\\([。！？￥%×（）—]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
+;; 让'_'被视为单词的一部分
+(add-hook 'after-change-major-mode-hook (lambda ()(modify-syntax-entry ?_ "w")))
+;; "-" 同上)
+(add-hook 'after-change-major-mode-hook (lambda () (modify-syntax-entry ?- "w")))
+(setq sentence-end-double-space nil)
+
+;; 更友好及平滑的滚动
+(setq scroll-step 2
+      scroll-margin 2
+      hscroll-step 2
+      hscroll-margin 2
+      scroll-conservatively 101
+      scroll-up-aggressively 0.01
+      scroll-down-aggressively 0.01
+      scroll-preserve-screen-position 'always)
+
+
+;; Browse URL
+;;;###autoload
+(defun suk-webkit-browse-url (url &optional pop-buffer new-session)
+  "Browse URL with xwidget-webkit' and switch or pop to the buffer.
+
+  POP-BUFFER specifies whether to pop to the buffer.
+  NEW-SESSION specifies whether to create a new xwidget-webkit session."
+  (interactive (progn
+                 (require 'browse-url)
+                 (browse-url-interactive-arg "xwidget-webkit URL: ")))
+  (or (featurep 'xwidget-internal)
+      (user-error "Your Emacs was not compiled with xwidgets support"))
+
+  (xwidget-webkit-browse-url url new-session)
+  (let ((buf (xwidget-buffer (xwidget-webkit-current-session))))
+    (when (buffer-live-p buf)
+      (and (eq buf (current-buffer)) (quit-window))
+      (if pop-buffer
+          (pop-to-buffer buf)
+        (switch-to-buffer buf)))))
+
+
+
+(autoload 'calendar "init-calendar" "Config Chinese calendar " t)
+
+;; Increase how much is read from processes in a single chunk (default is 4kb)
+(setq read-process-output-max #x10000)  ; 64kb
+
+
+;;====================================================
+;; 编码设置 begin
+;;====================================================
+;; Set UTF-8 as the default coding system
+(when (fboundp 'set-charset-priority)
+  (set-charset-priority 'unicode))
+
+(prefer-coding-system 'utf-8)
+(setq default-buffer-file-coding-system 'utf-8-unix)            ;缓存文件编码
+(setq default-file-name-coding-system 'utf-8-unix)              ;文件名编码
+(setq default-keyboard-coding-system 'utf-8-unix)               ;键盘输入编码
+(setq default-process-coding-system '(utf-8-unix . utf-8-unix)) ;进程输出输入编码
+(setq default-sendmail-coding-system 'utf-8-unix)               ;发送邮件编码
+(setq default-terminal-coding-system 'utf-8-unix)               ;终端编码
+
+
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(setq-default buffer-file-coding-system 'utf-8)
+
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+;; 23.2 之后废弃，用buffer-file-coding-system
+;;(setq default-buffer-file-coding-system 'utf-8)
+(setq buffer-file-coding-system 'utf-8)
+(setq session-save-file-coding-system 'utf-8)
+
+;; 据说设置为UTF-8不会卡顿
+(set-language-environment "UTF-8")
+;; (set-language-environment 'Chinese-GB)
+
+;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
+;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
+;; utf-16 (utf-16 实际上还细分为 utf-16le, utf-16be, utf-16le-with-signature等多种)
+;; Unicode
+;; (prefer-coding-system 'utf-16le-with-signature)
+;; (prefer-coding-system 'utf-16)
+;; (prefer-coding-system 'utf-8-dos)
+;; 新建文件以utf-8编码，行末结束符平台相关
+(prefer-coding-system 'utf-8)
+
+(when sys/win32p
+   (setq w32-unicode-filenames t) ; 启用 Unicode 文件名支持
+  (setq file-name-coding-system 'utf-8) ; 设置文件名编码为 UTF-8
+  (setq locale-coding-system 'utf-8) ; 设置区域设置编码为 UTF-8
+
+  ;; 简体
+  ;;(prefer-coding-system 'gb2312)
+  ;;(prefer-coding-system 'cp936)
+  ;;(prefer-coding-system 'gb18030)
+  ;;(setq file-name-coding-system 'gb18030)
+  ;;(setq locale-coding-system 'gb18030)    ; 此句保证中文字体设置有效
+
+  ;; 繁体
+  ;; (prefer-coding-system 'cp950)
+  ;; (prefer-coding-system 'big5-hkscs)
+  ;; (setq file-name-coding-system 'big5-hkscs) ; Hong Kong and Taiwan
+  ;; (setq locale-coding-system 'big5-hkscs)
+
+  ;; (setq file-name-coding-system 'cp932)      ; Japanese
+  ;; (setq locale-coding-system 'cp932)
+
+  ;; Key Modifiers
+  ;; make PC keyboard's Win key or other to type Super or Hyper
+  ;; (setq w32-pass-lwindow-to-system nil)
+  (setq w32-lwindow-modifier 'super)    ; Left Windows key
+  (setq w32-apps-modifier 'hyper)       ; Menu/App key
+  ;; w32-register-hot-key 在 Emacs 中是用来在Windows系统上注册全局热键的函数，
+  ;; 但它并不直接关联到执行 Emacs Lisp 函数。
+  ;; 这个函数更多的是告诉Windows操作系统，
+  ;; “当这个按键组合被按下时，应该通知Emacs”。
+  ;; 要使Emacs在按下这个热键时执行特定的Elisp函数，还需要在Emacs内部设置相应的
+  ;; 响应机制。这通常涉及到编写一些额外的Elisp代码来监听这个热键，
+  ;; 并在它被按下时触发相应的操作。
+  ;; 实际上，w32-register-hot-key 更多地用于在操作系统级别处理特定的按键组合，
+  ;; 而不是在Emacs的编辑环境内。如果您想在Emacs内部绑定热键并执行函数，
+  ;; 通常会使用像 global-set-key 或 define-key 这样的函数。
+  (w32-register-hot-key [s-t])
+  ;; scroll-bar
+  (set-scroll-bar-mode 'right)
+  ;; Optimization
+  (setq w32-get-true-file-attributes nil   ; decrease file IO workload
+        w32-use-native-image-API t         ; use native w32 API
+        w32-pipe-read-delay 0              ; faster IPC
+        w32-pipe-buffer-size 65536)       ; read more at a time (64K, was 4K)
+  )
+
+;; Unix like OS.
+(unless sys/win32p
+   ;; 新建文件使用utf-8-unix方式
+   (prefer-coding-system 'utf-8-unix)
+   (setq system-time-locale "C")
+   (set-selection-coding-system 'utf-8))
+
+(unless sys/macp
+  (setq command-line-ns-option-alist nil))
+
+(unless sys/linuxp
+  (setq command-line-x-option-alist nil))
+
+
+
+(defun childframe-workable-p ()
+  "Whether childframe is workable."
+  (not (or noninteractive
+           emacs-basic-display
+           (not (display-graphic-p)))))
+
+(defun childframe-completion-workable-p ()
+  "Whether childframe completion is workable."
+  (and (eq suk-completion-style 'childframe)
+       (childframe-workable-p)))
+
+(defun icons-displayable-p ()
+  "Return non-nil if icons are displayable."
+  (and suk-icon
+       (or (featurep 'nerd-icons)
+           (require 'nerd-icons nil t))))
+
+(defun suk-treesit-available-p ()
+  "Check whether tree-sitter is available.
+Native tree-sitter is introduced since 29.1."
+  (and suk-tree-sitter
+       (fboundp 'treesit-available-p)
+       (treesit-available-p)))
+
+(defun too-long-file-p ()
+  "Check whether the file is too long."
+  (or (> (buffer-size) 100000)
+      (and (fboundp 'buffer-line-statistics)
+           (> (car (buffer-line-statistics)) 10000))))
+
+;; Increase selected region by semantic units
+(defun suk-treesit-available-p ()
+  "Check whether tree-sitter is available.
+Native tree-sitter is introduced since 29.1."
+  (and suk-tree-sitter
+	   (fboundp 'treesit-available-p)
+	   (treesit-available-p)))
+
+
+;; GUI Environment
+(when (display-graphic-p)
+  (progn
+	;; 隐藏垂直滚动条。
+	;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
+	;;  (modify-all-frames-parameters '((vertical-scroll-bars)))
+	)
+  )
+
+;; =========================================================
+;; 通过编辑配置文件使其可以调用外部程序，来为其添加功能。
+;; 增加命令
+;;(defun lxr (names)
+;;  (interactive "s查找联系人，请输入条件：")
+;;  (call-process-shell-command "lxr" nil t t "-s" names))
+;;执行命令
+;;首先按功能键，Alt+x，然后输入命令 lxr 。
+;;系统提示：“查找联系人，请输入条件："。
+;;输入完成后，emacs 会执行命令lxr -s names，并输出执行的结果。
+;; =========================================================
+(provide 'init-basic)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; init-basic.el ends here
+
+#+end_src
+* etc/init-bookmark.el
+#+begin_src emacs-lisp :tangle etc/init-bookmark.el
+  ;; init-bookmark.el --- bookmark configurations.	-*- lexical-binding: t -*-
+  ;;; Commentary:
+  ;;
+  ;; Bookmark configuration.
+  ;;
+
+  ;;; Code:
+
+  ;; 同步更新书签文件
+  ;; 或者退出时保存
+  (setq bookmark-save-flag 1)
+
+  ;;C-x r m (name)  M-x bookmark-set  设置书签
+  ;;C-x r b (name)  M-x bookmark-jump  跳转到书签
+  ;;C-x r l         M-x bookmark-bmenu-list  书签列表
+  ;;                M-x bookmark-delete  删除书签
+  ;;                M-x bookmark-load  读取存储书签文件
+
+  ;; =========================================================
+  ;; 方便快速跳到bookmark
+  ;; ---------------------------------------------------------
+  ;;;###autoload
+  (defun suk/ska-point-to-register()
+    "Store cursorposition _fast_ in a register. Use ska-jump-to-register to jump back to the stored position."
+    (interactive)
+    (setq zmacs-region-stays t)
+    (point-to-register 8))
+  ;; ---------------------------------------------------------
+  ;;;###autoload
+  (defun suk/ska-jump-to-register()
+    "Switch between current cursorposition and position that was stored with ska-point-to-register."
+    (interactive)
+    (setq zmacs-region-stays t)
+    (let ((tmp (point-marker)))
+          (jump-to-register 8)
+          (set-register 8 tmp)))
+
+  ;; use init-key.el to load and bind the functions.
+  ;;(global-set-key  [C-f7] 'suk/ska-point-to-register)
+  ;;(global-set-key  [f7] 'suk/ska-jump-to-register)
+
+  ;; bookmark
+
+  ;; 这个是 Emacs 自带的功能，通过 C-x r m 调用 bookmark-set 函数，将文件夹设置为
+  ;; bookmark。设置成功之后，就可以使用 C-x r j 跳转到文件夹当中。除书签功能之处，
+  ;; 也可以使用 register 功能跳转到某个文件。
+
+  ;; C-x r m <RET>
+  ;; Set the bookmark for the visited file, at point.
+  ;; C-x r m bookmark <RET>
+  ;; Set the bookmark named bookmark at point (bookmark-set).
+  ;; C-x r M bookmark <RET>
+  ;; Like C-x r m, but don't overwrite an existing bookmark.
+  ;; C-x r b bookmark <RET>
+  ;; Jump to the bookmark named bookmark (bookmark-jump).
+  ;; C-x r l
+  ;; List all bookmarks (list-bookmarks).
+  ;; M-x bookmark-save
+  ;; Save all the current bookmark values in the default bookmark file.
+  ;; M-x bookmark-load <RET> filename <RET>
+  ;; Load a file named filename that contains a list of bookmark values. You can use this command, as well as bookmark-write, to work with other files of bookmark values in addition to your default bookmark file.
+  ;; M-x bookmark-write <RET> filename <RET>
+  ;; Save all the current bookmark values in the file filename.
+  ;; M-x bookmark-delete <RET> bookmark <RET>
+  ;; Delete the bookmark named bookmark.
+  ;; M-x bookmark-insert-location <RET> bookmark <RET>
+  ;; Insert in the buffer the name of the file that bookmark bookmark points to.
+  ;; M-x bookmark-insert <RET> bookmark <RET>
+  ;; Insert in the buffer the contents of the file that bookmark bookmark points to.
+
+
+  ;; Registers allow you to jump to a file or other location quickly.
+  ;; To jump to a register, use C-x r j followed by the letter of the register.
+  ;; Using registers for all these file shortcuts is probably a bit of
+  ;; a waste since I can easily define my own keymap, but since I rarely
+  ;; go beyond register A anyway. Also, I might as well add shortcuts for refiling.
+  (require 'bookmark)
+  (defvar my-refile-map (make-sparse-keymap))
+  (defmacro my-defshortcut (key file)
+    `(progn
+       (set-register ,key (cons 'file ,file))
+       (define-key my-refile-map
+         (char-to-string ,key)
+         (lambda (prefix)
+           (interactive "p")
+           (let ((org-refile-targets '(((,file) :maxlevel . 6)))
+                 (current-prefix-arg (or current-prefix-arg '(4))))
+             (call-interactively 'org-refile))))))
+
+  ;;(define-key my-refile-map "," 'my-org-refile-to-previous-in-file)
+  (my-defshortcut ?e "~/.emacs.d/init.el")
+  (my-defshortcut ?E "~/.emacs.d/custom.el")
+  ;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
+  ;; (my-defshortcut ?o "~/cloud/orgzly/organizer.org")
+  ;; (my-defshortcut ?s "~/personal/sewing.org")
+  ;; (my-defshortcut ?b "~/personal/business.org")
+  ;; (my-defshortcut ?p "~/personal/google-inbox.org")
+  ;; (my-defshortcut ?P "~/personal/google-ideas.org")
+  ;; (my-defshortcut ?B "~/Dropbox/books")
+  (my-defshortcut ?n "~/notes")
+  ;; (my-defshortcut ?N "~/sync/notes/QuickNote.md")
+  ;; (my-defshortcut ?w "~/Dropbox/public/sharing/index.org")
+  ;; (my-defshortcut ?W "~/Dropbox/public/sharing/blog.org")
+  ;; (my-defshortcut ?j "~/personal/journal.org")
+  ;; (my-defshortcut ?J "~/cloud/a/Journal.csv")
+  ;; (my-defshortcut ?I "~/Dropbox/Inbox")
+  ;; (my-defshortcut ?g "~/sachac.github.io/evil-plans/index.org")
+  ;; (my-defshortcut ?c "~/code/dev/elisp-course.org")
+  ;; (my-defshortcut ?C "~/personal/calendar.org")
+  ;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
+  ;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
+  ;; (my-defshortcut ?Q "~/personal/questions.org")
+
+
+  ;; Bookmark
+  (use-package bookmark
+    :ensure nil
+    :config
+    (with-no-warnings
+      ;; Display icons for bookmarks
+      (defun my-bookmark-bmenu--revert ()
+        "Re-populate `tabulated-list-entries'."
+        (let (entries)
+          (dolist (full-record (bookmark-maybe-sort-alist))
+            (let* ((name       (bookmark-name-from-full-record full-record))
+                   (annotation (bookmark-get-annotation full-record))
+                   (location   (bookmark-location full-record))
+                   (file       (file-name-nondirectory location))
+                   (type       (let ((fmt "%-8.8s"))
+                                 (cond ((null location)
+                                        (propertize (format fmt "NOFILE") 'face 'warning))
+                                       ((file-remote-p location)
+                                        (propertize (format fmt "REMOTE") 'face 'mode-line-buffer-id))
+                                       ((not (file-exists-p location))
+                                        (propertize (format fmt "NOTFOUND") 'face 'error))
+                                       ((file-directory-p location)
+                                        (propertize (format fmt "DIRED") 'face 'warning))
+                                       (t (propertize (format fmt "FILE") 'face 'success)))))
+                   (icon       (if (icons-displayable-p)
+                                   (cond
+                                    ((file-remote-p location)
+                                     (nerd-icons-codicon "nf-cod-radio_tower"))
+                                    ((file-directory-p location)
+                                     (nerd-icons-icon-for-dir location))
+                                    ((not (string-empty-p file))
+                                     (nerd-icons-icon-for-file file)))
+                                 "")))
+              (push (list
+                     full-record
+                     `[,(if (and annotation (not (string-equal annotation "")))
+                            "*" "")
+                       ,icon
+                       ,(if (display-mouse-p)
+                            (propertize name
+                                        'font-lock-face 'bookmark-menu-bookmark
+                                        'mouse-face 'highlight
+                                        'follow-link t
+                                        'help-echo "mouse-2: go to this bookmark in other window")
+                          name)
+                       ,type
+                       ,@(if bookmark-bmenu-toggle-filenames
+                             (list (propertize location 'face 'completions-annotations)))])
+                    entries)))
+          (tabulated-list-init-header)
+          (setq tabulated-list-entries entries))
+        (tabulated-list-print t))
+      (advice-add #'bookmark-bmenu--revert :override #'my-bookmark-bmenu--revert)
+
+      (defun my-bookmark-bmenu-list ()
+        "Display a list of existing bookmarks.
+  The list is displayed in a buffer named `*Bookmark List*'.
+  The leftmost column displays a D if the bookmark is flagged for
+  deletion, or > if it is flagged for displaying."
+        (interactive)
+        (bookmark-maybe-load-default-file)
+        (let ((buf (get-buffer-create bookmark-bmenu-buffer)))
+          (if (called-interactively-p 'interactive)
+              (pop-to-buffer buf)
+            (set-buffer buf)))
+        (bookmark-bmenu-mode)
+        (bookmark-bmenu--revert))
+      (advice-add #'bookmark-bmenu-list :override #'my-bookmark-bmenu-list)
+
+      (define-derived-mode bookmark-bmenu-mode tabulated-list-mode "Bookmark Menu"
+        (setq truncate-lines t)
+        (setq buffer-read-only t)
+        (setq tabulated-list-format
+              `[("" 1) ;; Space to add "*" for bookmark with annotation
+                ("" ,(if (icons-displayable-p) 2 0)) ;; Icons
+                ("Bookmark" ,bookmark-bmenu-file-column bookmark-bmenu--name-predicate)
+                ("Type" 9)
+                ,@(if bookmark-bmenu-toggle-filenames
+                      '(("File" 0 bookmark-bmenu--file-predicate)))])
+        (setq tabulated-list-padding bookmark-bmenu-marks-width)
+        (setq tabulated-list-sort-key '("Bookmark" . nil))
+        (add-hook 'tabulated-list-revert-hook #'bookmark-bmenu--revert nil t)'
+        (setq revert-buffer-function #'bookmark-bmenu--revert)
+        (tabulated-list-init-header))))
+  (provide 'init-bookmark)
+  ;;; init-bookmark.el ends here
+
+#+end_src
+* etc/init-buffers.el
+#+begin_src emacs-lisp :tangle etc/init-buffers.el
+;;; init-buffers.el --- Initialize buffers configurations. -*- lexical-binding: t -*-
+;;; Commentary:
+;;
+;; buffers configuration.
+;;
+;;; Code:
+(eval-when-compile
+  (require '+const)
+  (require '+custom)
+  (require 'buffer-extension))
+
+;; =========================================================
+;; 另外一种解决乱码的办法，就是用命令
+;; C-x <RET> r or M-x revert-buffer-with-coding-system or C-x C-m r
+;; 来用指定的编码重新读入这个文件。
+;; 以DOS格式重读文件（UNIX格式类似）
+;; C-x C-m r dos
+;;
+;; 1. 查看当前 buffer 的编码：M-x describe-coding-system
+;; 2. 列出所有编码：C-x <RET> r <TAB>
+;; 3. 以指定编码重读当前buffer：C-x <RET> r utf-8，（revert-buffer-with-coding-system）
+;; 4. 改变当前buffer的编码：C-x <RET> f utf-8，（set-buffer-file-coding-system）
+;; 5. 设定下一步操作的编码格式：C-x <RET> c，（universal-coding-system-argument）
+;; =========================================================
+
+;; =========================================================
+;; 换行符设置(只是设定保存文件的换行符，并不是用这种换行符重新读取文件)
+;; Dos/Unix
+;; ---------------------------------------------------------
+;;;###autoload
+(defun set2unix ()
+  "Convert the current buffer to UNIX file format."
+  (interactive)
+  (set-buffer-file-coding-system 'undecided-unix nil))
+
+;;;###autoload
+(defun set2dos ()
+  "Convert the current buffer to DOS file format."
+  (interactive)
+  (set-buffer-file-coding-system 'undecided-dos nil))
+
+;; ---------------------------------------------------------------
+
+;; If you have a mix of lines that end in ^M and lines that don’t,
+;; you can use ‘M-x replace-string RET C-q C-m RET’ to remove the
+;; ^M’s. ‘C-q’ quotes the key you press right after it, letting you
+;; insert a ^M character. Typing ‘C-m’ won’t work – you have to
+;; hold down ‘Control’ while hitting ‘q’ followed by ‘m’.
+;; ---------------------------------------------------------------
+;;;###autoload
+(defun dos2unix ()
+  "Delete `' characters in current region or buffer.
+Same as '`replace-string' `C-q' `C-m' `RET' `RET''."
+  (interactive)
+  (save-excursion
+    (when (region-active-p)
+      (narrow-to-region (region-beginning) (region-end)))
+    (goto-char (point-min))
+    (let ((count 0))
+      (while (search-forward "\r" nil t)
+        (replace-match "" nil t)
+        (setq count (1+ count)))
+      (message "Removed %d " count))
+    (widen))
+  ;; 设置当前缓冲区的保存文件格式为 UNIX
+  (set-buffer-file-coding-system 'unix 't)
+  )
+
+;;;###autoload
+(defun unix2dos ()
+  "Convert the current buffer from Unix line endings to DOS line
+endings."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (search-forward "\n" nil t)
+      (replace-match "\r\n" nil t)))
+  ;; 设置当前缓冲区的保存文件格式为 DOS
+  (set-buffer-file-coding-system 'dos 't))
+
+
+;; ===============================================================
+;; 重新读取文件
+;; Revert buffer
+;; ---------------------------------------------------------------
+;;;###autoload
+(defun suk/revert-current-buffer ()
+  "Revert the current buffer. key \\[suk/revert-current-buffer]."
+  (interactive)
+  (unless (minibuffer-window-active-p (selected-window))
+    (revert-buffer t t)
+    (message "Reverted this buffer")))
+
+;;; =========================================================
+;;; 用新编码重新读取文件
+;;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/revert-buffer-no-confirm ()
+  "执行`revert-buffer'时不需要确认. key \\[suk/revert-buffer-no-confirm]."
+  (interactive)
+  (when (buffer-file-name)
+    (revert-buffer buffer-file-name t)
+    )
+  )
+
+;;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/revert-buffer-with-coding-system-no-confirm (coding-system)
+  "Call `revert-buffer-with-coding-system' with CODING-SYSTEM, but when `revert-buffer' do not need confirm."
+  (interactive "Coding system for visited file (default nil): ")
+  (let ((coding-system-for-read coding-system))
+    (suk/revert-buffer-no-confirm)
+    (set-buffer-file-coding-system coding-system)
+    ))
+
+;;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/revert-buffer-with-gbk ()
+  "Call `revert-buffer-with-coding-system-no-confirm' with gbk.
+It is bound to \\[suk/revert-buffer-with-gbk]."
+  (interactive)
+  (suk/revert-buffer-with-coding-system-no-confirm 'gb18030))
+
+;;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/revert-buffer-with-utf8 ()
+  "Call `revert-buffer-with-coding-system-no-confirm' with utf-8.
+It is bound to \\[suk/revert-buffer-with-utf8]."
+  (interactive)
+  (suk/revert-buffer-with-coding-system-no-confirm 'utf-8))
+
+;;; =========================================================
+;;; set the eol to unix format
+;;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/no-junk-please-were-unixish ()
+  "只用unix类换行格式.It is bound to \\[suk/no-junk-please-were-unixish]."
+  (let ((coding-str (symbol-name buffer-file-coding-system)))
+    (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
+      (set-buffer-file-coding-system 'unix))))
+
+(add-hook 'find-file-hook 'suk/no-junk-please-were-unixish)
+
+;; ==============================================================
+;; buffers
+;; --------------------------------------------------------------
+(defvar suk/recently-closed-buffers nil
+  "A list of recently closed buffers. Each element is (buffer name, file path). The max number to track is controlled by the variable `suk/recently-closed-buffers-max'.")
+
+(defvar suk/recently-closed-buffers-max 40 "The maximum length for `suk/recently-closed-buffers'.")
+
+;; ---------------------------------------------------------------
+;;;###autoload
+(defun suk/close-current-buffer ()
+  "Close the current buffer.
+
+Similar to `kill-buffer', with the following addition:
+
+• Prompt user to save if the buffer has been modified even if the
+buffer is not associated with a file.
+
+• If the buffer is editing a source file in an 'org-mode' file,
+prompt the user to save before closing.
+
+• If the buffer is a file, add the path to the list
+`suk/recently-closed-buffers'.
+
+• If it is the minibuffer, exit the minibuffer"
+  (interactive)
+  (let ($emacs-buff-p
+        ($org-p (string-match "^*Org Src" (buffer-name))))
+
+    (setq $emacs-buff-p (if (string-match "^*" (buffer-name)) t nil))
+
+    (if (string= major-mode "minibuffer-inactive-mode")
+        (minibuffer-keyboard-quit)  ; if the buffer is minibuffer
+      (progn
+        ;; offer to save buffers that are non-empty and modified, even for
+        ;; non-file visiting buffer. (because kill-buffer does not offer to save
+        ;; buffers that are not associated with files)
+        (when (and (buffer-modified-p)
+                   (not $emacs-buff-p)
+                   (not (string-equal major-mode "dired-mode"))
+                   (if (equal (buffer-file-name) nil)
+                       (if (string-equal "" (save-restriction (widen) (buffer-string))) nil t)
+                     t))
+          (if (y-or-n-p (format "Buffer %s modified; Do you want to save? " (buffer-name)))
+              (save-buffer)
+            (set-buffer-modified-p nil)))
+        (when (and (buffer-modified-p)
+                   $org-p)
+          (if (y-or-n-p (format "Buffer %s modified; Do you want to save? " (buffer-name)))
+              (org-edit-src-save)
+            (set-buffer-modified-p nil)))
+
+        ;; save to a list of closed buffer
+        (when (buffer-file-name)
+          (setq suk/recently-closed-buffers
+                (cons (cons (buffer-name) (buffer-file-name)) suk/recently-closed-buffers))
+          (when (> (length suk/recently-closed-buffers) suk/recently-closed-buffers-max)
+            (setq suk/recently-closed-buffers (butlast suk/recently-closed-buffers 1))))
+
+        ;; close
+        (kill-buffer (current-buffer))))))
+
+;; ---------------------------------------------------------------
+;;;###autoload
+(defun suk/open-last-closed ()
+  "Open the last closed file."
+  (interactive)
+  (if (> (length suk/recently-closed-buffers) 0)
+      (find-file (cdr (pop suk/recently-closed-buffers)))
+    (progn (message "No recently close buffer in this session."))))
+
+;; ---------------------------------------------------------------
+;;;###autoload
+(defun suk/open-recently-closed ()
+  "Open recently closed file.Prompt for a choice."
+  (interactive)
+  (find-file (ido-completing-read "open:" (mapcar (lambda (f) (cdr f)) suk/recently-closed-buffers))))
+
+;; ---------------------------------------------------------------
+;; List the recently closed files.
+;; ---------------------------------------------------------------
+;;;###autoload
+(defun suk/list-recently-closed ()
+  "List recently closed file."
+  (interactive)
+  (let (($buf (generate-new-buffer "*recently closed*")))
+    (switch-to-buffer $buf)
+    (mapc (lambda ($f) (insert (cdr $f) "\n"))
+          suk/recently-closed-buffers)))
+
+;;;###autoload
+(defun suk/kill-current-mode-buffers ()
+  "Kill all buffers that major mode same with current mode."
+  (interactive)
+  (suk/kill-special-mode-buffers-internal major-mode))
+
+;;;###autoload
+(defun suk/kill-current-mode-buffers-except-current ()
+  "Kill all buffers that major mode same with current mode.
+And don't kill current buffer."
+  (interactive)
+  (kill-special-mode-buffers-internal major-mode t))
+
+;;;###autoload
+(defun suk/kill-special-mode-buffers ()
+  "Kill all buffers that major mode that user given."
+  (interactive)
+  (let (mode-list)
+    (dolist (element (buffer-list))
+      (set-buffer element)
+      (unless (member (symbol-name major-mode) mode-list)
+        (add-to-ordered-list 'mode-list (symbol-name major-mode))))
+    (kill-special-mode-buffers-internal (intern-soft (completing-read "Mode: " mode-list)))))
+
+;;;###autoload
+(defun suk/kill-special-mode-buffers-internal (mode &optional except-current-buffer)
+  "Kill all buffers that major MODE same with special.
+If option EXCEPT-CURRENT-BUFFER is `non-nil',
+kill all buffers with MODE except current buffer."
+  (interactive)
+  (let ((current-buf (current-buffer))
+        (count 0))
+    (dolist (buffer (buffer-list))
+      (set-buffer buffer)
+      (when (and (equal major-mode mode)
+                 (or (not except-current-buffer)
+                     (not (eq current-buf buffer))))
+        (cl-incf count)
+        (kill-buffer buffer)))
+    (message "Killed %s buffer%s" count (if (> count 1) "s" ""))))
+
+;;;###autoload
+(defun suk/kill-all-buffers-except-current ()
+  "Kill all buffers except current buffer.  key \\[suk/kill-all-buffers-except-current]."
+  (interactive)
+  (let ((current-buf (current-buffer)))
+    (dolist (buffer (buffer-list))
+      (set-buffer buffer)
+      (unless (eq current-buf buffer)
+        (kill-buffer buffer)))))
+
+;;;###autoload
+(defun suk/kill-other-window-buffer ()
+  "Kill the buffer in other window.  key \\[suk/kill-other-window-buffer]."
+  (interactive)
+  (other-window +1)
+  (kill-this-buffer)
+  (other-window -1))
+
+;;;###autoload
+(defun suk/delete-this-file ()
+  "Delete the current file, and kill the buffer."
+  (interactive)
+  (unless (buffer-file-name)
+    (error "No file is currently being edited"))
+  (when (yes-or-no-p (format "Really delete '%s'?"
+                             (file-name-nondirectory buffer-file-name)))
+    (delete-file (buffer-file-name))
+    (kill-this-buffer)))
+
+;; --------------------------------------------------------------
+;; new empty buffer
+;; --------------------------------------------------------------
+;;;###autoload
+(defun suk/new-empty-buffer ()
+  "Create a new empty buffer.
+New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
+It returns the buffer."
+  (interactive)
+  (let (($buf (generate-new-buffer "untitled")))
+    (switch-to-buffer $buf)
+    ;;    (funcall initial-major-mode)
+    (text-mode)
+    (setq buffer-offer-save t)
+    $buf
+    ))
+;; --------------------------------------------------------------
+;; Rename
+;; --------------------------------------------------------------
+;;;###autoload
+(defun rename-file-and-buffer (new-name)
+  "Renames both current buffer and file it's visiting to NEW-NAME."
+  (interactive "sNew name: ")
+  (let ((name (buffer-name))
+        (filename (buffer-file-name)))
+    (if (not filename)
+        (message "Buffer '%s' is not visiting a file!" name)
+      (if (get-buffer new-name)
+          (message "A buffer named '%s' already exists!" new-name)
+        (progn
+          (rename-file filename new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil))))))
+
+;; --------------------------------------------------------------
+;; move
+;; --------------------------------------------------------------
+;;;###autoload
+(defun suk/move-buffer-file (dir)
+  "Move both current buffer and file it's visiting to DIR."
+  (interactive "DNew directory: ")
+  (let* ((name (buffer-name))
+         (filename (buffer-file-name))
+         (dir
+          (if (string-match dir "\\(?:/\\|\\\\)$")
+              (substring dir 0 -1) dir))
+         (newname (concat dir "/" name)))
+    (if (not filename)
+        (message "Buffer '%s' is not visiting a file!" name)
+      (copy-file filename newname 1)
+      (delete-file filename)
+      (set-visited-file-name newname)
+      (set-buffer-modified-p nil)
+      t)))
+
+;;;###autoload
+(defun suk/browse-this-file ()
+  "Open the current file as a URL using `browse-url'."
+  (interactive)
+  (let ((file-name (buffer-file-name)))
+    (if (and (fboundp 'tramp-tramp-file-p)
+             (tramp-tramp-file-p file-name))
+        (error "Cannot open tramp file")
+      (browse-url (concat "file://" file-name)))))
+
+
+;;;###autoload
+(defun copy-file-name ()
+  "Copy the current buffer file name to the clipboard."
+  (interactive)
+  (let ((filename (if (equal major-mode 'dired-mode)
+                      default-directory
+                    (buffer-file-name))))
+    (if filename
+        (progn
+          (kill-new filename)
+          (message "Copied '%s'" filename))
+      (warn "Current buffer is not attached to a file!"))))
+
+;; --------------------------------------------------------------
+;; Reload
+;; --------------------------------------------------------------
+;;;###autoload
+(defun suk/reload-emacs-configuration ()
+  "Reload emacs initial configured file init.el."
+  (interactive)
+  (load-file "~/.emacs.d/init.el"))
+
+;; --------------------------------------------------------------
+;; Open custom file
+;; --------------------------------------------------------------
+;;;###autoload
+(defun open-custom-file()
+  "Open custom.el if exists, otherwise create it."
+  (interactive)
+  (let ((custom-example
+         (expand-file-name "custom-example.el" user-emacs-directory)))
+    (unless (file-exists-p custom-file)
+      (if (file-exists-p custom-example)
+          (copy-file custom-file)
+        (error "Unable to find \"%s\"" custom-example)))
+    (find-file custom-file)))
+
+;; --------------------------------------------------------------
+;; Create a new scratch buffer
+;; --------------------------------------------------------------
+;;;###autoload
+(defun suk/create-scratch-buffer ()
+  "Create a scratch buffer."
+  (interactive)
+  (switch-to-buffer (get-buffer-create "*scratch*"))
+  (lisp-interaction-mode))
+
+
+;;;###autoload
+(defun suk/create-scratch-org ()
+  "Create a scratch buffer with org-mode"
+  (interactive)
+  (find-file "/tmp/scratch.org")
+  (gnus-make-directory "/tmp"))
+(global-set-key "\C-cs" 'suk/create-scratch-org) ;; Bind to `C-c s'
+
+;;;###autoload
+(defun suk/switch-to-minibuffer ()
+  "Switch to minibuffer window."
+  (interactive)
+  (if (active-minibuffer-window)
+      (select-window (active-minibuffer-window))
+    (error "Minibuffer is not active")))
+(global-set-key "\C-co" 'suk/switch-to-minibuffer) ;; Bind to `C-c o'
+
+
+(define-minor-mode suk-read-mode
+  "Minor Mode for better reading experience."
+  :init-value nil
+  :group suk
+  (if suk-read-mode
+      (progn
+        (and (fboundp 'olivetti-mode) (olivetti-mode 1))
+        (and (fboundp 'mixed-pitch-mode) (mixed-pitch-mode 1))
+        (text-scale-set +1))
+    (progn
+      (and (fboundp 'olivetti-mode) (olivetti-mode -1))
+      (and (fboundp 'mixed-pitch-mode) (mixed-pitch-mode -1))
+      (text-scale-set 0))))
+
+;; 显示当前buffer或region或函数的行数和字符数
+;; --------------------------------------------------------------
+;;;###autoload
+(defun suk/count-brf-lines (&optional is-fun)
+  "显示当前buffer或region或函数的行数和字符数."
+  (interactive "P")
+  (let (min max)
+    (if is-fun
+        (save-excursion
+          (beginning-of-defun) (setq min (point))
+          (end-of-defun) (setq max (point))
+          (message "当前函数%s内共有%d行, %d个字符" (which-function) (count-lines min max) (- max min)))
+      (if mark-active
+          (progn
+            (setq min (min (point) (mark)))
+            (setq max (max (point) (mark))))
+        (setq min (point-min))
+        (setq max (point-max)))
+      (if (or (= 1 (point-min)) mark-active)
+		  mark-active
+        (message "当前region内共有%d行, %d个字符" (count-lines min max) (- max min))
+        (message "当前buffer内共有%d行, %d个字符" (count-lines min max) (- max min)))
+      (let ((nmin min) (nmax max))
+        (save-excursion
+          (save-restriction
+            (widen)
+            (setq min (point-min))
+            (setq max (point-max))))
+        (message "narrow下buffer内共有%d行, %d个字符, 非narrow下buffer内共有%d行, %d个字符"
+                 (count-lines nmin nmax) (- nmax nmin) (count-lines min max) (- max min))))))
+
+
+;; =========================================================
+;;;###autoload
+(defun suk/indent-buffer ()
+  "Indent the whole buffer."
+  (interactive)
+  (save-excursion
+    (indent-region (point-min) (point-max) nil)))
+
+;;(global-set-key [S-f7] 'indent-buffer)
+
+;;;###autoload
+(defun suk/xah-narrow-to-region ()
+  "Same as `narrow-to-region', but if no selection, narrow to the current block.
+Version 2022-01-22"
+  (interactive)
+  (if (region-active-p)
+      (progn
+        (narrow-to-region (region-beginning) (region-end)))
+    (progn
+      (let ($p1 $p2)
+        (save-excursion
+          (if (re-search-backward "\n[ \t]*\n" nil "move")
+              (progn (goto-char (match-end 0))
+                     (setq $p1 (point)))
+            (setq $p1 (point)))
+          (if (re-search-forward "\n[ \t]*\n" nil "move")
+              (progn (goto-char (match-beginning 0))
+                     (setq $p2 (point)))
+            (setq $p2 (point))))
+        (narrow-to-region $p1 $p2)))))
+
+;; =========================================================
+;; 段落格式化
+;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/unfill-paragraph (&optional region)
+  "Takes a multi-line paragraph (or REGION) and make it into a single line of text."
+  (interactive (progn
+                 (barf-if-buffer-read-only)
+                 (list t)))
+  (let ((fill-column (point-max)))
+    (fill-paragraph nil region)))
+
+;;(bind-key "M-Q" 'suk/unfill-paragraph)
+
+;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
+;; --------------------------------------------------------------
+;;;###autoload
+(defun suk/fill-or-unfill-paragraph (&optional unfill region)
+  "Fill paragraph (or REGION).
+With the prefix argument UNFILL, unfill it instead."
+  (interactive (progn
+                 (barf-if-buffer-read-only)
+                 (list (if current-prefix-arg 'unfill) t)))
+  (let ((fill-column (if unfill (point-max) fill-column)))
+    (fill-paragraph nil region)))
+;;(bind-key "M-q" 'suk/fill-or-unfill-paragraph)
+
+;; =========================================================
+;; 方便的切换major mode
+;; ---------------------------------------------------------
+(defvar suk/switch-major-mode-last-mode nil)
+;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/major-mode-heuristic (symbol)
+  (and (fboundp symbol)
+       (string-match ".*-mode$" (symbol-name symbol))))
+;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/switch-major-mode (mode)
+  "Change major mode to MODE."
+  (interactive
+   (let ((fn suk/switch-major-mode-last-mode) val)
+     (setq val
+           (completing-read
+            (if fn (format "Change major-mode(default:%s): " fn) "Change major mode: ")
+            obarray 'suk/major-mode-heuristic t nil nil (symbol-name fn)))
+     (list (intern val))))
+  (let ((last-mode major-mode))
+    (funcall mode)
+    (setq suk/switch-major-mode-last-mode last-mode)
+    (message "Change to %s." major-mode))
+  )
+;; ---------------------------------------------------------
+;; show major mode
+;;;###autoload
+(defun suk/get-mode-name ()
+  "Show `major-mode' and `mode-name'."
+  (interactive)
+  (message "major-mode:%s, mode-name:%s" major-mode mode-name))
+
+;;;###autoload
+(defun suk/toggle-margin-right ()
+  "Toggle the right margin between `fill-column' or window width.
+This command is convenient when reading novel, documentation."
+  (interactive)
+  (if (eq (cdr (window-margins)) nil)
+      (set-window-margins nil 0 (- (window-body-width) fill-column))
+    (set-window-margins nil 0 0)))
+
+(suk-set-key-bindings 'global-set-key
+                      (list
+                       ;;(list (kbd "C-x b l") #'suk/count-brf-lines)
+                       (list (kbd "C-x n x") #'suk/xah-narrow-to-region) ; C-x n w ,  C-x n d, C-x n n, C-x n p 系列
+                       (list (kbd "C-x x x") #'suk/switch-major-mode)
+                       (list (kbd "C-x x X") #'suk/get-mode-name)
+                       (list (kbd "C-x x n") #'suk/new-empty-buffer)
+                       (list (kbd "C-x x s") #'suk/create-scratch-buffer)
+                       (list (kbd "C-x x o") #'suk/create-scratch-org)
+                       (list (kbd "C-x x m") #'suk/switch-to-minibuffer)
+                       (list (kbd "C-x x c") #'copy-buffer-file-name-as-kill)
+                       (list (kbd "C-x x t") #'suk/toggle-margin-right)
+                       (list (kbd "C-x x q") #'suk/fill-or-unfill-paragraph)
+                       (list (kbd "C-x x Q") #'suk/unfill-paragraph)
+                       (list (kbd "C-x k")   #'suk/close-current-buffer)
+                       (list (kbd "C-x C-k")   #'suk/kill-all-buffers-except-current)
+					   (list (kbd "C-x K")  #'suk/kill-other-window-buffer) ;关闭其他窗口的
+                       (list (kbd "C-x x u") #'suk/revert-buffer-with-utf8)
+                       (list (kbd "C-x x g") #'suk/revert-buffer-with-gbk)
+                       ;;'([C-t]               transpose-chars)
+                       ;;'([S-f6]              hs-minor-mode)
+                       ;;'([S-f5]              toggle-truncate-lines)
+                       (list (kbd "C-S-t") #'suk/open-last-closed)
+                       (list (kbd "C-x R") #'recentf-open)
+                       (list (kbd "C-S-<f6>") #'suk/move-buffer-file)
+                       (list (kbd "C-F")  #'suk/indent-buffer)
+                       (list (kbd "C-S-<f2>")  #'suk/rename-file-and-buffer)
+                       ))
+
+
+
+(provide 'init-buffers)
+;;; init-buffers.el ends here
+
+#+end_src
+* etc/init-calendar.el
+#+begin_src emacs-lisp :tangle etc/init-calendar.el
+(provide 'init-calendar)
+;;; 设置日历 ;;;;;;
+;; Emacs Calender
+;;
+;; Emacs 中有日历，而且可以称之为一个系统，因为其中除了最常用的日历之外，
+;; 还有其他的近十种历法，其中有日记、约会提醒、纪念日提示以及节假日提示等
+;; 等。其中的历法包括中国的农历、希伯来历、伊斯兰历、法国革命历、中美玛雅
+;; 历等等，可以根据经纬度告知你的所在的每天日出日落的时间等等。
+;;
+;; holiday-fixed m d    固定阳历节日， m 月 d 日
+;; holiday-float m w n 浮动阳历节日， m 月的第 n 个星期 w%7
+;;
+;; ----------------------------------------------
+;; .    跳回当前天
+;; o    跳到某一个月
+;; g d    跳到某年某月某日
+;; g c    跳到某年某星期的星期几
+;; g C    跳到阴历的某一天
+;; p C    显示当前的阴历日期
+;; h    显示当前节日
+;; i d    加入当前这一天的日程安排
+;; i w    加入每周这一天的日程安排
+;; i m    加入每月这一天的日程安排
+;; i y    加入每年这一天的日程安排
+;; i a    加入周年纪念（anniversary），比如生日等
+;; d    察看当前日期的diary
+;; -----------------------------------------------
+;;
+
+(defun animals(birthyear)
+  "Calculate the Chinese aninal by year"
+  (let ((x (% (- 1997 birthyear) 12)))
+    (cond ((or (= x 1) (= x -11))  "鼠")
+          ((= x 0)                 "牛")
+          ((or (= x 11) (= x -1))  "虎")
+          ((or (= x 10) (= x -2))  "兔")
+          ((or (= x 9) (= x -3))   "龙")
+          ((or (= x 8) (= x -4))   "蛇")
+          ((or (= x 7) (= x -5))   "马")
+          ((or (= x 6) (= x -6))   "羊")
+          ((or (= x 5) (= x -7))   "猴")
+          ((or (= x 4) (= x -8))   "鸡")
+          ((or (= x 3) (= x -9))   "狗")
+          ((or (= x 2) (= x -10))  "猪")
+          )
+    )
+  )
+
+
+(setq diary-mail-addr "bruceasu@163.com")
+(add-hook 'diary-hook 'appt-make-list)
+;;appointment
+(setq appt-issue-message t)
+
+(autoload 'calendar-chinese-year "cal-china" "Chinese year data" t)
+(require 'cal-china-x)
+;; Holidays
+;;除去基督徒的节日、希伯来人的节日和伊斯兰教的节日。
+(setq hebrew-holidays nil
+      islamic-holidays nil
+      solar-holidays nil
+      bahai-holidays nil
+	  ;; christian-holidays nil
+      )
+(setq calendar-mark-holidays-flag t
+      cal-china-x-important-holidays cal-china-x-chinese-holidays
+      cal-china-x-general-holidays '((holiday-lunar 1 15 "元宵节")
+                                     (holiday-lunar 7 7 "七夕节")
+                                     ;; 生日
+                                     (holiday-lunar 7 16  "老豆生日 (七月十六)" );阴历生日
+                                     (holiday-lunar 1 10  "老母生日 (正月初十)" );阴历生日
+                                     (holiday-lunar 4 4  "老母生日 (四月初四)" );阴历生日
+                                     (holiday-lunar 10 18 "我嘅生日 (十月十八)" );阴历生日
+                                     (holiday-lunar 9 1   "細佬生日 (九月初一)") ;阴历生日
+                                     (holiday-lunar 3 2   "女儿生日 (三月初二)") ;阴历生日
+                                     (holiday-fixed 4 8   "女儿生日 (4月8日)")   ;阳历生日
+                                     (holiday-fixed 10 12  "女儿生日 (10月12日)") ;阳历生日
+                                     (holiday-lunar 9 14   "女儿生日 (九月十四)") ;阴历生日
+                                     (holiday-lunar 6 21  "老婆生日 (六月廿一)") ;阴历生日
+                                     (holiday-fixed 3 8 "妇女节")
+                                     (holiday-fixed 3 12 "植树节")
+                                     (holiday-fixed 5 4 "青年节")
+                                     (holiday-fixed 6 1 "儿童节")
+                                     (holiday-fixed 9 10 "教师节"))
+      holiday-other-holidays '((holiday-fixed 2 14 "情人节")
+                               (holiday-fixed 4 1 "愚人节")
+                               (holiday-fixed 12 25 "圣诞节")
+                               (holiday-float 5 0 2 "母亲节")
+                               (holiday-float 6 0 3 "父亲节")
+                               (holiday-float 11 4 4 "感恩节"))
+      calendar-holidays (append cal-china-x-important-holidays
+                                cal-china-x-general-holidays
+                                cal-china-x-japanese-holidays
+              					holiday-general-holidays
+              					holiday-christian-holidays
+                                holiday-other-holidays))
+
+
+
+(setq general-holidays '((holiday-fixed 1 1   "元旦")
+                         (holiday-fixed 2 14  "情人节")
+                         (holiday-fixed 4 1   "愚人节")
+                         (holiday-fixed 12 25 "圣诞节")
+                         (holiday-fixed 10 1  "国庆节")
+                         (holiday-float 5 0 2 "母亲节")   ;5月的第二个星期天
+                         (holiday-float 6 0 3 "父亲节")
+                         ))
+
+(setq local-holidays '((holiday-chinese 1 15  "元宵节 (正月十五)")
+                       (holiday-chinese 5 5   "端午节 (五月初五)")
+                       (holiday-chinese 9 9   "重阳节 (九月初九)")
+                       (holiday-chinese 8 15  "中秋节 (八月十五)")
+                       ;; 生日
+                       (holiday-chinese 7 16  "老豆生日 (七月十六)" );阴历生日
+                       (holiday-chinese 1 10  "老母生日 (正月初十)" );阴历生日
+                       (holiday-chinese 4 4  "老母生日 (四月初四)" );阴历生日
+                       (holiday-chinese 10 18 "我嘅生日 (十月十八)" );阴历生日
+                       (holiday-chinese 9 1   "細佬生日 (九月初一)") ;阴历生日
+                       (holiday-chinese 3 2   "女儿生日 (三月初二)") ;阴历生日
+                       (holiday-fixed   4 8   "女儿生日 (4月8日)")   ;阳历生日
+                       (holiday-fixed   10 12  "女儿生日 (10月12日)") ;阳历生日
+                       (holiday-chinese 9 14   "女儿生日 (九月十四)") ;阴历生日
+                       (holiday-chinese 6 21  "老婆生日 (六月廿一)") ;阴历生日
+                       ))
+
+(setq chinese-calendar-celestial-stem
+      ["甲" "乙" "丙" "丁" "戊" "己" "庚" "辛" "壬" "癸"])
+(setq chinese-calendar-terrestrial-branch
+      ["子" "丑" "寅" "卯" "辰" "巳" "午" "未" "申" "酉" "戌" "亥"])
+
+(setq mark-diary-entries-in-calendar t
+      appt-issue-message nil
+      mark-holidays-in-calendar t
+      view-calendar-holidays-initially nil)
+
+(setq diary-date-forms '((year "/" month "/" day "[^/0-9]"))
+      calendar-date-display-form '(year "/" month "/" day)
+      calendar-time-display-form
+      '(24-hours ":" minutes (if time-zone " (") time-zone (if time-zone ")")))
+
+(add-hook 'today-visible-calendar-hook 'calendar-mark-today)
+
+
+
+(defun holiday-chinese (cmonth cday string)
+  "Chinese calendar holiday, month and day in Chinese calendar (CMONTH, CDAY).
+
+If corresponding MONTH and DAY in gregorian calendar is visible,
+the value returned is the list \(((MONTH DAY year) STRING)).
+Returns nil if it is not visible in the current calendar window."
+  (let* ((m displayed-month)
+     (y displayed-year)
+     (gdate (calendar-gregorian-from-absolute
+         (+ (cadr (assoc cmonth (calendar-chinese-year y))) (1- cday))))
+     (gm (car gdate))
+     (gd (cadr gdate))
+     (gy (caddr gdate)))
+    (increment-calendar-month m y (- 11 gm))
+    (if (> m 9)
+        (list (list (list gm gd gy) string)))))
+
+(defun birthday-fixed (month day string)
+  "Holiday on MONTH, DAY (Gregorian) called STRING.
+If MONTH, DAY is visible, the value returned is the list (((MONTH DAY year)
+STRING)).  Returns nil if it is not visible in the current calendar window."
+  (let ((m displayed-month)
+        (y displayed-year)
+        (animal (animals (string-to-number (nth 1 (split-string string "(")))))
+        )
+    (increment-calendar-month m y (- 11 month))
+    (if (> m 9)
+      (list (list (list month day y) string animal)))))
+
+
+;;设置我所在地方的经纬度，calendar里有个功能是日月食的预测，和你的经纬度相联系的。
+;; 让emacs能计算日出日落的时间，在 calendar 上用 S 即可看到
+(setq calendar-latitude +35.6764)
+(setq calendar-longitude +139.6500)
+(setq calendar-location-name "東京")
+
+
+;; 设置 calendar 的显示
+(setq calendar-remove-frame-by-deleting t)
+(setq calendar-week-start-day 1) ; 设置星期一为每周的第一天
+(setq mark-diary-entries-in-calendar t) ; 标记calendar上有diary的日期
+(setq mark-holidays-in-calendar nil) ; 为了突出有diary的日期，calendar上不标记节日
+(setq view-calendar-holidays-initially nil) ; 打开calendar的时候不显示一堆节日
+
+;; bind `s-<F11>` in init-key.el
+;;(global-set-key (kbd "<f11>") 'calendar)
+
+#+end_src
+* etc/init-completion.el
+#+begin_src emacs-lisp :tangle etc/init-completion.el
+  ;;; init-completion.el --- Initialize completion configurations.	-*- lexical-binding: t -*-
+
+;;; Commentary:
+;;
+;; Modern completion configuration.
+;;
+
+;;; Code:
+
+
+(use-package helm
+  :ensure t)
+(use-package ac-helm
+  :ensure t)
+;; 著名的Emacs补全框架, 为 LSP 提供额外的功能，如自动补全
+(use-package company
+  :defer 2
+  :hook (after-init . global-company-mode)
+  :init (setq company-tooltip-align-annotations t
+              company-idle-delay 0 company-echo-delay 0
+              company-minimum-prefix-length 1
+              company-require-match nil
+              company-dabbrev-ignore-case nil
+              company-dabbrev-downcase nil
+              company-show-numbers t)
+  :config
+  (setq switch-window-input-style 'minibuffer)
+  (setq switch-window-increase 4)
+  (setq switch-window-threshold 2)
+  (setq switch-window-shortcut-sytle 'querty)
+  (setq switch-window-qwerty-shortcuts
+        '("a" "s" "d" "f" "j" "k" "l"))
+  (global-company-mode)
+  :bind (:map company-active-map
+              ("C-n" . #'company-select-next)
+              ("C-p" . #'company-select-previous)
+              ("TAB" . company-complete-selection)
+              ("M-h" . company-complete-selection)
+              ("M-H" . company-complete-common)
+              ("M-s" . company-search-candidates)
+              ("M-S" . company-filter-candidates)
+              ("M-n" . company-select-next)
+              ("M-p" . company-select-previous))
+  (:map leader-key
+        ("c s" . #'company-yasnippet
+         ))
+  )
+(use-package company-anaconda
+  :ensure nil)
+(use-package company-box
+  :ensure nil)
+(use-package emacs
+  :init
+  ;; TAB cycle if there are only few candidates
+  (setq completion-cycle-threshold 3)
+
+  ;; Only list the commands of the current modes
+  (when (boundp 'read-extended-command-predicate)
+    (setq read-extended-command-predicate
+          #'command-completion-default-include-p))
+
+  ;; Enable indentation+completion using the TAB key.
+  ;; `completion-at-point' is often bound to M-TAB.
+  (setq tab-always-indent 'complete))
+
+;; Optionally use the `orderless' completion style.
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion))))
+  (orderless-component-separator #'orderless-escapable-split-on-space))
+
+;; Support Pinyin
+(use-package pinyinlib
+  :after orderless
+  :autoload pinyinlib-build-regexp-string
+  :init
+  (defun completion--regex-pinyin (str)
+    (orderless-regexp (pinyinlib-build-regexp-string str)))
+  (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
+
+(use-package vertico
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  :hook ((after-init . vertico-mode)
+         (rfn-eshadow-update-overlay . vertico-directory-tidy)))
+
+(when (childframe-completion-workable-p)
+  (use-package vertico-posframe
+    :hook (vertico-mode . vertico-posframe-mode)
+    :init (setq vertico-posframe-poshandler
+                #'posframe-poshandler-frame-center-near-bottom
+                vertico-posframe-parameters
+                '((left-fringe  . 8)
+                  (right-fringe . 8)))
+    )
+  )
+
+(use-package nerd-icons-completion
+  :when (icons-displayable-p)
+  :hook (vertico-mode . nerd-icons-completion-mode))
+
+(use-package marginalia
+  :hook (after-init . marginalia-mode))
+
+;; 增强了搜索功能
+;; (use-package swiper
+;;   :bind
+;;   (
+;;    ("C-x M-s" . swiper)
+;;    ("C-x C-F"  . counsel-find-file)
+;;    ("C-x C-M-x" . counsel-M-x)
+;;    )
+;;   :config
+;;   (progn
+;;     (ivy-mode 1)
+;;     (setq ivy-use-virtual-buffers t)
+;;     (setq ivy-display-style 'fancy)
+;;     ;;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
+;;     ))
+
+;;(use-package bind-key)
+;;(bind-key "C-c x" #'some-function some-package-mode-map)
+;;(bind-key "C-c y" #'another-function)
+(use-package consult
+  :bind (;; C-c bindings in `mode-specific-map'
+         ("C-c M-x" . consult-mode-command)
+         ("C-c h"   . consult-history)
+         ("C-c k"   . consult-kmacro)
+         ("C-c m"   . consult-man)
+         ("C-c i"   . consult-info)
+         ("C-c r"   . consult-ripgrep)
+         ("C-c T"   . consult-theme)
+         ("C-."     . consult-imenu)
+
+         ;;("C-c c e" . consult-colors-emacs)
+         ;;("C-c c w" . consult-colors-web)
+         ;;("C-c c f" . describe-face)
+         ;;("C-c c t" . consult-theme)
+
+         ([remap Info-search]        . consult-info)
+         ([remap isearch-forward]    . consult-line)
+         ([remap recentf-open-files] . consult-recent-file)
+
+         ;; C-x bindings in `ctl-x-map'
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ("C-x b"   . consult-buffer)              ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#"     . consult-register-load)
+         ("M-'"     . consult-register-store)        ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#"   . consult-register)
+         ;; Other custom bindings
+         ("M-y"     . consult-yank-pop)                ;; orig. yank-pop
+         ;; M-g bindings in `goto-map'
+         ("M-g e"   . consult-compile-error)
+         ("M-g f"   . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g g"   . consult-goto-line)             ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g o"   . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-g m"   . consult-mark)
+         ("M-g k"   . consult-global-mark)
+         ("M-g i"   . consult-imenu)
+         ("M-g I"   . consult-imenu-multi)
+         ;; M-s bindings in `search-map'
+         ("M-s d"   . consult-find)
+         ("M-s D"   . consult-locate)
+         ("M-s g"   . consult-grep)
+         ("M-s G"   . consult-git-grep)
+         ("M-s r"   . consult-ripgrep)
+         ("M-s l"   . consult-line)
+         ("M-s L"   . consult-line-multi)
+         ("M-s k"   . consult-keep-lines)
+         ("M-s u"   . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e"   . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e"     . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s e"   . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s l"   . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L"   . consult-line-multi)            ;; needed by consult-line to detect isearch
+
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("C-s" . (lambda ()
+                    "Insert the selected region or current symbol at point."
+                    (interactive)
+                    (insert (with-current-buffer
+                                (window-buffer (minibuffer-selected-window))
+                              (or (and transient-mark-mode mark-active (/= (point) (mark))
+                                       (buffer-substring-no-properties (point) (mark)))
+                                  (thing-at-point 'symbol t)
+                                  "")))))
+         ("M-s" . consult-history) ;;orig. next-matching-history-element
+         ("M-r" . consult-history))   ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (with-eval-after-load 'xref
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref))
+
+  ;; More utils
+  (defvar consult-colors-history nil
+    "History for `consult-colors-emacs' and `consult-colors-web'.")
+
+  ;; No longer preloaded in Emacs 28.
+  (autoload 'list-colors-duplicates "facemenu")
+  ;; No preloaded in consult.el
+  (autoload 'consult--read "consult")
+
+  (defun consult-colors-emacs (color)
+    "Show a list of all supported colors for a particular frame.
+
+You can insert the name (default), or insert or kill the hexadecimal or RGB
+value of the selected COLOR."
+    (interactive
+     (list (consult--read (list-colors-duplicates (defined-colors))
+                          :prompt "Emacs color: "
+                          :require-match t
+                          :category 'color
+                          :history '(:input consult-colors-history)
+                          )))
+    (insert color))
+
+  ;; Adapted from counsel.el to get web colors.
+  (defun consult-colors--web-list nil
+    "Return list of CSS colors for `counsult-colors-web'."
+    (require 'shr-color)
+    (sort (mapcar #'downcase (mapcar #'car shr-color-html-colors-alist)) #'string-lessp))
+
+  (defun consult-colors-web (color)
+    "Show a list of all CSS colors.\
+
+You can insert the name (default), or insert or kill the hexadecimal or RGB
+value of the selected COLOR."
+    (interactive
+     (list (consult--read (consult-colors--web-list)
+                          :prompt "Color: "
+                          :require-match t
+                          :category 'color
+                          :history '(:input consult-colors-history)
+                          )))
+    (insert color))
+  :config
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+  (setq consult-preview-key '(:debounce 1.0 any))
+
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-goto-line
+   consult-theme :preview-key '(:debounce 0.5 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; "C-+"
+
+  ;; ;; Optionally make narrowing help available in the minibuffer.
+  ;; ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+  )
+
+(use-package consult-flyspell
+  :bind ("M-g s" . consult-flyspell))
+
+(use-package consult-yasnippet
+  :bind ("M-g y" . consult-yasnippet))
+(unless sys/win32p
+  (progn
+    ;;在Windows下会导致内存泄漏和无响应
+	(use-package corfu
+	  :custom
+	  (corfu-auto t)
+	  (corfu-auto-prefix 2)
+	  (corfu-preview-current nil)
+	  (corfu-auto-delay 0.2)
+	  (corfu-popupinfo-delay '(0.4 . 0.2))
+	  :custom-face
+	  (corfu-border ((t (:inherit region :background unspecified))))
+	  :bind ("M-/" . completion-at-point)
+	  :hook ((after-init . global-corfu-mode)
+			 (global-corfu-mode . corfu-popupinfo-mode)))
+
+    (use-package embark
+      :bind (("s-."   . embark-act)
+             ("C-s-." . embark-act)
+             ("M-."   . embark-dwim)        ; overrides `xref-find-definitions'
+             ([remap describe-bindings] . embark-bindings)
+             :map minibuffer-local-map
+             ("M-." . my-embark-preview))
+      :init
+      ;; Optionally replace the key help with a completing-read interface
+      (setq prefix-help-command #'embark-prefix-help-command)
+      :config
+      ;; Manual preview for non-Consult commands using Embark
+      (defun my-embark-preview ()
+        "Previews candidate in vertico buffer, unless it's a consult command."
+        (interactive)
+        (unless (bound-and-true-p consult--preview-function)
+          (save-selected-window
+            (let ((embark-quit-after-action nil))
+              (embark-dwim)))))
+
+      ;; Hide the mode line of the Embark live/completions buffers
+      (add-to-list 'display-buffer-alist
+                   '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                     nil
+                     (window-parameters (mode-line-format . none))))
+
+      (with-eval-after-load 'which-key
+        (defun embark-which-key-indicator ()
+          "An embark indicator that displays keymaps using which-key.
+The which-key help message will show the type and value of the
+current target followed by an ellipsis if there are further
+targets."
+          (lambda (&optional keymap targets prefix)
+            (if (null keymap)
+                (which-key--hide-popup-ignore-command)
+              (which-key--show-keymap
+               (if (eq (plist-get (car targets) :type) 'embark-become)
+                   "Become"
+                 (format "Act on %s '%s'%s"
+                         (plist-get (car targets) :type)
+                         (embark--truncate-target (plist-get (car targets) :target))
+                         (if (cdr targets) "…" "")))
+               (if prefix
+                   (pcase (lookup-key keymap prefix 'accept-default)
+                     ((and (pred keymapp) km) km)
+                     (_ (key-binding prefix 'accept-default)))
+                 keymap)
+               nil nil t (lambda (binding)
+                           (not (string-suffix-p "-argument" (cdr binding))))))))
+
+        (setq embark-indicators
+              '(embark-which-key-indicator
+                embark-highlight-indicator
+                embark-isearch-highlight-indicator))
+
+        (defun embark-hide-which-key-indicator (fn &rest args)
+          "Hide the which-key indicator immediately when using the completing-read prompter."
+          (which-key--hide-popup-ignore-command)
+          (let ((embark-indicators
+                 (remq #'embark-which-key-indicator embark-indicators)))
+            (apply fn args)))
+
+        (advice-add #'embark-completing-read-prompter
+                    :around #'embark-hide-which-key-indicator)
+        ))
+
+    (use-package embark-consult
+      :bind (:map minibuffer-mode-map
+                  ("C-c C-o" . embark-export))
+      :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+	(unless (display-graphic-p)
+	  (use-package corfu-terminal
+		:hook (global-corfu-mode . corfu-terminal-mode)))
+	(use-package nerd-icons-corfu
+	  :after corfu
+	  :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+	;; Add extensions
+	(use-package cape
+	  :init
+	  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+	  (add-to-list 'completion-at-point-functions #'cape-file)
+	  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+	  (add-to-list 'completion-at-point-functions #'cape-keyword)
+	  (add-to-list 'completion-at-point-functions #'cape-abbrev)
+
+	  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
+	))
+(provide 'init-completion)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; init-completion.el ends here
+
+#+end_src
+* etc/init-dired.el
+#+begin_src emacs-lisp :tangle etc/init-dired.el
+;;; init-dired.el --- Dired configuration
+;;; Commentary:
+;;
+;; Dired configuration
+;;
+;;; Require
+(require 'dired)
+(require 'dired-x)
+(require 'dired-details)                ;Dired详细信息
+(require 'dired-details+)
+
+
+;; Quick sort dired buffers via hydra
+(use-package dired-quick-sort
+	:bind (:map dired-mode-map
+       		("S" . hydra-dired-quick-sort/body)))
+
+;; Show git info in dired
+(use-package dired-git-info
+	:bind (:map dired-mode-map
+	       (")" . dired-git-info-mode)))
+
+;; Allow rsync from dired buffers
+(use-package dired-rsync
+	:bind (:map dired-mode-map
+	       ("C-c C-r" . dired-rsync)))
+
+;; Colorful dired
+(use-package diredfl
+	:hook (dired-mode . diredfl-mode))
+
+;; Shows icons
+(use-package nerd-icons-dired
+	:diminish
+	:when (icons-displayable-p)
+	:custom-face
+	(nerd-icons-dired-dir-face ((t (:inherit nerd-icons-dsilver :foreground unspecified))))
+	:hook (dired-mode . nerd-icons-dired-mode))
+
+;; Extra Dired functionality
+(use-package dired-aux :ensure nil)
+
+;;; Code:
+;; Guess a default target directory
+(setq dired-dwim-target t)
+
+;; Always delete and copy recursively
+(setq dired-recursive-deletes 'always
+    dired-recursive-copies 'always)
+
+;; Show directory first
+(setq dired-listing-switches "-alh --group-directories-first")
+(let ((cmd (cond (sys/mac-x-p "open")
+                 (sys/linux-x-p "xdg-open")
+                 (sys/win32p "start")
+                 (t ""))))
+  (setq dired-guess-shell-alist-user
+        `(("\\.pdf\\'" ,cmd)
+          ("\\.docx\\'" ,cmd)
+          ("\\.\\(?:djvu\\|eps\\)\\'" ,cmd)
+          ("\\.\\(?:jpg\\|jpeg\\|png\\|gif\\|xpm\\)\\'" ,cmd)
+          ("\\.\\(?:xcf\\)\\'" ,cmd)
+          ("\\.csv\\'" ,cmd)
+          ("\\.tex\\'" ,cmd)
+          ("\\.\\(?:mp4\\|mkv\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
+          ("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)
+          ("\\.html?\\'" ,cmd)
+          ("\\.md\\'" ,cmd)))
+(when sys/macp
+	(if (executable-find "gls")
+	    (progn
+	      ;; Use GNU ls as `gls' from `coreutils' if available.
+	      (setq insert-directory-program "gls")
+	      ;; Using `insert-directory-program'
+	      (setq ls-lisp-use-insert-directory-program t))
+	  (progn
+	    ;; Suppress the warning: `ls does not support --dired'.
+	    (setq dired-use-ls-dired nil)
+	    (setq dired-listing-switches "-alh"))))
+
+(setq dired-omit-files
+      (concat dired-omit-files
+              "\\|^.DS_Store$\\|^.projectile$\\|^.git*\\|^.svn$\\|^.vscode$\\|\\.js\\.meta$\\|\\.meta$\\|\\.elc$\\|^.emacs.*")))
+
+(setq dired-recursive-copies t)         ;可以递归的进行拷贝
+(setq dired-recursive-deletes t)        ;可以递归的删除目录
+(setq dired-recursive-deletes 'always)  ;删除东西时不提示
+(setq dired-recursive-copies 'always)   ;拷贝东西时不提示
+(setq dired-listing-switches "-aluh")   ;传给 ls 的参数
+(setq dired-details-hidden-string "") ;设置隐藏dired里面详细信息的字符串
+(setq directory-free-space-args "-Pkh") ;目录空间选项
+(setq dired-omit-size-limit nil)        ;dired忽略的上限
+(setq dired-dwim-target t)              ;Dired试着猜处默认的目标目录
+(setq my-dired-omit-status t)           ;设置默认忽略文件
+(setq my-dired-omit-regexp "^\\.?#\\|^\\..*") ;设置忽略文件的匹配正则表达式
+(setq my-dired-omit-extensions '(".cache")) ;设置忽略文件的扩展名列表
+(add-hook 'dired-after-readin-hook #'(lambda ()
+                                       (progn
+                                         (require 'dired-extension)
+                                         (dired-sort-method)))) ;先显示目录, 然后显示文件
+(add-hook
+ 'dired-mode-hook
+ #'(lambda ()
+     (require 'dired-extension)
+     (dired-omit-method)                ;隐藏文件的方法
+     ))
+(setq dired-guess-shell-alist-user      ;设置文件默认打开的模式
+      '(
+        ;; 压缩包
+        (list "\\.rar$" "unrar e -ad")
+        (list "\\.tar.bz2$" "tar jxvf")
+        (list "\\.gz$" "gzip -d")
+        ;; 其他
+        (list "\\.exe$" "wine")))
+
+;;; ### Dired ###
+;;; --- 文件浏览器
+(lazy-load-set-keys
+ '(
+   ("h" . dired-next-subdir)            ;下一个子目录
+   ("l" . dired-prev-subdir)            ;上一个子目录
+   ("n" . dired-next-dirline)           ;下一个目录
+   ("p" . dired-prev-dirline)           ;上一个目录
+   ("P" . dired-do-kill-lines)          ;删除标记的行
+   ("5" . dired-translate-to-html)      ;转换到HTML格式
+   ("9" . auto-install-from-dired)      ;自动从EmacsWiki安装标记的文件
+   ("I" . image-dired)                  ;打开浏览模式
+   ("W" . dired-x-find-file)            ;查找文件
+   ("J" . awesome-tab-backward-tab)
+   ("K" . awesome-tab-forward-tab)
+   ("X" . traverse-cp-or-mv-extfiles-in-dir) ;拷贝或移动目录下指定扩展名的文件
+   ("V" . traverse-dired-browse-archive)     ;浏览压缩文件
+   ("," . dired-diff)                        ;比较文件
+   ("SPC" . scroll-up)                       ;向下翻页
+   ("e" . scroll-down)                       ;向上翻页
+   ("c" . kill-this-buffer)                  ;关闭当前标签
+   ("/" . copy-buffer-file-name-as-kill)     ;显示路径或名称
+   ;;("s" . one-key-menu-dired-sort)           ;排序
+   ;;("F" . one-key-menu-dired-filter)         ;过滤
+   ("w" . wdired-change-to-wdired-mode)      ;切换到dired编辑模式
+   )
+ dired-mode-map
+ )
+
+(lazy-load-local-keys
+ '(
+   ("/" . copy-buffer-file-name-as-kill))
+ dired-mode-map
+ "buffer-extension")
+
+
+(lazy-load-local-keys
+ '(
+   ("M-o" . dired-toggle-omit)          ;切换忽略状态
+   ("?" . dired-get-size)               ;得到文件的大小
+   ("[" . dired-rename-with-copy)       ;重命名函数
+   ("'" . dired-up-directory-single)    ;返回上一级目录
+   ("4" . dired-serial-rename)          ;批量重命名
+   ("7" . dired-move-to-last-file)      ;移动到最后一个文件
+   ("8" . dired-move-to-first-file)     ;移动到第一个文件
+   ("k" . dired-previous-file-line)     ;上一行
+   ("j" . dired-next-file-line)         ;下一行
+   ;;("{" . dired-gnome-open-file)        ;用GNOME方式打开文件
+   ("E" . dired-touch-now)              ;Touch命令
+   ("f" . dired-find-file+)             ;打开当前文件或目录
+   ("C-m" . dired-find-file+)           ;打开当前文件或目录
+   )
+ dired-mode-map
+ "dired-extension")
+
+
+(provide 'init-dired)
+
+;;; init-dired.el ends here
+
+#+end_src
+* etc/init-eshell.el
+#+begin_src emacs-lisp :tangle etc/init-eshell.el
+;; init-eshell.el --- Initialize eshell configurations.	-*- lexical-binding: t -*-
+;;; Commentary:
+;;
+;; Eshell configurations.
+;;
+
+;;; Code:
+
+;; Emacs command shell
+(use-package eshell
+  :ensure nil
+  :defines eshell-prompt-function
+  :bind (:map eshell-mode-map
+         ([remap recenter-top-bottom] . eshell/clear))
+  :config
+  (with-no-warnings
+    (defun eshell/clear ()
+      "Clear the eshell buffer."
+      (interactive)
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (eshell-send-input)))
+
+    (defun eshell/emacs (&rest args)
+      "Open a file (ARGS) in Emacs.  Some habits die hard."
+      (if (null args)
+          ;; If I just ran "emacs", I probably expect to be launching
+          ;; Emacs, which is rather silly since I'm already in Emacs.
+          ;; So just pretend to do what I ask.
+          (bury-buffer)
+        ;; We have to expand the file names or else naming a directory in an
+        ;; argument causes later arguments to be looked for in that directory,
+        ;; not the starting directory
+        (mapc #'find-file (mapcar #'expand-file-name (flatten-tree (reverse args))))))
+    (defalias 'eshell/e #'eshell/emacs)
+    (defalias 'eshell/ec #'eshell/emacs)
+
+    (defun eshell/ebc (&rest args)
+      "Compile a file (ARGS) in Emacs. Use `compile' to do background make."
+      (if (eshell-interactive-output-p)
+          (let ((compilation-process-setup-function
+                 (list 'lambda nil
+                       (list 'setq 'process-environment
+                             (list 'quote (eshell-copy-environment))))))
+            (compile (eshell-flatten-and-stringify args))
+            (pop-to-buffer compilation-last-buffer))
+        (throw 'eshell-replace-command
+               (let ((l (eshell-stringify-list (flatten-tree args))))
+                 (eshell-parse-command (car l) (cdr l))))))
+    (put 'eshell/ebc 'eshell-no-numeric-conversions t)
+
+    (defun eshell-view-file (file)
+      "View FILE.  A version of `view-file' which properly rets the eshell prompt."
+      (interactive "fView file: ")
+      (unless (file-exists-p file) (error "%s does not exist" file))
+      (let ((buffer (find-file-noselect file)))
+        (if (eq (get (buffer-local-value 'major-mode buffer) 'mode-class)
+                'special)
+            (progn
+              (switch-to-buffer buffer)
+              (message "Not using View mode because the major mode is special"))
+          (let ((undo-window (list (window-buffer) (window-start)
+                                   (+ (window-point)
+                                      (length (funcall eshell-prompt-function))))))
+            (switch-to-buffer buffer)
+            (view-mode-enter (cons (selected-window) (cons nil undo-window))
+                             'kill-buffer)))))
+
+    (defun eshell/less (&rest args)
+      "Invoke `view-file' on a file (ARGS).
+
+\"less +42 foo\" will go to line 42 in the buffer for foo."
+      (while args
+        (if (string-match "\\`\\+\\([0-9]+\\)\\'" (car args))
+            (let* ((line (string-to-number (match-string 1 (pop args))))
+                   (file (pop args)))
+              (eshell-view-file file)
+              (forward-line line))
+          (eshell-view-file (pop args)))))
+    (defalias 'eshell/more #'eshell/less))
+
+  ;;  Display extra information for prompt
+  (use-package eshell-prompt-extras
+    :after esh-opt
+    :defines eshell-highlight-prompt
+    :autoload (epe-theme-lambda epe-theme-dakrone epe-theme-pipeline)
+    :init (setq eshell-highlight-prompt nil
+                eshell-prompt-function #'epe-theme-lambda))
+
+  ;; `eldoc' support
+  (use-package esh-help
+    :init (setup-esh-help-eldoc))
+
+  ;; `cd' to frequent directory in `eshell'
+  (use-package eshell-z
+    :hook (eshell-mode . (lambda () (require 'eshell-z)))))
+
+(provide 'init-eshell)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; init-eshell.el ends here
+
+#+end_src
+* etc/init-ext-packages.el
+
+* etc/init-hightlight.el
+* etc/ide.el
+* etc/init-idle.el
+* etc/init-im.el
+* etc/init-key.el
+* etc/init-lang-c.el
+* etc/init-lang-check.el
+* etc/init-lang-dap.el
+* etc/init-lang-elisp.el
+* etc/init-lang-lsp.el
+* etc/init-lang-python.el
+* etc/init-lang-vcs.el
+* etc/init-lang-web.el
+* etc/init-line-number.el
+* etc/init-markdown.el
+* etc/init-mode.el
+* etc/init-org.el
+* etc/init-package.el
+* etc/init-reader.el
+* etc/init-recentf.el
+* etc/init-search.el
+* etc/init-sesion.el
+* etc/init-shell.el
+* etc/init-speedbar.el
+* etc/init-string-inflection.el
+* etc/init-sudo.el
+* etc/init-translate.el
+* etc/init-treemacs.el
+* etc/init-ui.el
+* etc/init-utils.el
+* etc/init-window.el

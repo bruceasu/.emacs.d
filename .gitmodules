@@ -63,16 +63,16 @@
 	url = git@github.com:xwl/cal-china-x
 [submodule "extensions/org-pretty-table"]
 	path = extensions/org-pretty-table
-	url = https://github.com/Fuco1/org-pretty-table
+	url = git@github.com:Fuco1/org-pretty-table
 [submodule "extensions/vundo"]
 	path = extensions/vundo
-	url = https://github.com/casouri/vundo
+	url = git@github.com:casouri/vundo
 [submodule "extensions/dape"]
 	path = extensions/dape
-	url = https://github.com/svaante/dape
+	url = git@github.com:svaante/dape
 [submodule "extensions/consult-eglot"]
 	path = extensions/consult-eglot
-	url = https://github.com/mohkale/consult-eglot
+	url = git@github.com:mohkale/consult-eglot
 [submodule "extensions/doom-modeline"]
 	path = extensions/doom-modeline
-	url = https://github.com/seagle0128/doom-modeline
+	url = git@github.com:seagle0128/doom-modeline

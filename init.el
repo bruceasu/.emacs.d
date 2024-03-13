@@ -179,7 +179,7 @@
     (require '+custom)
     ;; Packages
     (require 'init-basic)
-    (require 'init-awsome-pair)
+    (require 'init-awesome-pair)
     (require 'lazy-load)
     (require 'init-key)
     (require 'init-package)
@@ -190,6 +190,7 @@
     (require 'init-mode)
     (when sys/linuxp
       (progn
+
         (require 'init-shell)
         (require 'init-im)   ;; windows 下表现不好
         (require 'init-sudo)

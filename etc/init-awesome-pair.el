@@ -1,3 +1,4 @@
+(provide 'init-awesome-pair)
 (require 'awesome-pair)
 (dolist (hook (list
                'c-mode-common-hook
@@ -57,4 +58,4 @@
 
 
 
-(provide 'init-awsome-pair)
+

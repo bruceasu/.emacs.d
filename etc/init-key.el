@@ -113,7 +113,7 @@
    ("<f2>" . refresh-file)              ;自动刷新文件
    ("s-f" . find-file-root)             ;用root打开文件
    ("s-r" . find-file-smb)              ;访问sambao
-   ("M-J" . joint-lines)                ;连接行
+   ("C-S-j" . join-lines)                ;连接行
    )
  "basic-toolkit")
 
