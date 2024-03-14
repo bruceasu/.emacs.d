@@ -98,7 +98,7 @@
    ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
    ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
    ("M-2" . indent-buffer)              ;自动格式化当前Buffer
-   ("M-z" . upcase-char) ;Upcase char handly with capitalize-word
+   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
    ;;("C-x u" . mark-line)              ;选中整行
    ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
    ("M-G" . goto-column)                ;到指定列
@@ -106,14 +106,17 @@
    ("C-<" . remember-jump)              ;记忆跳转函数
    ("M-s-," . point-stack-pop)          ;buffer索引跳转
    ("M-s-." . point-stack-push)         ;buffer索引标记
-   ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
+   ("s-g" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
    ("M-I" . backward-indent)            ;向后移动4个字符
                                         ;   ("s-J" . scroll-up-one-line)         ;向上滚动一行
                                         ;   ("s-K" . scroll-down-one-line)       ;向下滚动一行
    ("<f2>" . refresh-file)              ;自动刷新文件
    ("s-f" . find-file-root)             ;用root打开文件
    ("s-r" . find-file-smb)              ;访问sambao
-   ("C-S-j" . join-lines)                ;连接行
+   ("C-S-j" . join-lines)               ;连接行
+   ("C-S-f" .  suk/indent-buffer)       ;gákshikfá
+   ("M-q" . suk/fill-or-unfill-paragraph)
+   ("M-Q"  . suk/unfill-paragraph)
    )
  "basic-toolkit")
 
@@ -486,161 +489,161 @@
   "Map keys.
 ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
-     (mapcar (lambda(lst)
+  (mapcar (lambda(lst)
             ""
             (let ((x (car lst))
                   (y (car (last lst))))
               (funcall ACTION x y))) BINDINGLIST ))
 
 
-  (suk-set-key-bindings 'global-set-key
-                        (list
-                         (list (kbd "C-x M-a") 'align-regexp)
-                         ;;                      '([C-t]               transpose-chars)
-                         ;;                      '([S-f6]              hs-minor-mode)
-                         ;;                      '([S-f5]              toggle-truncate-lines)
-                         ;; '([S-f11]          insert-translated-name-insert) ;; Chinese to English
-                         ;; '([S-f12]          toggle-company-english-helper) ;; popup English tips
+(suk-set-key-bindings 'global-set-key
+                      (list
+                       (list (kbd "C-x M-a") 'align-regexp)
+                       ;;                      '([C-t]               transpose-chars)
+                       ;;                      '([S-f6]              hs-minor-mode)
+                       ;;                      '([S-f5]              toggle-truncate-lines)
+                       ;; '([S-f11]          insert-translated-name-insert) ;; Chinese to English
+                       ;; '([S-f12]          toggle-company-english-helper) ;; popup English tips
 
-                         ;; '([S-f2]           suk/new-empty-buffer)
-                         ;; '([f2]                hs-toggle-hiding)
-                         ;;'([M-f12]             vterm)
-                         ;; '([S-f1]              snails)
-                         (list (kbd "C-(") 'backward-sexp)
-                         (list (kbd "C-)") 'forward-sexp)
-                         (list (kbd "C-x t T") 'suk/toggle-transparency)
-                         (list (kbd "C-x t p") 'suk/toggle-toggle-proxy)
-                         (list (kbd "C-x t f") 'global-flycheck-mode)
-                         (list (kbd "C-x R") 'recentf-open)
-                         (list (kbd "C-<f11>")  'toggle-frame-fullscreen)
-                         ;; (list (kbd "C-S-f")  'toggle-frame-fullscreen) ; Compatible with macOS
-                         (list (kbd "M-S-<return>")  'toggle-frame-fullscreen)
-                         ;; 创建新行的动作
-                         (list (kbd "RET") 'newline-and-indent) ;; 回车时创建新行并且对齐
-                         (list (kbd "S-<return>") 'comment-indent-new-line) ;; 取消对齐创建的新行
+                       ;; '([S-f2]           suk/new-empty-buffer)
+                       ;; '([f2]                hs-toggle-hiding)
+                       ;;'([M-f12]             vterm)
+                       ;; '([S-f1]              snails)
+                       (list (kbd "C-(") 'backward-sexp)
+                       (list (kbd "C-)") 'forward-sexp)
+                       (list (kbd "C-x t T") 'suk/toggle-transparency)
+                       (list (kbd "C-x t p") 'suk/toggle-toggle-proxy)
+                       (list (kbd "C-x t f") 'global-flycheck-mode)
+                       (list (kbd "C-x R") 'recentf-open)
+                       (list (kbd "C-<f11>")  'toggle-frame-fullscreen)
+                       ;; (list (kbd "C-S-f")  'toggle-frame-fullscreen) ; Compatible with macOS
+                       (list (kbd "M-S-<return>")  'toggle-frame-fullscreen)
+                       ;; 创建新行的动作
+                       (list (kbd "RET") 'newline-and-indent) ;; 回车时创建新行并且对齐
+                       (list (kbd "S-<return>") 'comment-indent-new-line) ;; 取消对齐创建的新行
 
-                         ))
-
-
-
-  ;; bind-keys 是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个键。虽然
-  ;; bind-keys 可以独立于 use-package 使用，但它通常与 use-package 结合使用，以提
-  ;; 供更清晰和模块化的键绑定配置。
-
-  ;; Toggle fullscreen <F11> also bind to fullscreen
-  ;; (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
-  ;;            ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
-  ;;            ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
-  ;;            )
-
-  (unless sys/win32p
-    (global-set-key  (kbd "C-S-SPC") 'set-mark-command))
-
-  ;; C-c TAB indent-region
-  ;; C-u C-c TAB => (un)indent-region
+                       ))
 
 
 
-  ;; has set to f7, c-f7
-  ;;(global-set-key (kbd "<C-f6>") '(lambda () (interactive) (bookmark-set "SAVED")))
-  ;;(global-set-key (kbd "<f6>") '(lambda () (interactive) (bookmark-jump "SAVED")))
+;; bind-keys 是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个键。虽然
+;; bind-keys 可以独立于 use-package 使用，但它通常与 use-package 结合使用，以提
+;; 供更清晰和模块化的键绑定配置。
 
-  ;; default keys: C-x LEFT/RIGHT C-, C-.
-  (global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
-  (global-set-key (kbd "<C-tab>") 'next-buffer)
-  ;;(global-set-key (kbd "C-x C-b") 'buffer-menu)
-  ;;(global-set-key (kbd "C-x C-b") 'ibuffer)
+;; Toggle fullscreen <F11> also bind to fullscreen
+;; (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
+;;            ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
+;;            ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
+;;            )
+
+(unless sys/win32p
+  (global-set-key  (kbd "C-S-SPC") 'set-mark-command))
+
+;; C-c TAB indent-region
+;; C-u C-c TAB => (un)indent-region
+
+
+
+;; has set to f7, c-f7
+;;(global-set-key (kbd "<C-f6>") '(lambda () (interactive) (bookmark-set "SAVED")))
+;;(global-set-key (kbd "<f6>") '(lambda () (interactive) (bookmark-jump "SAVED")))
+
+;; default keys: C-x LEFT/RIGHT C-, C-.
+(global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
+(global-set-key (kbd "<C-tab>") 'next-buffer)
+;;(global-set-key (kbd "C-x C-b") 'buffer-menu)
+;;(global-set-key (kbd "C-x C-b") 'ibuffer)
 
 ;;;
-  ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
-  ;; (define-prefix-command 'comma-map)
-  ;; (global-set-key (kbd ",") 'comma-map)
-  ;; (global-set-key [(meta c)] 'meta-c-map)
+;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
+;; (define-prefix-command 'comma-map)
+;; (global-set-key (kbd ",") 'comma-map)
+;; (global-set-key [(meta c)] 'meta-c-map)
 
-  ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
-  ;; (add-hook 'isearch-mode-hook
-  ;;        '(lambda ()
-  ;;           ;; 搜索下一个结果
-  ;;           (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
-  ;;           ;; 搜索前一个结果
-  ;;           (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
-  ;;           ;; 替换
-  ;;           (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
-  ;;           ;; 正则替换
-  ;;           (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
-  ;;           (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
-  ;;           ;; 剪切板作为搜索内容
-  ;;           (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
-  ;;           ;; 将光标到行尾作为搜索内容
-  ;;           (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
-  ;;           (define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
-  ;;           ;; 向左或向右(选择/取消)单个字符作为搜索内容
-  ;;           (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
-  ;;           ;; 显示occur视图
-  ;;           (define-key isearch-mode-map [(meta o)] 'isearch-occur)
-  ;;           ;; 单词搜索
-  ;;           (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
-  ;;           (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
-  ;;           ))
+;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
+;; (add-hook 'isearch-mode-hook
+;;        '(lambda ()
+;;           ;; 搜索下一个结果
+;;           (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
+;;           ;; 搜索前一个结果
+;;           (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
+;;           ;; 替换
+;;           (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
+;;           ;; 正则替换
+;;           (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
+;;           (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
+;;           ;; 剪切板作为搜索内容
+;;           (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
+;;           ;; 将光标到行尾作为搜索内容
+;;           (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
+;;           (define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
+;;           ;; 向左或向右(选择/取消)单个字符作为搜索内容
+;;           (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
+;;           ;; 显示occur视图
+;;           (define-key isearch-mode-map [(meta o)] 'isearch-occur)
+;;           ;; 单词搜索
+;;           (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
+;;           (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
+;;           ))
 
 
 
-  ;;Emacs 自动排版
-  ;;很简单：C-x h C-M-\
-  ;;其中C-x h 是全选
-  ;;C-M-\ 是排版
+;;Emacs 自动排版
+;;很简单：C-x h C-M-\
+;;其中C-x h 是全选
+;;C-M-\ 是排版
 
-  ;; C-x C-q set/unset readonly
+;; C-x C-q set/unset readonly
 
-  ;; (require 'undo-tree)
-  ;;(define-key undo-tree-map (kbd "C-x u") #'(lambda ()
-  ;;   (interactive)
-  ;;   (undo-tree-visualize)
-  ;;   (undo-tree-visualize-undo)))
-  ;; c-/ c-_  undo | c-x u undo-tree | c-s-/ s-? M-_ redo
+;; (require 'undo-tree)
+;;(define-key undo-tree-map (kbd "C-x u") #'(lambda ()
+;;   (interactive)
+;;   (undo-tree-visualize)
+;;   (undo-tree-visualize-undo)))
+;; c-/ c-_  undo | c-x u undo-tree | c-s-/ s-? M-_ redo
 
-  ;; 大小写转换： M-u, M-l, M-c
+;; 大小写转换： M-u, M-l, M-c
 
-  ;; M-x align-regexp 可以方便的对齐一些文字
+;; M-x align-regexp 可以方便的对齐一些文字
 
 ;;; rectangle
-  ;; C-x r k
-  ;; Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
-  ;; C-x r M-w
-  ;; Save the text of the region-rectangle as the last killed rectangle (copy-rectangle-as-kill).
-  ;; C-x r d
-  ;; Delete the text of the region-rectangle (delete-rectangle).
-  ;; C-x r y
-  ;; Yank the last killed rectangle with its upper left corner at point (yank-rectangle).
-  ;; C-x r o
-  ;; Insert blank space to fill the space of the region-rectangle (open-rectangle). This pushes the previous contents of the region-rectangle to the right.
-  ;; C-x r N
-  ;; Insert line numbers along the left edge of the region-rectangle (rectangle-number-lines). This pushes the previous contents of the region-rectangle to the right.
-  ;; C-x r c
-  ;; Clear the region-rectangle by replacing all of its contents with spaces (clear-rectangle).
-  ;; M-x delete-whitespace-rectangle
-  ;; Delete whitespace in each of the lines on the specified rectangle, starting from the left edge column of the rectangle.
-  ;; C-x r t string <RET>
-  ;; Replace rectangle contents with string on each line (string-rectangle).
-  ;; M-x string-insert-rectangle <RET> string <RET>
-  ;; Insert string on each line of the rectangle.
-  ;; C-x <SPC>
-  ;; Toggle Rectangle Mark mode (rectangle-mark-mode). When this mode is active, the region-rectangle is highlighted and can be shrunk/grown, and the standard kill and yank commands operate on it.
-  ;; The rectangle operations fall into two classes: commands to erase or insert rectangles, and comm
+;; C-x r k
+;; Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
+;; C-x r M-w
+;; Save the text of the region-rectangle as the last killed rectangle (copy-rectangle-as-kill).
+;; C-x r d
+;; Delete the text of the region-rectangle (delete-rectangle).
+;; C-x r y
+;; Yank the last killed rectangle with its upper left corner at point (yank-rectangle).
+;; C-x r o
+;; Insert blank space to fill the space of the region-rectangle (open-rectangle). This pushes the previous contents of the region-rectangle to the right.
+;; C-x r N
+;; Insert line numbers along the left edge of the region-rectangle (rectangle-number-lines). This pushes the previous contents of the region-rectangle to the right.
+;; C-x r c
+;; Clear the region-rectangle by replacing all of its contents with spaces (clear-rectangle).
+;; M-x delete-whitespace-rectangle
+;; Delete whitespace in each of the lines on the specified rectangle, starting from the left edge column of the rectangle.
+;; C-x r t string <RET>
+;; Replace rectangle contents with string on each line (string-rectangle).
+;; M-x string-insert-rectangle <RET> string <RET>
+;; Insert string on each line of the rectangle.
+;; C-x <SPC>
+;; Toggle Rectangle Mark mode (rectangle-mark-mode). When this mode is active, the region-rectangle is highlighted and can be shrunk/grown, and the standard kill and yank commands operate on it.
+;; The rectangle operations fall into two classes: commands to erase or insert rectangles, and comm
 
-  ;; f3 start macro(kmacro-start-macro-or-insert-counter),
-  ;; f4 done macro or run marcro (kmacro-end-or-call-macro).
-  ;; C-x ( start macro (kmacro-start-macro),
-  ;; C-x ) end done marco,
-  ;; C-x e run marco(kmacro-end-macro)
-  ;; 先定义一个宏
-  ;; 然后 name-last-kbd-macro
-  ;; 然后 insert-kbd-macro
-  ;; 等到如下类似的配置
-  (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
+;; f3 start macro(kmacro-start-macro-or-insert-counter),
+;; f4 done macro or run marcro (kmacro-end-or-call-macro).
+;; C-x ( start macro (kmacro-start-macro),
+;; C-x ) end done marco,
+;; C-x e run marco(kmacro-end-macro)
+;; 先定义一个宏
+;; 然后 name-last-kbd-macro
+;; 然后 insert-kbd-macro
+;; 等到如下类似的配置
+(fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
 
-  (define-prefix-command 'leader-key)
-  (global-set-key (kbd "M-s-SPC") 'leader-key)
+(define-prefix-command 'leader-key)
+(global-set-key (kbd "M-s-SPC") 'leader-key)
 
 
-  (provide 'init-key)
+(provide 'init-key)

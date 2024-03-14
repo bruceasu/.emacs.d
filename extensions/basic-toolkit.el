@@ -1,90 +1,4 @@
 ;;; basic-toolkit.el --- Basic edit toolkit.
-
-;; Filename: basic-toolkit.el
-;; Description: Basic edit toolkit.
-;; Author: Andy Stewart <lazycat.manatee@gmail.com>
-;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2009 ~ 2018 Andy Stewart, all rights reserved.
-;; Created: 2009-02-07 20:56:08
-;; Version: 0.7
-;; Last-Updated: 2018-08-26 03:01:43
-;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/basic-toolkit.el
-;; Keywords: edit, toolkit
-;; Compatibility: GNU Emacs 23.0.60.1
-;;
-;; Features that might be required by this library:
-;;
-;;
-;;
-
-;;; This file is NOT part of GNU Emacs
-
-;;; License
-;;
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-
-;;; Commentary:
-;;
-;; Basic edit toolkit.
-;;
-;; This is my basic edit toolkit that separate from `lazycat-toolkit'.
-;;
-
-;;; Installation:
-;;
-;; Put basic-toolkit.el to your load-path.
-;; The load-path is usually ~/elisp/.
-;; It's set in your ~/.emacs like this:
-;; (add-to-list 'load-path (expand-file-name "~/elisp"))
-;;
-;; And the following to your ~/.emacs startup file.
-;;
-;; (require 'basic-toolkit)
-;;
-;; No need more.
-
-;;; Change log:
-;;
-;; 2018/08/26
-;;      * Add function `goto-line-with-feedback', use `display-line-numbers-mode' instead `linum-mode', for better performance.
-;;      * `match-paren' should instead by `paredit-match-paren' by `paredit-extension.el'.
-;;
-;; 2018/07/13
-;;      * Add `css-sort-buffer' for sort css attributable before format css buffer.
-;;
-;; 2018/06/14
-;;      * Add function `kill-unused-buffers'
-;;
-;; 2009/02/07
-;;      * First released.
-;;
-
-;;; Acknowledgements:
-;;
-;;
-;;
-
-;;; TODO
-;;
-;;
-;;
-
-;;; Require
-
 ;;; Code:
 
 (defun unmark-all-buffers ()
@@ -528,7 +442,63 @@ Otherwise return nil."
         (fill-region (region-beginning) (region-end)))
     (dotimes (_ (abs n))
       (delete-indentation (natnump n)))))
+;; =========================================================
+;;;###autoload
+(defun suk/indent-buffer ()
+  "Indent the whole buffer."
+  (interactive)
+  (save-excursion
+    (indent-region (point-min) (point-max) nil)))
+;;(global-set-key (kbd "C-S-f")  #'suk/indent-buffer)
+;;(global-set-key [S-f7] 'indent-buffer)
 
+;;;###autoload
+(defun suk/xah-narrow-to-region ()
+  "Same as `narrow-to-region', but if no selection, narrow to the current block.
+Version 2022-01-22"
+  (interactive)
+  (if (region-active-p)
+      (progn
+        (narrow-to-region (region-beginning) (region-end)))
+    (progn
+      (let ($p1 $p2)
+        (save-excursion
+          (if (re-search-backward "\n[ \t]*\n" nil "move")
+              (progn (goto-char (match-end 0))
+                     (setq $p1 (point)))
+            (setq $p1 (point)))
+          (if (re-search-forward "\n[ \t]*\n" nil "move")
+              (progn (goto-char (match-beginning 0))
+                     (setq $p2 (point)))
+            (setq $p2 (point))))
+        (narrow-to-region $p1 $p2)))))
+
+;; =========================================================
+;; ∂Œ¬‰∏Ò ΩªØ
+;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/unfill-paragraph (&optional region)
+  "Takes a multi-line paragraph (or REGION) and make it into a single line of text."
+  (interactive (progn
+                 (barf-if-buffer-read-only)
+                 (list t)))
+  (let ((fill-column (point-max)))
+    (fill-paragraph nil region)))
+
+;;(global-set-key (kbd "M-Q" ) #'suk/unfill-paragraph)
+
+;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
+;; --------------------------------------------------------------
+;;;###autoload
+(defun suk/fill-or-unfill-paragraph (&optional unfill region)
+  "Fill paragraph (or REGION).
+With the prefix argument UNFILL, unfill it instead."
+  (interactive (progn
+                 (barf-if-buffer-read-only)
+                 (list (if current-prefix-arg 'unfill) t)))
+  (let ((fill-column (if unfill (point-max) fill-column)))
+    (fill-paragraph nil region)))
+;;(global-set-key (kbd "M-q") #'suk/fill-or-unfill-paragraph)
 (provide 'basic-toolkit)
 
 ;;; basic-toolkit.el ends here
