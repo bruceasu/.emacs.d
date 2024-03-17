@@ -11,9 +11,9 @@
   (require 'init-package)
   )
 
-(use-package bind-key)
-;; Enhance M-x, use counsel-M-x
-;; (use-package amx)
+;;(use-package bind-key)
+;;Enhance M-x, use counsel-M-x
+;;(use-package amx)
 
 
 ;; Display available keybindings in popup
@@ -21,7 +21,7 @@
   :diminish
   :bind (("C-h M-m" . which-key-show-major-mode)
          (:map help-map ("C-h" . which-key-C-h-dispatch)))
-  
+
   :hook (after-init . which-key-mode)
   :custom
   ;; 弹出方式，底部弹出

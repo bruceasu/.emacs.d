@@ -27,7 +27,7 @@
 
 ;;; Code:
 
-
+(provide 'init-ui)
 
 (eval-when-compile
   (require '+const)
@@ -38,21 +38,16 @@
 ;; Optimization
 (setq idle-update-delay 1.0)
 
-;; Logo
-(setq fancy-splash-image suk-logo)
-
 
 ;; Compatibility
-
 (use-package compat :demand t)
-
 
 
 ;; 字体
 (defun font-installed-p (font-name)
   "Check if font with FONT-NAME is available."
   (find-font (font-spec :name font-name)))
-(require 'load-set-font)
+
 
 (display-time-mode -1)
 
@@ -140,21 +135,13 @@
   :ensure t
   :hook (after-init . default-text-scale-mode)
   :bind (:map default-text-scale-mode-map
-              ("s-="   . default-text-scale-increase)
-              ("s--"   . default-text-scale-decrease)
-              ("s-0"   . default-text-scale-reset)
-              ("C-s-=" . default-text-scale-increase)
-              ("C-s--" . default-text-scale-decrease)
-              ("C-s-0" . default-text-scale-reset)))
+         ("s-="   . default-text-scale-increase)
+         ("s--"   . default-text-scale-decrease)
+         ("s-0"   . default-text-scale-reset)
+         ("C-s-=" . default-text-scale-increase)
+         ("C-s--" . default-text-scale-decrease)
+         ("C-s-0" . default-text-scale-reset)))
 
-;; Title
-(setq frame-title-format
-      '("Suk's Emacs - "
-		(:eval (if (buffer-file-name)
-                   (abbreviate-file-name (buffer-file-name))
-                 "%b")))
-	  icon-title-format frame-title-format
-	  )
 
 ;; Icons
 (use-package nerd-icons
@@ -169,37 +156,6 @@
   :load-path "~/.emacs.d/extensions/all-the-icons"
   :if (display-graphic-p))
 
-;; Mouse & Smooth Scroll
-;; Scroll one line at a time (less "jumpy" than defaults)
-(when (display-graphic-p)
-  (setq mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
-        mouse-wheel-scroll-amount-horizontal 1
-        mouse-wheel-progressive-speed nil))
-(setq scroll-step 1
-      scroll-margin 0
-      scroll-conservatively 100000
-      auto-window-vscroll nil
-      scroll-preserve-screen-position t)
-
-;; Good pixel line scrolling
-(if (fboundp 'pixel-scroll-precision-mode)
-    (pixel-scroll-precision-mode t)
-  (unless sys/macp
-    (use-package good-scroll
-      :diminish
-      :hook (after-init . good-scroll-mode)
-      :bind (([remap next] . good-scroll-up-full-screen)
-             ([remap prior] . good-scroll-down-full-screen)))))
-
-;; Smooth scrolling over images
-(unless emacs/>=30p
-  (use-package iscroll
-    :diminish
-    :hook (image-mode . iscroll-mode)))
-
-;; Use fixed pitch where it's sensible
-(use-package mixed-pitch
-  :diminish)
 
 ;; Display ugly ^L page breaks as tidy horizontal lines
 (use-package page-break-lines
@@ -216,34 +172,6 @@
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode)
   :init (setq nerd-icons-ibuffer-icon suk-icon))
 
-;; Group ibuffer's list by project
-(use-package ibuffer-project
-  :hook (ibuffer . (lambda ()
-                     "Group ibuffer's list by project."
-                     (setq ibuffer-filter-groups (ibuffer-project-generate-filter-groups))
-                     (unless (eq ibuffer-sorting-mode 'project-file-relative)
-                       (ibuffer-do-sort-by-project-file-relative))))
-  :init (setq ibuffer-project-use-cache t)
-  :config
-  (defun my-ibuffer-project-group-name (root type)
-    "Return group name for project ROOT and TYPE."
-    (if (and (stringp type) (> (length type) 0))
-        (format "%s %s" type root)
-      (format "%s" root)))
-  (if (icons-displayable-p)
-      (progn
-        (advice-add #'ibuffer-project-group-name :override #'my-ibuffer-project-group-name)
-        (setq ibuffer-project-root-functions
-              `((ibuffer-project-project-root . ,(nerd-icons-octicon "nf-oct-repo" :height 1.2 :face ibuffer-filter-group-name-face))
-                (file-remote-p . ,(nerd-icons-codicon "nf-cod-radio_tower" :height 1.2 :face ibuffer-filter-group-name-face)))))
-    (progn
-      (advice-remove #'ibuffer-project-group-name #'my-ibuffer-project-group-name)
-      (setq ibuffer-project-root-functions
-            '((ibuffer-project-project-root . "Project")
-              (file-remote-p . "Remote"))))))
-
-
-
 (use-package hydra
   :hook (emacs-lisp-mode . hydra-add-imenu)
   :init
@@ -255,13 +183,13 @@
         "Set hydra-posframe style."
         (setq hydra-posframe-show-params
               `(:left-fringe 8
-                             :right-fringe 8
-                             :internal-border-width 2
-                             :internal-border-color ,(face-background 'posframe-border nil t)
-                             :background-color ,(face-background 'tooltip nil t)
-                             :foreground-color ,(face-foreground 'tooltip nil t)
-                             :lines-truncate t
-                             :poshandler posframe-poshandler-frame-center-near-bottom)))
+                :right-fringe 8
+                :internal-border-width 2
+                :internal-border-color ,(face-background 'posframe-border nil t)
+                :background-color ,(face-background 'tooltip nil t)
+                :foreground-color ,(face-foreground 'tooltip nil t)
+                :lines-truncate t
+                :poshandler posframe-poshandler-frame-center-near-bottom)))
       (hydra-set-posframe-show-params)
       (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))))
 
@@ -294,7 +222,7 @@
   ;; Global toggles
   (with-no-warnings
     (pretty-hydra-define toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on")
-                                               :color amaranth :quit-key ("q" "C-g"))
+                                        :color amaranth :quit-key ("q" "C-g"))
       ("Basic"
        (("n" (cond ((fboundp 'display-line-numbers-mode)
                     (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
@@ -366,12 +294,6 @@
                  2))))))
 
 
-(with-no-warnings
-  (when sys/macp
-    ;; Render thinner fonts
-    (setq ns-use-thin-smoothing t)
-    ;; Don't open a file in a new frame
-    (setq ns-pop-up-frames nil)))
 ;; Don't use GTK+ tooltip
 (when (boundp 'x-gtk-use-system-tooltips)
   (setq x-gtk-use-system-tooltips nil))
@@ -429,14 +351,6 @@
                               `([,(cdr char-regexp) 0 font-shape-gstring]))))
     (set-char-table-parent composition-ligature-table composition-function-table)))
 
-;; 图形界面插件的设置
-
-(when (display-graphic-p)
-
-
-  )
-
-
 (use-package centaur-tabs
   :demand
   :init
@@ -486,6 +400,15 @@
     (advice-add #'doom-themes-visual-bell-fn :override #'my-doom-themes-visual-bell-fn))
   )
 
+(defvar after-load-theme-hook nil
+  "Hook run after a color theme is loaded using `load-theme'.")
+
+;;;###autoload
+(defun run-after-load-theme-hook (&rest _)
+  "Run `after-load-theme-hook'."
+  (run-hooks 'after-load-theme-hook))
+(advice-add #'load-theme :after #'run-after-load-theme-hook)
+
 (use-package doom-modeline
   :load-path "~/.emacs.d/extensions/doom-modeline"
   :hook (after-init . doom-modeline-mode)
@@ -494,7 +417,7 @@
   (setq doom-modeline-icon suk-icon
         doom-modeline-minor-modes t)
   :bind (:map doom-modeline-mode-map
-              ("C-<f6>" . doom-modeline-hydra/body))
+         ("C-<f6>" . doom-modeline-hydra/body))
   :config
   (column-number-mode 1)
   :custom
@@ -515,8 +438,8 @@
   (if sys/win32p (setq inhibit-compacting-font-caches t))
   :pretty-hydra
   ((:title (pretty-hydra-title "Mode Line" 'sucicon "nf-custom-emacs" :face 'nerd-icons-purple)
-		   :color amaranth
-		   :quit-key ("q" "C-g"))
+	:color amaranth
+	:quit-key ("q" "C-g"))
    ("Icon"
     (("i" (setq doom-modeline-icon (not doom-modeline-icon))
       "display icons" :toggle doom-modeline-icon)
@@ -678,11 +601,6 @@
 (use-package minions
   :hook (doom-modeline-mode . minions-mode))
 
-;; 切换buffer焦点时高亮动画
-(use-package beacon
-  :ensure t
-  :hook (after-init . beacon-mode))
-
 ;; Frame transparence
 (use-package transwin
   :bind (("C-M-9" . transwin-inc)
@@ -692,78 +610,21 @@
   (when sys/linux-x-p
     (setq transwin-parameter-alpha 'alpha-background)))
 
-(when  (eq system-type 'gnu/linux)
-  ;; 调节屏幕亮度
-;;;###autoload
-  (defun suk/set-backlight (&optional light-value)
-    (interactive "s请输入亮度(小数表示的百分比): ")
-    (let ((max-backlight (string-to-number (string-trim-right
-					                        (shell-command-to-string
-					                         "cat /sys/class/backlight/intel_backlight/max_brightness")))))
-      (when (and light-value (floatp (string-to-number light-value)))
-	    (shell-command
-	     (concat "echo "
-		         (format "%d" (* max-backlight (string-to-number light-value)))
-		         " > /sys/class/backlight/intel_backlight/brightness")))))
-
-  ;; 增加10%屏幕亮度
-;;;###autoload
-  (defun suk/plus-backlight ()
-    (interactive)
-    (let* (
-	       ;; 最大亮度
-	       (max-backlight (string-to-number (string-trim-right
-					                         (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
-	       ;; 当前亮度
-	       (current-backlight (string-to-number (string-trim-right
-						                         (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
-	       ;; 增加后的亮度
-	       (add-backlight (+ current-backlight (* max-backlight 0.1))))
-      (if (< add-backlight max-backlight)
-	      (progn (shell-command
-		          (concat "echo "
-			              (format "%d" add-backlight)
-			              " > /sys/class/backlight/intel_backlight/brightness"))
-		         (message "亮度+10%"))
-	    (message "亮度MAX!!"))))
-
-  ;; 减少屏幕亮度
-;;;###autoload
-  (defun suk/less-backlight ()
-    (interactive)
-    (let* (
-	       ;; 最大亮度
-	       (max-backlight (string-to-number (string-trim-right
-					                         (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
-	       ;; 当前亮度
-	       (current-backlight (string-to-number (string-trim-right
-						                         (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
-	       ;; 减少后的亮度
-	       (less-backlight (- current-backlight (* max-backlight 0.1))))
-      (if (> less-backlight (* max-backlight 0.1) )
-	      (progn (shell-command
-		          (concat "echo "
-			              (format "%d" less-backlight)
-			              " > /sys/class/backlight/intel_backlight/brightness"))
-		         (message "亮度-10%"))
-	    (message "亮度Min!!"))))
-  )
 
 
-
-
-(defvar after-load-theme-hook nil
-  "Hook run after a color theme is loaded using `load-theme'.")
-
-;;;###autoload
-(defun run-after-load-theme-hook (&rest _)
-  "Run `after-load-theme-hook'."
-  (run-hooks 'after-load-theme-hook))
-(advice-add #'load-theme :after #'run-after-load-theme-hook)
 
 ;;===================================================
 ;; Frame
 ;;===================================================
+;; Title
+(setq frame-title-format
+      '("Suk's Emacs - "
+		(:eval (if (buffer-file-name)
+                   (abbreviate-file-name (buffer-file-name))
+                 "%b")))
+	  icon-title-format frame-title-format
+	  )
+
 (defvar suk/frame--geometry nil)
 ;;;###autoload
 (defun suk/frame--save-geometry ()
@@ -857,33 +718,113 @@
 
 
 (suk-set-key-bindings 'global-set-key
-  (list
-   (list (kbd "C-M-<return>")     #'suk/frame-maximize)
-   (list (kbd "C-M-<backspace>")  #'suk/frame-restore)
-   (list (kbd "C-M-<left>")       #'suk/frame-left-half)
-   (list (kbd "C-M-<right>")      #'suk/frame-right-half)
-   (list (kbd "C-M-<up>")         #'suk/frame-top-half)
-   (list (kbd "C-M-<down>")       #'suk/frame-bottom-half)
-   ))
+                      (list
+                       (list (kbd "C-M-<return>")     #'suk/frame-maximize)
+                       (list (kbd "C-M-<backspace>")  #'suk/frame-restore)
+                       (list (kbd "C-M-<left>")       #'suk/frame-left-half)
+                       (list (kbd "C-M-<right>")      #'suk/frame-right-half)
+                       (list (kbd "C-M-<up>")         #'suk/frame-top-half)
+                       (list (kbd "C-M-<down>")       #'suk/frame-bottom-half)
+                       ))
 
-(provide 'init-ui)
 
-;; how to use hydra to display a mennu
-;; (defhydra hydra-consult (:hint nil)
-;;   "
-;; Consult Commands
-;; ^Searching^      ^Buffers^        ^Files^
-;; -------------------------------------------------
-;; _s_: search      _b_: buffers     _f_: find file
-;; _o_: occur       _i_: imenu       _r_: recent file
-;; _g_: grep
-;; "
-;;   ("s" consult-line)
-;;   ("o" consult-occur)
-;;   ("g" consult-grep)
-;;   ("b" consult-buffer)
-;;   ("i" consult-imenu)
-;;   ("f" consult-find)
-;;   ("r" consult-recent-file))
+;; 调节屏幕亮度
+;;;###autoload
+(defun suk/set-backlight (&optional light-value)
+  (interactive "s请输入亮度(小数表示的百分比): ")
+  (let ((max-backlight (string-to-number (string-trim-right
+					                      (shell-command-to-string
+					                       "cat /sys/class/backlight/intel_backlight/max_brightness")))))
+    (when (and light-value (floatp (string-to-number light-value)))
+	  (shell-command
+	   (concat "echo "
+		       (format "%d" (* max-backlight (string-to-number light-value)))
+		       " > /sys/class/backlight/intel_backlight/brightness")))))
 
-;; (global-set-key (kbd "C-c c") 'hydra-consult/body)
+;; 增加10%屏幕亮度
+;;;###autoload
+(defun suk/plus-backlight ()
+  (interactive)
+  (let* (
+	     ;; 最大亮度
+	     (max-backlight (string-to-number (string-trim-right
+					                       (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
+	     ;; 当前亮度
+	     (current-backlight (string-to-number (string-trim-right
+						                       (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
+	     ;; 增加后的亮度
+	     (add-backlight (+ current-backlight (* max-backlight 0.1))))
+    (if (< add-backlight max-backlight)
+	    (progn (shell-command
+		        (concat "echo "
+			            (format "%d" add-backlight)
+			            " > /sys/class/backlight/intel_backlight/brightness"))
+		       (message "亮度+10%"))
+	  (message "亮度MAX!!"))))
+
+;; 减少屏幕亮度
+;;;###autoload
+(defun suk/less-backlight ()
+  (interactive)
+  (let* (
+	     ;; 最大亮度
+	     (max-backlight (string-to-number (string-trim-right
+					                       (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
+	     ;; 当前亮度
+	     (current-backlight (string-to-number (string-trim-right
+						                       (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
+	     ;; 减少后的亮度
+	     (less-backlight (- current-backlight (* max-backlight 0.1))))
+    (if (> less-backlight (* max-backlight 0.1) )
+	    (progn (shell-command
+		        (concat "echo "
+			            (format "%d" less-backlight)
+			            " > /sys/class/backlight/intel_backlight/brightness"))
+		       (message "亮度-10%"))
+	  (message "亮度Min!!"))))
+
+
+
+(require 'load-set-font)
+
+(unless sys/win32p
+  ;; 切换buffer焦点时高亮动画
+  (use-package beacon
+    :ensure t
+    :hook (after-init . beacon-mode))
+  )
+
+
+(unless sys/win32p
+  ;; Mouse & Smooth Scroll
+  ;; Scroll one line at a time (less "jumpy" than defaults)
+  (when (display-graphic-p)
+    (setq mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
+          mouse-wheel-scroll-amount-horizontal 1
+          mouse-wheel-progressive-speed nil))
+  (setq scroll-step 1
+        scroll-margin 0
+        scroll-conservatively 100000
+        auto-window-vscroll nil
+        scroll-preserve-screen-position t)
+
+  ;; Good pixel line scrolling
+  (if (fboundp 'pixel-scroll-precision-mode)
+      (pixel-scroll-precision-mode t)
+    (unless sys/macp
+      (use-package good-scroll
+        :diminish
+        :hook (after-init . good-scroll-mode)
+        :bind (([remap next] . good-scroll-up-full-screen)
+               ([remap prior] . good-scroll-down-full-screen)))))
+
+  ;; Smooth scrolling over images
+  (unless emacs/>=30p
+    (use-package iscroll
+      :diminish
+      :hook (image-mode . iscroll-mode)))
+
+  ;; Use fixed pitch where it's sensible
+  (use-package mixed-pitch
+    :diminish)
+  )

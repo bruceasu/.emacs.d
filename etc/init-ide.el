@@ -7,12 +7,17 @@
 
 ;;; Code:
 
-
+(provide 'init-ide)
 
 (eval-when-compile
   (require '+const)
   (require '+custom)
   (require 'init-package))
+
+;; 语法检查包
+(use-package flycheck
+  :ensure t
+  :defer 3)
 
 ;; format all, formatter for almost languages
 ;; great for programmers
@@ -133,33 +138,6 @@
 (dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook))
   (add-hook x #'yas-minor-mode-on))
 
-
-(use-package projectile
-  :ensure t
-  :config
-  ;;(setq projectile-completion-system 'ido)
-  ;;(setq ido-enable-flex-matching t)
-  (setq projectile-completion-system 'ivy)
-  ;; Eanble Projectile globally
-  (projectile-mode 1)
-  ;; Set akeybinding for projectile commands
-  (global-set-key (kbd "C-c p") 'projectile-commander))
-
-;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
-;;(add-to-list 'load-path "C:\\green\\emacs-29.1\\.emacs.d\\extensions\\copilot\\copilot.el")
-
-;;(require 'copilot)
-;;(add-hook 'prog-mode-hook 'copilot-mode)
-
-;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
-;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
-;;(define-key copilot-completion-map
-;;            (kbd "<tab>")
-;;            'copilot-accept-completion)
-;;(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-;; (add-to-list 'copilot-major-mode-alist '("c" . "cpp" . "css" . "go" . "java" . "html" . "javascript" . "javascriptreact" . "json" . "python" . "sql" . "shellscript"))
-;; Login to Copilot by M-x copilot-login. You can also check the status by M-x copilot-diagnose (NotAuthorized means you don't have a valid subscription).
-
 ;; Prettify Symbols
 ;; e.g. display “lambda” as “λ”
 (use-package prog-mode
@@ -169,89 +147,128 @@
   (setq-default prettify-symbols-alist suk-prettify-symbols-alist)
   (setq prettify-symbols-unprettify-at-point 'right-edge))
 
-;; Tree-sitter support
-(when (suk-treesit-available-p)
-  (use-package treesit-auto
-    :hook (after-init . global-treesit-auto-mode)
-    :init (setq treesit-auto-install 'prompt)))
-
-
-;; Show function arglist or variable docstring
-;; (use-package eldoc
-;;   :ensure nil
-;;   :diminish
-;;   :config
-;;   (when (childframe-workable-p)
-;;     (use-package eldoc-box
-;;       :diminish (eldoc-box-hover-mode eldoc-box-hover-at-point-mode)
-;;       :custom
-;;       (eldoc-box-lighter nil)
-;;       (eldoc-box-only-multi-line t)
-;;       (eldoc-box-clear-with-C-g t)
-;;       :custom-face
-;;       (eldoc-box-border ((t (:inherit posframe-border :background unspecified))))
-;;       (eldoc-box-body ((t (:inherit tooltip))))
-;;       :hook ((eglot-managed-mode . eldoc-box-hover-at-point-mode))
-;;       :config
-;;       ;; Prettify `eldoc-box' frame
-;;       (setf (alist-get 'left-fringe eldoc-box-frame-parameters) 8
-;;             (alist-get 'right-fringe eldoc-box-frame-parameters) 8))))
-
-
-;; Cross-referencing commands
-(use-package xref
-  :bind (("M-g ." . xref-find-definitions)
-         ("M-g ," . xref-go-back))
-  :init
-  ;; Use faster search tool
-  (when (executable-find "rg")
-    (setq xref-search-program 'ripgrep))
-
-  ;; Select from xref candidates in minibuffer
-  (setq xref-show-definitions-function #'xref-show-definitions-completing-read
-        xref-show-xrefs-function #'xref-show-definitions-completing-read))
-
-
-;; Jump to definition
-(use-package dumb-jump
-  :pretty-hydra
-  ((:title (pretty-hydra-title "Dump Jump" 'faicon "nf-fa-anchor")
-    :color blue :quit-key ("q" "C-g"))
-   ("Jump"
-    (("j" dumb-jump-go "Go")
-     ("o" dumb-jump-go-other-window "Go other window")
-     ("e" dumb-jump-go-prefer-external "Go external")
-     ("x" dumb-jump-go-prefer-external-other-window "Go external other window"))
-    "Other"
-    (("i" dumb-jump-go-prompt "Prompt")
-     ("l" dumb-jump-quick-look "Quick look")
-     ("b" dumb-jump-back "Back"))))
-  :bind (("C-M-j" . dumb-jump-hydra/body))
-  :init
-  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-  (setq dumb-jump-selector 'completing-read))
-
 ;; Misc. programming modes
-(use-package csv-mode)
+
 (unless emacs/>=29p
   (use-package csharp-mode))
-(use-package cmake-mode)
 (use-package powershell)
-(use-package vimrc-mode)
-(use-package yaml-mode)
-(use-package typescript-mode
- :load-path "~/.emacs.d/extensions/typescript")
+(use-package csv-mode)
 
 (require 'init-treemacs)
-(require 'init-lang-vcs)
-(require 'init-lang-lsp)
-(require 'init-lang-check)
-(require 'init-lang-dap)
 (require 'init-lang-web)
 (require 'init-lang-elisp)
-(require 'init-lang-c)
-(require 'init-lang-python)
 
-(provide 'init-ide)
+
+
+(unless (eq system-type 'windows-nt)
+  (use-package projectile
+    :ensure t
+    :config
+    ;;(setq projectile-completion-system 'ido)
+    ;;(setq ido-enable-flex-matching t)
+    (setq projectile-completion-system 'ivy)
+    ;; Eanble Projectile globally
+    (projectile-mode 1)
+    ;; Set akeybinding for projectile commands
+    (global-set-key (kbd "C-c p") 'projectile-commander)))
+
+(unless (eq system-type 'windows-nt)
+  ;;Show function arglist or variable docstring
+  (use-package eldoc
+    :ensure nil
+    :diminish
+    :config
+    (when (childframe-workable-p)
+      (use-package eldoc-box
+        :diminish (eldoc-box-hover-mode eldoc-box-hover-at-point-mode)
+        :custom
+        (eldoc-box-lighter nil)
+        (eldoc-box-only-multi-line t)
+        (eldoc-box-clear-with-C-g t)
+        :custom-face
+        (eldoc-box-border ((t (:inherit posframe-border :background unspecified))))
+        (eldoc-box-body ((t (:inherit tooltip))))
+        :hook ((eglot-managed-mode . eldoc-box-hover-at-point-mode))
+        :config
+        ;; Prettify `eldoc-box' frame
+        (setf (alist-get 'left-fringe eldoc-box-frame-parameters) 8
+              (alist-get 'right-fringe eldoc-box-frame-parameters) 8)))))
+
+(unless (eq system-type 'windows-nt)
+  ;; Cross-referencing commands
+  (use-package xref
+    :bind (("M-g ." . xref-find-definitions)
+           ("M-g ," . xref-go-back))
+    :init
+    ;; Use faster search tool
+    (when (executable-find "rg")
+      (setq xref-search-program 'ripgrep))
+
+    ;; Select from xref candidates in minibuffer
+    (setq xref-show-definitions-function #'xref-show-definitions-completing-read
+          xref-show-xrefs-function #'xref-show-definitions-completing-read))
+  (use-package helpful))
+
+(unless (eq system-type 'windows-nt)
+
+  ;; Jump to definition
+  (use-package dumb-jump
+    :pretty-hydra
+    ((:title (pretty-hydra-title "Dump Jump" 'faicon "nf-fa-anchor")
+      :color blue :quit-key ("q" "C-g"))
+     ("Jump"
+      (("j" dumb-jump-go "Go")
+       ("o" dumb-jump-go-other-window "Go other window")
+       ("e" dumb-jump-go-prefer-external "Go external")
+       ("x" dumb-jump-go-prefer-external-other-window "Go external other window"))
+      "Other"
+      (("i" dumb-jump-go-prompt "Prompt")
+       ("l" dumb-jump-quick-look "Quick look")
+       ("b" dumb-jump-back "Back"))))
+    :bind (("C-M-j" . dumb-jump-hydra/body))
+    :init
+    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+    (setq dumb-jump-selector 'completing-read)))
+
+(unless (eq system-type 'windows-nt)
+  ;; Tree-sitter support
+  (when (suk-treesit-available-p)
+    (use-package treesit-auto
+      :hook (after-init . global-treesit-auto-mode)
+      :init (setq treesit-auto-install 'prompt))))
+
+(unless (eq system-type 'windows-nt)
+  (use-package cmake-mode)
+  (use-package yaml-mode)
+  (use-package vimrc-mode))
+(unless (eq system-type 'windows-nt)
+
+  (require 'init-lang-vcs))
+(unless (eq system-type 'windows-nt)
+  (require 'init-lang-lsp))
+(unless (eq system-type 'windows-nt)
+  (require 'init-lang-dap))
+(unless (eq system-type 'windows-nt)
+  (require 'init-lang-c))
+(unless (eq system-type 'windows-nt)
+  (require 'init-lang-python))
+
+(unless (eq system-type 'windows-nt)
+  ;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
+  ;;(add-to-list 'load-path "C:\\green\\emacs-29.1\\.emacs.d\\extensions\\copilot\\copilot.el")
+
+  ;;(require 'copilot)
+  ;;(add-hook 'prog-mode-hook 'copilot-mode)
+
+  ;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
+  ;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
+  ;;(define-key copilot-completion-map
+  ;;            (kbd "<tab>")
+  ;;            'copilot-accept-completion)
+  ;;(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+  ;; (add-to-list 'copilot-major-mode-alist '("c" . "cpp" . "css" . "go" . "java" . "html" . "javascript" . "javascriptreact" . "json" . "python" . "sql" . "shellscript"))
+  ;; Login to Copilot by M-x copilot-login. You can also check the status by M-x copilot-diagnose (NotAuthorized means you don't have a valid subscription).
+
+  )
 
 ;;; init-ide.el ends here

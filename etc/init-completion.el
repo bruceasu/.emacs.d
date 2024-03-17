@@ -7,11 +7,21 @@
 
 ;;; Code:
 
+(provide 'init-completion)
+(use-package emacs
+  :init
+  ;; TAB cycle if there are only few candidates
+  (setq completion-cycle-threshold 3)
 
-(use-package helm
-  :ensure t)
-(use-package ac-helm
-  :ensure t)
+  ;; Only list the commands of the current modes
+  (when (boundp 'read-extended-command-predicate)
+    (setq read-extended-command-predicate
+          #'command-completion-default-include-p))
+
+  ;; Enable indentation+completion using the TAB key.
+  ;; `completion-at-point' is often bound to M-TAB.
+  (setq tab-always-indent 'complete))
+
 ;; 著名的Emacs补全框架, 为 LSP 提供额外的功能，如自动补全
 (use-package company
   :defer 2
@@ -45,23 +55,9 @@
         ("c s" . #'company-yasnippet
          ))
   )
-(use-package company-anaconda
-  :ensure nil)
 (use-package company-box
   :ensure nil)
-(use-package emacs
-  :init
-  ;; TAB cycle if there are only few candidates
-  (setq completion-cycle-threshold 3)
 
-  ;; Only list the commands of the current modes
-  (when (boundp 'read-extended-command-predicate)
-    (setq read-extended-command-predicate
-          #'command-completion-default-include-p))
-
-  ;; Enable indentation+completion using the TAB key.
-  ;; `completion-at-point' is often bound to M-TAB.
-  (setq tab-always-indent 'complete))
 
 ;; Optionally use the `orderless' completion style.
 (use-package orderless
@@ -102,8 +98,6 @@
   :when (icons-displayable-p)
   :hook (vertico-mode . nerd-icons-completion-mode))
 
-(use-package marginalia
-  :hook (after-init . marginalia-mode))
 
 ;; 增强了搜索功能
 ;; (use-package swiper
@@ -121,9 +115,7 @@
 ;;     ;;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
 ;;     ))
 
-;;(use-package bind-key)
-;;(bind-key "C-c x" #'some-function some-package-mode-map)
-;;(bind-key "C-c y" #'another-function)
+
 (use-package consult
   :bind (;; C-c bindings in `mode-specific-map'
          ("C-c M-x" . consult-mode-command)
@@ -159,7 +151,6 @@
          ("M-y"     . consult-yank-pop)                ;; orig. yank-pop
          ;; M-g bindings in `goto-map'
          ("M-g e"   . consult-compile-error)
-         ("M-g f"   . consult-flymake)               ;; Alternative: consult-flycheck
          ("M-g g"   . consult-goto-line)             ;; orig. goto-line
          ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
          ("M-g o"   . consult-outline)               ;; Alternative: consult-org-heading
@@ -221,179 +212,12 @@
           xref-show-definitions-function #'consult-xref))
 
   ;; More utils
-  (defvar consult-colors-history nil
-    "History for `consult-colors-emacs' and `consult-colors-web'.")
 
-  ;; No longer preloaded in Emacs 28.
-  (autoload 'list-colors-duplicates "facemenu")
-  ;; No preloaded in consult.el
-  (autoload 'consult--read "consult")
+  (use-package consult-flyspell
+    :bind ("M-g s" . consult-flyspell))
 
-  (defun consult-colors-emacs (color)
-    "Show a list of all supported colors for a particular frame.
-
-You can insert the name (default), or insert or kill the hexadecimal or RGB
-value of the selected COLOR."
-    (interactive
-     (list (consult--read (list-colors-duplicates (defined-colors))
-                          :prompt "Emacs color: "
-                          :require-match t
-                          :category 'color
-                          :history '(:input consult-colors-history)
-                          )))
-    (insert color))
-
-  ;; Adapted from counsel.el to get web colors.
-  (defun consult-colors--web-list nil
-    "Return list of CSS colors for `counsult-colors-web'."
-    (require 'shr-color)
-    (sort (mapcar #'downcase (mapcar #'car shr-color-html-colors-alist)) #'string-lessp))
-
-  (defun consult-colors-web (color)
-    "Show a list of all CSS colors.\
-
-You can insert the name (default), or insert or kill the hexadecimal or RGB
-value of the selected COLOR."
-    (interactive
-     (list (consult--read (consult-colors--web-list)
-                          :prompt "Color: "
-                          :require-match t
-                          :category 'color
-                          :history '(:input consult-colors-history)
-                          )))
-    (insert color))
-  :config
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-  (setq consult-preview-key '(:debounce 1.0 any))
-
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
-  (consult-customize
-   consult-goto-line
-   consult-theme :preview-key '(:debounce 0.5 any))
-
-  ;; Optionally configure the narrowing key.
-  ;; Both < and C-+ work reasonably well.
-  (setq consult-narrow-key "<") ;; "C-+"
-
-  ;; ;; Optionally make narrowing help available in the minibuffer.
-  ;; ;; You may want to use `embark-prefix-help-command' or which-key instead.
-  (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
-  )
-
-(use-package consult-flyspell
-  :bind ("M-g s" . consult-flyspell))
-
-(use-package consult-yasnippet
-  :bind ("M-g y" . consult-yasnippet))
-(unless sys/win32p
-  (progn
-    ;;在Windows下会导致内存泄漏和无响应
-	(use-package corfu
-	  :custom
-	  (corfu-auto t)
-	  (corfu-auto-prefix 2)
-	  (corfu-preview-current nil)
-	  (corfu-auto-delay 0.2)
-	  (corfu-popupinfo-delay '(0.4 . 0.2))
-	  :custom-face
-	  (corfu-border ((t (:inherit region :background unspecified))))
-	  :bind ("M-/" . completion-at-point)
-	  :hook ((after-init . global-corfu-mode)
-			 (global-corfu-mode . corfu-popupinfo-mode)))
-
-    (use-package embark
-      :bind (("s-."   . embark-act)
-             ("C-s-." . embark-act)
-             ("M-."   . embark-dwim)        ; overrides `xref-find-definitions'
-             ([remap describe-bindings] . embark-bindings)
-             :map minibuffer-local-map
-             ("M-." . my-embark-preview))
-      :init
-      ;; Optionally replace the key help with a completing-read interface
-      (setq prefix-help-command #'embark-prefix-help-command)
-      :config
-      ;; Manual preview for non-Consult commands using Embark
-      (defun my-embark-preview ()
-        "Previews candidate in vertico buffer, unless it's a consult command."
-        (interactive)
-        (unless (bound-and-true-p consult--preview-function)
-          (save-selected-window
-            (let ((embark-quit-after-action nil))
-              (embark-dwim)))))
-
-      ;; Hide the mode line of the Embark live/completions buffers
-      (add-to-list 'display-buffer-alist
-                   '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                     nil
-                     (window-parameters (mode-line-format . none))))
-
-      (with-eval-after-load 'which-key
-        (defun embark-which-key-indicator ()
-          "An embark indicator that displays keymaps using which-key.
-The which-key help message will show the type and value of the
-current target followed by an ellipsis if there are further
-targets."
-          (lambda (&optional keymap targets prefix)
-            (if (null keymap)
-                (which-key--hide-popup-ignore-command)
-              (which-key--show-keymap
-               (if (eq (plist-get (car targets) :type) 'embark-become)
-                   "Become"
-                 (format "Act on %s '%s'%s"
-                         (plist-get (car targets) :type)
-                         (embark--truncate-target (plist-get (car targets) :target))
-                         (if (cdr targets) "…" "")))
-               (if prefix
-                   (pcase (lookup-key keymap prefix 'accept-default)
-                     ((and (pred keymapp) km) km)
-                     (_ (key-binding prefix 'accept-default)))
-                 keymap)
-               nil nil t (lambda (binding)
-                           (not (string-suffix-p "-argument" (cdr binding))))))))
-
-        (setq embark-indicators
-              '(embark-which-key-indicator
-                embark-highlight-indicator
-                embark-isearch-highlight-indicator))
-
-        (defun embark-hide-which-key-indicator (fn &rest args)
-          "Hide the which-key indicator immediately when using the completing-read prompter."
-          (which-key--hide-popup-ignore-command)
-          (let ((embark-indicators
-                 (remq #'embark-which-key-indicator embark-indicators)))
-            (apply fn args)))
-
-        (advice-add #'embark-completing-read-prompter
-                    :around #'embark-hide-which-key-indicator)
-        ))
-
-    (use-package embark-consult
-      :bind (:map minibuffer-mode-map
-                  ("C-c C-o" . embark-export))
-      :hook (embark-collect-mode . consult-preview-at-point-mode))
-
-	(unless (display-graphic-p)
-	  (use-package corfu-terminal
-		:hook (global-corfu-mode . corfu-terminal-mode)))
-	(use-package nerd-icons-corfu
-	  :after corfu
-	  :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-	;; Add extensions
-	(use-package cape
-	  :init
-	  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-	  (add-to-list 'completion-at-point-functions #'cape-file)
-	  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
-	  (add-to-list 'completion-at-point-functions #'cape-keyword)
-	  (add-to-list 'completion-at-point-functions #'cape-abbrev)
-
-	  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
-	))
-(provide 'init-completion)
+  (use-package consult-yasnippet
+    :bind ("M-g y" . consult-yasnippet)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init-completion.el ends here

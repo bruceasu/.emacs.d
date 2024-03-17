@@ -1,6 +1,8 @@
-﻿(eval-when-compile
+﻿(provide 'init-key)
+(eval-when-compile
   (require '+const)
-  (require '+custom))
+  (require '+custom)
+  (require 'lazy-load))
 
 ;;; 全局 lazy-load-global-keys
 ;;; 模式 lazy-load-local-keys
@@ -164,8 +166,10 @@
 ;;; ### move text ###
 (lazy-load-global-keys
  '(
-   ("M-N" . move-text-down)	;把光标所在的整行文字(或标记)下移一行
-   ("M-P" . move-text-up)	;把光标所在的整行文字(或标记)上移一行
+   ("M-N"      . move-text-down)	;把光标所在的整行文字(或标记)下移一行
+   ("M-P"      . move-text-up)	;把光标所在的整行文字(或标记)上移一行
+   ("M-<DOWN>" . move-text-down)	;把光标所在的整行文字(或标记)下移一行
+   ("M-<UP>"   . move-text-up)	;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
 
@@ -445,6 +449,26 @@
    )
  "init-bookmark")
 
+
+;; gámfá citding hámshòu
+
+;;bind-keys 是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个键。虽然
+;;bind-keys 可以独立于 use-package 使用，但它通常与 use-package 结合使用，以提供
+;;更清晰和模块化的键绑定配置。
+
+;; (use-package bind-key)
+;; (bind-key "C-c x" #'some-function some-package-mode-map)
+;; (bind-key "C-c y" #'another-function)
+
+;; global-set-key examples:
+;; (global-set-key (kbd "C-x C-\\") 'next-line)
+;; (global-set-key [?\C-x ?\C-\\] 'next-line)
+;; (global-set-key [(control ?x) (control ?\\)] 'next-line)
+
+;; M-x global-set-key RET 交互式的绑定你的键。
+;; C-x Esc Esc 调出上一条“复杂命令”
+
+;; kèitá bongding
 ;; f3 start macro(kmacro-start-macro-or-insert-counter),
 ;; f4 done macro or run marcro (kmacro-end-or-call-macro).
 ;; C-x ( start macro (kmacro-start-macro),
@@ -457,34 +481,17 @@
 ;; (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
 ;;
 
-
-
-
-;; global-set-key examples:
-;; (global-set-key (kbd "C-x C-\\") 'next-line)
-;; (global-set-key [?\C-x ?\C-\\] 'next-line)
-;; (global-set-key [(control ?x) (control ?\\)] 'next-line)
-
 ;;(global-set-key (kbd "C-(") 'backward-sexp)
 ;;(global-set-key (kbd "C-)") 'forward-sexp)
 
-;;(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
-;;(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
-;;(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
-;;(global-set-key (kbd "C-x R") 'recentf)
-;; M-x global-set-key RET 交互式的绑定你的键。
-;; C-x Esc Esc 调出上一条“复杂命令”
-;; 使用方式
+;; tungyat bongding hámshòu
+;; shaiyung fongfá:
 ;; (suk-set-key-bindings 'global-set-key
 ;;   (list
 ;;      '([f2]              calendar)
 ;;      '([(shift f2)]      remember)
 ;;      '([f5]              revert-buffer)
 ;;      (list (kbd "C-c l") 'copy-line)))
-
-
-
-;; 设置绑定
 (defun suk-set-key-bindings (ACTION BINDINGLIST)
   "Map keys.
 ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
@@ -526,9 +533,6 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
 
 
-;; bind-keys 是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个键。虽然
-;; bind-keys 可以独立于 use-package 使用，但它通常与 use-package 结合使用，以提
-;; 供更清晰和模块化的键绑定配置。
 
 ;; Toggle fullscreen <F11> also bind to fullscreen
 ;; (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
@@ -644,6 +648,3 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
 (define-prefix-command 'leader-key)
 (global-set-key (kbd "M-s-SPC") 'leader-key)
-
-
-(provide 'init-key)

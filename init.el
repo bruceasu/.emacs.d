@@ -174,13 +174,11 @@
   (with-temp-message ""     ;Erase the output of plug-in startup
     ;; Constants
     (require '+const)
-
     ;; Customization
     (require '+custom)
     ;; Packages
     (require 'init-basic)
     (require 'init-awesome-pair)
-    (require 'lazy-load)
     (require 'init-key)
     (require 'init-package)
     (require 'init-completion)
@@ -188,22 +186,15 @@
     (require 'init-org)
     (require 'init-utils)
     (require 'init-mode)
-    (when sys/linuxp
-      (progn
 
-        (require 'init-shell)
-        (require 'init-im)   ;; windows 下表现不好
-        (require 'init-sudo)
-        )
-      )
-    ;; Restore session at last.
-    (require 'init-session)
-    (emacs-session-restore)
-    (server-start)
     ;; delay load
     (run-with-idle-timer
      1 nil
      #'(lambda ()
+         ;; Restore session at last.
+         (require 'init-session)
+         (emacs-session-restore)
+         (server-start)
          (require 'init-bookmark)
          (require 'init-buffers)
          (require 'init-recentf)
@@ -216,7 +207,6 @@
          ;;(require 'highlight-parentheses)
          (require 'init-highlight)
          (require 'init-window)
-         (require 'init-markdown)
          (require 'init-reader)
 
          (require 'init-calendar)
@@ -224,6 +214,14 @@
          (require 'init-ext-packages)
          ;; Programming
          (require 'init-ide)
+         (when sys/linuxp
+           (progn
+             (require 'init-shell)
+             (require 'init-im)   ;; windows 下表现不好
+             (require 'init-sudo)
+             )
+           )
+
          ;; Make gc pauses faster by decreasing the threshold.
          (setq gc-cons-threshold (* 16 1000 1000))
 

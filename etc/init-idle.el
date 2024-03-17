@@ -19,6 +19,10 @@
 
 
 ;;; Code:
+
+
+(provide 'init-idle)
+
 (eval-when-compile
   (require '+const)
   (require '+custom)
@@ -435,11 +439,3 @@ from tradition chinese to simple chinese" t)
 (if (boundp 'use-short-answers)
     (setq use-short-answers t)
   (fset 'yes-or-no-p 'y-or-n-p))
-
-
-
-
-
-(provide 'init-idle)
-
-;;; init-idle.el ends here

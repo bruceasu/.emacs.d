@@ -4,9 +4,6 @@
   (require 'init-package)
   )
 
-
-
-
 (use-package expand-region
   :load-path "~/.emacs.d/extensions/expand-region"
   :bind ("C-+" . er/expand-region)
@@ -27,10 +24,10 @@
 		(goto-char node-start)))
 	))
 
-;; Jump to Chinese characters
-(use-package ace-pinyin
-  :diminish
-  :hook (after-init . ace-pinyin-global-mode))
+;; ;; Jump to Chinese characters
+;; (use-package ace-pinyin
+;;   :diminish
+;;   :hook (after-init . ace-pinyin-global-mode))
 
 ;; Minor mode to aggressively keep your code always indented
 (use-package aggressive-indent
@@ -59,6 +56,7 @@
                                      'java-mode 'go-mode 'swift-mode)
                      (null (string-match "\\([;{}]\\|\\b\\(if\\|for\\|while\\)\\b\\)"
                                          )))))
+
 ;; Rectangle
 (use-package rect
   :ensure nil
@@ -117,8 +115,7 @@
   (with-eval-after-load 'dired
     (bind-key "C-c C-z f" #'browse-url-of-file dired-mode-map))
 
-  ;; For WSL
-  (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
+  (let ((cmd-exe "c:/Windows/System32/cmd.exe")
         (cmd-args '("/c" "start")))
     (when (file-exists-p cmd-exe)
       (setq browse-url-generic-program  cmd-exe
@@ -126,13 +123,6 @@
             browse-url-browser-function 'browse-url-generic)
       (when (daemonp)
         (advice-add #'browse-url :override #'browse-url-generic)))))
-
-;; Click to browse URL or to send to e-mail address
-(use-package goto-addr
-  :ensure nil
-  :hook ((text-mode . goto-address-mode)
-         (prog-mode . goto-address-prog-mode)))
-
 
 ;; Jump to things in Emacs tree-style
 (use-package avy
@@ -170,106 +160,15 @@
                   (diminish (cdr pair)))
                 beginend-modes))
 
+;;使用自己的函数
 ;; Drag stuff (lines, words, region, etc...) around
-(use-package drag-stuff
-  :diminish
-  :autoload drag-stuff-define-keys
-  :hook (after-init . drag-stuff-global-mode)
-  :config
-  (add-to-list 'drag-stuff-except-modes 'org-mode)
-  (drag-stuff-define-keys))
-
-
-;; A comprehensive visual interface to diff & patch
-(use-package ediff
-  :ensure nil
-  :hook(;; show org ediffs unfolded
-		(ediff-prepare-buffer . outline-show-all)
-		;; restore window layout when done
-		(ediff-quit . winner-undo))
-  :config
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain
-		ediff-split-window-function 'split-window-horizontally
-		ediff-merge-split-window-function 'split-window-horizontally))
-
-
-;; Automatic parenthesis pairing
-(use-package elec-pair
-  :ensure nil
-  :hook (after-init . electric-pair-mode)
-  :init (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit))
-
-;; Visual `align-regexp'
-(use-package ialign)
-
-
-;; Edit multiple regions in the same way simultaneously
-(use-package iedit
-  :defines desktop-minor-mode-table
-  :bind (("C-;" . iedit-mode)
-         ("C-x r RET" . iedit-rectangle-mode)
-         :map isearch-mode-map ("C-;" . iedit-mode-from-isearch)
-         :map esc-map ("C-;" . iedit-execute-last-modification)
-         :map help-map ("C-;" . iedit-mode-toggle-on-function))
-  :config
-  ;; Avoid restoring `iedit-mode'
-  (with-eval-after-load 'desktop
-    (add-to-list 'desktop-minor-mode-table
-                 '(iedit-mode nil))))
-
-
-;; Multiple cursors
-(use-package multiple-cursors
-  :bind (("C-c m" . multiple-cursors-hydra/body)
-         ("C-S-c C-S-c"   . mc/edit-lines)
-         ("C->"           . mc/mark-next-like-this)
-         ("C-<"           . mc/mark-previous-like-this)
-         ("C-c C-<"       . mc/mark-all-like-this)
-         ("C-M->"         . mc/skip-to-next-like-this)
-         ("C-M-<"         . mc/skip-to-previous-like-this)
-         ("s-<mouse-1>"   . mc/add-cursor-on-click)
-         ("C-S-<mouse-1>" . mc/add-cursor-on-click)
-         :map mc/keymap
-         ("C-|" . mc/vertical-align-with-space))
-  :pretty-hydra
-  ((:title (pretty-hydra-title "Multiple Cursors" 'mdicon "nf-md-cursor_move")
-    :color amaranth :quit-key ("q" "C-g"))
-   ("Up"
-	(("p" mc/mark-previous-like-this "prev")
-	 ("P" mc/skip-to-previous-like-this "skip")
-	 ("M-p" mc/unmark-previous-like-this "unmark")
-	 ("|" mc/vertical-align "align with input CHAR"))
-    "Down"
-    (("n" mc/mark-next-like-this "next")
-	 ("N" mc/skip-to-next-like-this "skip")
-	 ("M-n" mc/unmark-next-like-this "unmark"))
-    "Misc"
-    (("l" mc/edit-lines "edit lines" :exit t)
-	 ("a" mc/mark-all-like-this "mark all" :exit t)
-	 ("s" mc/mark-all-in-region-regexp "search" :exit t)
-     ("<mouse-1>" mc/add-cursor-on-click "click"))
-    "% 2(mc/num-cursors) cursor%s(if (> (mc/num-cursors) 1) \"s\" \"\")"
-	(("0" mc/insert-numbers "insert numbers" :exit t)
-	 ("A" mc/insert-letters "insert letters" :exit t)))))
-
-;; Smartly select region, rectangle, multi cursors
-(use-package smart-region
-  :hook (after-init . smart-region-on))
-
-
-
-
-;; Copy&paste GUI clipboard from text terminal
-(use-package xclip
-    :hook (after-init . xclip-mode)
-    :config
-    ;; @see https://github.com/microsoft/wslg/issues/15#issuecomment-1796195663
-    (when (eq xclip-method 'wl-copy)
-      (set-clipboard-coding-system 'gbk) ; for wsl
-      (setq interprogram-cut-function
-            (lambda (text)
-              (start-process "xclip"  nil xclip-program "--trim-newline" "--type" "text/plain;charset=utf-8" text)))))
-
+;; (use-package drag-stuff
+;;   :diminish
+;;   :autoload drag-stuff-define-keys
+;;   :hook (after-init . drag-stuff-global-mode)
+;;   :config
+;;   (add-to-list 'drag-stuff-except-modes 'org-mode)
+;;   (drag-stuff-define-keys))
 
 ;; Hungry deletion
 (use-package hungry-delete

@@ -11,42 +11,48 @@
    (require 'init-package)
   )
 
-;; eww
-(use-package eww
-  :ensure nil
-  :init
-  ;; Install: npm install -g readability-cli
-  (when (executable-find "readable")
-    (setq eww-retrieve-command '("readable"))))
+(unless (eq system-type 'windows-nt)
+  ;; eww
+  (use-package eww
+    :ensure nil
+    :init
+    ;; Install: npm install -g readability-cli
+    (when (executable-find "readable")
+      (setq eww-retrieve-command '("readable"))))
 
-;; Webkit browser
-(use-package xwidget
-  :ensure nil
-  :if (featurep 'xwidget-internal)
-  :bind (("C-c C-z w" . xwidget-webkit-browse-url)
-         :map xwidget-webkit-mode-map
-         ("h"         . xwidget-hydra/body))
-  :pretty-hydra
-  ((:title (pretty-hydra-title "Webkit" 'faicon "nf-fa-chrome" :face 'nerd-icons-blue)
-    :color amaranth :quit-key ("q" "C-g"))
-   ("Navigate"
-    (("b" xwidget-webkit-back "back")
-     ("f" xwidget-webkit-forward "forward")
-     ("r" xwidget-webkit-reload "refresh")
-     ("SPC" xwidget-webkit-scroll-up "scroll up")
-     ("DEL" xwidget-webkit-scroll-down "scroll down")
-     ("S-SPC" xwidget-webkit-scroll-down "scroll down"))
-    "Zoom"
-    (("+" xwidget-webkit-zoom-in "zoom in")
-     ("=" xwidget-webkit-zoom-in "zoom in")
-     ("-" xwidget-webkit-zoom-out "zoom out"))
-    "Misc"
-    (("g" xwidget-webkit-browse-url "browse url" :exit t)
-     ("u" xwidget-webkit-current-url "show url" :exit t)
-     ("v" xwwp-follow-link "follow link" :exit t)
-     ("w" xwidget-webkit-current-url-message-kill "copy url" :exit t)
-     ("?" describe-mode "help" :exit t)
-     ("Q" quit-window "quit" :exit t)))))
+  ;; Webkit browser
+  (use-package xwidget
+    :ensure nil
+    :if (featurep 'xwidget-internal)
+    :bind (("C-c C-z w" . xwidget-webkit-browse-url)
+           :map xwidget-webkit-mode-map
+           ("h"         . xwidget-hydra/body))
+    :pretty-hydra
+    ((:title (pretty-hydra-title "Webkit" 'faicon "nf-fa-chrome" :face 'nerd-icons-blue)
+      :color amaranth :quit-key ("q" "C-g"))
+     ("Navigate"
+      (("b" xwidget-webkit-back "back")
+       ("f" xwidget-webkit-forward "forward")
+       ("r" xwidget-webkit-reload "refresh")
+       ("SPC" xwidget-webkit-scroll-up "scroll up")
+       ("DEL" xwidget-webkit-scroll-down "scroll down")
+       ("S-SPC" xwidget-webkit-scroll-down "scroll down"))
+      "Zoom"
+      (("+" xwidget-webkit-zoom-in "zoom in")
+       ("=" xwidget-webkit-zoom-in "zoom in")
+       ("-" xwidget-webkit-zoom-out "zoom out"))
+      "Misc"
+      (("g" xwidget-webkit-browse-url "browse url" :exit t)
+       ("u" xwidget-webkit-current-url "show url" :exit t)
+       ("v" xwwp-follow-link "follow link" :exit t)
+       ("w" xwidget-webkit-current-url-message-kill "copy url" :exit t)
+       ("?" describe-mode "help" :exit t)
+       ("Q" quit-window "quit" :exit t)))))
+
+  )
+
+(use-package typescript-mode
+  :load-path "~/.emacs.d/extensions/typescript")
 
 ;; CSS
 (use-package css-mode
@@ -80,7 +86,7 @@
   ;; Use default keybindings for lsp
   (when suk-lsp
     (unbind-key "M-." js2-mode-map)))
-    
+
 (use-package rjsx-mode
   :load-path "~/.emacs.d/extensions/rjsx-mode"
   :mode ("\\.js\\'")
@@ -90,7 +96,6 @@
 	                          (flycheck-select-checker 'javascript-eslint)))
   )
 
-;; ¿ìËÙ±àÐ´ HTML ´úÂë
 (use-package emmet-mode
   :defer 3
   :init (setq emmet-expand-jsx-className? t)
@@ -122,16 +127,6 @@
 ;; Adds node_modules/.bin directory to `exec_path'
 (use-package add-node-modules-path
   :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
-
-(use-package haml-mode)
-
-;; REST
-(use-package restclient
-  :mode ("\\.http\\'" . restclient-mode)
-  :config
-  (use-package restclient-test
-    :diminish
-    :hook (restclient-mode . restclient-test-mode)))
 
 (provide 'init-lang-web)
 
