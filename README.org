@@ -6369,12 +6369,12 @@ from tradition chinese to simple chinese" t)
 #+end_src
 * etc/init-org.el
 #+begin_src emacs-lisp :tangle etc/init-org.el
-  ;;; Commentary:
+    ;;; Commentary:
   ;;
   ;; Org configurations.
   ;;
 
-  ;;; Code:
+          ;;; Code:
   (eval-when-compile
     (require '+const)
     (require '+custom)
@@ -6382,6 +6382,51 @@ from tradition chinese to simple chinese" t)
     )
   ;;(message org-files-directory)
   (require 'org)
+  ;;  (setq plantuml-default-exec-mode 'jar) ;default
+  ;; ;; Sample jar configuration
+  ;; (setq plantuml-jar-path "/path/to/your/copy/of/plantuml.jar")
+  ;; (setq plantuml-default-exec-mode 'jar)
+
+  ;; ;; Sample executable configuration
+  ;; (setq plantuml-executable-path "/path/to/your/copy/of/plantuml.bin")
+  ;; (setq plantuml-default-exec-mode 'executable)
+  (setq plantuml-default-exec-mode 'jar)
+  (setq org-plantuml-jar-path
+        (expand-file-name "C:/green/plantuml-1.2024.3.jar"))
+  ;; plantuml-java-args
+  ;; plantuml-jar-args
+  (defun my-org-plantuml-execute (orig-fun &rest args)
+    (let (
+          (plantuml-java-args (list  "-Dfile.encoding=UTF-16"
+                                     "-Djava.awt.headless=true"
+                                     "-jar"
+                                     "--illegal-access=deny"))
+          (plantuml-jar-args (list  "-charset" "UTF-8")) ;default value
+          )
+      (apply orig-fun args)))
+
+  (advice-add 'org-plantuml-execute :around #'my-org-plantuml-execute)
+  (add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((plantuml . t)
+     (dot . t)
+     ))
+                                          ;(setq process-environment (cons "PATH=D:/green/plantUML/bin;%PATH%" process-environment))
+
+  (defun my-org-export-before-processing-hook (backend)
+    (;let ((process-environment (cons "PATH=%PATH%" process-environment)))
+     ;; (org-babel-execute-src-block)
+     (org-babel-execute-buffer)))
+
+  (add-hook 'org-export-before-processing-hook 'my-org-export-before-processing-hook)
+
+  (defun my-org-mode-refresh-images ()
+    (when (derived-mode-p 'org-mode) ; 确保当前模式是 Org-mode
+      (org-redisplay-inline-images))) ; 刷新内嵌图片
+
+  (add-hook 'org-babel-after-execute-hook 'my-org-mode-refresh-images)
+
   (setq org-agenda-diary-file (expand-file-name "diary.org" org-files-directory))
   ;; setup agenda files
   ;; org-mode manages the org-agenda-files variable automatically
@@ -6427,9 +6472,9 @@ from tradition chinese to simple chinese" t)
   (setq org-startup-indented t)
   (setq org-pretty-entities nil)
   (setq org-hide-emphasis-markers t)
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Agenda
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (setq org-alphabetical-lists t)
   ;; Keep tasks with dates on the global todo lists
   (setq org-agenda-todo-ignore-with-date nil)
@@ -6519,9 +6564,9 @@ from tradition chinese to simple chinese" t)
           ("\\.x?html?\\'" . system)
           ("\\.pdf\\'" . system)))
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; TODO
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (setq org-use-fast-todo-selection t)
   ;; ! 的含义是记录某项更改为状态的时间。我不把这个添加到完成的状态，是因为它们已
   ;; 经被记录了。
@@ -6587,9 +6632,9 @@ from tradition chinese to simple chinese" t)
   ;; - this removes clocked tasks with 0:00 duration
   (setq org-clock-out-remove-zero-time-clocks t)
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; EXPORTER
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
   ;; Inline images in HTML instead of producting links to the image
   (setq org-html-inline-images t)
@@ -6607,7 +6652,7 @@ from tradition chinese to simple chinese" t)
   (setq org-export-with-timestamps nil)
 
   ;; Embed inline CSS read from a file.
-  ;;;###autoload
+          ;;;###autoload
   (defun my-org-inline-css-hook (exporter)
     "Insert custom inline css"
     (when (eq exporter 'html)
@@ -6656,11 +6701,11 @@ from tradition chinese to simple chinese" t)
                 (org-remove-empty-drawer-at "LOGBOOK" (point)))))
 
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Refile settings
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Exclude DONE state tasks from refile targets
-  ;;;###autoload
+          ;;;###autoload
   (defun suk/verify-refile-target ()
     "Exclude todo keywords with a done state from refile targets."
     (not (member (nth 2 (org-heading-components)) org-done-keywords)))
@@ -6672,9 +6717,9 @@ from tradition chinese to simple chinese" t)
   (setq org-refile-target-verify-function 'suk/verify-refile-target)
   ;; Allow refile to create parent tasks with confirmation
   (setq org-refile-allow-creating-parent-nodes 'confirm)
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;; Attachments
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;; Attachments
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (setq org-id-method (quote uuidgen))
   ;; Say you want to attach a file x.sql to your current task. Create
   ;; the file data in /tmp/x.sql and save it.
@@ -6724,9 +6769,9 @@ from tradition chinese to simple chinese" t)
   (add-hook 'org-mode-hook
             (lambda ()
               (add-hook 'after-save-hook #'suk/org-babel-tangle-config)))
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;; 快捷键设置 keys are set in init-key.el
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;; 快捷键设置 keys are set in init-key.el
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; I use C-c c to start capture mode
   (global-set-key (kbd "C-c c") #'org-capture)
   ;; ;; (global-set-key (kbd "C-c C") 'org-capture)
@@ -6743,21 +6788,21 @@ from tradition chinese to simple chinese" t)
   ;;(add-hook 'org-mode-hook (lambda () (org-pretty-table-mode)))
 
   ;; Prettify UI
-  (use-package org-modern
-    :hook ((org-mode . org-modern-mode)
-           (org-agenda-finalize . org-modern-agenda)
-           (org-modern-mode . (lambda ()
-                                "Adapt `org-modern-mode'."
-                                ;; Disable Prettify Symbols mode
-                                (setq prettify-symbols-alist nil)
-                                (prettify-symbols-mode -1)))))
+  ;; (use-package org-modern
+  ;;   :hook ((org-mode . org-modern-mode)
+  ;;          (org-agenda-finalize . org-modern-agenda)
+  ;;          (org-modern-mode . (lambda ()
+  ;;                               "Adapt `org-modern-mode'."
+  ;;                               ;; Disable Prettify Symbols mode
+  ;;                               (setq prettify-symbols-alist nil)
+  ;;                               (prettify-symbols-mode -1)))))
 
   ;; Export text/html MIME emails
   (use-package org-mime
     :bind (:map message-mode-map
-                ("C-c M-o" . org-mime-htmlize)
-                :map org-mode-map
-                ("C-c M-o" . org-mime-org-buffer-htmlize)))
+           ("C-c M-o" . org-mime-htmlize)
+           :map org-mode-map
+           ("C-c M-o" . org-mime-org-buffer-htmlize)))
 
   ;; covert to html
   (use-package htmlize
@@ -6765,8 +6810,8 @@ from tradition chinese to simple chinese" t)
 
   (provide 'init-org)
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;; init-org.el ends here
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;; init-org.el ends here
 
 #+end_src
 * etc/init-reader.el

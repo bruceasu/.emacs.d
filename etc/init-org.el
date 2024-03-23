@@ -11,6 +11,53 @@
   )
 ;;(message org-files-directory)
 (require 'org)
+;;(setq plantuml-default-exec-mode 'server) ;default
+;; ;; Sample jar configuration
+;; (setq plantuml-jar-path "/path/to/your/copy/of/plantuml.jar")
+;; (setq plantuml-default-exec-mode 'jar)
+
+;; ;; Sample executable configuration
+;; (setq plantuml-executable-path "/path/to/your/copy/of/plantuml.bin")
+;; (setq plantuml-default-exec-mode 'executable)
+(setq plantuml-default-exec-mode 'jar)
+(setq org-plantuml-jar-path
+      (expand-file-name "C:/green/plantuml-1.2024.3.jar"))
+(setq org-plantuml-jar-args (list "-charset" "UTF-8"))
+;; plantuml-java-args
+;; plantuml-jar-args
+(defun my-org-plantuml-execute (orig-fun &rest args)
+  (let (
+        (plantuml-java-args (list
+                             "-Djava.awt.headless=true"
+                             "-Dfile.encoding=UTT-8"
+                             "-jar"
+                             "--illegal-access=deny"
+                             ))
+        (plantuml-jar-args (list  "-charset" "UTF-8")) ;default value
+        )
+    (apply orig-fun args)))
+
+(advice-add 'org-plantuml-execute :around #'my-org-plantuml-execute)
+(add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((plantuml . t)
+   (dot . t)
+   ))
+                                        ;(setq process-environment (cons "PATH=D:/green/plantUML/bin;%PATH%" process-environment))
+
+(defun my-org-export-before-processing-hook (backend)
+  (;let ((process-environment (cons "PATH=%PATH%" process-environment)))
+   ;; (org-babel-execute-src-block)
+   (org-babel-execute-buffer)))
+
+(add-hook 'org-export-before-processing-hook 'my-org-export-before-processing-hook)
+
+(defun my-org-mode-refresh-images ()
+  (when (derived-mode-p 'org-mode) ; 确保当前模式是 Org-mode
+    (org-redisplay-inline-images))) ; 刷新内嵌图片
+
+(add-hook 'org-babel-after-execute-hook 'my-org-mode-refresh-images)
 (setq org-agenda-diary-file (expand-file-name "diary.org" org-files-directory))
 ;; setup agenda files
 ;; org-mode manages the org-agenda-files variable automatically
@@ -371,7 +418,7 @@
 ;;(require 'org-pretty-table)
 ;;(add-hook 'org-mode-hook (lambda () (org-pretty-table-mode)))
 
-;; Prettify UI
+;;Prettify UI
 (use-package org-modern
   :hook ((org-mode . org-modern-mode)
          (org-agenda-finalize . org-modern-agenda)
@@ -379,6 +426,7 @@
                               "Adapt `org-modern-mode'."
                               ;; Disable Prettify Symbols mode
                               (setq prettify-symbols-alist nil)
+                              (setq org-modern-table nil)
                               (prettify-symbols-mode -1)))))
 
 ;; Export text/html MIME emails

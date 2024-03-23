@@ -67,3 +67,5 @@ README.html
 /newsticker/
 org-clock-save.el
 *.~undo-tree~
+/custom.el
+/custom-post.el

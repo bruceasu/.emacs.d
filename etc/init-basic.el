@@ -242,7 +242,7 @@ Native tree-sitter is introduced since 29.1."
   (progn
 	;; 隐藏垂直滚动条。
 	;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
-	;;  (modify-all-frames-parameters '((vertical-scroll-bars)))
+	(modify-all-frames-parameters '((vertical-scroll-bars)))
 	)
   )
 

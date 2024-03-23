@@ -99,17 +99,16 @@
 ;;只渲染当前屏幕语法高亮，加快显示速度
 (setq font-lock-maximum-decoration t)
 (global-font-lock-mode t)
-(setq font-lock-maximum-size 50000000); set 50mb file size limit for fontification
+(setq font-lock-maximum-size 5000000); set 5mb file size limit for fontification
 ;; Fonts
-(when (or sys/mac-x-p sys/linux-x-p)
-  (set-frame-font "Noto Sans CJK SC-12"))
-
 (setq emacs-font-size-pair '(30 . 30))
 (setq en-font "Time New Roman"
       cn-font "LXGW WenKai")
 ;; font-family: "lucida grande", "lucida sans unicode", lucida, helvetica,
 ;; "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 (cond
+ ((member "asu-cjk-sans" (font-family-list))
+  (setq en-font "asu-cjk-sans"))
  ((member "Consolas" (font-family-list))
   (setq en-font "Consolas"))
  ((member "LXGW WenKai Mono" (font-family-list))
@@ -144,6 +143,8 @@
   (setq en-font "Consolas"))
  )
 (cond
+ ((member "asu-cjk-sans" (font-family-list))
+  (setq cn-font "asu-cjk-sans"))
  ((member "KleeOne+CJK" (font-family-list))
   (setq cn-font "KleeOne+CJK"))
 
@@ -177,12 +178,11 @@
       cn-font-size (cdr emacs-font-size-pair))
 
 (defun config-font-size (en-size cn-size)
-  (set-face-attribute 'default nil :font
-                      (format "%s:pixelsize=%d" en-font en-size))
-  (if (display-graphic-p)
-      (dolist (charset '(kana han cjk-misc bopomofo))
-        (set-fontset-font (frame-parameter nil 'font) charset
-                          (font-spec :family cn-font :size cn-size)))))
+  (when (display-graphic-p)
+    (set-face-attribute 'default nil :family cn-size)
+    (dolist (charset '(kana han cjk-misc bopomofo))
+      (set-fontset-font (frame-parameter nil 'font) charset
+                        (font-spec :family cn-font :size cn-size)))))
 ;; (config-font-size 17 18)
 (config-font-size (default-value 'en-font-size) (default-value 'cn-font-size))
 
@@ -203,13 +203,24 @@
 
 (defun set-font (latin cjk size-pair)
   "Setup Emacs LATIN and CJK fonts with SIZE-PAIR on x window-system."
-  (if (font-exist-p latin)
-      (set-frame-font (format "%s:pixelsize=%d" latin (car size-pair)) t))
+  (when (font-exist-p latin)
+    (set-frame-font (format "%s:pixelsize=%d" latin (car size-pair)) t))
 
-  (if (font-exist-p cjk)
-      (dolist (charset '(kana han symbol cjk-misc bopomofo))
-        (set-fontset-font (frame-parameter nil 'font) charset
-                          (font-spec :family cjk :size (cdr size-pair))))))
+  (when (font-exist-p cjk)
+    ;;(set-face-attribute 'default nil :family "JetBrainsMono NFM")
+    (dolist (charset '(kana
+                       han
+                       symbol
+                       cjk-misc
+                       bopomofo
+                       japanese-jisx0208
+                       japanese-jisx0212
+                       katakana-jisx0201
+                       ;;latin
+                       symbol
+                       ))
+      (set-fontset-font (frame-parameter nil 'font) charset
+                        (font-spec :family cjk :size (cdr size-pair))))))
 
 (defun emacs-step-font-size (step)
   "Increase/Decrease Emacs's font by STEP size."
@@ -243,21 +254,29 @@
   ;; setup change size font, base on emacs-font-size-pair-list
   (global-set-key (kbd "C-M-=") 'increase-emacs-font-size)
   (global-set-key (kbd "C-M--") 'decrease-emacs-font-size)
-  (setq emacs-english-font en-font)
-  (setq emacs-cjk-font cn-font)
-  ;; Setup font size based on emacs-font-size-pair
-  ;; (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+
   )
+
+(set-face-attribute 'variable-pitch nil :family "asu-cjk-serif" :height 120)
+(set-face-attribute 'fixed-pitch nil :family "asu-cjk-mono" :height 120)
+(dolist (mode '(text-mode-hook markdown-hook org-mode-hook))
+  (add-hook mode 'load-default-font)
+  (add-hook mode 'variable-pitch-mode)
+  )
+(add-hook 'prog-mode-hook 'load-program-font)
+(add-hook 'prog-mode-hook  (lambda () (variable-pitch-mode -1)))
+
 ;;----------------------------------------------------------
 (defun load-default-font ()
   "Load default font setting."
   (interactive)
-  ;; (load-program-font)
+  (setq emacs-english-font en-font)
+  (setq emacs-cjk-font cn-font)
+  ;; Setup font size based on emacs-font-size-pair
   (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
   (message "Set default font")
   )
-(dolist (mode '(text-mode-hook markdown-hook))
-  (add-hook mode 'load-default-font))
+
 
 (load-default-font)
 
@@ -266,98 +285,20 @@
 (defun load-program-font ()
   "Load Program font."
   (interactive)
-  (when sys/linuxp
-    ;; Set a default font
-    ;;(set-face-attribute 'default nil :font "Victor Mono") ;; linux
-    ;;(set-face-attribute 'default nil :font "Consolas")))
-    (set-face-attribute 'default nil :height 120)
-    (cond
-     ;; linnux 下不支持
-     ((member "Victor Mono" (font-family-list))
-      (face-remap-add-relative 'default nil :font "Victor Mono"))
-     ((member "JetBrains Mono" (font-family-list))
-      (face-remap-add-relative 'default nil :font "JetBrains Mono"))
-     ;; 这个字体偏小
-     ;;((member "monofur" (font-family-list))
-     ;; (set-face-attribute 'default nil :font "monofur"))
-     ((member "Migu 1M Less" (font-family-list))
-      (face-remap-add-relative 'default nil :font "Migu 1M Less"))
-     ((member "Source Code Pro" (font-family-list))
-      (face-remap-add-relative 'default nil :font "Source Code Pro"))
-     ((member "Monaco" (font-family-list))
-      (face-remap-add-relative 'default nil :font "Monaco"))
-     ((member "DejaVu Sans Mono" (font-family-list))
-      (face-remap-add-relative 'default nil :font "DejaVu Sans Mono"))
-     ((member "Consolas" (font-family-list))
-      (face-remap-add-relative 'default nil :font "Consolas")))
-
-
-    ;; Specify font for chinese characters
-    ;; (set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")
-
-    (set-fontset-font (frame-parameter nil 'font)
-                      ;;'han  '("Simsun" . "unicode-bmp")
-                      ;;'han  '("PMingliU" . "unicode-bmp")
-                      ;;'han  '("AR PL UKai CN" . "unicode-bmp")
-                      ;;'han  '("AR PL UMing CN" . "unicode-bmp")
-                      ;;'han  '("WenQuanYi Micro Hei" . "unicode-bmp")
-                      ;;'han  '("Microsoft Yahei" . "unicode-bmp")
-                      ;;'han  '("Noto Sans Mono CJK SC" . "unicode-bmp")
-                      'han '("LXGW WenKai Mono" . "unicode-bmp")
-                      ;; linnux 下不支持
-                      ;;'han '("TsangerJinKai01-27533 W03". "unicode-bmp")
-                      ;;'han '("仓耳今楷01-27533" . "unicode-bmp")
-		              ))
-  (when sys/win32p
-    ;; 下面是用于Windows的配置。
-    (progn
-      ;; 设置英文字体并指定字号。
-      ;;(set-face-attribute 'default nil :font "Migu 1M Less 11")
-      ;;(set-face-attribute 'default nil :font "Victor Mono Medium 12")
-      (face-remap-add-relative 'default nil :family "Consolas")
-      (cond
-       ((member "JetBrainsMono NFM" (font-family-list))
-        (face-remap-add-relative 'default nil :family "JetBrainsMono NFM"))
-       ;; linnux 下不支持
-       ((member "Victor Mono" (font-family-list))
-        (face-remap-add-relative 'default nil :family "Victor Mono"))
-       ((member "JetBrains Mono" (font-family-list))
-        (face-remap-add-relative 'default nil :family "JetBrains Mono"))
-       ;; 这个字体偏小
-       ;;((member "monofur" (font-family-list))
-       ;; (face-remap-add-relative 'default nil :family "monofur"))
-       ;; ((member "Migu 1M Less" (font-family-list))
-       ;;  (face-remap-add-relative 'default nil :family "Migu 1M Less-12"))
-       ((member "Source Code Pro" (font-family-list))
-        (face-remap-add-relative 'default nil :family "Source Code Pro"))
-       ((member "Monaco" (font-family-list))
-        (face-remap-add-relative 'default nil :family "Monaco"))
-       ((member "DejaVu Sans Mono" (font-family-list))
-        (face-remap-add-relative 'default nil :family "DejaVu Sans Mono"))
-       ((member "Consolas" (font-family-list))
-        (face-remap-add-relative 'default nil :family "Consolas")))
-      ;; 给相应的字符集设置中文字体。
-      (dolist (charset '(han cjk-misc chinese-gbk))
-        (cond
-         ((member "KleeOne+CJK" (font-family-list))
-          (set-fontset-font "fontset-default" charset (font-spec :family "KleeOne+CJK")))
-         ((member "LXGW WenKai Mono" (font-family-list))
-          (set-fontset-font "fontset-default" charset (font-spec :family "LXGW WenKai Mono")))
-         ((member "霞鹜文楷等宽" (font-family-list))
-          (set-fontset-font "fontset-default" charset (font-spec :family "霞鹜文楷等宽")))
-         ((member "Microsoft YaHei" (font-family-list))
-          (set-fontset-font "fontset-default" charset (font-spec :family "Microsoft YaHei")))
-         ((member "Sarasa Mono SC" (font-family-list))
-          (set-fontset-font "fontset-default" charset (font-spec :family "Sarasa Mono SC")))
-         ((member "仓耳今楷01-27533 W04" (font-family-list))
-          (set-fontset-font "fontset-default" charset (font-spec :family "仓耳今楷01-27533 W04")))
-         ((member "Simsun" (font-family-list))
-          (set-fontset-font "fontset-default" charset (font-spec :family "Simsun")))
-
-         ))
-      ))
+  ;; 设置英文字体并指定字号。
+  (setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
+  ;; 给相应的字符集设置中文字体。
+  (setq emacs-cjk-font "asu-cjk-mono")
+  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+  (when (member "Symbols Nerd Font Mono" (font-family-list))
+    (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
+    ;; FontAwesome 范围
+    (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
+    ;; 扩展至可能包含 Material Design Icons 的范围
+    (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
   (message "Set program font"))
-(add-hook 'prog-mode-hook 'load-program-font)
+
+
 
 
 ;;----------------------------------------------------------
@@ -365,9 +306,9 @@
   "Load org mode font."
   (interactive)
 
-  (load-default-font)
+  ;;(load-default-font)
   ;; (set-face-attribute FACE FRAME &rest ARGS)
-  ;; or (face-remap-add-relative FACE FRAME &rest ARGS)
+  ;; or (set-face-attribute FACE FRAME &rest ARGS)
   ;; 字体和字号
   ;; :family 指定字体家族，如 "Monaco"、"DejaVu Sans Mono"。
   ;; :height 指定字体大小，以 1/10 点为单位，如 120 表示 12 点大小。
@@ -385,28 +326,35 @@
   ;; :inherit 指定从其他 face 继承属性。
   ;; 关于 :font 参数
   ;; :font 参数可以用于直接指定整个字体描述字符串，这是一种快捷方式，它允许你同时指定字体家族、大小等信息，格式通常是 "家族-大小"，如 "Monaco-12"。使用 :font 时，可能无法单独指定字重、宽度等属性。
-
   ;; (set-face-attribute 'default nil
-  ;;                     :family "YourFontFamily" ; 字体家族，如 "Sarasa Mono SC"
+  ;;                     :family "asu-cjk-sans" ; 字体家族，如 "Sarasa Mono SC"
   ;;                     :height 120 ; 字号，120 表示 12pt
   ;;                     :weight 'normal ; 字体粗细
   ;;                     :width 'normal) ; 字体宽度
 
+  (set-face-attribute 'org-block nil :family "asu-cjk-mono")
+  (set-face-attribute 'org-code nil :family "asu-cjk-mono")
+  (set-face-attribute 'org-table nil :family "asu-cjk-mono")
+  (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
+  (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")
+  (set-face-attribute 'org-level-3 nil :family "asu-cjk-sans")
+  (set-face-attribute 'org-level-4 nil :family "asu-cjk-sans")
+  (set-face-attribute 'org-level-5 nil :family "asu-cjk-sans")
+  (set-face-attribute 'org-level-6 nil :family "asu-cjk-sans")
+  (set-face-attribute 'org-level-7 nil :family "asu-cjk-sans")
+  (set-face-attribute 'org-level-8 nil :family "asu-cjk-sans")
+  (when (member "Symbols Nerd Font Mono" (font-family-list))
+    (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
+    ;; FontAwesome 范围
+    (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
+    ;; 扩展至可能包含 Material Design Icons 的范围
+    (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
 
-  (face-remap-add-relative 'org-block nil :family "JetBrains Mono")
-  (face-remap-add-relative 'org-code nil :family "JetBrains Mono")
-  (face-remap-add-relative 'org-table nil :family "Sarasa Mono SC-12")
-  (face-remap-add-relative 'org-level-1 nil :family "Microsoft YaHei")
-  (face-remap-add-relative 'org-level-2 nil :family "Microsoft YaHei")
-  (face-remap-add-relative 'org-level-3 nil :family "Microsoft YaHei")
-  (face-remap-add-relative 'org-level-4 nil :family "Microsoft YaHei")
-  (face-remap-add-relative 'org-level-5 nil :family "Microsoft YaHei")
-  (face-remap-add-relative 'org-level-6 nil :family "Microsoft YaHei")
-  (face-remap-add-relative 'org-level-7 nil :family "Microsoft YaHei")
-  (face-remap-add-relative 'org-level-8 nil :family "Microsoft YaHei")
-  (make-face 'width-font-face)
-  (setq buffer-face-mode-face 'width-font-face)
-  (buffer-face-mode)
+  ;; 设置英文字体并指定字号。
+  (setq emacs-english-font "asu-cjk-serif")
+  ;; 给相应的字符集设置中文字体。
+  (setq emacs-cjk-font "asu-cjk-serif")
+  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
   (setq loaded-font-type 3)
   ;;(setq-default line-spacing 5)
   (message "Set org-mode font"))
@@ -469,32 +417,3 @@
   )
 (provide 'load-set-font)
 ;;; load-set-font.el ends here.
-
-;;   (cond
-;;    ((member "Source Code Pro" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Source Code Pro"))
-;;    ((member "Menlo" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Menlo"))
-;;    ((member "Monaco" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Monaco"))
-;;    ((member "DejaVu Sans Mono" (font-family-list))
-;;     (set-face-attribute 'default nil :font "DejaVu Sans Mono"))
-;;    ((member "Consolas" (font-family-list))
-;;     (set-face-attribute 'default nil :font "Consolas")))
-
-;;   (cond
-;;    (sys/mac-x-p
-;;     (set-face-attribute 'default nil :height 130))
-;;    (sys/win32p
-;;     (set-face-attribute 'default nil :height 110)))
-
-;;   ;; Specify font for all unicode characters
-;;   (when (member "Symbola" (font-family-list))
-;;     (set-fontset-font t 'unicode "Symbola" nil 'prepend))
-
-;;   ;; Specify font for chinese characters
-;;   (cond
-;;    ((member "WenQuanYi Micro Hei" (font-family-list))
-;;     (set-fontset-font t '(#x4e00 . #x9fff) "WenQuanYi Micro Hei"))
-;;    ((member "Microsoft Yahei" (font-family-list))
-;;     (set-fontset-font t '(#x4e00 . #x9fff) "Microsoft Yahei")))
