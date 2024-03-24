@@ -420,14 +420,15 @@
 
 ;;Prettify UI
 (use-package org-modern
+  :custom
+  (org-modern-table nil)
+  (prettify-symbols-alist nil)
+  :config
+  ;; Disable Prettify Symbols mode globally or locally as needed
+  (global-prettify-symbols-mode -1)
   :hook ((org-mode . org-modern-mode)
          (org-agenda-finalize . org-modern-agenda)
-         (org-modern-mode . (lambda ()
-                              "Adapt `org-modern-mode'."
-                              ;; Disable Prettify Symbols mode
-                              (setq prettify-symbols-alist nil)
-                              (setq org-modern-table nil)
-                              (prettify-symbols-mode -1)))))
+         ))
 
 ;; Export text/html MIME emails
 (use-package org-mime

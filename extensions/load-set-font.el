@@ -107,8 +107,8 @@
 ;; font-family: "lucida grande", "lucida sans unicode", lucida, helvetica,
 ;; "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 (cond
- ((member "asu-cjk-sans" (font-family-list))
-  (setq en-font "asu-cjk-sans"))
+ ((member "asu-cjk-serif" (font-family-list))
+  (setq en-font "asu-cjk-serif"))
  ((member "Consolas" (font-family-list))
   (setq en-font "Consolas"))
  ((member "LXGW WenKai Mono" (font-family-list))
@@ -143,8 +143,8 @@
   (setq en-font "Consolas"))
  )
 (cond
- ((member "asu-cjk-sans" (font-family-list))
-  (setq cn-font "asu-cjk-sans"))
+ ((member "asu-cjk-serif" (font-family-list))
+  (setq cn-font "asu-cjk-serif"))
  ((member "KleeOne+CJK" (font-family-list))
   (setq cn-font "KleeOne+CJK"))
 
@@ -259,8 +259,7 @@
 
 (set-face-attribute 'variable-pitch nil :family "asu-cjk-serif" :height 120)
 (set-face-attribute 'fixed-pitch nil :family "asu-cjk-mono" :height 120)
-(dolist (mode '(text-mode-hook markdown-hook org-mode-hook))
-  (add-hook mode 'load-default-font)
+(dolist (mode '(text-mode-hook markdown-hook))
   (add-hook mode 'variable-pitch-mode)
   )
 (add-hook 'prog-mode-hook 'load-program-font)
@@ -286,7 +285,8 @@
   "Load Program font."
   (interactive)
   ;; 设置英文字体并指定字号。
-  (setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
+  (setq emacs-english-font "asu-cjk-mono")
+  ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
   ;; 给相应的字符集设置中文字体。
   (setq emacs-cjk-font "asu-cjk-mono")
   (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
@@ -296,6 +296,7 @@
     (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
     ;; 扩展至可能包含 Material Design Icons 的范围
     (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
+  (variable-pitch-mode -1)
   (message "Set program font"))
 
 
@@ -331,10 +332,19 @@
   ;;                     :height 120 ; 字号，120 表示 12pt
   ;;                     :weight 'normal ; 字体粗细
   ;;                     :width 'normal) ; 字体宽度
+  (variable-pitch-mode -1)
+  ;; 设置英文字体并指定字号。
+  (setq emacs-english-font "asu-cjk-mono")
+  ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
+  ;; 给相应的字符集设置中文字体。
+  (setq emacs-cjk-font "asu-cjk-mono")
+  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+  ;; (face-remap-add-relative 'default nil :font "asu-cjk-serif")
 
   (set-face-attribute 'org-block nil :family "asu-cjk-mono")
   (set-face-attribute 'org-code nil :family "asu-cjk-mono")
-  (set-face-attribute 'org-table nil :family "asu-cjk-mono")
+  (set-face-attribute 'org-table nil :family "M+CodeLat50 Nerd Font Mono")
+  ;;(set-face-attribute 'org-table nil :family "Sarasa Mono SC")
   (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
   (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")
   (set-face-attribute 'org-level-3 nil :family "asu-cjk-sans")
@@ -350,11 +360,7 @@
     ;; 扩展至可能包含 Material Design Icons 的范围
     (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
 
-  ;; 设置英文字体并指定字号。
-  (setq emacs-english-font "asu-cjk-serif")
-  ;; 给相应的字符集设置中文字体。
-  (setq emacs-cjk-font "asu-cjk-serif")
-  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+
   (setq loaded-font-type 3)
   ;;(setq-default line-spacing 5)
   (message "Set org-mode font"))

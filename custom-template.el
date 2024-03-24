@@ -16,7 +16,7 @@
 (setq suk-cnfonts nil)                       ; Use cnfonts not: t or nil
 ;; (setq org-roam-directory "~/RoamNotes") ; default $home/RoamNotes
 ;; (setq org-files-directory "~/org") ; default $home/org
-;; (setq org-css-file "~/.emacs.d/documents/my-org-style-min.css")
+;; (setq org-css-file "~/.emacs.d/share/my-org-style-min.css")
 ;; (setq windows-bash-path "C:/Program Files/Git/bin/bash")
 
 ;; Misc.
