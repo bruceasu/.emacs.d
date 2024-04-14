@@ -101,7 +101,7 @@
 (global-font-lock-mode t)
 (setq font-lock-maximum-size 5000000); set 5mb file size limit for fontification
 ;; Fonts
-(setq emacs-font-size-pair '(30 . 30))
+(setq emacs-font-size-pair '(30 . 32))
 (setq en-font "Time New Roman"
       cn-font "LXGW WenKai")
 ;; font-family: "lucida grande", "lucida sans unicode", lucida, helvetica,
@@ -259,9 +259,9 @@
 
 (set-face-attribute 'variable-pitch nil :family "asu-cjk-serif" :height 120)
 (set-face-attribute 'fixed-pitch nil :family "asu-cjk-mono" :height 120)
-(dolist (mode '(text-mode-hook markdown-hook))
-  (add-hook mode 'variable-pitch-mode)
-  )
+;; (dolist (mode '(text-mode-hook markdown-hook))
+;;   (add-hook mode 'variable-pitch-mode)
+;;   )
 (add-hook 'prog-mode-hook 'load-program-font)
 (add-hook 'prog-mode-hook  (lambda () (variable-pitch-mode -1)))
 
@@ -299,9 +299,6 @@
   (variable-pitch-mode -1)
   (message "Set program font"))
 
-
-
-
 ;;----------------------------------------------------------
 (defun load-org-font ()
   "Load org mode font."
@@ -326,39 +323,44 @@
   ;; :slant 指定字体倾斜样式，如 'italic、'oblique、'normal。
   ;; :inherit 指定从其他 face 继承属性。
   ;; 关于 :font 参数
-  ;; :font 参数可以用于直接指定整个字体描述字符串，这是一种快捷方式，它允许你同时指定字体家族、大小等信息，格式通常是 "家族-大小"，如 "Monaco-12"。使用 :font 时，可能无法单独指定字重、宽度等属性。
+  ;; :font 参数可以用于直接指定整个字体描述字符串，
+  ;; 这是一种快捷方式，它允许你同时指定字体家族、大小等信息，格式通常是 "家族-大小"，
+  ;; 如 "Monaco-12"。使用 :font 时，可能无法单独指定字重、宽度等属性。
   ;; (set-face-attribute 'default nil
   ;;                     :family "asu-cjk-sans" ; 字体家族，如 "Sarasa Mono SC"
   ;;                     :height 120 ; 字号，120 表示 12pt
   ;;                     :weight 'normal ; 字体粗细
   ;;                     :width 'normal) ; 字体宽度
-  (variable-pitch-mode -1)
+  ;;(variable-pitch-mode -1)
   ;; 设置英文字体并指定字号。
-  (setq emacs-english-font "asu-cjk-mono")
+  (setq emacs-english-font "asu-cjk-serif")
   ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
   ;; 给相应的字符集设置中文字体。
+  ;; abcdefg
+  ;; hij汉字
   (setq emacs-cjk-font "asu-cjk-mono")
   (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
   ;; (face-remap-add-relative 'default nil :font "asu-cjk-serif")
 
-  (set-face-attribute 'org-block nil :family "asu-cjk-mono")
-  (set-face-attribute 'org-code nil :family "asu-cjk-mono")
+  (set-face-attribute 'org-block nil :family "M+CodeLat50 Nerd Font Mono")
+  (set-face-attribute 'org-code nil :family "M+CodeLat50 Nerd Font Mono")
   (set-face-attribute 'org-table nil :family "M+CodeLat50 Nerd Font Mono")
-  ;;(set-face-attribute 'org-table nil :family "Sarasa Mono SC")
-  (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
-  (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")
-  (set-face-attribute 'org-level-3 nil :family "asu-cjk-sans")
-  (set-face-attribute 'org-level-4 nil :family "asu-cjk-sans")
-  (set-face-attribute 'org-level-5 nil :family "asu-cjk-sans")
-  (set-face-attribute 'org-level-6 nil :family "asu-cjk-sans")
-  (set-face-attribute 'org-level-7 nil :family "asu-cjk-sans")
-  (set-face-attribute 'org-level-8 nil :family "asu-cjk-sans")
-  (when (member "Symbols Nerd Font Mono" (font-family-list))
-    (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
-    ;; FontAwesome 范围
-    (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
-    ;; 扩展至可能包含 Material Design Icons 的范围
-    (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
+  ;;(set-face-attribute 'org-table nil :family "asu-cjk-mono")
+  ;; (set-face-attribute 'org-table nil :family "asu-cjk-sans")
+  ;; (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
+  ;; (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")
+  ;; (set-face-attribute 'org-level-3 nil :family "asu-cjk-sans")
+  ;; (set-face-attribute 'org-level-4 nil :family "asu-cjk-sans")
+  ;; (set-face-attribute 'org-level-5 nil :family "asu-cjk-sans")
+  ;; (set-face-attribute 'org-level-6 nil :family "asu-cjk-sans")
+  ;; (set-face-attribute 'org-level-7 nil :family "asu-cjk-sans")
+  ;;(set-face-attribute 'org-level-8 nil :family "asu-cjk-sans")
+  ;; (when (member "Symbols Nerd Font Mono" (font-family-list))
+  ;;   (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
+  ;;   ;; FontAwesome 范围
+  ;;   (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
+  ;;   ;; 扩展至可能包含 Material Design Icons 的范围
+  ;;   (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
 
 
   (setq loaded-font-type 3)

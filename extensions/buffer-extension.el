@@ -352,7 +352,7 @@ It returns the buffer."
 ;; Rename
 ;; --------------------------------------------------------------
 ;;;###autoload
-(defun rename-file-and-buffer (new-name)
+(defun suk/rename-file-and-buffer (new-name)
   "Renames both current buffer and file it's visiting to NEW-NAME."
   (interactive "sNew name: ")
   (let ((name (buffer-name))

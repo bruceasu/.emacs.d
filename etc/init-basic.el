@@ -183,11 +183,12 @@
         w32-pipe-buffer-size 65536)       ; read more at a time (64K, was 4K)
   )
 
+(setq system-time-locale "C")
 ;; Unix like OS.
 (unless sys/win32p
    ;; 新建文件使用utf-8-unix方式
    (prefer-coding-system 'utf-8-unix)
-   (setq system-time-locale "C")
+
    (set-selection-coding-system 'utf-8))
 
 (unless sys/macp

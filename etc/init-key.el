@@ -231,14 +231,6 @@
    ("C-=" . text-scale-increase)        ;增加字体大小
    ))
 
-;;; ### 调整数字 ###
-;;; --- 调整光标处数字
-(lazy-load-global-keys
- '(
-   ("M--" . shift-number-down)
-   ("M-=" . shift-number-up))
- "shift-number")
-
 ;;; ### Window Operation ###
 ;;; --- 窗口操作
 (lazy-load-set-keys

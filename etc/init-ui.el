@@ -410,7 +410,7 @@
 (advice-add #'load-theme :after #'run-after-load-theme-hook)
 
 (use-package doom-modeline
-  :load-path "~/.emacs.d/extensions/doom-modeline"
+;;  :load-path "~/.emacs.d/extensions/doom-modeline"
   :hook (after-init . doom-modeline-mode)
   :init
   ;;(doom-modeline-mode 1)

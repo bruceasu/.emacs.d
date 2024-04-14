@@ -247,12 +247,7 @@
 (unless (eq system-type 'windows-nt)
   (require 'init-lang-lsp))
 (unless (eq system-type 'windows-nt)
-  (require 'init-lang-dap))
-(unless (eq system-type 'windows-nt)
   (require 'init-lang-c))
-(unless (eq system-type 'windows-nt)
-  (require 'init-lang-python))
-
 (unless (eq system-type 'windows-nt)
   ;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
   ;;(add-to-list 'load-path "C:\\green\\emacs-29.1\\.emacs.d\\extensions\\copilot\\copilot.el")

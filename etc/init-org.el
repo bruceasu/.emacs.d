@@ -75,15 +75,14 @@
 
 ;; To speed up startup, don't put to init section
 (setq org-modules nil)
-(setq org-startup-indented t)
+;;(setq org-startup-indented t)
 (setq org-startup-folded t)
-(setq org-ellipsis  "\t→ ")
+(setq org-ellipsis  "... → ")
 (setq org-pretty-entities t)
 (setq org-hide-emphasis-markers t)
 (setq org-hide-leading-stars nil)
-(setq org-startup-indented t)
 (setq org-blank-before-new-entry '((heading) (plain-list-item . auto)))
-(setq org-insert-heading-respect-content nil)
+(setq org-insert-heading-respect-content t)
 (setq org-yank-adjusted-subtrees t)
 ;; Use the current window for C-c ' source editing
 (setq org-src-window-setup 'current-window)
@@ -100,9 +99,7 @@
 (setq org-tags-column -80)
 (setq org-log-done 'time)
 (setq org-catch-invisible-edits 'smart)
-(setq org-startup-indented t)
-(setq org-pretty-entities nil)
-(setq org-hide-emphasis-markers t)
+
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Agenda
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -316,7 +313,6 @@
                 (setq prettify-symbols-alist suk-prettify-org-symbols-alist)))
             (prettify-symbols-mode 1)
             (abbrev-mode 1)
-            (org-indent-mode)
             (setq truncate-lines nil)
             (set-fill-column 70)
             (turn-on-font-lock)
@@ -400,6 +396,20 @@
 (add-hook 'org-mode-hook
           (lambda ()
             (add-hook 'after-save-hook #'suk/org-babel-tangle-config)))
+
+
+;;;###autoload
+(defun suk/load-theme-org()
+  (interactive)
+  (load-theme 'doom-solarized-light)
+  )
+
+;;;###autoload
+(defun suk/load-theme-default()
+  (interactive)
+  (load-theme 'doom-one)
+  )
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 快捷键设置 keys are set in init-key.el
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -413,19 +423,14 @@
 ;; C-',  C-, is org-cycle-agenda-files keys
 ;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。
 
-;; 会把字体的设定搞乱。
-;; https://github.com/Fuco1/org-pretty-table
-;;(require 'org-pretty-table)
-;;(add-hook 'org-mode-hook (lambda () (org-pretty-table-mode)))
-
 ;;Prettify UI
 (use-package org-modern
   :custom
-  (org-modern-table nil)
+;;  (org-modern-table nil)
   (prettify-symbols-alist nil)
   :config
   ;; Disable Prettify Symbols mode globally or locally as needed
-  (global-prettify-symbols-mode -1)
+  ;;(global-prettify-symbols-mode -1)
   :hook ((org-mode . org-modern-mode)
          (org-agenda-finalize . org-modern-agenda)
          ))
