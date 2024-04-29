@@ -40,7 +40,7 @@ anaconda-mode/
 auto-save-list/
 eclipse.jdt.ls/
 elpa-devel/
-elpa/
+/org-persist
 /elpa/
 emojis/
 eshell/

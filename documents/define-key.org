@@ -1,0 +1,110 @@
+#+OPTIONS: ^:{}
+#+TITLE: Emacs常见键绑定方式汇总
+#+AUTHOR: 一个无趣的游戏佬
+* 写在开头
+
+从本期开始，我会试图整合专栏之前零零散散的内容，产出更有概览性和指导性的文章。要做到这一点，一方面需尽力保证结构清晰，文字精炼，文风统一，另一方面也会给出历史文章分类目录及超链接，方便大家查阅。以后的文章中，也将视情况给出有必要的配图。
+
+本人的配置文件Github地址一并放在最后，暂时还没写什么注释，后面会跟进改善。
+
+这一期先对键绑定的内容做一下总结。
+
+
+
+* 概述：Emacs的键绑定方式看起来花样繁多，其本质上都是同一个机制
+
+(define-key keymap key def)
+这里的key是你要绑定的键。keymap是这个key所属的集合，不同的keymap决定了这个key在什么情况下触发，什么情况下隐藏，优先级如何。def代表了这个key的定义，它可以是很多东西，常见的有
+
+一个interactive function，即一个command，这也是键绑定最直接的方式。
+一个key，仅对于keymap为'key-translation-map这种情况，意味着映射到另一个键。
+一个keymap，通过这种方式用户可以自定义prefix key。
+一个nil，代表注销这个key。
+keymap也有很多种，如(current-global-map)返回全局keymap，(current-local-map)返回局部keymap。对于这两种情况，Emacs提供了更直接的函数：'global-set-key和'local-set-key。另外还有上面提到的key-translation-map，以及许多minor-mode下定义的keymap。
+
+
+这四种不同种类的keymap，正代表了Emacs里常见的四种不同的快捷键设置方式。虽然看起来较为复杂繁琐，但如果配合巧妙，完全可以实现一键多用，让用户做到在不使用Ctrl键、不叠加修饰键，不连击超过两次组合键，甚至不开Evil的前提下，执行Emacs连同各种插件包里所支持的所有编辑命令。
+
+* 一、key-translation-map，优先级最高
+
+(define-key key-translation-map (kbd "your-key") (kbd "target-key"))
+你在任何时候按下"your-key"，编辑器将执行"target-key"所绑定的命令。无论当时处于何种编辑状态，是否有minor-mode触发，该映射都不受影响，属于优先级最高的键绑定方式。
+
+特点：由于映射键是完全的跳转到了另一个键上，所以一旦目标键的定义发生了变化，该键也会随之受到影响。
+
+注销方式：把这个key重新映射为它自己。
+
+适用情况：
+
+常用的、重要的，但按键较为复杂的命令，如"C-x C-s"固定的绑定的'save-buffer，"C-M-i"固定绑定的'completion-at-point，"C-M-%"固定绑定的'query-replace-regexp。你可以用更简单的键来映射它们。
+常用的，重要的，但在不同mode下会发生变动的命令，如常规编辑中的"C-g"对应的是'keyboard-quit，在minibuffer下会变成'minibuffer-keyboard-quit。如果你将某个键绑定为'keyboard-quit，你会发现它在minibuffer下就没法用了。对于这种情况，最好的办法就是直接映射。
+
+* 二、minor-mode-map，优先级第二
+
+(define-key some-minor-mode-map (kbd "your-key") 'your-command)
+一般而言，大部分Emacs用户没有自定义minor-mode的需求，往往也不知道怎么定义，但minor-mode-map对所有用户而言并不陌生，最常见的便是在isearch-mode下的'isearch-repeat-forward和'isearch-repeat-backward。
+
+当你按"C-s"触发isearch-mode并搜索某段文字的时候，重复按"C-s"将跳转到下一个匹配，看起来是顺理成章的事其实对应的是两个不同的函数。之所以这里能一键多用，是因为在'isearch-mode触发同时也激活了它的minor-mode-map，也就是'isearch-mode-map，它里边将"C-s"绑定到了'isearch-repeat-forward上，在激活状态下便覆盖掉了它的初始定义'isearch-forward。
+
+特点：仅在minor-mode激活时有效，定义方便且优先级高，不用担心键冲突。
+
+注销方式：绑定为nil。
+
+适用情况：
+
+各种系统自带minor-mode如'isearch-mode，'query-replace，'edmacro-mode
+各种常见插件如'cua--rect，'with-editor
+自定义minor-mode
+
+* 三、local-set-key，优先级第三
+
+(local-set-key (kbd "your-key") 'your-command)
+local-set-key主要是在各种major-mode下使用，一般是通过hook设置
+
+(add-hook 'some-major-mode-hook '(lambda () (local-set-key ...)))
+特点：通过这种方式设置的键绑定仅在该major-mode下生效，不影响其他major-mode，实惠好用。
+
+注销方式：绑定为nil，或者
+
+(local-unset-key (kbd "your-key")
+适用情况：
+
+在不同major-mode下调用类似的命令，如运行当前文件，当前选区，当前行等等，在不同的语言做的是类似的事情，所以可通过这种方式把不同的命令绑定到同一个键上。
+通过hook来local-set-key本质上修改的只是一个变量（如果该变量不存在自动创建），不需要提前加载对应的major-mode，相比直接定义该mode下的各种keymap更加安全。
+
+* 四、global-set-key，优先级最低
+
+(global-set-key (kbd "your-key") 'your-command)
+特点：最简单的键绑定方式，一行搞定，无须关心到底是哪个keymap。然而需小心在某些major-mode时会被覆盖。
+
+注销方式：绑定为nil，或者
+
+(global-unset-key (kbd "your-key")
+适用情况：
+
+一些不常用的命令
+一些冷门的按键
+
+* 需要注意的是
+
+对于上述不同优先级的键绑定方式，其对应的逆操作（即注销键）也遵循同样的优先级，例如注销了minor-mode的快捷键，它便会恢复为当前major-mode下的定义，如果当前major-mode下没有定义，那便执行全局默认的命令。
+
+
+
+* 键冲突问题
+
+尽管已有如此多的键绑定方式，由于Emacs默认的键布局已十分紧张，用户往往容易碰到各种各样的键冲突问题。
+
+比如你想设置一个快捷键，使它在任何情况下都绑定为一个固定的命令。如果你用global-set-key，那它有可能会被其他major-mode覆盖；如果你用key-translation-map，它所映射的那个键同样可能被覆盖；如果你用local-set-key，那你不得不在所有出问题的major-mode里挨个设置。你该怎么办？——可以暂时参考本专栏之前的一篇文章：快捷键（一）
+
+又比如你写了一个minor-mode，你想定义一个快捷键让它执行"C-g"的功能，正常编辑时为'keyboard-quit，在minibuffer下则为'minibuffer-keyboard-quit。但遗憾的是minor-mode里是不支持键的映射的，你又该怎么办？——我会在新的文章中分享解决方案。
+
+
+* keymap-set
+用来增加keymap的绑定。例如：
+#+begin_src emacs-lisp
+  (defun c--insert-if()
+    (interactive)
+    (insert "if() {\n}"))
+  (keymap-set c-mode-map "C-S-l" 'c--insert-if)
+#+end_src

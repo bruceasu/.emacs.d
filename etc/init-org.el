@@ -278,6 +278,8 @@
 ;; Do not generate internal css formatting for HTML exports
 (setq org-export-htmlize-output-type 'css)
 (setq org-export-with-timestamps nil)
+;; _ 不转义，相当于#+OPTIONS: ^:{}
+(setq org-export-with-sub-superscripts '{})
 
 ;; Embed inline CSS read from a file.
 ;;;###autoload
@@ -418,7 +420,7 @@
 ;; ;; (global-set-key (kbd "C-c C") 'org-capture)
 (global-set-key "\C-cl" #'org-store-link)
 (global-set-key "\C-ca" #'org-agenda)
-(global-set-key "\C-cb" #'org-iswitchb)
+;;(global-set-key "\C-cb" #'org-iswitchb)
 
 ;; C-',  C-, is org-cycle-agenda-files keys
 ;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。

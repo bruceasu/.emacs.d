@@ -107,8 +107,8 @@
 ;; font-family: "lucida grande", "lucida sans unicode", lucida, helvetica,
 ;; "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 (cond
- ((member "asu-cjk-serif" (font-family-list))
-  (setq en-font "asu-cjk-serif"))
+ ((member "asu-cjk-mono" (font-family-list))
+  (setq en-font "asu-cjk-mono"))
  ((member "Consolas" (font-family-list))
   (setq en-font "Consolas"))
  ((member "LXGW WenKai Mono" (font-family-list))
@@ -143,6 +143,10 @@
   (setq en-font "Consolas"))
  )
 (cond
+ ((member "asu-cjk-sans" (font-family-list))
+  (setq cn-font "asu-cjk-sans"))
+ ((member "asu-cjk-mono" (font-family-list))
+  (setq cn-font "asu-cjk-mono"))
  ((member "asu-cjk-serif" (font-family-list))
   (setq cn-font "asu-cjk-serif"))
  ((member "KleeOne+CJK" (font-family-list))
@@ -265,16 +269,20 @@
 (add-hook 'prog-mode-hook 'load-program-font)
 (add-hook 'prog-mode-hook  (lambda () (variable-pitch-mode -1)))
 
+(defvar loaded-font-type nil
+  "Current font type.")
 ;;----------------------------------------------------------
 (defun load-default-font ()
   "Load default font setting."
   (interactive)
-  (setq emacs-english-font en-font)
-  (setq emacs-cjk-font cn-font)
-  ;; Setup font size based on emacs-font-size-pair
-  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-  (message "Set default font")
-  )
+  (unless (eq loaded-font-type 1)
+    (setq emacs-english-font en-font)
+    (setq emacs-cjk-font cn-font)
+    ;; Setup font size based on emacs-font-size-pair
+    (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+    (setq loaded-font-type 1)
+    (message "Set default font")
+  ))
 
 
 (load-default-font)
@@ -284,26 +292,28 @@
 (defun load-program-font ()
   "Load Program font."
   (interactive)
-  ;; 设置英文字体并指定字号。
-  (setq emacs-english-font "asu-cjk-mono")
-  ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
-  ;; 给相应的字符集设置中文字体。
-  (setq emacs-cjk-font "asu-cjk-mono")
-  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-  (when (member "Symbols Nerd Font Mono" (font-family-list))
-    (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
-    ;; FontAwesome 范围
-    (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
-    ;; 扩展至可能包含 Material Design Icons 的范围
-    (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
-  (variable-pitch-mode -1)
-  (message "Set program font"))
+  (unless (eq loaded-font-type 2)
+    ;; 设置英文字体并指定字号。
+    (setq emacs-english-font "asu-cjk-mono")
+    ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
+    ;; 给相应的字符集设置中文字体。
+    (setq emacs-cjk-font "asu-cjk-mono")
+    (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+    (when (member "Symbols Nerd Font Mono" (font-family-list))
+      (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
+      ;; FontAwesome 范围
+      (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
+      ;; 扩展至可能包含 Material Design Icons 的范围
+      (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
+    (variable-pitch-mode -1)
+    (setq loaded-font-type 2)
+    (message "Set program font")))
 
 ;;----------------------------------------------------------
 (defun load-org-font ()
   "Load org mode font."
   (interactive)
-
+  (unless (eq loaded-font-type 3)
   ;;(load-default-font)
   ;; (set-face-attribute FACE FRAME &rest ARGS)
   ;; or (set-face-attribute FACE FRAME &rest ARGS)
@@ -346,15 +356,15 @@
   (set-face-attribute 'org-code nil :family "M+CodeLat50 Nerd Font Mono")
   (set-face-attribute 'org-table nil :family "M+CodeLat50 Nerd Font Mono")
   ;;(set-face-attribute 'org-table nil :family "asu-cjk-mono")
-  ;; (set-face-attribute 'org-table nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-3 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-4 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-5 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-6 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-7 nil :family "asu-cjk-sans")
-  ;;(set-face-attribute 'org-level-8 nil :family "asu-cjk-sans")
+   (set-face-attribute 'org-table nil :family "asu-cjk-sans")
+   (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
+   (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")
+   (set-face-attribute 'org-level-3 nil :family "asu-cjk-sans")
+   (set-face-attribute 'org-level-4 nil :family "asu-cjk-sans")
+   (set-face-attribute 'org-level-5 nil :family "asu-cjk-sans")
+   (set-face-attribute 'org-level-6 nil :family "asu-cjk-sans")
+   (set-face-attribute 'org-level-7 nil :family "asu-cjk-sans")
+  (set-face-attribute 'org-level-8 nil :family "asu-cjk-sans")
   ;; (when (member "Symbols Nerd Font Mono" (font-family-list))
   ;;   (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
   ;;   ;; FontAwesome 范围
@@ -364,12 +374,12 @@
 
 
   (setq loaded-font-type 3)
-  ;;(setq-default line-spacing 5)
-  (message "Set org-mode font"))
+  (message "Set org-mode font")))
+
 ;; (with-eval-after-load 'org
 
+;; )
 
-;;   )
 (add-hook 'org-mode-hook 'load-org-font)
 ;;; ----------------------------------------------------------
 

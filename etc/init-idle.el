@@ -1,23 +1,4 @@
 ;;; init-idle.el --- Configure file that can load when emacs idle.
-
-;;; Commentary:
-;;
-;; Configure file that can load when emacs idle.
-;;
-
-;;; Acknowledgements:
-;;
-;;
-;;
-
-;;; TODO
-;;
-;;
-;;
-
-;;; Require
-
-
 ;;; Code:
 
 
@@ -26,10 +7,9 @@
 (eval-when-compile
   (require '+const)
   (require '+custom)
+  (require '+func)
   (require 'init-package)
   )
-;; (require 'pretty-lambdada)
-;; (pretty-lambda-for-modes)
 
 
 (setq suggest-key-bindings 1)             ;当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
@@ -59,7 +39,7 @@ from tradition chinese to simple chinese" t)
 (setq message-log-max t)                  ;设置message记录全部消息, 而不用截去
 (setq require-final-newline nil)          ;不自动添加换行符到末尾, 有些情况会出现错误
 (setq ediff-window-setup-function
-	  (quote ediff-setup-windows-plain))  ;比较窗口设置在同一个frame里
+      (quote ediff-setup-windows-plain))  ;比较窗口设置在同一个frame里
 (setq x-stretch-cursor t)                 ;光标在 TAB 字符上会显示为一个大方块
 (put 'narrow-to-region 'disabled nil)     ;开启变窄区域
 (setq print-escape-newlines t)            ;显示字符窗中的换行符为 \n
@@ -116,8 +96,6 @@ from tradition chinese to simple chinese" t)
 ;;; ### Modeline-posn-column-limit ###
 (setq modelinepos-column-limit 80)      ;设置列数限制, 并在mode-line上显示
 
-;;; enable winner mode globally for undo/redo window layout changes
-(winner-mode t)
 (show-paren-mode t)
 (tooltip-mode -1)                       ;不要显示任何 tooltips
 (delete-selection-mode 1)               ; 选中文本后输入会覆盖
@@ -145,104 +123,42 @@ from tradition chinese to simple chinese" t)
 (setq delete-old-versions t) ; 自动删除旧的备份文件
 
 ;; 回到关闭文件前光标的位置
-(use-package saveplace
-  :ensure nil
-  :defer 1
-  :hook (after-init . save-place-mode)
-  :init (setq save-place-file (expand-file-name "saveplace" suk-emacs-var-dir) ; "~/.emacs.d/var/saveplace"
-  ))
+(my-run-with-idle-timer
+ 2
+ #'(lambda()
+     ;;saveplace
+     (setq save-place-file (expand-file-name "saveplace" suk-emacs-var-dir)) ; "~/.emacs.d/var/saveplace"
+     (save-place-mode 1)
+     ;;If emacs is slow to exit after enabling saveplace, you may be
+     ;;running afoul of save-place-forget-unreadable-files. On exit,
+     ;;it checks that every loaded file is readable before saving its
+     ;;buffer position - potentially very slow if you use NFS.
+     (setq save-place-forget-unreadable-files nil)
+     ))
 
-(use-package savehist
-  :ensure nil
-  :hook (after-init . savehist-mode)
-  :init (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
-              history-length 1000
-              savehist-additional-variables '(mark-ring
-                                              global-mark-ring
-                                              search-ring
-                                              regexp-search-ring
-                                              extended-command-history)
-              savehist-autosave-interval 300
-              savehist-file (expand-file-name "history" suk-emacs-var-dir) ; "~/.emacs.d/var/history"
-))
+(my-run-with-idle-timer
+ 2
+ #'(lambda()
+     ;; savehist
+     (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
+           history-length 1000
+           savehist-additional-variables '(mark-ring
+                                           global-mark-ring
+                                           search-ring
+                                           regexp-search-ring
+                                           extended-command-history)
+           savehist-autosave-interval 300
+           savehist-file (expand-file-name "history" suk-emacs-var-dir) ; "~/.emacs.d/var/history"
+           )
+     (savehist-mode 1)
+     ))
 
-;; =========================================================
-;; Start server
-;; =========================================================
-(use-package server
-   :ensure t
-   :hook (after-init . server-mode))
-;; Emacs可以做为一个server, 然后用emacsclient连接这个server,
-;; 无需再打开两个Emacs，windows下还不支持daemon的方式。
-;;(server-force-delete)
-;;(server-start)
 
 ;; Misc.
-(use-package simple
-  :ensure nil
-  :hook ((after-init . size-indication-mode)
-         (text-mode . visual-line-mode)
-         ((prog-mode markdown-mode conf-mode) . enable-trailing-whitespace))
-  :init
-  (setq column-number-mode t
-        line-number-mode t
-        kill-whole-line t               ; Kill line including '\n'
-        line-move-visual nil
-        track-eol t                     ; Keep cursor at end of lines. Require line-move-visual is nil.
-        set-mark-command-repeat-pop t)  ; Repeating C-SPC after popping mark pops it again
 
-  ;; Visualize TAB, (HARD) SPACE, NEWLINE
-  (setq-default show-trailing-whitespace nil) ; Don't show trailing whitespace by default
-  (defun enable-trailing-whitespace ()
-    "Show trailing spaces and delete on saving."
-    (setq show-trailing-whitespace t)
-    (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
-
-  ;; Prettify the process list
-  (with-no-warnings
-    (defun my-list-processes--prettify ()
-      "Prettify process list."
-      (when-let ((entries tabulated-list-entries))
-        (setq tabulated-list-entries nil)
-        (dolist (p (process-list))
-          (when-let* ((val (cadr (assoc p entries)))
-                      (name (aref val 0))
-                      (pid (aref val 1))
-                      (status (aref val 2))
-                      (status (list status
-                                    'face
-                                    (if (memq status '(stop exit closed failed))
-                                        'error
-                                      'success)))
-                      (buf-label (aref val 3))
-                      (tty (list (aref val 4) 'face 'font-lock-doc-face))
-                      (thread (list (aref val 5) 'face 'font-lock-doc-face))
-                      (cmd (list (aref val 6) 'face 'completions-annotations)))
-            (push (list p (vector name pid status buf-label tty thread cmd))
-		          tabulated-list-entries)))))
-    (advice-add #'list-processes--refresh :after #'my-list-processes--prettify)))
-
-(when (or sys/mac-x-p sys/linux-x-p (daemonp))
-  (use-package exec-path-from-shell
-    :custom (exec-path-from-shell-arguments '("-l"))
-    :init (exec-path-from-shell-initialize)))
-
-;; Garbage Collector Magic Hack
-(use-package gcmh
-  :diminish
-  :hook (emacs-startup . gcmh-mode)
-  :init
-  (setq gcmh-idle-delay 'auto
-        gcmh-auto-idle-delay-factor 10
-        gcmh-high-cons-threshold #x1000000)) ; 16MB
-
-;; Sqlite
-(when (fboundp 'sqlite-open)
-  (use-package emacsql-sqlite-builtin))
 ;;===================================================
 ;; Proxy settings
 ;;===================================================
-;;;###autoload
 (defun suk/proxy-http-show ()
   "Show http/https proxy."
   (interactive)
@@ -250,7 +166,6 @@ from tradition chinese to simple chinese" t)
       (message "Current HTTP proxy is \"%s\"" suk-proxy)
     (message "No proxy")))
 
-;;;###autoload
 (defun suk/proxy-http-enable ()
   "Enable http/https proxy."
   (interactive)
@@ -259,14 +174,12 @@ from tradition chinese to simple chinese" t)
                              ("no_proxy" . "^\\(localhost\\|192.168.*\\|10.*\\)")))
   (suk/proxy-http-show))
 
-;;;###autoload
 (defun suk/proxy-http-disable ()
   "Disable http/https proxy."
   (interactive)
   (setq url-proxy-services nil)
   (suk/proxy-http-show))
 
-;;;###autoload
 (defun suk/proxy-http-toggle ()
   "Toggle http/https proxy."
   (interactive)
@@ -274,7 +187,6 @@ from tradition chinese to simple chinese" t)
       (suk/proxy-http-disable)
     (suk/proxy-http-enable)))
 
-;;;###autoload
 (defun suk/proxy-socks-enable ()
   "Enable Socks proxy."
   (interactive)
@@ -283,7 +195,6 @@ from tradition chinese to simple chinese" t)
   (setq socks-server '("Default server" "127.0.0.1" 1080 5))
   (message "Enable socks proxy."))
 
-;;;###autoload
 (defun suk/proxy-socks-disable ()
   "Disable Socks proxy."
   (interactive)
@@ -294,7 +205,6 @@ from tradition chinese to simple chinese" t)
 ;;===================================================
 ;; Byte Compile
 ;;===================================================
-;;;###autoload
 (defun byte-compile-elpa ()
   "Compile packages in elpa directory. Useful if you switch Emacs versions."
   (interactive)
@@ -302,7 +212,6 @@ from tradition chinese to simple chinese" t)
       (async-byte-recompile-directory package-user-dir)
     (byte-recompile-directory package-user-dir 0 t)))
 
-;;;###autoload
 (defun byte-compile-extensions ()
   "Compile packages in extensions directory."
   (interactive)
@@ -311,14 +220,12 @@ from tradition chinese to simple chinese" t)
         (async-byte-recompile-directory dir)
       (byte-recompile-directory dir 0 t))))
 
-;;;###autoload
 (defun native-compile-elpa ()
   "Native-compile packages in elpa directory."
   (interactive)
   (if (fboundp 'native-compile-async)
       (native-compile-async package-user-dir t)))
 
-;;;###autoload
 (defun native-compile-extensions ()
   "Native compile packages in extensions directory."
   (interactive)
@@ -326,7 +233,6 @@ from tradition chinese to simple chinese" t)
     (if (fboundp 'native-compile-async)
         (native-compile-async dir t))))
 
-;;;###autoload
 (defun suk-set-variable (variable value &optional no-save)
   "Set the VARIABLE to VALUE, and return VALUE.
 
@@ -349,7 +255,6 @@ from tradition chinese to simple chinese" t)
 ;;===================================================
 ;; Update
 ;;===================================================
-;;;###autoload
 (defun update-config ()
   "Update Suk's Emacs configurations to the latest version."
   (interactive)
@@ -363,7 +268,6 @@ from tradition chinese to simple chinese" t)
     (message "Updating configurations...done")))
 (defalias 'suk-update-config #'update-config)
 
-;;;###autoload
 (defun update-packages ()
   "Refresh package contents and update all packages."
   (interactive)
@@ -372,7 +276,6 @@ from tradition chinese to simple chinese" t)
   (message "Updating packages...done"))
 (defalias 'suk-update-packages #'update-packages)
 
-;;;###autoload
 (defun update-config-and-packages()
   "Update confgiurations and packages."
   (interactive)
@@ -380,7 +283,6 @@ from tradition chinese to simple chinese" t)
   (update-packages))
 (defalias 'suk-update #'update-config-and-packages)
 
-;;;###autoload
 (defun update-dotfiles ()
   "Update the dotfiles to the latest version."
   (interactive)
@@ -395,7 +297,6 @@ from tradition chinese to simple chinese" t)
       (message "\"%s\" doesn't exist" dir))))
 (defalias 'suk-update-dotfiles #'update-dotfiles)
 
-;;;###autoload
 (defun update-org ()
   "Update Org files to the latest version."
   (interactive)
@@ -409,7 +310,6 @@ from tradition chinese to simple chinese" t)
       (message "\"%s\" doesn't exist" dir))))
 (defalias 'suk-update-org #'update-org)
 
-;;;###autoload
 (defun update-all()
   "Update dotfiles, org files, configurations and packages to the latest."
   (interactive)
@@ -421,21 +321,17 @@ from tradition chinese to simple chinese" t)
 ;; ==================================================
 ;; Terminate
 ;; ==================================================
-;;;###autoload
 (defun term()
   "Use Bash in windows."
   (interactive)
   (if sys/win32p
-	  (let (
-			(shell-file-name windows-bash-path)
-			)
-		(call-interactively 'shell))
+      (let (
+            (shell-file-name windows-bash-path)
+            )
+        (call-interactively 'shell))
     (let ((explicit-shell-file-name "/bin/bash"))
-	  (call-interactively 'shell)))
+      (call-interactively 'shell)))
   )
 
 
-;; Misc
-(if (boundp 'use-short-answers)
-    (setq use-short-answers t)
-  (fset 'yes-or-no-p 'y-or-n-p))
+

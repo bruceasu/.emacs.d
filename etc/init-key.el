@@ -1,4 +1,5 @@
-﻿(provide 'init-key)
+﻿;; -*- lexical-binding: t -*-
+(provide 'init-key)
 (eval-when-compile
   (require '+const)
   (require '+custom)
@@ -550,11 +551,29 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;;(global-set-key (kbd "C-x C-b") 'buffer-menu)
 ;;(global-set-key (kbd "C-x C-b") 'ibuffer)
 
+;; (define-prefix-command 'my-leader) ;设定leader
+;; (define-key keymap "keystrok" 'command-name)   ;将快捷键绑定到 leader按键后，即和键位图绑定。
+;; (global-set-key "keystroke" 'command-name) ; 定义全局快捷键
+;; (local-set-key  "keystroke" 'command-name) ; 定义局部快捷键
+;;注意：keystroke中的Control 和 Alternative使用\C, \M表示。
+;;如果是kbd函数，可以使用C和M表示
+
+;; 方式一：
+;;(define-prefix-command 'SPC-map)
+;;(global-set-key (kbd "SPC") 'SPC-map)
+;;(global-set-key (kbd "SPC f") 'find-file)
+
+;; 方式二：
+;;(define-prefix-command 'SPC-map)
+;;(global-set-key (kbd "SPC") #'SPC-map)
+;;(define-key SPC-map (kbd "f") #'find-file)
+
+
 ;;;
 ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
 ;; (define-prefix-command 'comma-map)
-;; (global-set-key (kbd ",") 'comma-map)
 ;; (global-set-key [(meta c)] 'meta-c-map)
+;; (global-set-key (kbd ",") 'comma-map)
 
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
 ;; (add-hook 'isearch-mode-hook

@@ -110,38 +110,14 @@ The test for presence of the car of ELT-CONS is done with `equal'."
 
 
 ;;; Mode load.
-(autoload 'cmake-mode "cmake-mode")
-(autoload 'qml-mode "qml-mode")
 (autoload 'markdown-mode "init-markdown-mode")
-(autoload 'php-mode "php-mode")
-(autoload 'php-mode-maybe "php-mode")
-(autoload 'web-mode "init-web-mode")
-(autoload 'coffee-mode "coffee-mode")
-(autoload 'sws-mode "sws-mode")
-(autoload 'jade-mode "jade-mode")
-(autoload 'css-mode "init-css-mode")
-(autoload 'go-mode "init-golang")
-(autoload 'vala-mode "vala-mode")
-(autoload 'rust-mode "rust-mode")
-(autoload 'qmake-mode "qmake-mode")
-(autoload 'ruby-mode "init-ruby")
-(autoload 'python-mode "init-python")
-(autoload 'lua-mode "init-lua")
-(autoload 'swift-mode "swift-mode")
-(autoload 'haskell-mode "init-haskell")
-(autoload 'js-mode "init-web-mode")
+(autoload 'web-mode "init-lang-web")
+(autoload 'css-mode "init-lang-web")
+(autoload 'js-mode "init-lang-web")
 (autoload 'rjsx-mode "rjsx-mode")
-(autoload 'flex-mode "flex")
-(autoload 'bison-mode "bison")
-(autoload 'llvm-mode "llvm-mode")
-(autoload 'nim-mode "init-nim")
 (autoload 'typescript-mode "typescript-mode")
-(autoload 'elixir-mode "elixir-mode")
 (autoload 'json-mode "json-mode")
-(autoload 'clojure-mode "clojure-mode")
-(autoload 'dart-mode "dart-mode")
-(autoload 'zig-mode "zig-mode")
-(autoload 'kotlin-mode "kotlin-mode")
+
 
 ;;; ### Auto-fill ###
 ;;; --- 自动换行

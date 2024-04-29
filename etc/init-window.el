@@ -15,7 +15,8 @@
 (use-package windmove
   :ensure nil
   :hook (after-init . (lambda ()
-                        (windmove-default-keybindings 'super))))
+                        (windmove-default-keybindings 'super)))
+  )
 
 ;; Restore old window configurations
 (use-package winner
@@ -46,18 +47,26 @@
      ("a" ace-select-window "select" :exit t)
      ("m" toggle-frame-maximized "maximize" :exit t)
      ("u" toggle-frame-fullscreen "fullscreen" :exit t))
+    "Movement"
+    (("i" windmove-up "move ↑")
+     ("k" windmove-down "move ↓")
+     ("j" windmove-left "move ←")
+     ("l" windmove-right "move →")
+     ("f" follow-mode "follow"))
     "Resize"
-    (("h" shrink-window-horizontally "←")
-     ("j" enlarge-window "↓")
-     ("k" shrink-window "↑")
-     ("l" enlarge-window-horizontally "→")
+    (("<left>" shrink-window-horizontally "shrink H")
+     ("<right>" enlarge-window-horizontally "enlarge H")
+     ("<up>" shrink-window "shrink V")
+     ("<down>" enlarge-window "enlarge V")
      ("n" balance-windows "balance"))
     "Split"
     (("r" split-window-right "horizontally")
      ("R" split-window-horizontally-instead "horizontally instead")
      ("v" split-window-below "vertically")
      ("V" split-window-vertically-instead "vertically instead")
-     ("t" toggle-window-split "toggle"))
+     ("t" toggle-window-split "toggle")
+     ("o" delete-other-windows "only this")
+     )
     "Zoom"
     (("+" text-scale-increase "in")
      ("=" text-scale-increase "in")
@@ -67,8 +76,8 @@
     (("o" set-frame-font "frame font")
      ("f" make-frame-command "new frame")
      ("d" delete-frame "delete frame")
-     ("<left>" winner-undo "winner undo")
-     ("<right>" winner-redo "winner redo"))))
+     ("z" winner-undo "winner undo")
+     ("Z" winner-redo "winner redo"))))
   :custom-face
   (aw-leading-char-face ((t (:inherit font-lock-keyword-face :foreground unspecified :bold t :height 3.0))))
   (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
@@ -190,9 +199,10 @@
           "\\*Agenda Commands\\*" "\\*Org Select\\*" "\\*Capture\\*" "^CAPTURE-.*\\.org*"
           "\\*Gofmt Errors\\*$" "\\*Go Test\\*$" godoc-mode
           "\\*docker-.+\\*"
-          "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
+          "\\*prolog\\*" inferior-python-mode
           "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
-          rustic-cargo-outdated-mode rustic-cargo-run-mode rustic-cargo-test-mode))
+          rustic-cargo-outdated-mode rustic-cargo-run-mode rustic-cargo-test-mode
+          ))
 
   (with-eval-after-load 'doom-modeline
     (setq popper-mode-line

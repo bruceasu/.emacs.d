@@ -348,6 +348,20 @@ It returns the buffer."
     (setq buffer-offer-save t)
     $buf
     ))
+
+;;###autoload
+(defun suk/new-org-buffer ()
+  "Create a new org-mode buffer.
+New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
+It returns the buffer."
+  (interactive)
+  (let (($buf (generate-new-buffer "untitled")))
+    (switch-to-buffer $buf)
+    (insert "#+OPTIONS: ^:{}\n#+TITLE: ")
+    (setq buffer-offer-save t)
+    (org-mode)
+    $buf
+    ))
 ;; --------------------------------------------------------------
 ;; Rename
 ;; --------------------------------------------------------------

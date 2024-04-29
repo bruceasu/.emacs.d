@@ -1,12 +1,26 @@
-;; Defer garbage collection further back in the startup process
-(setq gc-cons-threshold most-positive-fixnum gc-cons-percentage 0.6)
+(when (or (featurep 'esup-child)
+          (fboundp 'profile-dotemacs)
+          (daemonp)
+          (boundp 'startup-now)
+          noninteractive)
+  (setq package-enable-at-startup nil))
 
+(defvar my-computer-has-smaller-memory-p nil
+  "Installing&Compiling many packages could cost too much memory.")
+
+;; @see https://www.reddit.com/r/emacs/comments/ofhket/further_boost_start_up_time_with_a_simple_tweak/
+(unless my-computer-has-smaller-memory-p
+;; Defer garbage collection further back in the startup process
+  (setq gc-cons-threshold most-positive-fixnum
+        gc-cons-percentage 0.6)
+)
 ;; Prevent unwanted runtime compilation for gccemacs (native-comp) users;
 ;; packages are compiled ahead-of-time when they are installed and site files
 ;; are compiled when gccemacs is installed.
 (setq native-comp-deferred-compilation nil ;; obsolete since 29.1
       native-comp-jit-compilation nil)
 
+(setq inhibit-startup-message t)
 
 ;; In Emacs 27+, package initialization occurs before `user-init-file' is
 ;; loaded, but after `early-init-file'. Doom handles package initialization, so
@@ -26,4 +40,6 @@
 (when (featurep 'ns)
   (push '(ns-transparent-titlebar . t) default-frame-alist))
 (setq-default mode-line-format nil)
+
+(provide 'early-init)
 ;;(global-unset-key (kbd "C-SPC"))

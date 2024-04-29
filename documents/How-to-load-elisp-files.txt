@@ -47,7 +47,7 @@ Emacs Lisp files
    短暂的延迟，之后对该函数（以及其他在此过程中被加载的函数） 的调用会
    和正常调用一样快。
    语法：
-   (autoload filename docstring interactive type)
+   (autoload function filename docstring interactive type)
 
    要将一个函数注册为 auto-loadable，需要使用 autoload:
 

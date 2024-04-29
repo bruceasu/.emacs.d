@@ -27,9 +27,6 @@
 ;;; Code:
 
 
-(when (version< emacs-version "27.1")
-  (error "This requires Emacs 27.1 and above!"))
-
 ;; 定义一些启动目录，方便下次迁移修改
 (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
 (defvar suk-emacs-config-dir (expand-file-name "etc" suk-emacs-root-dir))
@@ -61,12 +58,12 @@
 ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
 ;; History
 (setq savehist-file (concat suk-emacs-var-dir "/history"))
-; Amx
+                                        ; Amx
 (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
 ;; Auto save
 (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
 ;; Eshell
-(setq eshell-directory-name (concat suk-emacs-var-dir "eschell"))
+(setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
 (setq eshell-history-file-name (concat eshell-directory-name "/history"))
 ;; projectitle-bookmarks
 (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
@@ -129,13 +126,12 @@
 (add-subdirs-to-load-path suk-emacs-elpa-dir t)
 
 ;; The contents of the Emacs configuration file are written below.
-
 (let
     (
      ;;  Temporarily increase `gc-cons-threshold' when loading to speed up
      ;;  startup.
      (gc-cons-threshold most-positive-fixnum)
-     (gc-cons-percentage 0.8)
+     (gc-cons-percentage 0.6)
 
      ;; Clear to avoid analyzing files when loading remote files.
      (file-name-handler-alist nil))
@@ -170,61 +166,75 @@
                        gcs-done)
               (add-hook 'focus-out-hook 'garbage-collect)))
 
+  ;; Constants
+  (require '+const)
+  ;; Customization
+  (require '+custom)
+  ;; Functions
+  (require '+func)
+  ;; Packages
+  (require 'init-basic)
+  (require 'init-awesome-pair)
+  (require 'init-key)
+  (require 'init-package)
+  (require 'init-completion)
+  (require 'init-ui)
+  (require 'init-org)
+  (require 'init-utils)
+  (require 'init-mode)
 
-  (with-temp-message ""     ;Erase the output of plug-in startup
-    ;; Constants
-    (require '+const)
-    ;; Customization
-    (require '+custom)
-    ;; Packages
-    (require 'init-basic)
-    (require 'init-awesome-pair)
-    (require 'init-key)
-    (require 'init-package)
-    (require 'init-completion)
-    (require 'init-ui)
-    (require 'init-org)
-    (require 'init-utils)
-    (require 'init-mode)
+  ;; delay load
+  (run-with-idle-timer
+   1 nil
+   #'(lambda ()
+       ;; Restore session at last.
+       (require 'init-session)
+       (emacs-session-restore)
+       (server-start)
+       (require 'init-bookmark)
+       (require 'init-buffers)
+       (require 'init-recentf)
+       (require 'init-dired)
 
-    ;; delay load
-    (run-with-idle-timer
-     1 nil
-     #'(lambda ()
-         ;; Restore session at last.
-         (require 'init-session)
-         (emacs-session-restore)
-         (server-start)
-         (require 'init-bookmark)
-         (require 'init-buffers)
-         (require 'init-recentf)
-         (require 'init-dired)
+       (require 'init-auto-save)
+       (require 'init-edit)
+       (require 'init-idle)
+       (require 'init-eshell)
+       ;;(require 'highlight-parentheses)
+       (require 'init-highlight)
+       (require 'init-window)
+       (require 'init-reader)
 
-         (require 'init-auto-save)
-         (require 'init-edit)
-         (require 'init-idle)
-         (require 'init-eshell)
-         ;;(require 'highlight-parentheses)
-         (require 'init-highlight)
-         (require 'init-window)
-         (require 'init-reader)
-
-         (require 'init-calendar)
-         (require 'load-abbrev)
-         (require 'init-ext-packages)
-         ;; Programming
-         (require 'init-ide)
-         (when sys/linuxp
-           (progn
-             (require 'init-shell)
-             (require 'init-im)   ;; windows 下表现不好
-             (require 'init-sudo)
-             )
+       (require 'init-calendar)
+       (require 'load-abbrev)
+       ;; Programming
+       (require 'init-ide)
+       (when sys/linuxp
+         (progn
+           (require 'init-shell)
+           (require 'init-im)   ;; windows 下表现不好
+           (require 'init-sudo)
            )
+         )
 
-         ;; Make gc pauses faster by decreasing the threshold.
-         (setq gc-cons-threshold (* 16 1000 1000))
+       ;; Make gc pauses faster by decreasing the threshold.
+       (setq gc-cons-threshold (* 16 1000 1000))
 
-         ))
-    )
+       ))
+
   )
+
+;; @see https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/
+;; Emacs 25 does gc too frequently
+;; (setq garbage-collection-messages t) ; for debug
+(defun my-cleanup-gc ()
+  "Clean up gc."
+  (setq gc-cons-threshold  67108864) ; 64M
+  (setq gc-cons-percentage 0.1) ; original value
+  (garbage-collect))
+
+(message "*** Emacs loaded in %s with %d garbage collections."
+         (format "%.2f seconds"
+                 (float-time (time-subtract after-init-time before-init-time)))
+         gcs-done)
+(run-with-idle-timer 4 nil #'my-cleanup-gc)

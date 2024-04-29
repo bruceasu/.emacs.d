@@ -1,28 +1,86 @@
 (eval-when-compile
   (require '+const)
   (require '+custom)
+  (require '+func)
   (require 'init-package)
   )
 
-(use-package expand-region
-  :load-path "~/.emacs.d/extensions/expand-region"
-  :bind ("C-+" . er/expand-region)
-  :config
-  (when (suk-treesit-available-p)
-	(defun treesit-mark-bigger-node ()
-	  "Use tree-sitter to mark regions."
-	  (let* ((root (treesit-buffer-root-node))
-			 (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
-			 (node-start (treesit-node-start node))
-			 (node-end (treesit-node-end node)))
-		;; Node fits the region exactly. Try its parent node instead.
-		(when (and (= (region-beginning) node-start) (= (region-end) node-end))
-		  (when-let ((node (treesit-node-parent node)))
-			(setq node-start (treesit-node-start node)
-				  node-end (treesit-node-end node))))
-		(set-mark node-end)
-		(goto-char node-start)))
-	))
+
+;; @see http://endlessparentheses.com/super-smart-capitalization.html
+;;;###autoload
+(defun endless/convert-punctuation (rg rp)
+  "Look for regexp RG around point, and replace with RP.
+Only applies to text-mode."
+  (let* ((f "\\(%s\\)\\(%s\\)")
+         (space "?:[[:blank:]\n\r]*"))
+    ;; We obviously don't want to do this in prog-mode.
+    (if (and (derived-mode-p 'text-mode)
+             (or (looking-at (format f space rg))
+                 (looking-back (format f rg space) (point-min))))
+        (replace-match rp nil nil nil 1))))
+;;;###autoload
+(defun endless/call-subword-cmd (fn)
+  (my-ensure 'subword)
+  (call-interactively fn))
+;;;###autoload
+(defun endless/capitalize ()
+  "Capitalize region or word.
+Also converts commas to full stops, and kills
+extraneous space at beginning of line."
+  (interactive)
+  (endless/convert-punctuation "," ".")
+  (if (use-region-p)
+      (call-interactively 'capitalize-region)
+    ;; A single space at the start of a line:
+    (when (looking-at "^\\s-\\b")
+      ;; get rid of it!
+      (delete-char 1))
+    (endless/call-subword-cmd 'subword-capitalize)))
+;;;###autoload
+(defun endless/downcase ()
+  "Downcase region or word.
+Also converts full stops to commas."
+  (interactive)
+  (endless/convert-punctuation "\\." ",")
+  (if (use-region-p)
+      (call-interactively 'downcase-region)
+    (endless/call-subword-cmd 'subword-downcase)))
+;;;###autoload
+(defun endless/upcase ()
+  "Upcase region or word."
+  (interactive)
+  (if (use-region-p)
+      (call-interactively 'upcase-region)
+    (endless/call-subword-cmd 'subword-upcase)))
+
+;; these bindings are fine
+(global-set-key (kbd "M-c") 'endless/capitalize)
+(global-set-key (kbd "M-l") 'endless/downcase)
+(global-set-key (kbd "M-u") 'endless/upcase)
+
+(my-run-with-idle-timer
+ 2
+ #'(lambda()
+     ;; expand-region :load-path "~/.emacs.d/extensions/expand-region"
+     (lazy-load-global-keys
+      '(("C-+" . er/expand-region))
+      "expand-region")
+     (with-eval-after-load 'expand-region
+       (when (suk-treesit-available-p)
+         (defun treesit-mark-bigger-node ()
+           "Use tree-sitter to mark regions."
+           (let* ((root (treesit-buffer-root-node))
+                  (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
+                  (node-start (treesit-node-start node))
+                  (node-end (treesit-node-end node)))
+             ;; Node fits the region exactly. Try its parent node instead.
+             (when (and (= (region-beginning) node-start) (= (region-end) node-end))
+               (when-let ((node (treesit-node-parent node)))
+                 (setq node-start (treesit-node-start node)
+                       node-end (treesit-node-end node))))
+             (set-mark node-end)
+             (goto-char node-start)))
+         ))))
 
 ;; ;; Jump to Chinese characters
 ;; (use-package ace-pinyin
@@ -32,6 +90,7 @@
 ;; Minor mode to aggressively keep your code always indented
 (use-package aggressive-indent
   :diminish
+  :defer 2
   :hook ((after-init . global-aggressive-indent-mode)
          ;; NOTE: Disable in large files due to the performance issues
          ;; https://github.com/Malabarba/aggressive-indent-mode/issues/73
@@ -60,10 +119,11 @@
 ;; Rectangle
 (use-package rect
   :ensure nil
+  :defer 2
   :bind (:map text-mode-map
-              ("<C-return>" . rect-hydra/body)
-              :map prog-mode-map
-              ("<C-return>" . rect-hydra/body))
+         ("<C-return>" . rect-hydra/body)
+         :map prog-mode-map
+         ("<C-return>" . rect-hydra/body))
   :init
   (with-eval-after-load 'org
     (bind-key "<s-return>" #'rect-hydra/body org-mode-map))
@@ -73,7 +133,7 @@
     (bind-key "<C-return>" #'rect-hydra/body wdired-mode-map))
   :pretty-hydra
   ((:title (pretty-hydra-title "Rectangle" 'mdicon "nf-md-border_all")
-           :color amaranth :body-pre (rectangle-mark-mode) :post (deactivate-mark) :quit-key ("q" "C-g"))
+    :color amaranth :body-pre (rectangle-mark-mode) :post (deactivate-mark) :quit-key ("q" "C-g"))
    ("Move"
     (("h" backward-char "←")
      ("j" next-line "↓")
@@ -99,11 +159,13 @@
 (use-package autorevert
   :ensure nil
   :diminish
+  :defer 2
   :hook (after-init . global-auto-revert-mode))
 
 ;; Pass a URL to a WWW browser
 (use-package browse-url
   :ensure nil
+  :defer 2
   :defines dired-mode-map
   :bind (("C-c C-z ." . browse-url-at-point)
          ("C-c C-z b" . browse-url-of-buffer)
@@ -125,97 +187,108 @@
         (advice-add #'browse-url :override #'browse-url-generic)))))
 
 ;; Jump to things in Emacs tree-style
-(use-package avy
-  :bind (("C-:"   . avy-goto-char)
+(my-run-with-idle-timer
+ 2
+ #'(lambda()
+     (with-eval-after-load 'avy
+       (setq avy-all-windows nil
+             avy-all-windows-alt t
+             avy-background t
+             avy-style 'pre)
+       (add-hook 'after-init-hook #'avy-setup-default)
+       )
+
+     (lazy-load-global-keys
+      ' (("C-:"   . avy-goto-char)
          ("C-'"   . avy-goto-char-2)
          ("M-g l" . avy-goto-line)
          ("M-g w" . avy-goto-word-1)
          ("M-g e" . avy-goto-word-0))
-  :hook (after-init . avy-setup-default)
-  :config (setq avy-all-windows nil
-                avy-all-windows-alt t
-                avy-background t
-                avy-style 'pre))
+      "avy")
+     ;; Kill text between the point and the character CHAR
+     (lazy-load-global-keys
+      '(("M-z" . avy-zap-to-char-dwim)
+        ("M-Z" . avy-zap-up-to-char-dwim))
+      "avy-zap")
 
-;; Kill text between the point and the character CHAR
-(use-package avy-zap
-  :bind (("M-z" . avy-zap-to-char-dwim)
-         ("M-Z" . avy-zap-up-to-char-dwim)))
+     ))
 
 ;; Show number of matches in mode-line while searching
-(use-package anzu
-  :diminish
-  :bind (([remap query-replace] . anzu-query-replace)
-         ([remap query-replace-regexp] . anzu-query-replace-regexp)
-         :map isearch-mode-map
-         ([remap isearch-query-replace] . anzu-isearch-query-replace)
-         ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
-  :hook (after-init . global-anzu-mode))
+(my-run-with-idle-timer
+ 2
+ #'(lambda()
+     (use-package anzu
+       :diminish
+       :bind (([remap query-replace] . anzu-query-replace)
+              ([remap query-replace-regexp] . anzu-query-replace-regexp)
+              :map isearch-mode-map
+              ([remap isearch-query-replace] . anzu-isearch-query-replace)
+              ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
+       :hook (after-init . global-anzu-mode))))
 
 ;; Redefine M-< and M-> for some modes
-(use-package beginend
-  :diminish beginend-global-mode
-  :hook (after-init . beginend-global-mode)
-  :config (mapc (lambda (pair)
-                  (diminish (cdr pair)))
-                beginend-modes))
+(my-run-with-idle-timer
+ 2
+ #'(lambda()
+     (require 'beginend)
+     (add-hook 'after-init-hook #'(beginend-global-mode))
+     (mapc (lambda (pair)
+             (diminish (cdr pair)))
+           beginend-modes)))
 
-;;使用自己的函数
-;; Drag stuff (lines, words, region, etc...) around
-;; (use-package drag-stuff
-;;   :diminish
-;;   :autoload drag-stuff-define-keys
-;;   :hook (after-init . drag-stuff-global-mode)
-;;   :config
-;;   (add-to-list 'drag-stuff-except-modes 'org-mode)
-;;   (drag-stuff-define-keys))
+(my-run-with-idle-timer 2 #'(lambda()(require 'hungry-delete)))
 
-;; Hungry deletion
-(use-package hungry-delete
-  :diminish
-  :hook (after-init . global-hungry-delete-mode)
-  :init (setq hungry-delete-chars-to-skip " \t\f\v"
-              hungry-delete-except-modes
-              '(help-mode minibuffer-mode minibuffer-inactive-mode calc-mode)))
+(with-eval-after-load 'hungry-delete
+  (setq hungry-delete-chars-to-skip " \t\f\v"
+        hungry-delete-except-modes
+        '(help-mode minibuffer-mode minibuffer-inactive-mode calc-mode))
+  )
 
-;; Move to the beginning/end of line or code
-(use-package mwim
-  :bind (([remap move-beginning-of-line] . mwim-beginning)
-		 ([remap move-end-of-line] . mwim-end)))
 
 ;; Treat undo history as a tree, ^x u
 (if emacs/>=28p
-    (use-package vundo
-      :ensure nil
-      :load-path "~/.emacs.d/extensions/vundo"
-      :bind (("C-x u" . vundo)
-             ("C-/" . vundo))
-      :config (setq vundo-glyph-alist vundo-unicode-symbols))
-  (use-package undo-tree
-    :diminish undo-tree-mode
-    :bind (("C-x u" . undo-trees)
-           ("C-/" . undo-tree-undo)
-           ("C-?" . undo-tree-redo)
-           )
-    :hook (after-init . global-undo-tree-mode)
-    :init (setq undo-tree-visualizer-timestamps t
-                undo-tree-visualizer-diff t
-                undo-tree-enable-undo-in-region nil
-                undo-tree-auto-save-history nil)
+    (progn
+      ;; vundo :load-path "~/.emacs.d/extensions/vundo"
+      (lazy-load-global-keys
+       '(("C-x u" . vundo)
+         ("C-/" . vundo)
+         )
+       "vundo")
+      (with-eval-after-load 'vundo
+        (setq vundo-glyph-alist vundo-unicode-symbols)))
+  (progn
+    ;; use undo-tree
+    (setq undo-tree-visualizer-timestamps t
+          undo-tree-visualizer-diff t
+          undo-tree-enable-undo-in-region nil
+          undo-tree-auto-save-history nil)
     ;; HACK: keep the diff window
     (with-no-warnings
       (make-variable-buffer-local 'undo-tree-visualizer-diff)
-      (setq-default undo-tree-visualizer-diff t))))
+      (setq-default undo-tree-visualizer-diff t))
+
+    (lazy-load-global-keys
+     '(("C-x u" . undo-trees)
+       ("C-/" . undo-tree-undo)
+       ("C-?" . undo-tree-redo)
+       )
+     "undo-tree")
+
+    (with-eval-after-load 'undo-tree
+      (add-hook 'after-init-hook #'global-undo-tree-mode))
+    ))
+
 ;; Goto last change
-(use-package goto-chg)
+(my-run-with-idle-timer 2 #'(lambda()(require 'goto-chg)))
 
 ;; Handling capitalized subwords in a nomenclature
-(use-package subword
-  :ensure nil
-  :diminish
-  :hook ((prog-mode . subword-mode)
-         (minibuffer-setup . subword-mode)))
-
+(my-run-with-idle-timer
+ 2
+ #'(lambda()
+     (require 'subword)
+     (add-hook 'prog-mode-hook #'subword-mode)
+     (add-hook 'mimibuffer-setup #'subword-mode)
+     ))
 ;; Flexible text folding
 (use-package hideshow
   :ensure nil
@@ -297,40 +370,21 @@
                                           (overlay-end ov)))
                      'face '(:inherit shadow :height 0.8))
                     " "))))
-  (setq hs-set-up-overlay #'hs-display-code-line-counts))
-
-;; Narrow/Widen
-(use-package fancy-narrow
-  :diminish
-  :hook (after-init . fancy-narrow-mode))
+  )
 
 ;; Hanlde minified code
-(use-package so-long
-  :hook (after-init . global-so-long-mode))
+(if emacs/>=27p
+    (add-hook 'after-init-hook #'global-so-long-mode))
 
 
-;; Nice writing
-(use-package olivetti
-  :diminish
-  :bind ("<f7>" . olivetti-mode)
-  :init (setq olivetti-body-width 0.62))
-
-;; Edit text for browsers with GhostText or AtomicChrome extension
-(use-package atomic-chrome
-  :hook ((emacs-startup . atomic-chrome-start-server)
-         (atomic-chrome-edit-mode . delete-other-windows))
-  :init (setq atomic-chrome-buffer-frame-width 100
-			  atomic-chrome-buffer-frame-height 30
-			  atomic-chrome-buffer-open-style 'frame)
-  :config
-  (when (fboundp 'gfm-mode)
-    (setq atomic-chrome-url-major-mode-alist
-		  '(("github\\.com" . gfm-mode)
-            ("gitlab\\.com" . gfm-mode)))))
+(lazy-load-global-keys
+ '(
+   ("<f7>" . olivetti-mode))
+ "olivetti")
 
 (unless sys/win32p
-	;; Open files as another user
-	(use-package sudo-edit)
+  ;; Open files as another user
+  (my-run-with-idle-timer 2 #'(use-package sudo-edit))
   ;; On-the-fly spell checker
   (use-package flyspell
     :ensure t

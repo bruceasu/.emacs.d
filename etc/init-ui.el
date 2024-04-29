@@ -32,6 +32,7 @@
 (eval-when-compile
   (require '+const)
   (require '+custom)
+  (require '+func)
   (require 'init-package)
   )
 
@@ -193,6 +194,118 @@
       (hydra-set-posframe-show-params)
       (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))))
 
+;; -*- coding: utf-8; lexical-binding: t; -*-
+
+;; @see https://github.com/abo-abo/hydra
+;; color could: red, blue, amaranth, pink, teal
+
+;; 最常用的功能
+(defhydra my-hydra-launcher (:color blue)
+  "
+^Misc^                    ^Study^                    ^Emms^
+-------------------------------------------------------------------
+[_ss_] Save workgroup     [_vv_] Pronounce word      [_R_] Random
+[_ll_] Load workgroup     [_W_] Big word list        [_n_] Next
+[_B_] New bookmark        [_vi_] Play word's video   [_p_] Previous
+[_m_] Goto bookmark       [_im_] Image of word       [_P_] Pause
+[_bb_] Switch Gnus buffer [_w_] Select big word      [_S_] Stop
+[_e_] Erase buffer        [_s1_] Pomodoro tiny task  [_O_] Open
+[_r_] Erase this buffer   [_s2_] Pomodoro big task   [_L_] Playlist
+[_f_] Recent file         [_st_] Pomodoro stop       [_K_] Search
+[_d_] Recent directory    [_sr_] Pomodoro resume     [_F_] filter
+[_z_] Jump around (z.sh)  [_sp_] Pomodoro pause      [_E_] replay
+[_bh_] Bash history       [_as_] Ascii table
+[_hh_] Favorite theme     [_T_] Typewriter on/off
+[_hr_] Random theme       [_V_] Old typewriter
+[_ka_] Kill other buffers
+[_ii_] Imenu
+[_id_] Insert date string
+[_aa_] Adjust subtitle
+[_q_] Quit
+"
+  ("aa" my-srt-offset-subtitles-from-point)
+  ("B" my-bookmark-set)
+  ("m" my-bookmark-goto)
+  ("f" my-counsel-recentf)
+  ("d" my-recent-directory)
+  ("bh" my-insert-bash-history)
+  ("hh" my-random-favorite-color-theme)
+  ("hr" my-random-healthy-color-theme)
+  ("ii" my-counsel-imenu)
+  ("ka" my-kill-all-but-current-buffer)
+  ("id" my-insert-date)
+  ("as" my-ascii-table)
+  ("ss" wg-create-workgroup)
+  ("ll" wg-open-workgroup)
+  ("e" shellcop-erase-buffer)
+  ("r" shellcop-reset-with-new-command)
+  ("z" shellcop-jump-around)
+  ("T" my-toggle-typewriter)
+  ("V" twm/toggle-sound-style)
+
+  ;; {{pomodoro
+  ("s1" (pomodoro-start 15))
+  ("s2" (pomodoro-start 60))
+  ("st" pomodoro-stop)
+  ("sr" pomodoro-resume)
+  ("sp" pomodoro-pause)
+  ;; }}
+
+  ;; {{emms
+  ("R" (progn (emms-shuffle) (emms-random)))
+  ("F" my-emms-playlist-filter)
+  ("K" my-emms-playlist-random-track)
+  ("E" (emms-seek-to 0))
+  ("p" emms-previous)
+  ("P" emms-pause)
+  ("S" emms-stop)
+  ("O" emms-play-playlist)
+  ("n" emms-next)
+  ("L" emms-playlist-mode-go)
+  ;; }}
+
+  ("vv" mybigword-pronounce-word)
+  ("w" mybigword-big-words-in-current-window)
+  ("im" mybigword-show-image-of-word)
+  ("W" my-lookup-bigword-definition-in-buffer)
+  ("vi" mybigword-play-video-of-word-at-point)
+  ("bb" dianyou-switch-gnus-buffer)
+  ("q" nil :color red))
+
+;; Because in message-mode/article-mode we've already use `y' as hotkey
+(global-set-key (kbd "C-c C-y") 'my-hydra-launcher/body)
+(defun org-mode-hook-hydra-setup ()
+  (local-set-key (kbd "C-c C-y") 'my-hydra-launcher/body))
+(add-hook 'org-mode-hook 'org-mode-hook-hydra-setup)
+
+
+
+
+
+;; ;; increase and decrease font size in GUI emacs
+;; ;; @see https://oremacs.com/download/london.pdf
+;; (when (display-graphic-p)
+;;   ;; Since we already use GUI Emacs, f2 is definitely available
+;;   (defhydra my-hydra-zoom (global-map "<f2>")
+;;     "Zoom"
+;;     ("g" text-scale-increase "in")
+;;     ("l" text-scale-decrease "out")
+;;     ("r" (text-scale-set 0) "reset")
+;;     ("q" nil "quit")))
+
+
+(defhydra my-hydra-ebook ()
+  "
+[_v_] Pronounce word
+[_;_] Jump to word
+[_w_] Display bigword in current window
+"
+  ("v" mybigword-pronounce-word)
+  (";" avy-goto-char-2)
+  ("w" mybigword-big-words-in-current-window)
+  ("q" nil))
+
+
 
 (use-package pretty-hydra
   :custom (pretty-hydra-default-title-body-format-spec " %s%s")
@@ -221,7 +334,7 @@
 
   ;; Global toggles
   (with-no-warnings
-    (pretty-hydra-define toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on")
+    (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on")
                                         :color amaranth :quit-key ("q" "C-g"))
       ("Basic"
        (("n" (cond ((fboundp 'display-line-numbers-mode)
@@ -231,15 +344,19 @@
          "line number"
          :toggle (or (bound-and-true-p display-line-numbers-mode)
                      (bound-and-true-p global-linum-mode)))
-        ("a" global-aggressive-indent-mode "aggressive indent" :toggle t)
+        ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
         ("d" global-hungry-delete-mode "hungry delete" :toggle t)
         ("e" electric-pair-mode "electric pair" :toggle t)
         ("c" flyspell-mode "spell check" :toggle t)
         ("s" prettify-symbols-mode "pretty symbol" :toggle t)
         ("l" global-page-break-lines-mode "page break lines" :toggle t)
-        ("b" display-battery-mode "battery" :toggle t)
-        ("i" display-time-mode "time" :toggle t)
-        ("m" doom-modeline-mode "modern mode-line" :toggle t))
+        ("B" display-battery-mode "battery" :toggle t)
+        ("T" display-time-mode "time" :toggle t)
+        ("a" abbrev-mode "abrev" :toggle t)
+        ("F" auto-fill-mode "auto fill" :toggle t)
+        ("m" doom-modeline-mode "modern mode-line" :toggle t)
+        ("t" toggle-truncate-lines "truncate lines" :toggle t)
+        ("u" toggle-company-ispell "Company Ispell" :toggle t))
        "Highlight"
        (("h l" global-hl-line-mode "line" :toggle t)
         ("h p" show-paren-mode "paren" :toggle t)
@@ -253,12 +370,13 @@
        "Program"
        (("f" flymake-mode "flymake" :toggle t)
         ("O" hs-minor-mode "hideshow" :toggle t)
-        ("u" subword-mode "subword" :toggle t)
+        ("U" subword-mode "subword" :toggle t)
+        ("w" whitespace-mode "whitespace" :toggle t)
         ("W" which-function-mode "which function" :toggle t)
         ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
         ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
         ("v" global-diff-hl-mode "gutter" :toggle t)
-        ("V" diff-hl-flydiff-mode "live gutter" :toggle t)
+        ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
         ("M" diff-hl-margin-mode "margin gutter" :toggle t)
         ("D" diff-hl-dired-mode "dired gutter" :toggle t))
        ))))

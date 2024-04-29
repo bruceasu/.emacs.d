@@ -1,15 +1,10 @@
-;; init-basic.el --- Initialize basic configurations.	-*- lexical-binding: t -*-
+;; init-basic.el --- Initialize basic configurations.   -*- lexical-binding: t -*-
 
-;;; Commentary:
-;;
-;; Basic configuration.
-;;
-
-;;; Code:
-
+(provide 'init-basic)
 (eval-when-compile
   (require '+const)
   (require '+custom)
+  (require '+func)
   (require 'subr-x)
   )
 
@@ -30,7 +25,7 @@
 (setq user-mail-address suk-mail-address)
 
 (setq-default major-mode 'text-mode
-               fill-column 80
+              fill-column 80
               tab-width 4
               c-basic-offset 4
               indent-tabs-mode nil)     ;; Permanently indent with spaces, never with TABs
@@ -63,29 +58,6 @@
       scroll-up-aggressively 0.01
       scroll-down-aggressively 0.01
       scroll-preserve-screen-position 'always)
-
-
-;; Browse URL
-;;;###autoload
-(defun suk-webkit-browse-url (url &optional pop-buffer new-session)
-  "Browse URL with xwidget-webkit' and switch or pop to the buffer.
-
-  POP-BUFFER specifies whether to pop to the buffer.
-  NEW-SESSION specifies whether to create a new xwidget-webkit session."
-  (interactive (progn
-                 (require 'browse-url)
-                 (browse-url-interactive-arg "xwidget-webkit URL: ")))
-  (or (featurep 'xwidget-internal)
-      (user-error "Your Emacs was not compiled with xwidgets support"))
-
-  (xwidget-webkit-browse-url url new-session)
-  (let ((buf (xwidget-buffer (xwidget-webkit-current-session))))
-    (when (buffer-live-p buf)
-      (and (eq buf (current-buffer)) (quit-window))
-      (if pop-buffer
-          (pop-to-buffer buf)
-        (switch-to-buffer buf)))))
-
 
 
 (autoload 'calendar "init-calendar" "Config Chinese calendar " t)
@@ -138,7 +110,7 @@
 (prefer-coding-system 'utf-8)
 
 (when sys/win32p
-   (setq w32-unicode-filenames t) ; 启用 Unicode 文件名支持
+  (setq w32-unicode-filenames t) ; 启用 Unicode 文件名支持
   (setq file-name-coding-system 'utf-8) ; 设置文件名编码为 UTF-8
   (setq locale-coding-system 'utf-8) ; 设置区域设置编码为 UTF-8
 
@@ -186,10 +158,10 @@
 (setq system-time-locale "C")
 ;; Unix like OS.
 (unless sys/win32p
-   ;; 新建文件使用utf-8-unix方式
-   (prefer-coding-system 'utf-8-unix)
+  ;; 新建文件使用utf-8-unix方式
+  (prefer-coding-system 'utf-8-unix)
 
-   (set-selection-coding-system 'utf-8))
+  (set-selection-coding-system 'utf-8))
 
 (unless sys/macp
   (setq command-line-ns-option-alist nil))
@@ -199,66 +171,69 @@
 
 
 
-(defun childframe-workable-p ()
-  "Whether childframe is workable."
-  (not (or noninteractive
-           emacs-basic-display
-           (not (display-graphic-p)))))
-
-(defun childframe-completion-workable-p ()
-  "Whether childframe completion is workable."
-  (and (eq suk-completion-style 'childframe)
-       (childframe-workable-p)))
-
-(defun icons-displayable-p ()
-  "Return non-nil if icons are displayable."
-  (and suk-icon
-       (or (featurep 'nerd-icons)
-           (require 'nerd-icons nil t))))
-
-(defun suk-treesit-available-p ()
-  "Check whether tree-sitter is available.
-Native tree-sitter is introduced since 29.1."
-  (and suk-tree-sitter
-       (fboundp 'treesit-available-p)
-       (treesit-available-p)))
-
-(defun too-long-file-p ()
-  "Check whether the file is too long."
-  (or (> (buffer-size) 100000)
-      (and (fboundp 'buffer-line-statistics)
-           (> (car (buffer-line-statistics)) 10000))))
-
-;; Increase selected region by semantic units
-(defun suk-treesit-available-p ()
-  "Check whether tree-sitter is available.
-Native tree-sitter is introduced since 29.1."
-  (and suk-tree-sitter
-	   (fboundp 'treesit-available-p)
-	   (treesit-available-p)))
-
 
 ;; GUI Environment
 (when (display-graphic-p)
   (progn
-	;; 隐藏垂直滚动条。
-	;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
-	(modify-all-frames-parameters '((vertical-scroll-bars)))
-	)
+    ;; 隐藏垂直滚动条。
+    ;; 其实在有鼠标的环境，阅读文档时，使用滚动条有时会轻松一点。
+    (modify-all-frames-parameters '((vertical-scroll-bars)))
+    )
   )
 
-;; =========================================================
-;; 通过编辑配置文件使其可以调用外部程序，来为其添加功能。
-;; 增加命令
-;;(defun lxr (names)
-;;  (interactive "s查找联系人，请输入条件：")
-;;  (call-process-shell-command "lxr" nil t t "-s" names))
-;;执行命令
-;;首先按功能键，Alt+x，然后输入命令 lxr 。
-;;系统提示：“查找联系人，请输入条件："。
-;;输入完成后，emacs 会执行命令lxr -s names，并输出执行的结果。
-;; =========================================================
-(provide 'init-basic)
+(with-eval-after-load 'hydra
+
+  (defhydra my-hydra-describe (:color blue :hint nil)
+    "
+Describe Something: (q to quit)
+_a_ all help for everything screen
+_b_ bindings
+_c_ char
+_C_ coding system
+_f_ function
+_i_ input method
+_k_ key briefly
+_K_ key
+_l_ language environment
+_m_ major mode
+_M_ minor mode
+_n_ current coding system briefly
+_N_ current coding system full
+_o_ lighter indicator
+_O_ lighter symbol
+_p_ package
+_P_ text properties
+_s_ symbol
+_t_ theme
+_v_ variable
+_w_ where is something defined
+"
+    ("b" describe-bindings)
+    ("C" describe-categories)
+    ("c" describe-char)
+    ("C" describe-coding-system)
+    ("f" describe-function)
+    ("i" describe-input-method)
+    ("K" describe-key)
+    ("k" describe-key-briefly)
+    ("l" describe-language-environment)
+    ("M" describe-minor-mode)
+    ("m" describe-mode)
+    ("N" describe-current-coding-system)
+    ("n" describe-current-coding-system-briefly)
+    ("o" describe-minor-mode-from-indicator)
+    ("O" describe-minor-mode-from-symbol)
+    ("p" describe-package)
+    ("P" describe-text-properties)
+    ("q" nil)
+    ("a" help)
+    ("s" describe-symbol)
+    ("t" describe-theme)
+    ("v" describe-variable)
+    ("w" where-is))
+  (global-set-key (kbd "C-c C-q") 'my-hydra-describe/body))
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
