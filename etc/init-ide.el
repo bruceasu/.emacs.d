@@ -1,17 +1,13 @@
+;; -*- coding: utf-8; lexical-binding: t; -*-
 ;;; init-ide.el --- IDE configuration
 
-;;; Commentary:
-;;
-;; IDE configuration
-;;
-
-;;; Code:
 
 (provide 'init-ide)
 
 (eval-when-compile
   (require '+const)
   (require '+custom)
+  (require '+func)
   (require 'init-package))
 
 ;; 语法检查包
@@ -34,7 +30,7 @@
   :diminish hs-minor-mode
   :pretty-hydra
   ((:title (pretty-hydra-title "HideShow" 'octicon "nf-oct-fold")
-    :color amaranth :quit-key ("q" "C-g"))
+           :color amaranth :quit-key ("q" "C-g"))
    ("Fold"
     (("t" hs-toggle-all "toggle all")
      ("a" hs-show-all "show all")
@@ -57,11 +53,11 @@
      ("M->" end-of-buffer "⭸"))))
   :bind
   (:map hs-minor-mode-map
-   ("C-~" . hideshow-hydra/body)
-   ("C-S-<escape>" . hideshow-hydra/body)
-   ("C-c ." . hs-toggle-hiding)
-   ("C-c ," . hs-show-all)
-   )
+              ("C-~" . hideshow-hydra/body)
+              ("C-S-<escape>" . hideshow-hydra/body)
+              ("C-c ." . hs-toggle-hiding)
+              ("C-c ," . hs-show-all)
+              )
   :hook (prog-mode . hs-minor-mode)
   :config
   ;; More functions

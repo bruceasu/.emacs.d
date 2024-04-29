@@ -1,9 +1,5 @@
 ;;; init-buffers.el --- Initialize buffers configurations. -*- lexical-binding: t -*-
-;;; Commentary:
-;;
-;; buffers configuration.
-;;
-;;; Code:
+
 (eval-when-compile
   (require '+const)
   (require '+custom)

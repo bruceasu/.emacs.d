@@ -6,7 +6,7 @@
 ;;
 
 ;;; Code:
-
+(provide 'init-lang-lsp)
 (eval-when-compile
   (require '+custom)
   (require 'init-basic)
@@ -28,16 +28,7 @@
        :load-path "~/.emacs.d/extensions/consult-eglot"
        :bind (:map eglot-mode-map
               ("C-M-." . consult-eglot-symbols)))
-     (use-package eglot-java
-       :hook((java-mode . eglot-java-mode)
-             (elgot-java-mode . (lambda()
-                                  (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
-								  (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
-								  (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
-								  (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
-								  (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
-								  (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh))))
-       )
+
      )
    )
   ('lsp-mode
@@ -66,7 +57,7 @@
                                      (not (apply #'derived-mode-p suk-lsp-format-on-save-ignore-modes)))
                             (add-hook 'before-save-hook #'lsp-format-buffer t t)
                             (add-hook 'before-save-hook #'lsp-organize-imports t t))))
-            (java-mode . lsp-deferred))
+            )
      :bind (:map lsp-mode-map
             ("C-c C-d" . lsp-describe-thing-at-point)
             ([remap xref-find-definitions] . lsp-find-definition)
@@ -318,177 +309,177 @@
      (with-eval-after-load 'ace-window
        (when (boundp 'aw-ignored-buffers)
          (push 'lsp-treemacs-symbols-mode aw-ignored-buffers)
-         (push 'lsp-treemacs-java-deps-mode aw-ignored-buffers)))
+         )
 
-     (with-no-warnings
-       (when (icons-displayable-p)
-         (treemacs-create-theme "lsp-nerd-icons"
-           :config
-           (progn
-             (treemacs-create-icon
+       (with-no-warnings
+         (when (icons-displayable-p)
+           (treemacs-create-theme "lsp-nerd-icons"
+                                  :config
+                                  (progn
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-repo" :face 'nerd-icons-blue))
               :extensions (root))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_boolean" :face 'nerd-icons-lblue))
               :extensions (boolean-data))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_class" :face 'nerd-icons-orange))
               :extensions (class))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_color"))
               :extensions (color-palette))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_constant"))
               :extensions (constant))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_file"))
               :extensions (document))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_misc" :face 'nerd-icons-orange))
               :extensions (enumerator))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_enum_member" :face 'nerd-icons-lblue))
               :extensions (enumitem))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_event" :face 'nerd-icons-orange))
               :extensions (event))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_field" :face 'nerd-icons-lblue))
               :extensions (field))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_misc"))
               :extensions (indexer))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_keyword"))
               :extensions (intellisense-keyword))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_interface" :face 'nerd-icons-lblue))
               :extensions (interface))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_variable" :face 'nerd-icons-lblue))
               :extensions (localvariable))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_method" :face 'nerd-icons-purple))
               :extensions (method))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_namespace" :face 'nerd-icons-lblue))
               :extensions (namespace))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_numeric"))
               :extensions (numeric))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_operator"))
               :extensions (operator))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_property"))
               :extensions (property))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_snippet"))
               :extensions (snippet))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_string"))
               :extensions (string))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_structure" :face 'nerd-icons-orange))
               :extensions (structure))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_snippet"))
               :extensions (template))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-chevron_right" :face 'nerd-icons-dsilver))
               :extensions (collapsed) :fallback "+")
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-chevron_down" :face 'nerd-icons-dsilver))
               :extensions (expanded) :fallback "-")
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-file_binary" :face 'nerd-icons-dsilver))
               :extensions (classfile))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder_opened" :face 'nerd-icons-blue))
               :extensions (default-folder-opened))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder" :face 'nerd-icons-blue))
               :extensions (default-folder))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder_opened" :face 'nerd-icons-green))
               :extensions (default-root-folder-opened))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder" :face 'nerd-icons-green))
               :extensions (default-root-folder))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-file_binary" :face 'nerd-icons-dsilver))
               :extensions ("class"))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-file_zip" :face 'nerd-icons-dsilver))
               :extensions (file-type-jar))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder_opened" :face 'nerd-icons-dsilver))
               :extensions (folder-open))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder" :face 'nerd-icons-dsilver))
               :extensions (folder))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder_opened" :face 'nerd-icons-orange))
               :extensions (folder-type-component-opened))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder" :face 'nerd-icons-orange))
               :extensions (folder-type-component))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder_opened" :face 'nerd-icons-green))
               :extensions (folder-type-library-opened))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder" :face 'nerd-icons-green))
               :extensions (folder-type-library))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder_opened" :face 'nerd-icons-pink))
               :extensions (folder-type-maven-opened))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder" :face 'nerd-icons-pink))
               :extensions (folder-type-maven))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder_opened" :face 'nerd-icons-orange))
               :extensions (folder-type-package-opened))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder" :face 'nerd-icons-orange))
               :extensions (folder-type-package))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-add" :face 'nerd-icons-dsilver))
               :extensions (icon-create))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-list_flat" :face 'nerd-icons-dsilver))
               :extensions (icon-flat))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-symbol_class" :face 'nerd-icons-blue))
               :extensions (icon-hierarchical))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-link" :face 'nerd-icons-dsilver))
               :extensions (icon-link))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-refresh" :face 'nerd-icons-dsilver))
               :extensions (icon-refresh))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-faicon "nf-fa-unlink" :face 'nerd-icons-dsilver))
               :extensions (icon-unlink))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-devicon "nf-dev-java" :face 'nerd-icons-orange))
               :extensions (jar))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-library" :face 'nerd-icons-green))
               :extensions (library))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder_opened" :face 'nerd-icons-lblue))
               :extensions (packagefolder-open))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-folder" :face 'nerd-icons-lblue))
               :extensions (packagefolder))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-archive" :face 'nerd-icons-dsilver))
               :extensions (package))
-             (treemacs-create-icon
+                                    (treemacs-create-icon
               :icon (format "%s " (nerd-icons-codicon "nf-cod-repo" :face 'nerd-icons-blue))
               :extensions (java-project))))
 
-         (setq lsp-treemacs-theme "lsp-nerd-icons"))))
+           ))))
 
    ;; Python
    (use-package lsp-pyright
@@ -502,7 +493,7 @@
                                               (require 'lsp-pyright)
                                               (add-hook 'after-save-hook #'lsp-pyright-format-buffer t t))))
      :init (when (executable-find "python3")
-             (setq lsp-pyright-python-executable-cmd "python3")))
+             ))
 
    ;; C/C++/Objective-C
    (use-package ccls
@@ -516,62 +507,51 @@
          (when-let ((xrefs (lsp--locations-to-xref-items
                             (lsp--send-execute-command (symbol-name command) arguments))))
            (xref--show-xrefs xrefs nil)))
-       (advice-add #'lsp-execute-command :override #'my-lsp-execute-command)))
+       )))
 
-   ;; Swift
-   (use-package lsp-sourcekit)
+  (when suk-lsp
+    ;; Enable LSP in org babel
+    ;; https://github.com/emacs-lsp/lsp-mode/issues/377
+    (cl-defmacro lsp-org-babel-enable (lang)
+      "Support LANG in org source code block."
+      (cl-check-type lang string)
+      (let* ((edit-pre (intern (format "org-babel-edit-prep:%s" lang)))
+             (intern-pre (intern (format "lsp--%s" (symbol-name edit-pre)))))
+        `(progn
+           (defun ,intern-pre (info)
+             (setq buffer-file-name (or (->> info caddr (alist-get :file))
+                                        "org-src-babel.tmp"))
+             (pcase suk-lsp
+               ('eglot
+                (when (fboundp 'eglot-ensure)
+                  (eglot-ensure)))
+               ('lsp-mode
+                (when (fboundp 'lsp-deferred)
+                  ;; Avoid headerline conflicts
+                  (setq-local lsp-headerline-breadcrumb-enable nil)
+                  (lsp-deferred)))
+               (_
+                (user-error "LSP:: invalid `suk-lsp' type"))))
+           (put ',intern-pre 'function-documentation
+                (format "Enable `%s' in the buffer of org source block (%s)."
+                        suk-lsp (upcase ,lang)))
 
-   ;; Julia
-   (use-package lsp-julia
-     :hook (julia-mode . (lambda () (require 'lsp-julia))))
+           (if (fboundp ',edit-pre)
+               (advice-add ',edit-pre :after ',intern-pre)
+             (progn
+               (defun ,edit-pre (info)
+                 (,intern-pre info))
+               (put ',edit-pre 'function-documentation
+                    (format "Prepare local buffer environment for org source block (%s)."
+                            ))
 
-   ;; Java
-   (use-package lsp-java
-     :hook ((java-mode java-ts-mode jdee-mode) . (lambda () (require 'lsp-java))))))
+              (defconst org-babel-lang-list
+                '("go" "python" "ipython" "ruby" "js" "css" "sass" "c" "rust" "java" "cpp" "c++" "shell")
+                "The supported programming languages for interactive Babel.")
+              (dolist (lang org-babel-lang-list)
+                (eval `(lsp-org-babel-enable ,lang))))
 
-(when suk-lsp
-  ;; Enable LSP in org babel
-  ;; https://github.com/emacs-lsp/lsp-mode/issues/377
-  (cl-defmacro lsp-org-babel-enable (lang)
-    "Support LANG in org source code block."
-    (cl-check-type lang string)
-    (let* ((edit-pre (intern (format "org-babel-edit-prep:%s" lang)))
-           (intern-pre (intern (format "lsp--%s" (symbol-name edit-pre)))))
-      `(progn
-         (defun ,intern-pre (info)
-           (setq buffer-file-name (or (->> info caddr (alist-get :file))
-                                      "org-src-babel.tmp"))
-           (pcase suk-lsp
-             ('eglot
-              (when (fboundp 'eglot-ensure)
-                (eglot-ensure)))
-             ('lsp-mode
-              (when (fboundp 'lsp-deferred)
-                ;; Avoid headerline conflicts
-                (setq-local lsp-headerline-breadcrumb-enable nil)
-                (lsp-deferred)))
-             (_
-              (user-error "LSP:: invalid `suk-lsp' type"))))
-         (put ',intern-pre 'function-documentation
-              (format "Enable `%s' in the buffer of org source block (%s)."
-                      suk-lsp (upcase ,lang)))
 
-         (if (fboundp ',edit-pre)
-             (advice-add ',edit-pre :after ',intern-pre)
-           (progn
-             (defun ,edit-pre (info)
-               (,intern-pre info))
-             (put ',edit-pre 'function-documentation
-                  (format "Prepare local buffer environment for org source block (%s)."
-                          (upcase ,lang))))))))
-
-  (defconst org-babel-lang-list
-    '("go" "python" "ipython" "ruby" "js" "css" "sass" "c" "rust" "java" "cpp" "c++" "shell")
-    "The supported programming languages for interactive Babel.")
-  (dolist (lang org-babel-lang-list)
-    (eval `(lsp-org-babel-enable ,lang))))
-
-(provide 'init-lang-lsp)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init-lsp.el ends here

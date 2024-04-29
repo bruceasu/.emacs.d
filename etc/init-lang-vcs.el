@@ -1,4 +1,5 @@
 ;; init-vcs.el --- Initialize version control system configurations.	-*- lexical-binding: t -*-
+
 (provide 'init-lang-vcs)
 
 (eval-when-compile

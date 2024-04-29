@@ -30,4 +30,4 @@
   (add-to-list 'recentf-exclude #'suk/recentf-exclude-p)
   )
 
-(provide 'init-recentf)  
+(provide 'init-recentf)

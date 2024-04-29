@@ -5,6 +5,7 @@
 (eval-when-compile
   (require '+const)
   (require '+custom)
+  (require '+func)
   (require 'dired)
   (require 'dired-x)
   (require 'dired-details)                ;Dired详细信息

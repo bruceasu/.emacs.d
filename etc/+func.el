@@ -39,8 +39,8 @@ Native tree-sitter is introduced since 29.1."
   "Check whether tree-sitter is available.
 Native tree-sitter is introduced since 29.1."
   (and suk-tree-sitter
-	   (fboundp 'treesit-available-p)
-	   (treesit-available-p)))
+       (fboundp 'treesit-available-p)
+       (treesit-available-p)))
 
 
 ;; Browse URL

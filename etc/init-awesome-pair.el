@@ -1,5 +1,5 @@
-(provide 'init-awesome-pair)
 (require 'awesome-pair)
+(provide 'init-awesome-pair)
 (dolist (hook (list
                'c-mode-common-hook
                'c-mode-hook
@@ -30,15 +30,15 @@
                ))
   (add-hook hook #'(lambda () (awesome-pair-mode 1))))
 
-;; (define-key awesome-pair-mode-map (kbd "(") #'awesome-pair-open-round)
-;; (define-key awesome-pair-mode-map (kbd "[") #'awesome-pair-open-bracket)
-;; (define-key awesome-pair-mode-map (kbd "{") #'awesome-pair-open-curly)
-;; (define-key awesome-pair-mode-map (kbd ")") #'awesome-pair-close-round)
-;; (define-key awesome-pair-mode-map (kbd "]") #'awesome-pair-close-bracket)
-;; (define-key awesome-pair-mode-map (kbd "}") #'awesome-pair-close-curly)
-;; (define-key awesome-pair-mode-map (kbd "SPC") #'awesome-pair-space)
-;; (define-key awesome-pair-mode-map (kbd "=") #'awesome-pair-equal)
-;; (define-key awesome-pair-mode-map (kbd "\"") #'awesome-pair-double-quote)
+(define-key awesome-pair-mode-map (kbd "(") #'awesome-pair-open-round)
+(define-key awesome-pair-mode-map (kbd "[") #'awesome-pair-open-bracket)
+(define-key awesome-pair-mode-map (kbd "{") #'awesome-pair-open-curly)
+(define-key awesome-pair-mode-map (kbd ")") #'awesome-pair-close-round)
+(define-key awesome-pair-mode-map (kbd "]") #'awesome-pair-close-bracket)
+(define-key awesome-pair-mode-map (kbd "}") #'awesome-pair-close-curly)
+(define-key awesome-pair-mode-map (kbd "SPC") #'awesome-pair-space)
+(define-key awesome-pair-mode-map (kbd "=") #'awesome-pair-equal)
+(define-key awesome-pair-mode-map (kbd "\"") #'awesome-pair-double-quote)
 
 (define-key awesome-pair-mode-map (kbd "%") #'awesome-pair-match-paren)
 

@@ -1,8 +1,5 @@
 (provide 'init-calendar)
 ;;; 设置日历 ;;;;;;
-
-
-
 ;; Emacs Calender
 ;;
 ;; Emacs 中有日历，而且可以称之为一个系统，因为其中除了最常用的日历之外，
@@ -50,7 +47,7 @@
   )
 
 
-(setq diary-mail-addr "bruceasu@163.com")
+(setq diary-mail-addr user-mail-address)
 (add-hook 'diary-hook 'appt-make-list)
 ;;appointment
 (setq appt-issue-message t)
@@ -189,5 +186,5 @@ STRING)).  Returns nil if it is not visible in the current calendar window."
 (setq mark-holidays-in-calendar nil) ; 为了突出有diary的日期，calendar上不标记节日
 (setq view-calendar-holidays-initially nil) ; 打开calendar的时候不显示一堆节日
 
-;; bind `s-<F11>` in init-key.el  
+;; bind `s-<F11>` in init-key.el
 ;;(global-set-key (kbd "<f11>") 'calendar)

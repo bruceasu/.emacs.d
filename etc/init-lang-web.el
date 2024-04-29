@@ -1,10 +1,5 @@
 ;; init-web.el --- Initialize web configurations.   -*- lexical-binding: t -*-
-;;; Commentary:
-;;
-;; Web configurations.
-;;
-
-;;; Code:
+(provide 'init-lang-web)
 
 (eval-when-compile
   (require '+custom)
@@ -376,8 +371,3 @@ If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it.
 ;; Adds node_modules/.bin directory to `exec_path'
 (use-package add-node-modules-path
   :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
-
-(provide 'init-lang-web)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init-web.el ends here

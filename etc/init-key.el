@@ -1,4 +1,5 @@
-﻿;; -*- lexical-binding: t -*-
+;; -*- lexical-binding: t -*-
+
 (provide 'init-key)
 (eval-when-compile
   (require '+const)
@@ -23,23 +24,24 @@
 ;;
 
 ;;; ### Unset key ###
-;;; --- 卸载按键
-(lazy-load-unset-keys                   ;全局按键的卸载
- ;; '("C-z"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
- '("C-z" ))
+ ;;; --- 卸载按键
+ (lazy-load-unset-keys                   ;全局按键的卸载
+  ;; '("C-z"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
+  '("C-z" ))
 
 ;;; ### sudo ###
 (when sys/linuxp
   (progn
-	(lazy-load-global-keys
-	 '(("C-z C-s" . suk/sudo-actions-one-key))
-	 "init-sudo"
-	 )
-	)
+    (lazy-load-global-keys
+     '(("C-z C-s" . suk/sudo-actions-one-key))
+     "init-sudo"
+     )
+    )
   )
 
 ;;; ### Sdcv ###
 ;;; --- 星际译王命令行
+(when  (eq system-type 'gnu/linux)
 (lazy-load-global-keys
  '(("p" . sdcv-search-pointer)		   ;光标处的单词, buffer显示
    ("P" . sdcv-search-pointer+)		   ;光标处的单词, tooltip显示
@@ -55,7 +57,7 @@
    ("h" . fanyi-from-history)
    )
  "init-translate"
- "C-z")
+ "C-z"))
 
 ;;; ### Insert translated name ###
 ;; youdao / google
@@ -70,9 +72,8 @@
  "C-z"
  )
 
-
 ;;; ### Toolkit ###
-;;; --- 工具函数
+  ;;; --- 工具函数
 (lazy-load-set-keys
  '(
    ("C-," . bury-buffer)                ;隐藏当前buffer
@@ -91,9 +92,7 @@
    ("C-c ," . hs-show-all)
    )
  )
-
-
-;;; ### basic-toolkit ###
+   ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
    ("M-s-n" . comment-part-move-down)   ;向下移动注释
@@ -109,72 +108,54 @@
    ("C-<" . remember-jump)              ;记忆跳转函数
    ("M-s-," . point-stack-pop)          ;buffer索引跳转
    ("M-s-." . point-stack-push)         ;buffer索引标记
-   ("s-g" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
+   ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
    ("M-I" . backward-indent)            ;向后移动4个字符
                                         ;   ("s-J" . scroll-up-one-line)         ;向上滚动一行
                                         ;   ("s-K" . scroll-down-one-line)       ;向下滚动一行
    ("<f2>" . refresh-file)              ;自动刷新文件
    ("s-f" . find-file-root)             ;用root打开文件
    ("s-r" . find-file-smb)              ;访问sambao
-   ("C-S-j" . join-lines)               ;连接行
-   ("C-S-f" .  suk/indent-buffer)       ;gákshikfá
-   ("M-q" . suk/fill-or-unfill-paragraph)
-   ("M-Q"  . suk/unfill-paragraph)
+   ("C-J" . joint-lines)                ;连接行
    )
  "basic-toolkit")
 
-;;; ### goto-line-preview ###
+    ;;; ### goto-line-preview ###
 (lazy-load-global-keys
  '(
    ("M-g p" . goto-line-preview))
  "goto-line-preview")
 
-;;; ### Delete block ###
-;;; --- 快速删除光标左右的内容
+    ;;; ### Delete block ###
+    ;;; --- 快速删除光标左右的内容
 (lazy-load-global-keys
  '(
    ("M-," . delete-block-backward)
    ("M-." . delete-block-forward))
  "delete-block")
 
-;;; ### watch other window ###
-;;; --- 滚动其他窗口
+
+    ;;; ### watch other window ###
+    ;;; --- 滚动其他窗口
 (lazy-load-global-keys
  '(
-   ("C-P" . other-window-move-up)		;向下滚动其他窗口
-   ("C-N" . other-window-move-down)		;向上滚动其他窗口
-   ("M-p" . window-move-up)				;向下滚动当前窗口
-   ("M-n" . window-move-down)			;向上滚动当前窗口
+   ("C-P" . other-window-move-up)       ;向下滚动其他窗口
+   ("C-N" . other-window-move-down) ;向上滚动其他窗口
+   ("M-p" . window-move-up)         ;向下滚动当前窗口
+   ("M-n" . window-move-down)           ;向上滚动当前窗口
    )
  "win-move")
 
-;;; ### Buffer Move ###
-;;; --- 缓存移动
-(lazy-load-set-keys
- '(
-   ;;("C-z i" . beginning-of-buffer)      ;缓存开始 M-<
-   ;;("C-z k" . end-of-buffer)            ;缓存结尾 M->
-   ("C-M-f" . forward-paragraph)        ;下一个段落
-   ("C-M-b" . backward-paragraph)       ;上一个段落
-   ("C-M-y" . backward-up-list)         ;向左跳出 LIST
-   ("C-M-o" . up-list)                  ;向右跳出 LIST
-   ("C-M-u" . backward-down-list)       ;向左跳进 LIST
-   ("C-M-i" . down-list)                ;向右跳进 LIST
-   ("C-M-a" . beginning-of-defun)       ;函数开头
-   ("C-M-e" . end-of-defun)             ;函数末尾
-   ))
-
-;;; ### move text ###
+;; ### move text ###
 (lazy-load-global-keys
  '(
-   ("M-N"      . move-text-down)	;把光标所在的整行文字(或标记)下移一行
-   ("M-P"      . move-text-up)	;把光标所在的整行文字(或标记)上移一行
+   ("M-N" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
+   ("M-P" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
    ("M-<DOWN>" . move-text-down)	;把光标所在的整行文字(或标记)下移一行
    ("M-<UP>"   . move-text-up)	;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
 
-;;; ### duplicate-line ###
+;; ### duplicate-line ###
 (lazy-load-global-keys
  '(
    ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
@@ -194,9 +175,43 @@
  "open-newline")
 
 
+;; ### Rect ###
+;; --- 矩形操作
+(lazy-load-global-keys
+ '(
+   ("s-M" . rm-set-mark)                ;矩形标记
+   ("s-X" . rm-exchange-point-and-mark) ;矩形对角交换
+   ("s-D" . rm-kill-region)             ;矩形删除
+   ("s-S" . rm-kill-ring-save)          ;矩形保存
+   ("s-Y" . yank-rectangle)             ;粘帖矩形
+   ("s-O" . open-rectangle)       ;用空白填充矩形, 并向右移动文本
+   ("s-C" . clear-rectangle)      ;清空矩形
+   ("s-T" . string-rectangle)     ;用字符串替代矩形的每一行
+   ("s-I" . string-insert-rectangle)    ;插入字符串在矩形的每一行
+   ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
+   ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
+   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
+   )
+ "rect-extension")
 
-;;; ### Buffer Edit ###
-;;; --- 缓存编辑
+;; ### Buffer Move ###
+;; --- 缓存移动
+(lazy-load-set-keys
+ '(
+   ;;("C-z i" . beginning-of-buffer)      ;缓存开始 M-<
+   ;;("C-z k" . end-of-buffer)            ;缓存结尾 M->
+   ("C-M-f" . forward-paragraph)        ;下一个段落
+   ("C-M-b" . backward-paragraph)       ;上一个段落
+   ("C-M-y" . backward-up-list)         ;向左跳出 LIST
+   ("C-M-o" . up-list)                  ;向右跳出 LIST
+   ("C-M-u" . backward-down-list)       ;向左跳进 LIST
+   ("C-M-i" . down-list)                ;向右跳进 LIST
+   ("C-M-a" . beginning-of-defun)       ;函数开头
+   ("C-M-e" . end-of-defun)             ;函数末尾
+   ))
+
+;; ### Buffer Edit ###
+;; --- 缓存编辑
 (lazy-load-set-keys
  '(
    ("C-x C-x" . exchange-point-and-mark)   ;交换当前点和标记点
@@ -205,35 +220,17 @@
    ("M-SPC" . just-one-space)              ;只有一个空格在光标处
    ))
 
-;;; ### Rect ###
-;;; --- 矩形操作
-(lazy-load-global-keys
- '(
-   ("s-M" . rm-set-mark)				;矩形标记
-   ("s-X" . rm-exchange-point-and-mark)	;矩形对角交换
-   ("s-D" . rm-kill-region)				;矩形删除
-   ("s-S" . rm-kill-ring-save)			;矩形保存
-   ("s-Y" . yank-rectangle)				;粘帖矩形
-   ("s-O" . open-rectangle)		  ;用空白填充矩形, 并向右移动文本
-   ("s-C" . clear-rectangle)	  ;清空矩形
-   ("s-T" . string-rectangle)	  ;用字符串替代矩形的每一行
-   ("s-I" . string-insert-rectangle)	;插入字符串在矩形的每一行
-   ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
-   ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
-   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
-   )
- "rect-extension")
-
-;;; ### Font ###
-;;; --- 字体命令
+;; ### Font ###
+;; --- 字体命令
 (lazy-load-set-keys
  '(
    ("C--" . text-scale-decrease)        ;减小字体大小
    ("C-=" . text-scale-increase)        ;增加字体大小
    ))
 
-;;; ### Window Operation ###
-;;; --- 窗口操作
+
+;; ### Window Operation ###
+;; --- 窗口操作
 (lazy-load-set-keys
  '(
    ("C-c :" . split-window-vertically)   ;纵向分割窗口
@@ -243,11 +240,11 @@
    ))
 (lazy-load-global-keys
  '(
-   ("C-c V" . delete-other-windows-vertically+)	;关闭上下的其他窗口
+   ("C-c V" . delete-other-windows-vertically+) ;关闭上下的其他窗口
    ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
    ("C-'" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
    ("C-\"" . delete-current-buffer-window) ;删除当前buffer的窗口
-   ("M-s-o" . toggle-one-window)		   ;切换一个窗口
+   ("M-s-o" . toggle-one-window)           ;切换一个窗口
    ("C-x O" . toggle-window-split)
    )
  "window-extension")
@@ -261,8 +258,8 @@
    )
  "init-search")
 
-;;; ### Functin key ###
-;;; --- 功能函数
+  ;;; ### Functin key ###
+  ;;; --- 功能函数
 (lazy-load-set-keys
  '(
    ("<f9>" . emacs-session-save )
@@ -270,11 +267,11 @@
    ("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
    ))
 
-;;; ### Awesome-Pair ###
-;;; --- 结构化编程
+  ;;; ### Awesome-Pair ###
+  ;;; --- 结构化编程
 
-;;; ### Thingh-edit ###
-;;; --- 增强式编辑当前光标的对象
+  ;;; ### Thingh-edit ###
+  ;;; --- 增强式编辑当前光标的对象
 (lazy-load-global-keys
  '(
    ("C-c w" . thing-copy-word)
@@ -312,8 +309,8 @@
  "C-z"
  )
 
-;;; ### Isearch ###
-;;; --- 交互式搜索
+  ;;; ### Isearch ###
+  ;;; --- 交互式搜索
 (lazy-load-set-keys
  '(
    ("TAB" . isearch-complete)               ;isearch补全
@@ -342,7 +339,7 @@
  )
 
 
-;;; ### expand-region ###
+  ;;; ### expand-region ###
 (lazy-load-global-keys
  '(
    ("C-+" . er/expand-region))
@@ -354,7 +351,7 @@
    ("M-s-u" . vdiff-buffers))
  "vdiff")
 
-;;; ### Ace jump ###
+  ;;; ### Ace jump ###
 (lazy-load-global-keys
  '(
    ("C-c w" . ace-jump-word-mode)
@@ -366,8 +363,8 @@
  )
 
 
-;;; ### Company en words ###
-;;; --- 英文助手
+  ;;; ### Company en words ###
+  ;;; --- 英文助手
 (lazy-load-global-keys
  '(
    ("M-r" . toggle-company-english-helper) ;英文助手
@@ -400,14 +397,6 @@
 ;;  "init-org"
 ;;  "<f9>")
 
-;;; ### String Inflection ###
-;; --- 单词语法风格快速转换
-(lazy-load-global-keys
- '(
-   ("C-c C-u" . one-key-string-inflection)
-   )
- "init-string-inflection")
-
 ;;; Dash.
 ;;(lazy-load-global-keys
 ;; '(("y" . dash-at-point)
@@ -416,19 +405,26 @@
 ;; "C-x"
 ;; )
 
+;; ### String Inflection ###
+;; --- 单词语法风格快速转换
+(lazy-load-global-keys
+ '(
+   ("C-c C-u" . one-key-string-inflection)
+   )
+ "init-string-inflection")
 
-;;; ### Keyboard Macro ###
-;;; --- 键盘宏
+  ;;; ### Keyboard Macro ###
+  ;;; --- 键盘宏
 (lazy-load-global-keys
  '(
    ("M-s-s" . kmacro-start-macro-or-insert-counter) ;开始键盘宏或插入 F3
-   ("M-s-d" . kmacro-end-or-call-macro)	   ;结束键盘宏或调用 F4
-   ("M-s-c" . kmacro-delete-ring-head)	   ;删除当前的键盘宏
-   ("M-s-w" . kmacro-cycle-ring-next)	   ;下一个键盘宏
+   ("M-s-d" . kmacro-end-or-call-macro)    ;结束键盘宏或调用 F4
+   ("M-s-c" . kmacro-delete-ring-head)     ;删除当前的键盘宏
+   ("M-s-w" . kmacro-cycle-ring-next)      ;下一个键盘宏
    ("M-s-e" . kmacro-cycle-ring-previous)  ;上一个键盘宏
-   ("M-s-a" . kmacro-edit-macro)		   ;编辑键盘宏
-   ("M-s-v" . name-last-kbd-macro)		   ;命令当前键盘宏
-   ("M-s-f" . insert-kbd-macro)			   ;插入键盘宏
+   ("M-s-a" . kmacro-edit-macro)           ;编辑键盘宏
+   ("M-s-v" . name-last-kbd-macro)         ;命令当前键盘宏
+   ("M-s-f" . insert-kbd-macro)            ;插入键盘宏
    ("M-s-q" . apply-macro-to-region-lines) ;应用键盘宏到选择的区域
    )
  "macros+")
@@ -443,23 +439,6 @@
  "init-bookmark")
 
 
-;; gámfá citding hámshòu
-
-;;bind-keys 是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个键。虽然
-;;bind-keys 可以独立于 use-package 使用，但它通常与 use-package 结合使用，以提供
-;;更清晰和模块化的键绑定配置。
-
-;; (use-package bind-key)
-;; (bind-key "C-c x" #'some-function some-package-mode-map)
-;; (bind-key "C-c y" #'another-function)
-
-;; global-set-key examples:
-;; (global-set-key (kbd "C-x C-\\") 'next-line)
-;; (global-set-key [?\C-x ?\C-\\] 'next-line)
-;; (global-set-key [(control ?x) (control ?\\)] 'next-line)
-
-;; M-x global-set-key RET 交互式的绑定你的键。
-;; C-x Esc Esc 调出上一条“复杂命令”
 
 ;; kèitá bongding
 ;; f3 start macro(kmacro-start-macro-or-insert-counter),
@@ -474,20 +453,37 @@
 ;; (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
 ;;
 
+
+
+
+;; global-set-key examples:
+;; (global-set-key (kbd "C-x C-\\") 'next-line)
+;; (global-set-key [?\C-x ?\C-\\] 'next-line)
+;; (global-set-key [(control ?x) (control ?\\)] 'next-line)
+
 ;;(global-set-key (kbd "C-(") 'backward-sexp)
 ;;(global-set-key (kbd "C-)") 'forward-sexp)
 
-;; tungyat bongding hámshòu
-;; shaiyung fongfá:
+;;(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
+;;(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
+;;(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
+;;(global-set-key (kbd "C-x R") 'recentf)
+;; M-x global-set-key RET 交互式的绑定你的键。
+;; C-x Esc Esc 调出上一条“复杂命令”
+;; 使用方式
 ;; (suk-set-key-bindings 'global-set-key
 ;;   (list
 ;;      '([f2]              calendar)
 ;;      '([(shift f2)]      remember)
 ;;      '([f5]              revert-buffer)
 ;;      (list (kbd "C-c l") 'copy-line)))
+
+
+
+;; 设置绑定
 (defun suk-set-key-bindings (ACTION BINDINGLIST)
   "Map keys.
-ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
+  ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
   (mapcar (lambda(lst)
             ""
@@ -526,6 +522,12 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
 
 
+;; bind-keys 是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个键。虽然
+;; bind-keys 可以独立于 use-package 使用，但它通常与 use-package 结合使用，以提
+;; 供更清晰和模块化的键绑定配置。
+;; (use-package bind-key)
+;; (bind-key "C-c x" #'some-function some-package-mode-map)
+;; (bind-key "C-c y" #'another-function)
 
 ;; Toggle fullscreen <F11> also bind to fullscreen
 ;; (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
@@ -569,11 +571,10 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 ;;(define-key SPC-map (kbd "f") #'find-file)
 
 
-;;;
 ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
 ;; (define-prefix-command 'comma-map)
-;; (global-set-key [(meta c)] 'meta-c-map)
 ;; (global-set-key (kbd ",") 'comma-map)
+;; (global-set-key [(meta c)] 'meta-c-map)
 
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
 ;; (add-hook 'isearch-mode-hook
@@ -621,7 +622,7 @@ ACTION usually is 'global-set-key', and BINDINGLIST is key and command LIST."
 
 ;; M-x align-regexp 可以方便的对齐一些文字
 
-;;; rectangle
+  ;;; rectangle
 ;; C-x r k
 ;; Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
 ;; C-x r M-w

@@ -1,9 +1,7 @@
-;;; Commentary:
-;;
-;; Org configurations.
-;;
+;; -*- lexical-binding: t -*-
 
-;;; Code:
+(provide 'init-org)
+
 (eval-when-compile
   (require '+const)
   (require '+custom)
@@ -95,7 +93,7 @@
         (800 1000 1200 1400 1600 1800 2000)
         " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"))
 (setq org-agenda-current-time-string
-	  "⭠ now ─────────────────────────────────────────────────")
+      "⭠ now ─────────────────────────────────────────────────")
 (setq org-tags-column -80)
 (setq org-log-done 'time)
 (setq org-catch-invisible-edits 'smart)
@@ -149,45 +147,45 @@
 (setq org-capture-templates
       '(
         ("t" "Todo"
-		 entry (file+headline (expand-file-name "gtd.org" org-files-directory) "Tasks")
-		 "* TODO %?\n%U\n%a\n"
-		 :clock-in t
-		 :clock-resume t)
-		("n" "note"
-		 entry (file (expand-file-name "notes.org" org-files-directory))
-		 "* %? :NOTE:\n%U\n%a\n"
-		 :clock-in t
-		 :clock-resume t)
-		("r" "respond"
-		 entry (file (expand-file-name "gtd.org" org-files-directory))
-		 "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n"
-		 :clock-in t
-		 :clock-resume t
-		 :immediate-finish t)
-		("j" "Journal"
-		 entry (file+datetree (expand-file-name "journal.org" org-files-directory))
-		 "* %?\nEntered on %U\n  %i\n  %a")
-		("w" "Review"
-		 entry (file (expand-file-name "gtd.org" org-files-directory))
-		 "* TODO Review %c\n%U\n"
-		 :immediate-finish t)
-		("m" "Meeting"
-		 entry (file (expand-file-name "gtd.org" org-files-directory))
-		 "* MEETING with %? :MEETING:\n%U"
-		 :clock-in t
-		 :clock-resume t)
-		("p" "Phone call"
-		 entry (file (expand-file-name "gtd.org" org-files-directory))
-		 "* PHONE %? :PHONE:\n%U"
-		 :clock-in t
-		 :clock-resume t)
-		("h" "Habit"
-		 entry (file (expand-file-name "gtd.org" org-files-directory))
-		 "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
-		))
+         entry (file+headline (expand-file-name "gtd.org" org-files-directory) "Tasks")
+         "* TODO %?\n%U\n%a\n"
+         :clock-in t
+         :clock-resume t)
+        ("n" "note"
+         entry (file (expand-file-name "notes.org" org-files-directory))
+         "* %? :NOTE:\n%U\n%a\n"
+         :clock-in t
+         :clock-resume t)
+        ("r" "respond"
+         entry (file (expand-file-name "gtd.org" org-files-directory))
+         "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n"
+         :clock-in t
+         :clock-resume t
+         :immediate-finish t)
+        ("j" "Journal"
+         entry (file+datetree (expand-file-name "journal.org" org-files-directory))
+         "* %?\nEntered on %U\n  %i\n  %a")
+        ("w" "Review"
+         entry (file (expand-file-name "gtd.org" org-files-directory))
+         "* TODO Review %c\n%U\n"
+         :immediate-finish t)
+        ("m" "Meeting"
+         entry (file (expand-file-name "gtd.org" org-files-directory))
+         "* MEETING with %? :MEETING:\n%U"
+         :clock-in t
+         :clock-resume t)
+        ("p" "Phone call"
+         entry (file (expand-file-name "gtd.org" org-files-directory))
+         "* PHONE %? :PHONE:\n%U"
+         :clock-in t
+         :clock-resume t)
+        ("h" "Habit"
+         entry (file (expand-file-name "gtd.org" org-files-directory))
+         "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
+        ))
 ;; 设置打开某种文件类型
 (setq org-file-apps
-	  '((auto-mode . emacs)
+      '((auto-mode . emacs)
         ("\\.mm\\'" . system)
         ("\\.x?html?\\'" . system)
         ("\\.pdf\\'" . system)))
@@ -202,25 +200,25 @@
 ;; @ 符号表示带理由的提示，所以当切换到 WAITTING 时，Org 模式会问我为什么，并将
 ;; 这个添加到笔记中。
 (setq org-todo-keywords
-	  '((sequence "TODO(t)" "NEXT(n!)" "HANGUP(h)"  "|" "DONE(d!)" "CANCELLED(c@/!)")
+      '((sequence "TODO(t)" "NEXT(n!)" "HANGUP(h)"  "|" "DONE(d!)" "CANCELLED(c@/!)")
         (sequence "⚑(T)" "🏴(N)" "❓(H)" "|" "✔(D)" "✘(C)")
         (sequence "WAITTING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING")))
 (setq org-todo-keyword-faces
-	  '(("TODO" :foreground "red" :weight bold)
+      '(("TODO" :foreground "red" :weight bold)
         ("NEXT" :foreground "blue" :weight bold)
         ("DONE" :foreground "forest green" :weight bold)
         ("WAITTING" :foreground "orange" :weight bold)
         ("HOLD" :foreground "magenta" :weight bold)
         ("CANCELLED" :foreground "forest grey" :weight bold)
         ("ABORT" :foreground "forest yellow" :weight bold)
-		("HANGUP" :foreground "orange" :weight bold)
+        ("HANGUP" :foreground "orange" :weight bold)
         ("❓" :foreground "orange" :weight bold)
         ("MEETING" :foreground "forest brown" :weight bold)
         ("PHONE" :foreground "forest pink" :weight bold) ))
 
 
 (setq org-priority-faces
-	  '((?A . error)
+      '((?A . error)
         (?B . warning)
         (?C . success)))
 
@@ -233,13 +231,13 @@
 ;;   Moving a task to NEXT removes WAITTING, CANCELLED, and HOLD tags
 ;;   Moving a task to DONE removes WAITTING, CANCELLED, and HOLD tags
 (setq org-todo-state-tags-triggers
-	  '(("CANCELLED" ("CANCELLED" . t))
-		("WAITTING" ("WAITTING" . t))
-		("HOLD" ("WAITTING") ("HOLD" . t))
-		("DONE" ("WAITTING") ("HOLD"))
-		("TODO" ("WAITTING") ("CANCELLED") ("HOLD"))
-		("NEXT" ("WAITTING") ("CANCELLED") ("HOLD"))
-		("DONE" ("WAITTING") ("CANCELLED") ("HOLD"))))
+      '(("CANCELLED" ("CANCELLED" . t))
+        ("WAITTING" ("WAITTING" . t))
+        ("HOLD" ("WAITTING") ("HOLD" . t))
+        ("DONE" ("WAITTING") ("HOLD"))
+        ("TODO" ("WAITTING") ("CANCELLED") ("HOLD"))
+        ("NEXT" ("WAITTING") ("CANCELLED") ("HOLD"))
+        ("DONE" ("WAITTING") ("CANCELLED") ("HOLD"))))
 
 ;; Filetags look like this:
 ;; #+FILETAGS: NORANG @office
@@ -319,15 +317,15 @@
             (set-fill-column 70)
             (turn-on-font-lock)
             (load-org-font)
-			))
+            ))
 
 (add-hook 'org-agenda-mode-hook
-		  (lambda() (hl-line-mode 1)))
+          (lambda() (hl-line-mode 1)))
 (add-hook 'org-clock-out-hook
-		  (lambda()
-			(save-excursion
-			  (beginning-of-line 0)
-			  (org-remove-empty-drawer-at "LOGBOOK" (point)))))
+          (lambda()
+            (save-excursion
+              (beginning-of-line 0)
+              (org-remove-empty-drawer-at "LOGBOOK" (point)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -440,15 +438,10 @@
 ;; Export text/html MIME emails
 (use-package org-mime
   :bind (:map message-mode-map
-			  ("C-c M-o" . org-mime-htmlize)
-			  :map org-mode-map
-			  ("C-c M-o" . org-mime-org-buffer-htmlize)))
+              ("C-c M-o" . org-mime-htmlize)
+              :map org-mode-map
+              ("C-c M-o" . org-mime-org-buffer-htmlize)))
 
 ;; covert to html
 (use-package htmlize
   :defer 2)
-
-(provide 'init-org)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init-org.el ends here

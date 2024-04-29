@@ -241,6 +241,8 @@ If NO-REFRESH is nil, `package-refresh-contents' is called."
 (require-package 'highlight-symbol)
 (require-package 'wc-mode)
 (require-package 'helpful)
+(require-package 'inf-ruby)
+(require-package 'erlang)
 ;;(require-package 'qrencode)
 ;;(require-package 'ws-butler)
 ;;(require-package 'sage-shell-mode)

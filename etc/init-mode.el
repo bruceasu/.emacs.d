@@ -1,11 +1,6 @@
 ;;; init-mode.el --- File mode setup
 
-;;; Commentary:
-;;
-;; File mode setup
-
-
-;;; Code:
+(provide 'init-mode)
 
 ;;; ### auto-mode-alist ###
 ;;; --- 绑定扩展名到特定的模式
@@ -127,7 +122,3 @@ The test for presence of the car of ELT-CONS is done with `equal'."
                'message-mode-hook
                ))
   (add-hook hook #'(lambda () (auto-fill-mode 1))))
-
-(provide 'init-mode)
-
-;;; init-mode.el ends here

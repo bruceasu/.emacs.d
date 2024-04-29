@@ -1,3 +1,5 @@
+(provide 'early-init)
+
 (when (or (featurep 'esup-child)
           (fboundp 'profile-dotemacs)
           (daemonp)
@@ -41,5 +43,4 @@
   (push '(ns-transparent-titlebar . t) default-frame-alist))
 (setq-default mode-line-format nil)
 
-(provide 'early-init)
 ;;(global-unset-key (kbd "C-SPC"))

@@ -1,29 +1,4 @@
-﻿;;; init-sudo.el --- sudo .	-*- lexical-binding: t no-byte-compile: t; -*-
-
-;; Copyright (C) 2018 Suk
-
-;; Author: Suk
-;; Version: 1.0.0
-;; Keywords: .emacs.d
-
-;; This file is not part of GNU Emacs.
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or
-;; (at your option) any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-;;
-
+;;; init-sudo.el --- sudo .	-*- lexical-binding: t no-byte-compile: t; -*-
 ;;; Commentary:
 ;;
 ;; sudo setting
@@ -38,72 +13,72 @@
 (when sys/linuxp
   (progn
     ;; =========================================================
-	;; 普通用户调用root权限写文件
-	;; ---------------------------------------------------------
-		;;;###autoload
-	(defun suk/sudo-edit (&optional arg)
-	  (interactive "P")
-	  (if (or arg (not buffer-file-name))
-		  (find-file (concat "/sudo:root@localhost:"
-		                     (ido-read-file-name "Find file(as root): ")))
-		(find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
-		)
-	  )
-	;; ---------------------------------------------------------
-		;;;###autoload
-	(defadvice ido-find-file (after suk/sudo-find-file activate)
-	  "Find file as root if necessary."
-	  (unless (and buffer-file-name
-		           (file-writable-p buffer-file-name))
-		(find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
-	;; ---------------------------------------------------------
-		;;;###autoload
-	(defun suk/sudo-find-file (file-name)
-	  "Like find file, but opens the file as root."
-	  (interactive "Find File for sudo-edit: ")
-	  (let ((tramp-file-name
-			 (concat "/sudo::"
-		             (expand-file-name file-name)
-					 )
-			 )
-		    )
-		(find-file tramp-file-name)
-		)
-	  )
+    ;; 普通用户调用root权限写文件
+    ;; ---------------------------------------------------------
+        ;;;###autoload
+    (defun suk/sudo-edit (&optional arg)
+      (interactive "P")
+      (if (or arg (not buffer-file-name))
+          (find-file (concat "/sudo:root@localhost:"
+                             (ido-read-file-name "Find file(as root): ")))
+        (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
+        )
+      )
+    ;; ---------------------------------------------------------
+        ;;;###autoload
+    (defadvice ido-find-file (after suk/sudo-find-file activate)
+      "Find file as root if necessary."
+      (unless (and buffer-file-name
+                   (file-writable-p buffer-file-name))
+        (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
+    ;; ---------------------------------------------------------
+        ;;;###autoload
+    (defun suk/sudo-find-file (file-name)
+      "Like find file, but opens the file as root."
+      (interactive "Find File for sudo-edit: ")
+      (let ((tramp-file-name
+             (concat "/sudo::"
+                     (expand-file-name file-name)
+                     )
+             )
+            )
+        (find-file tramp-file-name)
+        )
+      )
 
-	;; ---------------------------------------------------------
-		;;;###autoload
-	(defun suk/sudo-save ()
-	  (interactive)
-	  (if (not buffer-file-name)
+    ;; ---------------------------------------------------------
+        ;;;###autoload
+    (defun suk/sudo-save ()
+      (interactive)
+      (if (not buffer-file-name)
                                         ; true condition
-		  (write-file (concat "/sudo:root@localhost:"
-		                      (ido-read-file-name "File:")
-		                      )
-		              )
+          (write-file (concat "/sudo:root@localhost:"
+                              (ido-read-file-name "File:")
+                              )
+                      )
                                         ; false condition
-		(write-file (concat "/sudo:root@localhost:" buffer-file-name))
-		)
-	  )
-	;; Just hook on `find-file-hook', don't hook `dired-mode-hook', it's unnecessary.
-	(add-hook 'find-file-hook
-	          #'(lambda ()
-	              (require 'auto-sudoedit)
-	              (auto-sudoedit)))         ;默认打开忽略模式
-	)
+        (write-file (concat "/sudo:root@localhost:" buffer-file-name))
+        )
+      )
+    ;; Just hook on `find-file-hook', don't hook `dired-mode-hook', it's unnecessary.
+    (add-hook 'find-file-hook
+              #'(lambda ()
+                  (require 'auto-sudoedit)
+                  (auto-sudoedit)))         ;默认打开忽略模式
+    )
 
   (defun suk/sudo-actions-one-key ()
-	(interactive)
-	(require 'one-key)
-	(one-key-create-menu
-	 "SUDO ACTION"
-	 '(
-	   (("s" . "Sudo Save") . suk/sudo-save)
-	   (("f" . "Sudo Find") . suk/sudo-find-file)
-	   (("e" . "Sudo edit") . suk/sudo-edit)
-	   )
-	 t)
-	)
+    (interactive)
+    (require 'one-key)
+    (one-key-create-menu
+     "SUDO ACTION"
+     '(
+       (("s" . "Sudo Save") . suk/sudo-save)
+       (("f" . "Sudo Find") . suk/sudo-find-file)
+       (("e" . "Sudo edit") . suk/sudo-edit)
+       )
+     t)
+    )
 
   )
 

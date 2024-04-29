@@ -1,15 +1,8 @@
 ;; init-window.el --- Initialize window configurations.	-*- lexical-binding: t -*-
 
-;; Copyright (C) 2006-2024 Vincent Zhang
 
-;; Author: Vincent Zhang <seagle0128@gmail.com>
-;; URL: https://github.com/seagle0128/.emacs.d
-;;; Commentary:
-;;
-;; Window configurations.
-;;
 
-;;; Code:
+(provide 'init-window)
 
 ;; Directional window-selection routines
 (use-package windmove
@@ -235,8 +228,3 @@
           (when (window-live-p window)
             (delete-window window)))))
     (advice-add #'keyboard-quit :before #'popper-close-window-hack)))
-
-(provide 'init-window)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init-window.el ends here

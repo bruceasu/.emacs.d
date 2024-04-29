@@ -1,7 +1,3 @@
-;;; init-idle.el --- Configure file that can load when emacs idle.
-;;; Code:
-
-
 (provide 'init-idle)
 
 (eval-when-compile
@@ -11,13 +7,12 @@
   (require 'init-package)
   )
 
-
 (setq suggest-key-bindings 1)             ;当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
 (setq browse-kill-ring-quit-action        ;设置退出动作
       (quote save-and-restore))           ;保存还原窗口设置
 (autoload 'hanconvert-region "hanconvert" ;简繁中文互相转换
   "Convert a region from simple chinese to tradition chinese or
-from tradition chinese to simple chinese" t)
+    from tradition chinese to simple chinese" t)
 (setq max-lisp-eval-depth 40000)          ;lisp最大执行深度
 (setq max-specpdl-size 10000)             ;最大容量
 (setq kill-ring-max 1024)                 ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
@@ -73,6 +68,37 @@ from tradition chinese to simple chinese" t)
               )))
 
 (setq-default cursor-type 'box) ; 设置光标样式
+    ;;; ### Speedbar ###
+(setq speedbar-show-unknown-files t)    ;显示文件
+
+    ;;; ### Modeline-posn-column-limit ###
+(setq modelinepos-column-limit 80)      ;设置列数限制, 并在mode-line上显示
+;; 如果有两个重名buffer, 则再前面加上路径区别
+(require 'uniquify)
+;; (setq uniquify-buffer-name-style 'forward)
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+
+
+;; =========================================================
+;;备份策略
+;; =========================================================
+(setq make-backup-files t)
+(setq version-control t)     ; 允许多次备份
+(setq kept-old-versions 2)   ; 保留最早的2个备份文件
+(setq kept-new-version 100)  ; 保留最近的100个备份文件
+(setq delete-old-versions t) ; 自动删除旧的备份文件
+
+(show-paren-mode t)
+(tooltip-mode -1)                       ;不要显示任何 tooltips
+(delete-selection-mode 1)               ; 选中文本后输入会覆盖
+(auto-compression-mode 1)
+(size-indication-mode 1)
+(blink-cursor-mode -1)
+
+;; Misc
+(if (boundp 'use-short-answers)
+    (setq use-short-answers t)
+  (fset 'yes-or-no-p 'y-or-n-p))
 
 ;;; ### Advice ###
 ;;; --- 各种emacs行为建议
@@ -90,19 +116,6 @@ from tradition chinese to simple chinese" t)
                            plain-tex-mode))
       (indent-region (region-beginning) (region-end) nil)))
 
-;;; ### Speedbar ###
-(setq speedbar-show-unknown-files t)    ;显示文件
-
-;;; ### Modeline-posn-column-limit ###
-(setq modelinepos-column-limit 80)      ;设置列数限制, 并在mode-line上显示
-
-(show-paren-mode t)
-(tooltip-mode -1)                       ;不要显示任何 tooltips
-(delete-selection-mode 1)               ; 选中文本后输入会覆盖
-(auto-compression-mode 1)
-(size-indication-mode 1)
-(blink-cursor-mode -1)
-
 ;; 如果有两个重名buffer, 则再前面加上路径区别
 (require 'uniquify)
 ;; (setq uniquify-buffer-name-style 'forward)
@@ -113,16 +126,7 @@ from tradition chinese to simple chinese" t)
 (add-hook 'after-save-hook
           'executable-make-buffer-file-executable-if-script-p)
 
-;; =========================================================
-;;备份策略
-;; =========================================================
-(setq make-backup-files t)
-(setq version-control t)     ; 允许多次备份
-(setq kept-old-versions 2)   ; 保留最早的2个备份文件
-(setq kept-new-version 100)  ; 保留最近的100个备份文件
-(setq delete-old-versions t) ; 自动删除旧的备份文件
-
-;; 回到关闭文件前光标的位置
+;; Saiyung `saveplace` joi ģánbei mangin cin, bouocün gongbiu ge waiji
 (my-run-with-idle-timer
  2
  #'(lambda()
@@ -152,9 +156,6 @@ from tradition chinese to simple chinese" t)
            )
      (savehist-mode 1)
      ))
-
-
-;; Misc.
 
 ;;===================================================
 ;; Proxy settings
@@ -250,8 +251,6 @@ from tradition chinese to simple chinese" t)
       (write-region nil nil custom-file)
       (message "Saved %s (%s) to %s" variable value custom-file))))
 
-
-
 ;;===================================================
 ;; Update
 ;;===================================================
@@ -332,6 +331,3 @@ from tradition chinese to simple chinese" t)
     (let ((explicit-shell-file-name "/bin/bash"))
       (call-interactively 'shell)))
   )
-
-
-

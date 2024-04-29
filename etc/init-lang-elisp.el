@@ -1,12 +1,5 @@
 ;; init-elisp.el --- Initialize Emacs Lisp configurations.	-*- lexical-binding: t -*-
 
-;;; Commentary:
-;;
-;; Emacs Lisp configurations.
-;;
-
-;;; Code:
-
 (defun my-show-scratch-buffer-message ()
   "Show something in scratch buffer."
   (let* ((fortune-prog (or (executable-find "fortune-zh")

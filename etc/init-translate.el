@@ -1,27 +1,4 @@
 ;; init-translate.el --- Initialize translation ultilities.	-*- lexical-binding: t -*-
-
-;; Copyright (C) 2018 Suk
-
-;; Author: Suk
-
-;; This file is not part of GNU Emacs.
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or
-;; (at your option) any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-;;
-
 ;;; Commentary:
 ;;
 ;; Some translation Utilities.
@@ -71,16 +48,16 @@
   :ensure t
   :defer 2
   :config (setq google-translate--tkk-url "http://translate.google.com/"
-				google-translate-base-url "http://translate.google.com/translate\_a/single"
-				google-translate-listen-url "https://translate.google.com/translate\_tts"
-				google-translate-default-target-language "zh-CN"
-				google-translate-default-source-language "en")
+                google-translate-base-url "http://translate.google.com/translate\_a/single"
+                google-translate-listen-url "https://translate.google.com/translate\_tts"
+                google-translate-default-target-language "zh-CN"
+                google-translate-default-source-language "en")
   (setq-default google-translate-enable-ido-completion t)
   :bind(
-		;; 配置快捷键
-		("C-x t s" . google-translate-at-point)
-		("C-x t q" . google-translate-query-translate)
-		("C-x t S" . google-translate-smooth-translate)
+        ;; 配置快捷键
+        ("C-x t s" . google-translate-at-point)
+        ("C-x t q" . google-translate-query-translate)
+        ("C-x t S" . google-translate-smooth-translate)
   ))
 ;; A multi dictionaries interface
 (use-package fanyi
@@ -92,21 +69,21 @@
   (use-package go-translate
     :bind (("C-c d g" . gts-do-translate))
     :init (setq gts-translate-list '(("en" "zh") ("zh" "en")))))
-    
+
 ;; Youdao Dictionay
 (use-package youdao-dictionary
   :defer 2
   :ensure t
   :bind (
-  		("C-c y"   . my-youdao-dictionary-search-at-point)
+        ("C-c y"   . my-youdao-dictionary-search-at-point)
          ("C-c d Y" . youdao-dictionary-search-async)
          ("C-c d y" . youdao-dictionary-search-at-point)
-		 ;;("C-x y Y" . youdao-dictionary-search-at-point-tooltip)
-		 ;;("C-c d p" . 'youdao-dictionary-search-at-point-posframe)
-		 ;;("C-c d v" . 'youdao-dictionary-play-voice-at-point)
-		 ("C-c d r" . 'youdao-dictionary-search-and-replace)
-		 ("C-c d i" . 'youdao-dictionary-search-from-input)
-		 :map youdao-dictionary-mode-map
+         ;;("C-x y Y" . youdao-dictionary-search-at-point-tooltip)
+         ;;("C-c d p" . 'youdao-dictionary-search-at-point-posframe)
+         ;;("C-c d v" . 'youdao-dictionary-play-voice-at-point)
+         ("C-c d r" . 'youdao-dictionary-search-and-replace)
+         ("C-c d i" . 'youdao-dictionary-search-from-input)
+         :map youdao-dictionary-mode-map
          ("h"       . my-youdao-dictionary-help)
          ("?"       . my-youdao-dictionary-help)
   :init
@@ -170,5 +147,5 @@
             (message "Nothing to look up"))))
     (advice-add #'youdao-dictionary--posframe-tip
                 :override #'my-youdao-dictionary--posframe-tip)))
-		
+
 (provide 'init-translate)

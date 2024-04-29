@@ -1,31 +1,5 @@
 ;;; init-ui.el --- Initialize UI configurations.	-*- lexical-binding: t -*-
-;; Copyright (C) 2018 Suk
-;; Author: Suk
 
-;; This file is not part of GNU Emacs.
-;;
-
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or
-;; (at your option) any later version.
-;;
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-;;
-
-;;; Commentary:
-;;
-;; Emacs Package management configurations.
-;;
-
-;;; Code:
 
 (provide 'init-ui)
 
@@ -545,7 +519,7 @@
   (doom-modeline-icon t)
   ;;(doom-modeline-major-mode-icon nil)
   ;;(doom-modeline-minor-modes nil)
-  (doom-modeline-enable-word-count t)
+  (doom-modeline-enable-word-count nil)
   ;;(doom-modeline-buffer-encoding nil)
   (doom-modeline-buffer-modification-icon t)
   ;;(doom-modeline-env-python-executeable "python")
@@ -556,8 +530,8 @@
   (if sys/win32p (setq inhibit-compacting-font-caches t))
   :pretty-hydra
   ((:title (pretty-hydra-title "Mode Line" 'sucicon "nf-custom-emacs" :face 'nerd-icons-purple)
-	:color amaranth
-	:quit-key ("q" "C-g"))
+    :color amaranth
+    :quit-key ("q" "C-g"))
    ("Icon"
     (("i" (setq doom-modeline-icon (not doom-modeline-icon))
       "display icons" :toggle doom-modeline-icon)
@@ -737,11 +711,11 @@
 ;; Title
 (setq frame-title-format
       '("Suk's Emacs - "
-		(:eval (if (buffer-file-name)
+        (:eval (if (buffer-file-name)
                    (abbreviate-file-name (buffer-file-name))
                  "%b")))
-	  icon-title-format frame-title-format
-	  )
+      icon-title-format frame-title-format
+      )
 
 (defvar suk/frame--geometry nil)
 ;;;###autoload
@@ -851,55 +825,55 @@
 (defun suk/set-backlight (&optional light-value)
   (interactive "s请输入亮度(小数表示的百分比): ")
   (let ((max-backlight (string-to-number (string-trim-right
-					                      (shell-command-to-string
-					                       "cat /sys/class/backlight/intel_backlight/max_brightness")))))
+                                          (shell-command-to-string
+                                           "cat /sys/class/backlight/intel_backlight/max_brightness")))))
     (when (and light-value (floatp (string-to-number light-value)))
-	  (shell-command
-	   (concat "echo "
-		       (format "%d" (* max-backlight (string-to-number light-value)))
-		       " > /sys/class/backlight/intel_backlight/brightness")))))
+      (shell-command
+       (concat "echo "
+               (format "%d" (* max-backlight (string-to-number light-value)))
+               " > /sys/class/backlight/intel_backlight/brightness")))))
 
 ;; 增加10%屏幕亮度
 ;;;###autoload
 (defun suk/plus-backlight ()
   (interactive)
   (let* (
-	     ;; 最大亮度
-	     (max-backlight (string-to-number (string-trim-right
-					                       (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
-	     ;; 当前亮度
-	     (current-backlight (string-to-number (string-trim-right
-						                       (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
-	     ;; 增加后的亮度
-	     (add-backlight (+ current-backlight (* max-backlight 0.1))))
+         ;; 最大亮度
+         (max-backlight (string-to-number (string-trim-right
+                                           (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
+         ;; 当前亮度
+         (current-backlight (string-to-number (string-trim-right
+                                               (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
+         ;; 增加后的亮度
+         (add-backlight (+ current-backlight (* max-backlight 0.1))))
     (if (< add-backlight max-backlight)
-	    (progn (shell-command
-		        (concat "echo "
-			            (format "%d" add-backlight)
-			            " > /sys/class/backlight/intel_backlight/brightness"))
-		       (message "亮度+10%"))
-	  (message "亮度MAX!!"))))
+        (progn (shell-command
+                (concat "echo "
+                        (format "%d" add-backlight)
+                        " > /sys/class/backlight/intel_backlight/brightness"))
+               (message "亮度+10%"))
+      (message "亮度MAX!!"))))
 
 ;; 减少屏幕亮度
 ;;;###autoload
 (defun suk/less-backlight ()
   (interactive)
   (let* (
-	     ;; 最大亮度
-	     (max-backlight (string-to-number (string-trim-right
-					                       (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
-	     ;; 当前亮度
-	     (current-backlight (string-to-number (string-trim-right
-						                       (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
-	     ;; 减少后的亮度
-	     (less-backlight (- current-backlight (* max-backlight 0.1))))
+         ;; 最大亮度
+         (max-backlight (string-to-number (string-trim-right
+                                           (shell-command-to-string "cat /sys/class/backlight/intel_backlight/max_brightness"))))
+         ;; 当前亮度
+         (current-backlight (string-to-number (string-trim-right
+                                               (shell-command-to-string "cat /sys/class/backlight/intel_backlight/brightness"))))
+         ;; 减少后的亮度
+         (less-backlight (- current-backlight (* max-backlight 0.1))))
     (if (> less-backlight (* max-backlight 0.1) )
-	    (progn (shell-command
-		        (concat "echo "
-			            (format "%d" less-backlight)
-			            " > /sys/class/backlight/intel_backlight/brightness"))
-		       (message "亮度-10%"))
-	  (message "亮度Min!!"))))
+        (progn (shell-command
+                (concat "echo "
+                        (format "%d" less-backlight)
+                        " > /sys/class/backlight/intel_backlight/brightness"))
+               (message "亮度-10%"))
+      (message "亮度Min!!"))))
 
 
 

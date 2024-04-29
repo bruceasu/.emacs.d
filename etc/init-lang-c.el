@@ -1,12 +1,6 @@
 ;; init-c.el --- Initialize c configurations.	-*- lexical-binding: t -*-
 
-
-;;; Commentary:
-;;
-;; C/C++ configuration.
-;;
-
-;;; Code:
+(provide 'init-lang-c)
 
 (eval-when-compile
   (require '+custom))
@@ -68,8 +62,3 @@
 (when (suk-treesit-available-p)
   (use-package c-ts-mode
     :init (setq c-ts-mode-indent-offset 4)))
-
-(provide 'init-lang-c)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init-c.el ends here

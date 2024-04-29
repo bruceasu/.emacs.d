@@ -1,5 +1,4 @@
 ;; init-markdown.el --- Initialize markdown configurations.	-*- lexical-binding: t -*-
-
 ;;; Commentary:
 ;;
 ;; Markdown configurations.

@@ -1,4 +1,4 @@
-;; init-bookmark.el --- bookmark configurations.    -*- lexical-binding: t -*-
+;; init-bookmark.el --- bookmark configurations.	-*- lexical-binding: t -*-
 ;;; Commentary:
 ;;
 ;; Bookmark configuration.
@@ -179,3 +179,68 @@ If bookmark with same file name already exists, override it quietly."
 ;; Bookmark
 (provide 'init-bookmark)
 ;;; init-bookmark.el ends here
+
+;; =========================================================
+;; fáicuk tiu dòu bookmark
+;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/ska-point-to-register()
+  "Store cursorposition _fast_ in a register. Use ska-jump-to-register to jump back to the stored position."
+  (interactive)
+  (setq zmacs-region-stays t)
+  (point-to-register 8))
+;; ---------------------------------------------------------
+;;;###autoload
+(defun suk/ska-jump-to-register()
+  "Switch between current cursorposition and position that was stored with ska-point-to-register."
+  (interactive)
+  (setq zmacs-region-stays t)
+  (let ((tmp (point-marker)))
+        (jump-to-register 8)
+        (set-register 8 tmp)))
+
+;; use init-key.el to load and bind the functions.
+;;(global-set-key  [C-f7] 'suk/ska-point-to-register)
+;;(global-set-key  [f7] 'suk/ska-jump-to-register)
+
+;; Registers allow you to jump to a file or other location quickly.
+;; To jump to a register, use C-x r j followed by the letter of the register.
+;; Using registers for all these file shortcuts is probably a bit of
+;; a waste since I can easily define my own keymap, but since I rarely
+;; go beyond register A anyway. Also, I might as well add shortcuts for refiling.
+(require 'bookmark)
+(defvar my-refile-map (make-sparse-keymap))
+(defmacro my-defshortcut (key file)
+  `(progn
+     (set-register ,key (cons 'file ,file))
+     (define-key my-refile-map
+       (char-to-string ,key)
+       (lambda (prefix)
+         (interactive "p")
+         (let ((org-refile-targets '(((,file) :maxlevel . 6)))
+               (current-prefix-arg (or current-prefix-arg '(4))))
+           (call-interactively 'org-refile))))))
+
+;;(define-key my-refile-map "," 'my-org-refile-to-previous-in-file)
+(my-defshortcut ?e "~/.emacs.d/init.el")
+(my-defshortcut ?E "~/.emacs.d/custom.el")
+;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
+;; (my-defshortcut ?o "~/cloud/orgzly/organizer.org")
+;; (my-defshortcut ?s "~/personal/sewing.org")
+;; (my-defshortcut ?b "~/personal/business.org")
+;; (my-defshortcut ?p "~/personal/google-inbox.org")
+;; (my-defshortcut ?P "~/personal/google-ideas.org")
+;; (my-defshortcut ?B "~/Dropbox/books")
+(my-defshortcut ?n "~/notes")
+;; (my-defshortcut ?N "~/sync/notes/QuickNote.md")
+;; (my-defshortcut ?w "~/Dropbox/public/sharing/index.org")
+;; (my-defshortcut ?W "~/Dropbox/public/sharing/blog.org")
+;; (my-defshortcut ?j "~/personal/journal.org")
+;; (my-defshortcut ?J "~/cloud/a/Journal.csv")
+;; (my-defshortcut ?I "~/Dropbox/Inbox")
+;; (my-defshortcut ?g "~/sachac.github.io/evil-plans/index.org")
+;; (my-defshortcut ?c "~/code/dev/elisp-course.org")
+;; (my-defshortcut ?C "~/personal/calendar.org")
+;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
+;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
+;; (my-defshortcut ?Q "~/personal/questions.org")

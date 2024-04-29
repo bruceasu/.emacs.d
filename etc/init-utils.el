@@ -1,10 +1,8 @@
 ;; init-utils.el --- Initialize ultilities.	-*- lexical-binding: t -*-
-;;; Commentary:
-;;
-;; Some usefule Utilities.
-;;
 
-;;; Code:
+
+(provide 'init-utils)
+
 (eval-when-compile
   (require '+const)
   (require '+custom)
@@ -24,11 +22,11 @@
 
   :hook (after-init . which-key-mode)
   :custom
-  ;; µ¯³ö·½Ê½£¬µ×²¿µ¯³ö
+  ;; ÂµÂ¯Â³Ã¶Â·Â½ÃŠÂ½Â£Â¬ÂµÃ—Â²Â¿ÂµÂ¯Â³Ã¶
   (which-key-popup-type 'side-window)
   :init (setq which-key-max-description-length 30
-			  which-key-lighter nil
-			  which-key-show-remaining-keys t)
+              which-key-lighter nil
+              which-key-show-remaining-keys t)
   :config
   (which-key-mode)
   (which-key-add-key-based-replacements "C-c !" "flycheck")
@@ -54,50 +52,50 @@
   (which-key-add-key-based-replacements "C-x X" "edebug")
 
   (which-key-add-major-mode-key-based-replacements 'org-mode
-												   "C-c \"" "org-plot")
+                                                   "C-c \"" "org-plot")
   (which-key-add-major-mode-key-based-replacements 'org-mode
-												   "C-c C-v" "org-babel")
+                                                   "C-c C-v" "org-babel")
   (which-key-add-major-mode-key-based-replacements 'org-mode
-												   "C-c C-x" "org-misc")
+                                                   "C-c C-x" "org-misc")
 
   (which-key-add-major-mode-key-based-replacements 'python-mode
-												   "C-c C-t" "python-skeleton")
+                                                   "C-c C-t" "python-skeleton")
 
   (which-key-add-major-mode-key-based-replacements 'markdown-mode
-												   "C-c C-a" "markdown-link")
+                                                   "C-c C-a" "markdown-link")
   (which-key-add-major-mode-key-based-replacements 'markdown-mode
-												   "C-c C-c" "markdown-command")
+                                                   "C-c C-c" "markdown-command")
   (which-key-add-major-mode-key-based-replacements 'markdown-mode
-												   "C-c C-s" "markdown-style")
+                                                   "C-c C-s" "markdown-style")
   (which-key-add-major-mode-key-based-replacements 'markdown-mode
-												   "C-c C-t" "markdown-header")
+                                                   "C-c C-t" "markdown-header")
   (which-key-add-major-mode-key-based-replacements 'markdown-mode
-												   "C-c C-x" "markdown-toggle")
+                                                   "C-c C-x" "markdown-toggle")
 
   (which-key-add-major-mode-key-based-replacements 'gfm-mode
-												   "C-c C-a" "markdown-link")
+                                                   "C-c C-a" "markdown-link")
   (which-key-add-major-mode-key-based-replacements 'gfm-mode
-												   "C-c C-c" "markdown-command")
+                                                   "C-c C-c" "markdown-command")
   (which-key-add-major-mode-key-based-replacements 'gfm-mode
-												   "C-c C-s" "markdown-style")
+                                                   "C-c C-s" "markdown-style")
   (which-key-add-major-mode-key-based-replacements 'gfm-mode
-												   "C-c C-t" "markdown-header")
+                                                   "C-c C-t" "markdown-header")
   (which-key-add-major-mode-key-based-replacements 'gfm-mode
-												   "C-c C-x" "markdown-toggle")
+                                                   "C-c C-x" "markdown-toggle")
 
   (when (childframe-completion-workable-p)
-	(use-package which-key-posframe
-	  :diminish
-	  :functions posframe-poshandler-frame-center-near-bottom
-	  :custom-face
-	  (which-key-posframe ((t (:inherit tooltip))))
-	  (which-key-posframe-border ((t (:inherit posframe-border :background unspecified))))
-	  :init
-	  (setq which-key-posframe-border-width posframe-border-width
-			which-key-posframe-poshandler #'posframe-poshandler-frame-center-near-bottom
-			which-key-posframe-parameters '((left-fringe . 8)
-											(right-fringe . 8)))
-	  (which-key-posframe-mode 1))))
+    (use-package which-key-posframe
+      :diminish
+      :functions posframe-poshandler-frame-center-near-bottom
+      :custom-face
+      (which-key-posframe ((t (:inherit tooltip))))
+      (which-key-posframe-border ((t (:inherit posframe-border :background unspecified))))
+      :init
+      (setq which-key-posframe-border-width posframe-border-width
+            which-key-posframe-poshandler #'posframe-poshandler-frame-center-near-bottom
+            which-key-posframe-parameters '((left-fringe . 8)
+                                            (right-fringe . 8)))
+      (which-key-posframe-mode 1))))
 
 
 
@@ -117,8 +115,3 @@
   (interactive)
   (setq httpd-root default-directory)
   (httpd-restart-now))
-
-(provide 'init-utils)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; init-utils.el ends here
