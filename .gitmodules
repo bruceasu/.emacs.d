@@ -7,9 +7,6 @@
 [submodule "extensions/all-the-icons"]
 	path = extensions/all-the-icons
 	url = git@github.com:domtronn/all-the-icons.el
-[submodule "extensions/go-mode"]
-	path = extensions/go-mode
-	url = git@github.com:dominikh/go-mode.el
 [submodule "extensions/company-english-helper"]
 	path = extensions/company-english-helper
 	url = git@github.com:manateelazycat/company-english-helper.git
