@@ -25,9 +25,6 @@
 [submodule "extensions/typescript"]
 	path = extensions/typescript
 	url = git@github.com:ananthakumaran/typescript.el.git
-[submodule "extensions/dash"]
-	path = extensions/dash
-	url = git@github.com:magnars/dash.el.git
 [submodule "extensions/emacs-rime"]
 	path = extensions/emacs-rime
 	url = git@github.com:DogLooksGood/emacs-rime.git
