@@ -19,9 +19,6 @@
 [submodule "extensions/hydra-posframe"]
 	path = extensions/hydra-posframe
 	url = git@github.com:Ladicle/hydra-posframe.git
-[submodule "extensions/eglot-java"]
-	path = extensions/eglot-java
-	url = git@github.com:yveszoundi/eglot-java
 [submodule "extensions/copilot"]
 	path = extensions/copilot
 	url = git@github.com:zerolfx/copilot.el.git
