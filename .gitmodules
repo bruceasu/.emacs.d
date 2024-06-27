@@ -1,6 +1,3 @@
-[submodule "extensions/company-mode"]
-	path = extensions/company-mode
-	url = git@github.com:company-mode/company-mode.git
 [submodule "extensions/company-posframe"]
 	path = extensions/company-posframe
 	url = git@github.com:tumashu/company-posframe
