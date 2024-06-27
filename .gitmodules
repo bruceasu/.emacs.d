@@ -37,9 +37,6 @@
 [submodule "extensions/json-mode"]
 	path = extensions/json-mode
 	url = git@github.com:joshwnj/json-mode
-[submodule "extensions/json-reformat"]
-	path = extensions/json-reformat
-	url = git@github.com:gongo/json-reformat.git
 [submodule "extensions/posframe"]
 	path = extensions/posframe
 	url = git@github.com:tumashu/posframe.git
