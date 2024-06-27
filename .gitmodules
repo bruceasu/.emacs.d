@@ -55,6 +55,3 @@
 [submodule "extensions/vundo"]
 	path = extensions/vundo
 	url = git@github.com:casouri/vundo
-[submodule "extensions/consult-eglot"]
-	path = extensions/consult-eglot
-	url = git@github.com:mohkale/consult-eglot
