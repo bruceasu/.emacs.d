@@ -12,8 +12,7 @@
 (require 'sdcv)
 (setq sdcv-say-word-p t)                ;say word after search
 
-(setq sdcv-dictionary-data-dir
-      (concat suk-emacs-root-dir "/share/sdcv-dict")) ;设置星际译王本地词典的目录
+(setq sdcv-dictionary-data-dir "~/.local/share/sdcv-dict") ;设置星际译王本地词典的目录
 
 (setq sdcv-dictionary-simple-list    ;星际译王屏幕取词词典, 简单, 快速
       '("懒虫简明英汉词典"

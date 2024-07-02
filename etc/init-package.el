@@ -6,6 +6,9 @@
   (require '+const)
   (require '+func)
   (require '+custom))
+;; 指定ELPA目录
+(setq package-user-dir suk-emacs-elpa-dir)
+(add-subdirs-to-load-path package-user-dir t)
 
 ;; HACK: DO NOT copy package-selected-packages to init/custom file forcibly.
 ;; https://github.com/jwiegley/use-package/issues/383#issuecomment-247801751
@@ -139,8 +142,23 @@ If NO-REFRESH is nil, `package-refresh-contents' is called."
   ;; dictionary requires 'link and 'connection
   (require-package 'dictionary))
 (require-package 'htmlize) ; prefer stable version
-;;(require-package 'jade-mode)
-;;(require-package 'diminish)
+(require-package 'forge)
+(require-package 'doom-modeline)
+(require-package 'orderless)
+(require-package 'pretty-hydra)
+(require-package 'centaur-tabs)
+(require-package 'diminish)
+(require-package 'nerd-icons-completion)
+(require-package 'nerd-icons-dired)
+(require-package 'persistent-scratch)
+(require-package 'treemacs)
+(require-package 'treemacs-projectile)
+(require-package 'treemacs-nerd-icons)
+(require-package 'treemacs-tab-bar)
+(require-package 'treemacs-magit)
+(require-package 'lsp-treemacs)
+(require-package 'diff-hl)
+
 (require-package 'scratch)
 (require-package 'rainbow-delimiters)
 (require-package 'textile-mode)
@@ -181,8 +199,8 @@ If NO-REFRESH is nil, `package-refresh-contents' is called."
 (require-package 'company-native-complete)
 (require-package 'company-c-headers)
 (require-package 'company-statistics)
-(require-package 'lsp-mode)
-;;(require-package 'elpy)
+;;(require-package 'lsp-mode)
+(require-package 'projectile)
 ;;(require-package 'legalese)
 ;;(require-package 'simple-httpd)
 (require-package 'git-gutter) ; use my patched version
@@ -190,7 +208,7 @@ If NO-REFRESH is nil, `package-refresh-contents' is called."
 (require-package 'hydra)
 (require-package 'ivy-hydra) ; @see https://oremacs.com/2015/07/23/ivy-multiaction/
 (require-package 'web-mode)
-;;(require-package 'iedit)
+(require-package 'format-all)
 ;;(require-package 'websocket) ; for debug debugging of browsers
 ;; (require-package 'evil)
 ;; (require-package 'evil-escape)
@@ -213,7 +231,7 @@ If NO-REFRESH is nil, `package-refresh-contents' is called."
 ;;(require-package 'visual-regexp) ;; Press "M-x vr-*"
 ;;(require-package 'vimrc-mode)
 (require-package 'nov) ; read epub
-;;(require-package 'rust-mode)
+(require-package 'hide-mode-line)
 ;; (require-package 'langtool) ; my own patched version is better
 (require-package 'typescript-mode)
 ;; run "M-x pdf-tool-install" at debian and open pdf in GUI Emacs

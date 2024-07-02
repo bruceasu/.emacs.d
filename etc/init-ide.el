@@ -18,6 +18,7 @@
 ;; format all, formatter for almost languages
 ;; great for programmers
 (use-package format-all
+  :ensure t
   :hook (prog-mode . format-all-ensure-formatter)
   :bind ("C-c f" . #'format-all-buffer))
 
@@ -154,10 +155,7 @@
 (require 'init-lang-web)
 (require 'init-lang-elisp)
 
-
-
-(unless (eq system-type 'windows-nt)
-  (use-package projectile
+(use-package projectile
     :ensure t
     :config
     ;;(setq projectile-completion-system 'ido)
@@ -166,9 +164,8 @@
     ;; Eanble Projectile globally
     (projectile-mode 1)
     ;; Set akeybinding for projectile commands
-    (global-set-key (kbd "C-c p") 'projectile-commander)))
+    (global-set-key (kbd "C-c p") 'projectile-commander))
 
-(unless (eq system-type 'windows-nt)
   ;;Show function arglist or variable docstring
   (use-package eldoc
     :ensure nil
@@ -188,9 +185,8 @@
         :config
         ;; Prettify `eldoc-box' frame
         (setf (alist-get 'left-fringe eldoc-box-frame-parameters) 8
-              (alist-get 'right-fringe eldoc-box-frame-parameters) 8)))))
+              (alist-get 'right-fringe eldoc-box-frame-parameters) 8))))
 
-(unless (eq system-type 'windows-nt)
   ;; Cross-referencing commands
   (use-package xref
     :bind (("M-g ." . xref-find-definitions)
@@ -203,12 +199,49 @@
     ;; Select from xref candidates in minibuffer
     (setq xref-show-definitions-function #'xref-show-definitions-completing-read
           xref-show-xrefs-function #'xref-show-definitions-completing-read))
-  (use-package helpful))
 
-(unless (eq system-type 'windows-nt)
+(use-package helpful)
 
-  ;; Jump to definition
-  (use-package dumb-jump
+
+;; ;; Enable lsp-mode for JavaScript development
+;; (use-package lsp-mode
+;;   :hook ((js-mode . lsp)
+;;          (js2-mode . lsp)
+;;          (typescript-mode . lsp))
+;;   :commands lsp)
+
+;; ;; Enable lsp-ui for additional UI features
+;; (use-package lsp-ui
+;;   :commands lsp-ui-mode)
+
+;; https://github.com/manateelazycat/lsp-bridge
+(require 'lsp-bridge)
+(global-lsp-bridge-mode)
+(add-hook 'prog-mode-hook 'lsp-bridge-mode)
+;; set the python interpreter path if it's different from default
+(setq lsp-bridge-python-command "C:\\green\Python311\\python.exe")
+
+(require 'lsp-bridge-jdtls) ;; 根据项目自动生成自定义配置，添加必要的启动参数
+(setq lsp-bridge-enable-auto-import t) ;; 开启自动导入依赖，目前没有code action。补全时可以通过这个导入相应的依赖，建议开启。
+(setq lsp-bridge-jdtls-jvm-args '("-javaagent:c:/User/suk/.m2/repository/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar"))
+(custom-set-variables '(lsp-bridge-get-workspace-folder 'my-lsp-bridge-workspace))
+(add-hook 'java-mode-hook (lambda ()
+                            (setq-local lsp-bridge-get-lang-server-by-project 'lsp-bridge-get-jdtls-server-by-project)))
+
+
+(defun my-lsp-bridge-workspace (proj)
+  (let* ((proj-2-workspace
+          '(("D:/03_projects/suk/word-process-src" . "file://D:/03_projects/suk")
+            ("D:/03_projects/suk/anysql" . "file://D:/03_projects/suk")
+
+
+          ))
+         (kv (assoc proj proj-2-workspace)))
+    (when kv
+        (cdr kv))))
+
+;; Jump to definition
+(use-package dumb-jump
     :pretty-hydra
     ((:title (pretty-hydra-title "Dump Jump" 'faicon "nf-fa-anchor")
       :color blue :quit-key ("q" "C-g"))
@@ -224,43 +257,36 @@
     :bind (("C-M-j" . dumb-jump-hydra/body))
     :init
     (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-    (setq dumb-jump-selector 'completing-read)))
+    (setq dumb-jump-selector 'completing-read))
 
-(unless (eq system-type 'windows-nt)
   ;; Tree-sitter support
   (when (suk-treesit-available-p)
     (use-package treesit-auto
       :hook (after-init . global-treesit-auto-mode)
-      :init (setq treesit-auto-install 'prompt))))
+      :init (setq treesit-auto-install 'prompt)))
 
-(unless (eq system-type 'windows-nt)
-  (use-package cmake-mode)
-  (use-package yaml-mode)
-  (use-package vimrc-mode))
-(unless (eq system-type 'windows-nt)
+(use-package cmake-mode)
+(use-package yaml-mode)
+(use-package vimrc-mode)
+(require 'init-lang-vcs)
 
-  (require 'init-lang-vcs))
-(unless (eq system-type 'windows-nt)
-  (require 'init-lang-lsp))
-(unless (eq system-type 'windows-nt)
-  (require 'init-lang-c))
-(unless (eq system-type 'windows-nt)
-  ;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
-  ;;(add-to-list 'load-path "C:\\green\\emacs-29.1\\.emacs.d\\extensions\\copilot\\copilot.el")
 
-  ;;(require 'copilot)
-  ;;(add-hook 'prog-mode-hook 'copilot-mode)
+;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
+;;(add-to-list 'load-path "C:\\green\\emacs-suk\\.emacs.d\\extensions\\copilot\\copilot.el")
 
-  ;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
-  ;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
-  ;;(define-key copilot-completion-map
-  ;;            (kbd "<tab>")
-  ;;            'copilot-accept-completion)
-  ;;(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-  ;; (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
-  ;; Login to Copilot by M-x copilot-login. You can also check the status by M-x copilot-diagnose (NotAuthorized means you don't have a valid subscription).
+;;(require 'copilot)
+;;(add-hook 'prog-mode-hook 'copilot-mode)
 
-  )
+;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
+;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
+;;(define-key copilot-completion-map
+;;            (kbd "<tab>")
+;;            'copilot-accept-completion)
+;;(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+;; (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
+;; Login to Copilot by M-x copilot-login. You can also check the status by M-x copilot-diagnose (NotAuthorized means you don't have a valid subscription).
+
+
 
 
 ;;; {{ shell and conf
@@ -281,32 +307,6 @@
                   "yarn\\.lock\\'")
 ;; }}
 
-
-;; {{ lisp like language
-;; racket
-(my-add-auto-mode 'lisp-mode "\\.rkt\\'")
-(my-add-auto-mode 'emacs-lisp-mode
-                  "\\.emacs-project\\'"
-                  "archive-contents\\'"
-                  "\\.emacs_workgroups\\'"
-                  "\\.emacs\\.bmk\\'" )
-;; }}
-
-;; {{ ruby
-(my-add-auto-mode 'ruby-mode
-                  "\\.\\(rb\\|rake\\|rxml\\|rjs\\|irbrc\\|builder\\|ru\\|gemspec\\)\\'"
-                  "\\(Rakefile\\|Gemfile\\)\\'")
-
-;; }}
-
-;; {{ perl
-;; Use cperl-mode instead of the default perl-mode
-(my-add-auto-mode 'cperl-mode
-                  "\\.\\([pP][Llm]\\|al\\)\\'"
-                  "\\.\\([pP][Llm]\\|al\\)\\'")
-
-(my-add-interpreter-mode 'cperl-mode "perl5?\\|minperl")
-;; }}
 
 (my-add-auto-mode 'text-mode
                   "TAGS\\'"
@@ -391,5 +391,88 @@
 ;; besides, scss/sass is outdated. We use postcss or css in js these days.
 (my-add-auto-mode 'css-mode "\\.scss\\'")
 
+(require 'fingertip)
+(dolist (hook (list
+               'c-mode-common-hook
+               'c-mode-hook
+               'c++-mode-hook
+               'java-mode-hook
+               'haskell-mode-hook
+               'emacs-lisp-mode-hook
+               'lisp-interaction-mode-hook
+               'lisp-mode-hook
+               'maxima-mode-hook
+               'ielm-mode-hook
+               'sh-mode-hook
+               'makefile-gmake-mode-hook
+               'php-mode-hook
+               'python-mode-hook
+               'js-mode-hook
+               'go-mode-hook
+               'qml-mode-hook
+               'jade-mode-hook
+               'css-mode-hook
+               'ruby-mode-hook
+               'coffee-mode-hook
+               'rust-mode-hook
+               'rust-ts-mode-hook
+               'qmake-mode-hook
+               'lua-mode-hook
+               'swift-mode-hook
+               'web-mode-hook
+               'markdown-mode-hook
+               'llvm-mode-hook
+               'conf-toml-mode-hook
+               'nim-mode-hook
+               'typescript-mode-hook
+               'c-ts-mode-hook
+               'c++-ts-mode-hook
+               'cmake-ts-mode-hook
+               'toml-ts-mode-hook
+               'css-ts-mode-hook
+               'js-ts-mode-hook
+               'json-ts-mode-hook
+               'python-ts-mode-hook
+               'bash-ts-mode-hook
+               'typescript-ts-mode-hook
+               ))
+  (add-hook hook #'(lambda () (fingertip-mode 1))))
+  (define-key fingertip-mode-map (kbd "(") 'fingertip-open-round)
+(define-key fingertip-mode-map (kbd "[") 'fingertip-open-bracket)
+(define-key fingertip-mode-map (kbd "{") 'fingertip-open-curly)
+(define-key fingertip-mode-map (kbd ")") 'fingertip-close-round)
+(define-key fingertip-mode-map (kbd "]") 'fingertip-close-bracket)
+(define-key fingertip-mode-map (kbd "}") 'fingertip-close-curly)
+(define-key fingertip-mode-map (kbd "=") 'fingertip-equal)
 
+(define-key fingertip-mode-map (kbd "（") 'fingertip-open-chinese-round)
+(define-key fingertip-mode-map (kbd "「") 'fingertip-open-chinese-bracket)
+(define-key fingertip-mode-map (kbd "【") 'fingertip-open-chinese-curly)
+(define-key fingertip-mode-map (kbd "）") 'fingertip-close-chinese-round)
+(define-key fingertip-mode-map (kbd "」") 'fingertip-close-chinese-bracket)
+(define-key fingertip-mode-map (kbd "】") 'fingertip-close-chinese-curly)
+
+(define-key fingertip-mode-map (kbd "%") 'fingertip-match-paren)
+(define-key fingertip-mode-map (kbd "\"") 'fingertip-double-quote)
+(define-key fingertip-mode-map (kbd "'") 'fingertip-single-quote)
+
+(define-key fingertip-mode-map (kbd "SPC") 'fingertip-space)
+(define-key fingertip-mode-map (kbd "RET") 'fingertip-newline)
+
+(define-key fingertip-mode-map (kbd "M-o") 'fingertip-backward-delete)
+(define-key fingertip-mode-map (kbd "C-d") 'fingertip-forward-delete)
+(define-key fingertip-mode-map (kbd "C-k") 'fingertip-kill)
+
+(define-key fingertip-mode-map (kbd "M-\"") 'fingertip-wrap-double-quote)
+(define-key fingertip-mode-map (kbd "M-'") 'fingertip-wrap-single-quote)
+(define-key fingertip-mode-map (kbd "M-[") 'fingertip-wrap-bracket)
+(define-key fingertip-mode-map (kbd "M-{") 'fingertip-wrap-curly)
+(define-key fingertip-mode-map (kbd "M-(") 'fingertip-wrap-round)
+(define-key fingertip-mode-map (kbd "M-)") 'fingertip-unwrap)
+
+(define-key fingertip-mode-map (kbd "M-p") 'fingertip-jump-right)
+(define-key fingertip-mode-map (kbd "M-n") 'fingertip-jump-left)
+(define-key fingertip-mode-map (kbd "M-:") 'fingertip-jump-out-pair-and-newline)
+
+(define-key fingertip-mode-map (kbd "C-j") 'fingertip-jump-up)
 ;;; init-ide.el ends here

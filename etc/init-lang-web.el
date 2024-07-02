@@ -6,45 +6,6 @@
   (require '+func)
   (require 'init-package))
 
-(unless (eq system-type 'windows-nt)
-  ;; eww
-  (use-package eww
-    :ensure nil
-    :init
-    ;; Install: npm install -g readability-cli
-    (when (executable-find "readable")
-      (setq eww-retrieve-command '("readable"))))
-
-  ;; Webkit browser
-  (use-package xwidget
-    :ensure nil
-    :if (featurep 'xwidget-internal)
-    :bind (("C-c C-z w" . xwidget-webkit-browse-url)
-           :map xwidget-webkit-mode-map
-           ("h"         . xwidget-hydra/body))
-    :pretty-hydra
-    ((:title (pretty-hydra-title "Webkit" 'faicon "nf-fa-chrome" :face 'nerd-icons-blue)
-      :color amaranth :quit-key ("q" "C-g"))
-     ("Navigate"
-      (("b" xwidget-webkit-back "back")
-       ("f" xwidget-webkit-forward "forward")
-       ("r" xwidget-webkit-reload "refresh")
-       ("SPC" xwidget-webkit-scroll-up "scroll up")
-       ("DEL" xwidget-webkit-scroll-down "scroll down")
-       ("S-SPC" xwidget-webkit-scroll-down "scroll down"))
-      "Zoom"
-      (("+" xwidget-webkit-zoom-in "zoom in")
-       ("=" xwidget-webkit-zoom-in "zoom in")
-       ("-" xwidget-webkit-zoom-out "zoom out"))
-      "Misc"
-      (("g" xwidget-webkit-browse-url "browse url" :exit t)
-       ("u" xwidget-webkit-current-url "show url" :exit t)
-       ("v" xwwp-follow-link "follow link" :exit t)
-       ("w" xwidget-webkit-current-url-message-kill "copy url" :exit t)
-       ("?" describe-mode "help" :exit t)
-       ("Q" quit-window "quit" :exit t)))))
-)
-
 ;; {{ typescript
 (use-package typescript-mode
   :load-path "~/.emacs.d/extensions/typescript"
@@ -135,31 +96,14 @@ INDENT-SIZE decide the indentation level.
 ;; }}
 
 (use-package js2-mode
-  :mode (("\\.js\\'" . js2-mode)
-         ("\\.jsx\\'" . js2-jsx-mode))
-  :interpreter (("node" . js2-mode)
-                ("node" . js2-jsx-mode))
-  :hook ((js2-mode . (lambda()  (js2-imenu-extras-mode)
+  :mode (("\\.js\\'" . js2-minor-mode)
+         ("\\.jsx\\'" . js2-minor-jsx-mode))
+  :interpreter (("node" . js2-minor-mode)
+                ("node" . js2-minor-jsx-mode))
+  :hook ((js2-minor-mode . (lambda()  (js2-imenu-extras-mode)
                             (js2-highlight-unused-variables-mode)
-                            (my-js2-mode-setup)
+                    
                             )))
-  :init
-  (setq-default js2-use-font-lock-faces t
-                js2-mode-must-byte-compile nil
-                ;; {{ comment indention in modern frontend development
-                javascript-indent-level 2
-                js-indent-level 2
-                css-indent-offset 2
-                typescript-indent-level 2
-                ;; }}
-                js2-strict-trailing-comma-warning nil ; it's encouraged to use trailing comma in ES6
-                js2-idle-timer-delay 0.5 ; NOT too big for real time syntax check
-                js2-auto-indent-p nil
-                js2-indent-on-enter-key nil ; annoying instead useful
-                js2-skip-preprocessor-directives t
-                js2-strict-inconsistent-return-warning nil ; return <=> return null
-                js2-enter-indents-newline nil
-                js2-bounce-indent-p t)
   :config
   (defun my-validate-json-or-js-expression (&optional not-json-p)
     "Validate buffer or select region as JSON.
@@ -232,24 +176,9 @@ If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it.
           (goto-char cur-pos)
           (js2-print-json-path))))))
 
-  (defun my-js2-mode-setup()
-    "Set up javascript."
-    (unless (my-buffer-file-temp-p)
-      ;; if use node.js we need nice output
-      (js2-imenu-extras-mode)
-      (setq mode-name "JS2")
-      ;; counsel/ivy is more generic and powerful for refactoring
-      ;; js2-mode has its own syntax linter
-
-      ;; call js-doc commands through `counsel-M-x'!
-
-      ;; @see https://github.com/mooz/js2-mode/issues/350
-      (setq forward-sexp-function nil)))
-  ;; Use default keybindings for lsp
-  (when suk-lsp
-    (unbind-key "M-." js2-mode-map))
-  Latest rjsx-mode does not have indentation issue
-  @see https://emacs.stackexchange.com/questions/33536/how-to-edit-jsx-react-files-in-emacs
+  
+  ;;Latest rjsx-mode does not have indentation issue
+  ;;@see https://emacs.stackexchange.com/questions/33536/how-to-edit-jsx-react-files-in-emacs
    (setq-default js2-additional-externs
                 '("$"
                   "$A" ; salesforce lightning component

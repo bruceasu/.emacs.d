@@ -38,12 +38,22 @@
 
   (treemacs-follow-mode t)
   (treemacs-filewatch-mode t)
-  (pcase (cons (not (null (executable-find "git")))
-               (not (null (executable-find "python3"))))
-    (`(t . t)
-     (treemacs-git-mode 'deferred))
-    (`(t . _)
-     (treemacs-git-mode 'simple)))
+  (when sys/win32p
+    (pcase (cons (not (null (executable-find "git.exe")))
+                 (not (null (executable-find "c:/greem/Python311/python.exe"))))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+  )
+  (unless sys/win32p
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null (executable-find "python3"))))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+    )
 
   (use-package treemacs-nerd-icons
     :demand t
@@ -61,10 +71,11 @@
            . treemacs-magit--schedule-update))
 
   (use-package treemacs-tab-bar
+    :ensure t
     :demand t
     :config (treemacs-set-scope-type 'Tabs)))
 
-(add-hook 'treemacs-mode-hook 'treemacs-project-follo-mode)
+(add-hook 'treemacs-mode-hook 'treemacs-project-follow-mode)
 (provide 'init-treemacs)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -42,7 +42,10 @@
 	url = git@github.com:xwl/cal-china-x
 [submodule "extensions/vundo"]
 	path = extensions/vundo
-	url = git@github.com:casouri/vundo
+	url = https://github.com/casouri/vundo
 [submodule "extensions/lsp-bridge"]
 	path = extensions/lsp-bridge
 	url = https://github.com/manateelazycat/lsp-bridge
+[submodule "extensions/fingertip"]
+	path = extensions/fingertip
+	url = https://github.com/manateelazycat/fingertip

@@ -122,7 +122,7 @@
 (add-subdirs-to-load-path suk-emacs-config-dir t)
 (add-subdirs-to-load-path suk-emacs-extension-dir t)
 (add-subdirs-to-load-path suk-emacs-themes-dir t)
-(add-subdirs-to-load-path suk-emacs-elpa-dir t)
+
 
 ;; The contents of the Emacs configuration file are written below.
 (let (;;  Temporarily increase `gc-cons-threshold' when loading to speed up
@@ -156,7 +156,6 @@
   (require '+custom) ; Customization
   (require '+func)   ; Functions
   (require 'init-basic)
-  (require 'init-awesome-pair)
   (require 'lazy-load)
   (require 'init-key)
   (require 'init-package)
