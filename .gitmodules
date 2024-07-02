@@ -37,12 +37,12 @@
 [submodule "extensions/smex"]
 	path = extensions/smex
 	url = git@github.com:nonsequitur/smex
-[submodule "extensions/awesome-pair"]
-	path = extensions/awesome-pair
-	url = git@github.com:manateelazycat/awesome-pair
 [submodule "extensions/cal-china-x"]
 	path = extensions/cal-china-x
 	url = git@github.com:xwl/cal-china-x
 [submodule "extensions/vundo"]
 	path = extensions/vundo
 	url = git@github.com:casouri/vundo
+[submodule "extensions/lsp-bridge"]
+	path = extensions/lsp-bridge
+	url = https://github.com/manateelazycat/lsp-bridge
