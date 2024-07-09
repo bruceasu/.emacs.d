@@ -115,7 +115,7 @@
    ("<f2>" . refresh-file)              ;自动刷新文件
    ("s-f" . find-file-root)             ;用root打开文件
    ("s-r" . find-file-smb)              ;访问sambao
-   ("C-J" . joint-lines)                ;连接行
+   ("C-J" . join-lines)                ;连接行
    )
  "basic-toolkit")
 
@@ -219,7 +219,11 @@
    ("C-M-S-h" . mark-paragraph)            ;选中段落
    ("M-SPC" . just-one-space)              ;只有一个空格在光标处
    ))
-
+(lazy-load-global-keys
+ '(
+    ("C-c b"   . my-hydra-buffers/body)
+   )
+ "init-buffers")
 ;; ### Font ###
 ;; --- 字体命令
 (lazy-load-set-keys
@@ -248,15 +252,6 @@
    ("C-x O" . toggle-window-split)
    )
  "window-extension")
-
-(lazy-load-global-keys
- '(
-   ("C-c C-m" . rg-menu)
-   ("C-c C-/" . webjump)
-   ("C-c g" . github-code-search)
-   ("C-c G" . google-search)
-   )
- "init-search")
 
   ;;; ### Functin key ###
   ;;; --- 功能函数
@@ -381,22 +376,29 @@
  )
 
 ;;; --- 笔记管理和组织
-;; (define-prefix-command 'F9-map)
-;; (global-set-key (kbd "<f9>") 'F9-map)
-;; (lazy-load-global-keys
-;;  '(("a" . org-agenda)
-;;    ("A" . org-attach)
-;;    ("s" . show-org-agenda)
-;;    ("c" . org-capture)
-;;    ("i" . org-toggle-inline-images)
-;;    ("l" . org-toggle-link-display)
-;;    ("d" . calendar)
-;;    ("f" . boxquote-insert-file)
-;;    ("r" . boxquote-region)
-;;    ("v" . visible-mode))
-;;  "init-org"
-;;  "<f9>")
-
+(define-prefix-command 'F9-map)
+(global-set-key (kbd "<f9>") 'F9-map)
+(lazy-load-global-keys
+	'(("a" . org-agenda)
+	   	("A" . org-attach)
+	   	("s" . show-org-agenda)
+	   	("c" . org-capture)
+	   	("i" . org-toggle-inline-images)
+	   	("l" . org-toggle-link-display)
+	   	("d" . calendar)
+	   	("F" . boxquote-insert-file)
+	   	("R" . boxquote-region)
+	   	("v" . visible-mode)
+	   	("f" . suk/file-shortcuts/body)
+	)
+  "init-org"
+  "<f9>")
+(lazy-load-global-keys
+	'(("C-c C-u" . string-inflection-hydra/body)
+	)
+"init-string-inflection"
+	)
+	
 ;;; Dash.
 ;;(lazy-load-global-keys
 ;; '(("y" . dash-at-point)
@@ -429,12 +431,11 @@
    )
  "macros+")
 
-;;(global-set-key  [C-f7] 'suk/ska-point-to-register)
-;;(global-set-key  [f7] 'suk/ska-jump-to-register)
+;;(global-set-key  [C-f7] 'suk/point-to-register)
+;;(global-set-key  [f7] 'suk/jump-to-register)
 (lazy-load-global-keys
  '(
-   ("C-<f7>" . suk/ska-point-to-register)
-   ("<f7>"   . suk/ska-jump-to-register )
+    ("C-<f7>"   . suk/bookmark-launcher/body)
    )
  "init-bookmark")
 
@@ -495,12 +496,8 @@
 (suk-set-key-bindings 'global-set-key
                       (list
                        (list (kbd "C-x M-a") 'align-regexp)
-                       ;;                      '([C-t]               transpose-chars)
-                       ;;                      '([S-f6]              hs-minor-mode)
-                       ;;                      '([S-f5]              toggle-truncate-lines)
                        ;; '([S-f11]          insert-translated-name-insert) ;; Chinese to English
                        ;; '([S-f12]          toggle-company-english-helper) ;; popup English tips
-
                        ;; '([S-f2]           suk/new-empty-buffer)
                        ;; '([f2]                hs-toggle-hiding)
                        ;;'([M-f12]             vterm)

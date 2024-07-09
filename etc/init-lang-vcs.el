@@ -394,6 +394,13 @@ Git:
       (when rlt
         (message "Stage files? %s" (mapconcat 'identity rlt " "))))))
 
+;;;###autoload
+(defun my-lines-from-command-output (command)
+  "Return lines of COMMAND output."
+  (let* ((output (string-trim (shell-command-to-string command)))
+         (cands (my-nonempty-lines output)))
+    (delq nil (delete-dups cands))))
+
 
 (defun my-git-gutter-toggle ()
   "Toggle git gutter."
@@ -430,6 +437,12 @@ Show the diff between current working code and git head."
          (item (completing-read "git log:" collection)))
     (when item
       (car (split-string item "|" t)))))
+
+;;;###autoload
+(defun my-nonempty-lines (str)
+  "Split STR into lines."
+  (split-string str "[\r\n]+" t))
+        
 ;;;###autoload
 (defun my-git-show-commit-internal ()
   "Show git commit."
@@ -669,7 +682,20 @@ If LEVEL > 0, find file in previous LEVEL commit."
          (file (completing-read prompt (my-lines-from-command-output cmd))))
     (when file
       (find-file file))))
+;;;###autoload
+(defun my-git-root-dir ()
+  "Git root directory."
+  ;;(interactive)
+  (locate-dominating-file default-directory ".git"))
 
+;;;###autoload
+(defun my-git-files-in-rev-command (rev level)
+  "Return git command line to show files in REV and LEVEL."
+  (unless level (setq level 0))
+  (concat "git diff-tree --no-commit-id --name-only -r "
+          rev
+          (make-string level ?^)))
+            
 (defun my-git-commit-create ()
   "Git commit."
   (interactive)

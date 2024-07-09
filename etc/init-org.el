@@ -8,6 +8,14 @@
   (require 'init-package)
   )
 ;;(message org-files-directory)
+;; 创建 var 文件夹
+(make-directory (expand-file-name "var" user-emacs-directory) t)
+
+;; 设置 org-persist 目录
+(setq org-persist-directory (expand-file-name "var/org-persist" user-emacs-directory))
+;; 创建新的 org-persist 目录（如果不存在）
+(unless (file-exists-p org-persist-directory)
+  (make-directory org-persist-directory t))
 (require 'org)
 ;;(setq plantuml-default-exec-mode 'server) ;default
 ;; ;; Sample jar configuration
@@ -445,3 +453,127 @@
 ;; covert to html
 (use-package htmlize
   :defer 2)
+
+
+;; Registers allow you to jump to a file or other location quickly.
+;; To jump to a register, use C-x r j followed by the letter of the register.
+;; Using registers for all these file shortcuts is probably a bit of
+;; a waste since I can easily define my own keymap, but since I rarely
+;; go beyond register A anyway. Also, I might as well add shortcuts for refiling.
+(require 'bookmark)
+(defvar my-refile-map (make-sparse-keymap))
+(defmacro my-defshortcut (key file)
+  `(progn
+     (set-register ,key (cons 'file ,file))
+     (bookmark-store ,file (list (cons 'filename ,file)
+                                 (cons 'position 1)
+                                 (cons 'front-context-string "")) nil)
+     (define-key my-refile-map
+       (char-to-string ,key)
+       (lambda (prefix)
+         (interactive "p")
+         (let ((org-refile-targets '(((,file) :maxlevel . 6)))
+               (current-prefix-arg (or current-prefix-arg '(4))))
+           (call-interactively 'org-refile))))))
+
+(defvar my-org-last-refile-marker nil "Marker for last refile")
+(defun my-org-refile-in-file (&optional prefix)
+  "Refile to a target within the current file."
+  (interactive)
+	(let ((org-refile-targets (list (cons (list (buffer-file-name)) '(:maxlevel . 5)))))
+		(call-interactively 'org-refile)
+		(setq my-org-last-refile-marker (plist-get org-bookmark-names-plist :last-refile))))
+
+(defun my-org-refile-to-previous ()
+  "Refile subtree to last position from `my-org-refile-in-file'."
+  (interactive)
+  (save-selected-window
+    (when (eq major-mode 'org-agenda-mode)
+      (org-agenda-switch-to))
+    (org-cut-subtree)
+		(save-window-excursion
+			(save-excursion
+				(bookmark-jump (plist-get org-bookmark-names-plist :last-refile))
+				(let ((level (org-current-level)))
+					(org-end-of-subtree t t)
+					(org-paste-subtree))))))
+
+					
+(define-key my-refile-map "," 'my-org-refile-to-previous)
+(define-key my-refile-map "." 'my-org-refile-in-file)
+;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
+;; (my-defshortcut ?o "~/cloud/orgzly/organizer.org")
+;; (my-defshortcut ?s "~/personal/sewing.org")
+;; (my-defshortcut ?b "~/personal/business.org")
+;; (my-defshortcut ?p "~/personal/google-inbox.org")
+;; (my-defshortcut ?P "~/personal/google-ideas.org")
+;; (my-defshortcut ?B "~/Dropbox/books")
+;; (my-defshortcut ?n "~/notes")
+;; (my-defshortcut ?N "~/sync/notes/QuickNote.md")
+;; (my-defshortcut ?w "~/Dropbox/public/sharing/index.org")
+;; (my-defshortcut ?W "~/Dropbox/public/sharing/blog.org")
+;; (my-defshortcut ?j "~/personal/journal.org")
+;; (my-defshortcut ?J "~/cloud/a/Journal.csv")
+;; (my-defshortcut ?I "~/Dropbox/Inbox")
+;; (my-defshortcut ?g "~/sachac.github.io/evil-plans/index.org")
+;; (my-defshortcut ?c "~/code/dev/elisp-course.org")
+;; (my-defshortcut ?C "~/personal/calendar.org")
+;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
+;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
+;; (my-defshortcut ?Q "~/personal/questions.org")
+
+(defmacro defshortcuts (name body &optional docstring &rest heads)
+  (declare (indent defun) (doc-string 3))
+  (cond ((stringp docstring))
+        (t
+         (setq heads (cons docstring heads))
+         (setq docstring "")))
+  (list
+   'progn
+   (append `(defhydra ,name (:exit t))
+           (mapcar (lambda (h)
+                     (list (elt h 0) (list 'find-file (elt h 1)) (elt h 2)))
+                   heads))
+   (cons 'progn
+         (mapcar (lambda (h) (list 'my-defshortcut (string-to-char (elt h 0)) (elt h 1)))
+                 heads))))
+
+(defmacro defshortcuts+ (name body &optional docstring &rest heads)
+  (declare (indent defun) (doc-string 3))
+  (cond ((stringp docstring))
+        (t
+         (setq heads (cons docstring heads))
+         (setq docstring "")))
+  (list
+   'progn
+   (append `(defhydra+ ,name (:exit t))
+           (mapcar (lambda (h)
+                     (list (elt h 0) (list 'find-file (elt h 1)) (elt h 2)))
+                   heads))
+   (cons 'progn
+         (mapcar (lambda (h) (list 'my-defshortcut (string-to-char (elt h 0)) (elt h 1)))
+                 heads))))
+
+ (with-eval-after-load 'hydra
+  (defshortcuts suk/file-shortcuts ()
+    ("C" "~/proj/emacs-calendar/README.org" "Emacs calendar")
+    ("e" "~/sync/emacs/Sacha.org" "Config")
+    ("E" "~/sync/emacs-news/index.org" "Emacs News")
+    ("f" "~/proj/font/README.org" "Font")
+    ("I" "~/sync/orgzly/computer-inbox.org" "Computer inbox")
+    ("i" "~/sync/orgzly/Inbox.org" "Phone inbox")
+    ("o" "~/sync/orgzly/organizer.org" "Main org file")
+    ("s" "~/proj/stream/notes.org" "Public Emacs notes")
+    ("b" "~/sync/orgzly/business.org" "Business")
+    ("p" "/scp:web:/mnt/prev/home/sacha/planet/en.ini" "Planet Emacsen")
+    ("P" "~/sync/orgzly/posts.org" "Posts")
+;    ("B" "/ssh:web|sudo::/etc/nginx/sites-available" "Nginx sites")
+    ("w" "~/Dropbox/public/sharing/index.org" "Sharing index")
+    ("W" "~/Dropbox/public/sharing/blog.org" "Blog index")
+    ("1" "~/proj/static-blog/" "Static blog")
+    ("r" "~/sync/orgzly/reference.org" "Reference")
+    ("R" "~/personal/reviews.org" "Reviews")
+    ("g" "~/proj/sachac.github.io/evil-plans/index.org" "Evil plans"))
+)
+;; ("C-c f" . #'suk/file-shortcuts/body)
+  

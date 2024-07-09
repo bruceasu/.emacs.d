@@ -78,6 +78,7 @@
 
 (require 'use-package)
 
+(make-directory (expand-file-name "var/persistent-scratch" user-emacs-directory) t)
 ;; Persistent the scratch buffer
 (use-package persistent-scratch
   :diminish
@@ -90,8 +91,44 @@
   :hook ((after-init . persistent-scratch-autosave-mode)
          (lisp-interaction-mode . persistent-scratch-mode))
   :init (setq persistent-scratch-backup-file-name-format "%Y-%m-%d"
-			  persistent-scratch-backup-directory
-			  (expand-file-name "var/persistent-scratch" user-emacs-directory)))
+			  persistent-scratch-backup-directory (expand-file-name "var/persistent-scratch" user-emacs-directory)
+              persistent-scratch-save-file (expand-file-name "var/persistent-scratch/.persistent-scratch" user-emacs-directory))
+  :config
+  (persistent-scratch-setup-default)
+
+
+  ;; 定义列出备份文件的函数
+  (defun list-scratch-backups ()
+    "List all available scratch buffer backups."
+    (interactive)
+    (let ((backup-files (directory-files persistent-scratch-backup-directory nil "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}$")))
+      (if backup-files
+          (message "Available backups:\n%s" (string-join backup-files "\n"))
+        (message "No backups available."))))
+
+  ;; 定义带自动补全功能的加载备份文件的函数
+  (defun load-scratch-backup (date)
+    "Load a scratch buffer backup from a specific DATE."
+    (interactive
+     (list
+      (completing-read "Enter the date (YYYY-MM-DD): "
+                       (directory-files persistent-scratch-backup-directory nil "^[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}$") nil t)))
+    (let ((backup-file (expand-file-name date persistent-scratch-backup-directory)))
+      (if (file-exists-p backup-file)
+          (with-temp-buffer
+            (insert-file-contents backup-file)
+            (let ((content (buffer-string)))
+              (with-current-buffer "*scratch*"
+                (erase-buffer)
+                (insert content)
+                (message "Loaded backup from %s" date))))
+        (message "Backup file for date %s does not exist" date))))
+
+  ;; 将列出备份和加载备份函数绑定到 M-x 命令
+  ;;(global-set-key (kbd "C-c l") 'list-scratch-backups)
+  ;;(global-set-key (kbd "C-c r") 'load-scratch-backup)
+
+  )
 
 ;; Misc
 
@@ -124,10 +161,7 @@ If NO-REFRESH is nil, `package-refresh-contents' is called."
 ;;(require-package 'fringe-helper)
 (require-package 'wgrep)
 (require-package 'request)
-;;(require-package 'lua-mode)
 (require-package 'yaml-mode)
-;;(require-package 'paredit)
-;;(require-package 'findr)
 (require-package 'diredfl) ; font lock for `dired-mode'
 (require-package 'pinyinlib)
 (require-package 'find-by-pinyin-dired)
@@ -171,8 +205,8 @@ If NO-REFRESH is nil, `package-refresh-contents' is called."
 (require-package 'counsel-bbdb)
 (require-package 'command-log-mode)
 (require-package 'regex-tool)
-;;(require-package 'groovy-mode)
-;;(require-package 'emmet-mode)
+(require-package 'groovy-mode)
+(require-package 'emmet-mode)
 ;;(require-package 'winum)
 ;;(require-package 'session)
 ;;(require-package 'unfill)

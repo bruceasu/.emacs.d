@@ -103,18 +103,7 @@ The test for presence of the car of ELT-CONS is done with `equal'."
 
 (add-to-list 'interpreter-mode-alist '("coffee" . coffee-mode))
 
-
-;;; Mode load.
-(autoload 'markdown-mode "init-markdown-mode")
-(autoload 'web-mode "init-lang-web")
-(autoload 'css-mode "init-lang-web")
-(autoload 'js-mode "init-lang-web")
-(autoload 'rjsx-mode "rjsx-mode")
-(autoload 'typescript-mode "typescript-mode")
-(autoload 'json-mode "json-mode")
-
-
-;;; ### Auto-fill ###
+;; ### Auto-fill ###
 ;;; --- 自动换行
 (setq default-fill-column 100)          ;默认显示 100列就换行
 (dolist (hook (list

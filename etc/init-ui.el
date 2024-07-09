@@ -12,7 +12,18 @@
 
 ;; Optimization
 (setq idle-update-delay 1.0)
-
+(when (fboundp 'tool-bar-mode) (tool-bar-mode -1)) ; ģánbèi gunggêi lán.
+(when (fboundp 'menu-bar-mode) (menu-bar-mode -1)) ;ģánbèi coidán lán
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1)) ;ģánbèi ģandung tiu
+;; GUI Environment
+(when (display-graphic-p)
+  (progn
+    ;; scroll-bar
+    (set-scroll-bar-mode 'right)
+    ;; 隐藏垂直滚动条。
+    (modify-all-frames-parameters '((vertical-scroll-bars)))
+    )
+  )
 
 ;; Compatibility
 (use-package compat :demand t)
@@ -168,63 +179,29 @@
       (hydra-set-posframe-show-params)
       (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))))
 
-;; -*- coding: utf-8; lexical-binding: t; -*-
-
 ;; @see https://github.com/abo-abo/hydra
 ;; color could: red, blue, amaranth, pink, teal
 
 ;; 最常用的功能
 (defhydra my-hydra-launcher (:color blue)
   "
-^Misc^                    ^Study^                    ^Emms^
+^Emms^				^Study^             
 -------------------------------------------------------------------
-[_ss_] Save workgroup     [_vv_] Pronounce word      [_R_] Random
-[_ll_] Load workgroup     [_W_] Big word list        [_n_] Next
-[_B_] New bookmark        [_vi_] Play word's video   [_p_] Previous
-[_m_] Goto bookmark       [_im_] Image of word       [_P_] Pause
-[_bb_] Switch Gnus buffer [_w_] Select big word      [_S_] Stop
-[_e_] Erase buffer        [_s1_] Pomodoro tiny task  [_O_] Open
-[_r_] Erase this buffer   [_s2_] Pomodoro big task   [_L_] Playlist
-[_f_] Recent file         [_st_] Pomodoro stop       [_K_] Search
-[_d_] Recent directory    [_sr_] Pomodoro resume     [_F_] filter
-[_z_] Jump around (z.sh)  [_sp_] Pomodoro pause      [_E_] replay
-[_bh_] Bash history       [_as_] Ascii table
-[_hh_] Favorite theme     [_T_] Typewriter on/off
-[_hr_] Random theme       [_V_] Old typewriter
-[_ka_] Kill other buffers
-[_ii_] Imenu
-[_id_] Insert date string
-[_aa_] Adjust subtitle
+[_R_] Random	 	[_vv_] Pronounce word
+[_n_] Next			[_W_] Big word list
+[_p_] Previous 		[_vi_] Play word's video
+[_P_] Pause 		[_im_] Image of word 
+[_S_] Stop			[_w_] Select big word 
+[_O_] Open
+[_L_] Playlist
+[_K_] Search
+[_F_] filter
+[_E_] replay
 [_q_] Quit
+
+
+
 "
-  ("aa" my-srt-offset-subtitles-from-point)
-  ("B" my-bookmark-set)
-  ("m" my-bookmark-goto)
-  ("f" my-counsel-recentf)
-  ("d" my-recent-directory)
-  ("bh" my-insert-bash-history)
-  ("hh" my-random-favorite-color-theme)
-  ("hr" my-random-healthy-color-theme)
-  ("ii" my-counsel-imenu)
-  ("ka" my-kill-all-but-current-buffer)
-  ("id" my-insert-date)
-  ("as" my-ascii-table)
-  ("ss" wg-create-workgroup)
-  ("ll" wg-open-workgroup)
-  ("e" shellcop-erase-buffer)
-  ("r" shellcop-reset-with-new-command)
-  ("z" shellcop-jump-around)
-  ("T" my-toggle-typewriter)
-  ("V" twm/toggle-sound-style)
-
-  ;; {{pomodoro
-  ("s1" (pomodoro-start 15))
-  ("s2" (pomodoro-start 60))
-  ("st" pomodoro-stop)
-  ("sr" pomodoro-resume)
-  ("sp" pomodoro-pause)
-  ;; }}
-
   ;; {{emms
   ("R" (progn (emms-shuffle) (emms-random)))
   ("F" my-emms-playlist-filter)
@@ -243,7 +220,6 @@
   ("im" mybigword-show-image-of-word)
   ("W" my-lookup-bigword-definition-in-buffer)
   ("vi" mybigword-play-video-of-word-at-point)
-  ("bb" dianyou-switch-gnus-buffer)
   ("q" nil :color red))
 
 ;; Because in message-mode/article-mode we've already use `y' as hotkey
@@ -638,11 +614,7 @@
       "disable"
       :toggle (eq doom-modeline-project-detection nil)))
     "Misc"
-    (("n" (progn
-            (message "Fetching GitHub notifications...")
-            (run-with-timer 300 nil #'doom-modeline--github-fetch-notifications)
-            (browse-url "https://github.com/notifications"))
-      "github notifications" :exit t)
+    (
      ("e" (cond ((bound-and-true-p flycheck-mode)
                  (flycheck-list-errors))
                 ((bound-and-true-p flymake-mode)

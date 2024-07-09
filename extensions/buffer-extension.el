@@ -160,18 +160,6 @@ It is bound to \\[suk/revert-buffer-with-utf8]."
   (interactive)
   (suk/revert-buffer-with-coding-system-no-confirm 'utf-8))
 
-;;; =========================================================
-;;; set the eol to unix format
-;;; ---------------------------------------------------------
-;;;###autoload
-(defun suk/no-junk-please-were-unixish ()
-  "只用unix类换行格式.It is bound to \\[suk/no-junk-please-were-unixish]."
-  (let ((coding-str (symbol-name buffer-file-coding-system)))
-    (when (string-match "-\\(?:dos\\|mac\\)$" coding-str)
-      (set-buffer-file-coding-system 'unix))))
-
-(add-hook 'find-file-hook 'suk/no-junk-please-were-unixish)
-
 ;; ==============================================================
 ;; buffers
 ;; --------------------------------------------------------------
@@ -261,47 +249,6 @@ prompt the user to save before closing.
     (switch-to-buffer $buf)
     (mapc (lambda ($f) (insert (cdr $f) "\n"))
           suk/recently-closed-buffers)))
-
-;;;###autoload
-(defun suk/kill-current-mode-buffers ()
-  "Kill all buffers that major mode same with current mode."
-  (interactive)
-  (suk/kill-special-mode-buffers-internal major-mode))
-
-;;;###autoload
-(defun suk/kill-current-mode-buffers-except-current ()
-  "Kill all buffers that major mode same with current mode.
-And don't kill current buffer."
-  (interactive)
-  (kill-special-mode-buffers-internal major-mode t))
-
-;;;###autoload
-(defun suk/kill-special-mode-buffers ()
-  "Kill all buffers that major mode that user given."
-  (interactive)
-  (let (mode-list)
-    (dolist (element (buffer-list))
-      (set-buffer element)
-      (unless (member (symbol-name major-mode) mode-list)
-        (add-to-ordered-list 'mode-list (symbol-name major-mode))))
-    (kill-special-mode-buffers-internal (intern-soft (completing-read "Mode: " mode-list)))))
-
-;;;###autoload
-(defun suk/kill-special-mode-buffers-internal (mode &optional except-current-buffer)
-  "Kill all buffers that major MODE same with special.
-If option EXCEPT-CURRENT-BUFFER is `non-nil',
-kill all buffers with MODE except current buffer."
-  (interactive)
-  (let ((current-buf (current-buffer))
-        (count 0))
-    (dolist (buffer (buffer-list))
-      (set-buffer buffer)
-      (when (and (equal major-mode mode)
-                 (or (not except-current-buffer)
-                     (not (eq current-buf buffer))))
-        (cl-incf count)
-        (kill-buffer buffer)))
-    (message "Killed %s buffer%s" count (if (> count 1) "s" ""))))
 
 ;;;###autoload
 (defun suk/kill-all-buffers-except-current ()
@@ -402,19 +349,8 @@ It returns the buffer."
       (set-buffer-modified-p nil)
       t)))
 
-;;;###autoload
-(defun suk/browse-this-file ()
-  "Open the current file as a URL using `browse-url'."
-  (interactive)
-  (let ((file-name (buffer-file-name)))
-    (if (and (fboundp 'tramp-tramp-file-p)
-             (tramp-tramp-file-p file-name))
-        (error "Cannot open tramp file")
-      (browse-url (concat "file://" file-name)))))
-
-
-;;;###autoload
-(defun copy-file-name ()
+;;###autoload
+(defun suk/copy-file-name ()
   "Copy the current buffer file name to the clipboard."
   (interactive)
   (let ((filename (if (equal major-mode 'dired-mode)
@@ -426,29 +362,7 @@ It returns the buffer."
           (message "Copied '%s'" filename))
       (warn "Current buffer is not attached to a file!"))))
 
-;; --------------------------------------------------------------
-;; Reload
-;; --------------------------------------------------------------
-;;;###autoload
-(defun suk/reload-emacs-configuration ()
-  "Reload emacs initial configured file init.el."
-  (interactive)
-  (load-file "~/.emacs.d/init.el"))
 
-;; --------------------------------------------------------------
-;; Open custom file
-;; --------------------------------------------------------------
-;;;###autoload
-(defun open-custom-file()
-  "Open custom.el if exists, otherwise create it."
-  (interactive)
-  (let ((custom-example
-         (expand-file-name "custom-example.el" user-emacs-directory)))
-    (unless (file-exists-p custom-file)
-      (if (file-exists-p custom-example)
-          (copy-file custom-file)
-        (error "Unable to find \"%s\"" custom-example)))
-    (find-file custom-file)))
 
 ;; --------------------------------------------------------------
 ;; Create a new scratch buffer
@@ -467,7 +381,6 @@ It returns the buffer."
   (interactive)
   (find-file "/tmp/scratch.org")
   (gnus-make-directory "/tmp"))
-(global-set-key "\C-cs" 'suk/create-scratch-org) ;; Bind to `C-c s'
 
 ;;;###autoload
 (defun suk/switch-to-minibuffer ()
@@ -566,69 +479,6 @@ This command is convenient when reading novel, documentation."
   (if (eq (cdr (window-margins)) nil)
       (set-window-margins nil 0 (- (window-body-width) fill-column))
     (set-window-margins nil 0 0)))
-
-
-(defun buffer-order-next-mark (arg)
-  "Jump to next mark."
-  (interactive "p")
-  (when (mark)
-    (let* ((p (point))
-           (m (mark))
-           (n p)
-           (count (if (null arg) 1 arg))
-           (abscount (abs count))
-           (rel
-            (funcall
-             (if (< 0 count) 'identity 'reverse)
-             (sort (cons (cons 0 p)
-                         (cons (cons (- m p) m)
-                               (if mark-ring
-                                   (mapcar (lambda (mrm)
-                                             (cons (- mrm p) mrm))
-                                           mark-ring)
-                                 nil)))
-                   (lambda (c d) (< (car c) (car d))))))
-           (cur rel))
-      (while (and (numberp (caar cur)) (/= (caar cur) 0))
-        (setq cur (cdr cur)))
-      (while (and (numberp (caadr cur)) (= (caadr cur) 0))
-        (setq cur (cdr cur)))
-      (while (< 0 abscount)
-        (setq cur (cdr cur))
-        (when (null cur) (setq cur rel))
-        (setq abscount (- abscount 1)))
-      (when (number-or-marker-p (cdar cur))
-        (goto-char (cdar cur))))))
-
-(defun buffer-order-prev-mark (arg)
-  "Jump to previous mark."
-  (interactive "p")
-  (buffer-order-next-mark
-   (or (- arg) -1)))
-
-(defun copy-buffer-file-name-as-kill(choice)
-  "Copy the buffer-file-name to the kill-ring"
-  (interactive "cCopy Buffer Name (F) Full, (D) Directory, (N) Name")
-  (let ((new-kill-string)
-        (name (if (eq major-mode 'dired-mode)
-                  (dired-get-filename)
-                (or (buffer-file-name) ""))))
-    (cond ((eq choice ?f)
-           (setq new-kill-string name))
-          ((eq choice ?d)
-           (setq new-kill-string (file-name-directory name)))
-          ((eq choice ?n)
-           (setq new-kill-string (file-name-nondirectory name)))
-          (t (message "Quit")))
-    (when new-kill-string
-      (message "%s copied" new-kill-string)
-      (kill-new new-kill-string))))
-
-(defun try-to-switch-buffer (name)
-  "Just switch to buffer when found some buffer named NAME."
-  (if (get-buffer name)
-      (switch-to-buffer name)
-    (message "Haven't found buffer named `%s`." name)))
 
 (provide 'buffer-extension)
 

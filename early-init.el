@@ -42,5 +42,5 @@
 (when (featurep 'ns)
   (push '(ns-transparent-titlebar . t) default-frame-alist))
 (setq-default mode-line-format nil)
-
+(require 'subr-x)
 ;;(global-unset-key (kbd "C-SPC"))

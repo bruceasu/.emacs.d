@@ -46,24 +46,25 @@
 
 ;;; Code:
 
-(defvar one-key-string-inflection-alist nil
-  "The `one-key' menu alist for DIRECTORY.")
-
-(setq one-key-string-inflection-alist
-      '(
-        (("c" . "FooBar") . (lambda () (interactive) (string-inflection-camelcase)))
-        (("l" . "fooBar") . (lambda () (interactive) (string-inflection-lower-camelcase)))
-        (("_" . "foo_bar") . (lambda () (interactive) (string-inflection-underscore)))
-        (("u" . "FOO_BAR") . (lambda () (interactive) (string-inflection-upcase)))
-        (("k" . "foo-bar") . (lambda () (interactive) (string-inflection-kebab-case)))
-        (("t" . "foo_bar <=> FooBar") . (lambda () (interactive) (string-inflection-toggle)))
-        ))
-
-(defun one-key-string-inflection ()
-  "The `one-key' menu for DIRECTORY."
-  (interactive)
-  (one-key-menu "STRING INFLECTION" one-key-string-inflection-alist t))
-
+(with-eval-after-load 'hydra
+  (defhydra string-inflection-hydra (:color blue :hint nil)
+    "
+Describe Something: (q to quit)
+_c_ camelcase FooBar
+_l_ lower-camelcase fooBar
+___ underscore foo_bar
+_u_ upcase FOO_BAR
+_k_ kebab-case foo-bar
+_t_ toggle foo_bar <=> FooBar
+"
+    ("c" string-inflection-camelcase)
+    ("l" string-inflection-lower-camelcase)
+    ("_" string-inflection-underscore)
+    ("u" string-inflection-upcase)
+    ("k" string-inflection-kebab-case)
+    ("t" string-inflection-toggle))
+  ;; set key in init-keys.el
+  ;; (global-set-key (kbd "C-c C-u") 'string-inflection-hydra/body)
+  )
+  
 (provide 'init-string-inflection)
-
-;;; init-string-inflection.el ends here

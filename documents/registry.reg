@@ -6,13 +6,13 @@ REGEDIT4
 @="Edit with Emacs(new frame)"
 
 [HKEY_CLASSES_ROOT\*\shell\open_emacsclient\command]
-@="C:\\green\\emacs-29.2\\bin\\emacsclientw.exe --server-file C:\\green\\emacs-29.2\\.emacs.d\\server\\server -c -n -a C:\\green\\emacs-29.2\\bin\\runemacs.exe \"%1\" "
+@="C:\\green\\emacs-29.2\\bin\\emacsclientw.exe --server-file C:\\green\\emacs-suk\\.emacs.d\\server\\server -c -n -a C:\\green\\emacs-29.2\\bin\\runemacs.exe \"%1\" "
 
 [HKEY_CLASSES_ROOT\*\shell\openwemacs]
 @="Edit with Emacs"
 
 [HKEY_CLASSES_ROOT\*\shell\openwemacs\command]
-@="C:\\green\\emacs-29.2\\bin\\emacsclientw.exe --server-file C:\\green\\emacs-29.2\\.emacs.d\\server\\server -n -a C:\\green\\emacs-29.2\\bin\\runemacs.exe \"%1\" "
+@="C:\\green\\emacs-29.2\\bin\\emacsclientw.exe --server-file C:\\green\\emacs-suk\\.emacs.d\\server\\server -n -a C:\\green\\emacs-29.2\\bin\\runemacs.exe \"%1\" "
 
 [HKEY_CLASSES_ROOT\*\shell\quick_open_emacs]
 @="Quick Edit with Emacs"

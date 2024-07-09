@@ -30,6 +30,16 @@
               :around #'my-typescript-beginning-of-defun-hack)
   )
 
+
+;;;###autoload
+(defun my-use-tags-as-imenu-function-p ()
+  "Can use tags file to build imenu function"
+  (my-ensure 'counsel-etags)
+  (and (locate-dominating-file default-directory "TAGS")
+       ;; latest universal ctags has built in parser for javascript/typescript
+       (counsel-etags-universal-ctags-p "ctags")
+       (memq major-mode '(typescript-mode js-mode javascript-mode))))
+       
 ;; }}
 
 
@@ -95,6 +105,9 @@ INDENT-SIZE decide the indentation level.
                                         (format " --indent-size=%d " indent-size)))))
 ;; }}
 
+
+
+    
 (use-package js2-mode
   :mode (("\\.js\\'" . js2-minor-mode)
          ("\\.jsx\\'" . js2-minor-jsx-mode))

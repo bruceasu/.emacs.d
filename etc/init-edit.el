@@ -8,58 +8,6 @@
   )
 
 
-;; @see http://endlessparentheses.com/super-smart-capitalization.html
-;;;###autoload
-(defun endless/convert-punctuation (rg rp)
-  "Look for regexp RG around point, and replace with RP.
-Only applies to text-mode."
-  (let* ((f "\\(%s\\)\\(%s\\)")
-         (space "?:[[:blank:]\n\r]*"))
-    ;; We obviously don't want to do this in prog-mode.
-    (if (and (derived-mode-p 'text-mode)
-             (or (looking-at (format f space rg))
-                 (looking-back (format f rg space) (point-min))))
-        (replace-match rp nil nil nil 1))))
-;;;###autoload
-(defun endless/call-subword-cmd (fn)
-  (my-ensure 'subword)
-  (call-interactively fn))
-;;;###autoload
-(defun endless/capitalize ()
-  "Capitalize region or word.
-Also converts commas to full stops, and kills
-extraneous space at beginning of line."
-  (interactive)
-  (endless/convert-punctuation "," ".")
-  (if (use-region-p)
-      (call-interactively 'capitalize-region)
-    ;; A single space at the start of a line:
-    (when (looking-at "^\\s-\\b")
-      ;; get rid of it!
-      (delete-char 1))
-    (endless/call-subword-cmd 'subword-capitalize)))
-;;;###autoload
-(defun endless/downcase ()
-  "Downcase region or word.
-Also converts full stops to commas."
-  (interactive)
-  (endless/convert-punctuation "\\." ",")
-  (if (use-region-p)
-      (call-interactively 'downcase-region)
-    (endless/call-subword-cmd 'subword-downcase)))
-;;;###autoload
-(defun endless/upcase ()
-  "Upcase region or word."
-  (interactive)
-  (if (use-region-p)
-      (call-interactively 'upcase-region)
-    (endless/call-subword-cmd 'subword-upcase)))
-
-;; these bindings are fine
-(global-set-key (kbd "M-c") 'endless/capitalize)
-(global-set-key (kbd "M-l") 'endless/downcase)
-(global-set-key (kbd "M-u") 'endless/upcase)
-
 (my-run-with-idle-timer
  2
  #'(lambda()
@@ -84,39 +32,11 @@ Also converts full stops to commas."
              (goto-char node-start)))
          ))))
 
-;; ;; Jump to Chinese characters
-;; (use-package ace-pinyin
-;;   :diminish
-;;   :hook (after-init . ace-pinyin-global-mode))
+;; Jump to Chinese characters
+(use-package ace-pinyin
+   :diminish
+   :hook (after-init . ace-pinyin-global-mode))
 
-;; Minor mode to aggressively keep your code always indented
-(use-package aggressive-indent
-  :diminish
-  :defer 2
-  :hook ((after-init . global-aggressive-indent-mode)
-         ;; NOTE: Disable in large files due to the performance issues
-         ;; https://github.com/Malabarba/aggressive-indent-mode/issues/73
-         (find-file . (lambda ()
-                        (when (too-long-file-p)
-                          (aggressive-indent-mode -1)))))
-  :config
-  ;; Disable in some modes
-  (dolist (mode '(gitconfig-mode
-                  asm-mode web-mode html-mode css-mode
-                  go-mode scala-mode
-                  shell-mode term-mode vterm-mode
-                  prolog-inferior-mode))
-    (add-to-list 'aggressive-indent-excluded-modes mode))
-
-  ;; Disable in some commands
-  (add-to-list 'aggressive-indent-protected-commands #'delete-trailing-whitespace t)
-
-  ;; Be slightly less aggressive in C/C++/C#/Java/Go/Swift
-  (add-to-list 'aggressive-indent-dont-indent-if
-               '(and (derived-mode-p 'c-mode 'c++-mode 'csharp-mode
-                                     'java-mode 'go-mode 'swift-mode)
-                     (null (string-match "\\([;{}]\\|\\b\\(if\\|for\\|while\\)\\b\\)"
-                                         )))))
 
 ;; Rectangle
 (use-package rect
@@ -163,30 +83,6 @@ Also converts full stops to commas."
   :diminish
   :defer 2
   :hook (after-init . global-auto-revert-mode))
-
-;; Pass a URL to a WWW browser
-(use-package browse-url
-  :ensure nil
-  :defer 2
-  :defines dired-mode-map
-  :bind (("C-c C-z ." . browse-url-at-point)
-         ("C-c C-z b" . browse-url-of-buffer)
-         ("C-c C-z r" . browse-url-of-region)
-         ("C-c C-z u" . browse-url)
-         ("C-c C-z e" . browse-url-emacs)
-         ("C-c C-z v" . browse-url-of-file))
-  :init
-  (with-eval-after-load 'dired
-    (bind-key "C-c C-z f" #'browse-url-of-file dired-mode-map))
-
-  (let ((cmd-exe "c:/Windows/System32/cmd.exe")
-        (cmd-args '("/c" "start")))
-    (when (file-exists-p cmd-exe)
-      (setq browse-url-generic-program  cmd-exe
-            browse-url-generic-args     cmd-args
-            browse-url-browser-function 'browse-url-generic)
-      (when (daemonp)
-        (advice-add #'browse-url :override #'browse-url-generic)))))
 
 ;; Jump to things in Emacs tree-style
 (my-run-with-idle-timer
