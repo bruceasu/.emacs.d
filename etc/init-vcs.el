@@ -4,7 +4,7 @@
 
 (eval-when-compile
   (require '+const)
-  (require '+func)
+  (require '+fn)
   )
 
 
@@ -35,57 +35,6 @@
   (unbind-key "M-2" magit-mode-map)
   (unbind-key "M-3" magit-mode-map)
   (unbind-key "M-4" magit-mode-map)
-
-
-  (with-eval-after-load 'hydra
-    ;; {{ git-gutter, @see https://github.com/abo-abo/hydra/wiki/Git-gutter
-    (defhydra my-hydra-git (:body-pre
-                            (progn
-                              (git-gutter-mode 1)
-                              (setq git-link-use-commit t))
-                            :after-exit (setq git-link-use-commit nil)
-                            :color blue)
-      "
-Git:
-[_dd_] Diff               [_ri_] Rebase closest
-[_dc_] Diff staged        [_s_] Show commit
-[_dr_] Diff range         [_rr_] Reset gutter
-[_au_] Add modified       [_rh_] Gutter => HEAD
-[_cc_] Commit             [_l_] Log selected/file
-[_ca_] Amend              [_b_] Branches
-[_ja_] Amend silent       [_k_] Git commit link
-[_tt_] Stash              [_Q_] Quit gutter
-[_ta_] Apply stash        [_cr_] Cherry pick from reflog
-[_f_] Find file in commit
-
-"
-      ("ri" my-git-rebase-interactive)
-      ("rr" my-git-gutter-reset-to-default)
-      ("rh" my-git-gutter-reset-to-head-parent)
-      ("cb" my-git-current-branch)
-      ("s" my-git-show-commit)
-      ("l" magit-log-buffer-file)
-      ("b" magit-show-refs)
-      ("k" git-link)
-      ("g" magit-status)
-      ("ta" magit-stash-apply)
-      ("tt" magit-stash)
-      ("dd" magit-diff-dwim)
-      ("dc" magit-diff-staged)
-      ("dr" (magit-diff-range (my-git-commit-id)))
-      ("cc" magit-commit-create)
-      ("ca" magit-commit-amend)
-      ("nn" my-git-commit-create)
-      ("na" my-git-commit-amend)
-      ("ja" (my-git-commit-amend t))
-      ("au" magit-stage-modified)
-      ("Q" my-git-gutter-toggle)
-      ("f" my-git-find-file-in-commit)
-      ("cr" my-git-cherry-pick-from-reflog)
-      ("q" nil))
-    (global-set-key (kbd "C-c C-g") 'my-hydra-git/body)
-    )
-  ;; }}
 
   ;; Access Git forges from Magit
   (use-package forge
@@ -144,6 +93,7 @@ Git:
         (posframe-hide transient--buffer-name))
       (advice-add #'transient-posframe--delete :override #'my-transient-posframe--hide))))
 
+;; vc-prefix-map 默认是 C-x v
 ;; Walk through git revisions of a file
 (use-package git-timemachine
   :custom-face
@@ -357,6 +307,7 @@ Git:
 
   )
 
+;;;###autoload
 (defun my-git-gutter-reset-to-head-parent()
   "Reset gutter to HEAD^.  Support Subversion and Git."
   (interactive)
@@ -402,6 +353,7 @@ Git:
     (delq nil (delete-dups cands))))
 
 
+;;;###autoload
 (defun my-git-gutter-toggle ()
   "Toggle git gutter."
   (interactive)
@@ -411,6 +363,7 @@ Git:
   (sit-for 0.1)
   (git-gutter:clear))
 
+;;;###autoload
 (defun my-git-gutter-reset-to-default ()
   "Restore git gutter to its original status.
 Show the diff between current working code and git head."
@@ -450,6 +403,7 @@ Show the diff between current working code and git head."
     (when id
       (shell-command-to-string (format "git show %s" id)))))
 
+;;;###autoload
 (defun my-git-show-commit ()
   "Show commit using ffip."
   (interactive)
@@ -457,12 +411,14 @@ Show the diff between current working code and git head."
     (ffip-show-diff 0)))
 
 
+;;;###autoload
 (defun git-get-current-file-relative-path ()
   "Get relative path of current file for Git."
   (replace-regexp-in-string (concat "^" (file-name-as-directory default-directory))
                             ""
                             buffer-file-name))
 
+;;;###autoload
 (defun git-checkout-current-file ()
   "Git checkout current file."
   (interactive)
@@ -474,6 +430,7 @@ Show the diff between current working code and git head."
       (message "DONE! git checkout %s" filename))))
 
 (defvar git-commit-message-history nil)
+;;;###autoload
 (defun git-commit-tracked ()
   "Run 'git add -u' and commit."
   (interactive)
@@ -490,7 +447,7 @@ Show the diff between current working code and git head."
       (message "Tracked files is committed."))
      (t
       (message "Do nothing!")))))
-
+;;;###autoload
 (defun git-add-current-file ()
   "Git add file of current buffer."
   (interactive)
@@ -506,7 +463,7 @@ Show the diff between current working code and git head."
 (defvar my-goto-merge-conflict-fns
   '(("n" my-next-merge-conflict)
     ("p" my-prev-merge-conflict)))
-
+;;;###autoload
 (defun my-goto-merge-conflict-internal (forward-p)
   "Goto specific hunk.  If FORWARD-P is t, go in forward direction."
   ;; @see https://emacs.stackexchange.com/questions/63413/finding-git-conflict-in-the-same-buffer-if-cursor-is-at-end-of-the-buffer#63414
@@ -522,16 +479,18 @@ Show the diff between current working code and git head."
             (goto-char prev-pos)
             (message "No conflicts found")))))))
 
+;;;###autoload
 (defun my-next-merge-conflict ()
   "Go to next merge conflict."
   (interactive)
   (my-goto-merge-conflict-internal t))
-
+;;;###autoload
 (defun my-prev-merge-conflict ()
   "Go to previous merge conflict."
   (interactive)
   (my-goto-merge-conflict-internal nil))
 
+;;;###autoload
 (defun my-search-next-merge-conflict ()
   "Search next merge conflict."
   (interactive)
@@ -539,7 +498,7 @@ Show the diff between current working code and git head."
                          "Goto merge conflict: [n]ext [p]revious [q]uit"
                          'my-goto-merge-conflict-internal
                          t))
-
+;;;###autoload
 (defun my-search-prev-merge-conflict ()
   "Search previous merge conflict."
   (interactive)
@@ -553,14 +512,14 @@ Show the diff between current working code and git head."
 (defvar my-goto-diff-hunk-fns
   '(("n" diff-hunk-next)
     ("p" diff-hunk-prev)))
-
+;;;###autoload
 (defun my-search-next-diff-hunk ()
   "Search next diff hunk."
   (interactive)
   (my-setup-extra-keymap my-goto-diff-hunk-fns
                          "Goto diff hunk: [n]ext [p]revious [q]uit"
                          'diff-hunk-next))
-
+;;;###autoload
 (defun my-search-prev-diff-hunk ()
   "Search previous diff hunk."
   (interactive)
@@ -570,6 +529,7 @@ Show the diff between current working code and git head."
 ;; }}
 
 ;; {{
+;;;###autoload
 (defun my-git-extract-based (target lines)
   "Extract based version from TARGET and LINES."
   (let* (based (i 0) break)
@@ -588,7 +548,7 @@ Show the diff between current working code and git head."
                                       (car (split-string (nth (1- i) lines)
                                                          " +")))))
     based))
-
+;;;###autoload
 (defun my-git-rebase-interactive (&optional user-select-branch)
   "Rebase interactively on the closest branch or tag in git log output.
 If USER-SELECT-BRANCH is not nil, rebase on the tag or branch selected by user."
@@ -617,7 +577,7 @@ If USER-SELECT-BRANCH is not nil, rebase on the tag or branch selected by user."
     (when based
       (magit-rebase-interactive based nil))))
 ;; }}
-
+;;;###autoload
 (defun my-git-cherry-pick-from-reflog ()
   "Cherry pick a commit from git reflog."
   (interactive)
@@ -630,6 +590,7 @@ If USER-SELECT-BRANCH is not nil, rebase on the tag or branch selected by user."
       (magit-cherry-copy commit-id))))
 
 ;; {{ git-gutter use ivy
+;;;###autoload
 (defun my-git-reshape-gutter (gutter)
   "Re-shape GUTTER for `ivy-read'."
   (let* ((linenum-start (aref gutter 3))
@@ -655,7 +616,7 @@ If USER-SELECT-BRANCH is not nil, rebase on the tag or branch selected by user."
                   (if (eq 'deleted (aref gutter 1)) "-" "+")
                   target-linenum target-line)
           target-linenum)))
-
+;;;###autoload
 (defun my-git-goto-gutter ()
   "Go to specific git gutter."
   (interactive)
@@ -668,7 +629,7 @@ If USER-SELECT-BRANCH is not nil, rebase on the tag or branch selected by user."
     (message "NO git-gutters!")))
 
 ;; }}
-
+;;;###autoload
 (defun my-git-find-file-in-commit (&optional level)
   "Find file in previous commit with LEVEL.
 If LEVEL > 0, find file in previous LEVEL commit."
@@ -695,14 +656,14 @@ If LEVEL > 0, find file in previous LEVEL commit."
   (concat "git diff-tree --no-commit-id --name-only -r "
           rev
           (make-string level ?^)))
-            
+;;;###autoload            
 (defun my-git-commit-create ()
   "Git commit."
   (interactive)
   (let ((msg (read-string "Git commit message: ")))
     (when (> (length msg) 0)
       (shell-command (format "git commit --no-verify -m \"%s\"" msg)))))
-
+;;;###autoload
 (defun my-git-commit-amend (&optional reuse-p)
   "Git amend.  If REUSE-P is t, commit by reusing original message."
   (interactive)
@@ -718,7 +679,7 @@ If LEVEL > 0, find file in previous LEVEL commit."
       (unless reuse-p
         (setq cmd (format "%s -m \"%s\"" cmd msg)))
       (shell-command cmd))))
-
+;;;###autoload
 (defun my-git-current-branch ()
   "Show current branch name."
   (interactive)
@@ -726,5 +687,55 @@ If LEVEL > 0, find file in previous LEVEL commit."
            (string-trim (shell-command-to-string "git branch --show-current"))))
 
 
+
+(with-eval-after-load 'hydra
+    ;; {{ git-gutter, @see https://github.com/abo-abo/hydra/wiki/Git-gutter
+    (defhydra my-hydra-git (:body-pre
+                            (progn
+                              (git-gutter-mode 1)
+                              (setq git-link-use-commit t))
+                            :after-exit (setq git-link-use-commit nil)
+                            :color blue)
+      "
+Git:
+[_dd_] Diff               [_ri_] Rebase closest
+[_dc_] Diff staged        [_s_] Show commit
+[_dr_] Diff range         [_rr_] Reset gutter
+[_au_] Add modified       [_rh_] Gutter => HEAD
+[_cc_] Commit             [_l_] Log selected/file
+[_ca_] Amend              [_b_] Branches
+[_ja_] Amend silent       [_k_] Git commit link
+[_tt_] Stash              [_Q_] Quit gutter
+[_ta_] Apply stash        [_cr_] Cherry pick from reflog
+[_f_] Find file in commit
+
+"
+      ("ri" my-git-rebase-interactive)
+      ("rr" my-git-gutter-reset-to-default)
+      ("rh" my-git-gutter-reset-to-head-parent)
+      ("cb" my-git-current-branch)
+      ("s" my-git-show-commit)
+      ("l" magit-log-buffer-file)
+      ("b" magit-show-refs)
+      ("k" git-link)
+      ("g" magit-status)
+      ("ta" magit-stash-apply)
+      ("tt" magit-stash)
+      ("dd" magit-diff-dwim)
+      ("dc" magit-diff-staged)
+      ("dr" (magit-diff-range (my-git-commit-id)))
+      ("cc" magit-commit-create)
+      ("ca" magit-commit-amend)
+      ("nn" my-git-commit-create)
+      ("na" my-git-commit-amend)
+      ("ja" (my-git-commit-amend t))
+      ("au" magit-stage-modified)
+      ("Q" my-git-gutter-toggle)
+      ("f" my-git-find-file-in-commit)
+      ("cr" my-git-cherry-pick-from-reflog)
+      ("q" nil))
+    (global-set-key (kbd "C-c C-g") 'my-hydra-git/body)
+    )
+  ;; }}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; init-vcs.el ends here

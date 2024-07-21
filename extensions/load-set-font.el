@@ -94,109 +94,12 @@
   (all-the-icons-install-fonts)
   (nerd-icons-install-fonts))
 
-;; 解决卡顿
-(setq inhibit-compacting-font-caches t)
-;;只渲染当前屏幕语法高亮，加快显示速度
-(setq font-lock-maximum-decoration t)
-(global-font-lock-mode t)
-(setq font-lock-maximum-size 5000000); set 5mb file size limit for fontification
-;; Fonts
-(setq emacs-font-size-pair '(30 . 32))
-(setq en-font "Time New Roman"
-      cn-font "LXGW WenKai")
-;; font-family: "lucida grande", "lucida sans unicode", lucida, helvetica,
-;; "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
-(cond
- ((member "asu-cjk-mono" (font-family-list))
-  (setq en-font "asu-cjk-mono"))
- ((member "Consolas" (font-family-list))
-  (setq en-font "Consolas"))
- ((member "LXGW WenKai Mono" (font-family-list))
-  (setq en-font "LXGW WenKai Mono"))
- ((member "霞鹜文楷等宽" (font-family-list))
-  (setq en-font "霞鹜文楷等宽"))
- ((member "Victor Mono" (font-family-list))
-  (setq en-font "Victor Mono"))
- ((member "JetBrains Mono" (font-family-list))
-  (setq en-font "JetBrains Mono"))
- ((member "lucida grande" (font-family-list))
-  (setq en-font "lucida grande"))
- ((member "lucida sans unicode" (font-family-list))
-  (setq en-font "lucida sans unicode"))
- ((member "lucida" (font-family-list))
-  (setq en-font "lucida"))
- ((member "helvetica" (font-family-list))
-  (setq en-font "helvetica"))
- ((member "Tahoma" (font-family-list))
-  (setq en-font "Tahoma"))
- ((member "Times New Roman" (font-family-list))
-  (setq en-font "Times New Roman"))
- ((member "Migu 1M Less" (font-family-list))
-  (setq en-font "Migu 1M Less"))
- ((member "Source Code Pro" (font-family-list))
-  (setq en-font "Source Code Pro"))
- ((member "Monaco" (font-family-list))
-  (setq en-font "Monaco"))
- ((member "DejaVu Sans Mono" (font-family-list))
-  (setq en-font "DejaVu Sans Mono"))
- ((member "Consolas" (font-family-list))
-  (setq en-font "Consolas"))
- )
-(cond
- ((member "asu-cjk-sans" (font-family-list))
-  (setq cn-font "asu-cjk-sans"))
- ((member "asu-cjk-mono" (font-family-list))
-  (setq cn-font "asu-cjk-mono"))
- ((member "asu-cjk-serif" (font-family-list))
-  (setq cn-font "asu-cjk-serif"))
- ((member "KleeOne+CJK" (font-family-list))
-  (setq cn-font "KleeOne+CJK"))
-
- ((member "LXGW WenKai" (font-family-list))
-  (setq cn-font "LXGW WenKai"))
- ((member "霞鹜文楷" (font-family-list))
-  (setq cn-font "霞鹜文楷"))
- ((member "LXGW WenKai Mono" (font-family-list))
-  (setq cn-font "LXGW WenKai Mono"))
- ((member "霞鹜文楷等宽" (font-family-list))
-  (setq cn-font "霞鹜文楷等宽"))
- ((member "仓耳今楷01-27533 W04" (font-family-list))
-  (setq cn-font "仓耳今楷01-27533 W04"))
- ((member "Hiragino Sans GB" (font-family-list))
-  (setq cn-font "Hiragino Sans GB"))
- ((member "Microsoft YaHei" (font-family-list))
-  (setq cn-font "Microsoft YaHei"))
- ((member "WenQuanYi Micro Hei" (font-family-list))
-  (setq cn-font "WenQuanYi Micro Hei"))
- ((member "Sarasa Mono SC" (font-family-list))
-  (setq cn-font "Sarasa Mono SC"))
- ((member "Simsun" (font-family-list))
-  (setq cn-font "Simsun"))
- ((member "宋体" (font-family-list))
-  (setq cn-font "宋体"))
- ((member "微软雅黑" (font-family-list))
-  (setq cn-font "微软雅黑"))
- )
-
-(setq en-font-size (car emacs-font-size-pair)
-      cn-font-size (cdr emacs-font-size-pair))
-
 (defun config-font-size (en-size cn-size)
   (when (display-graphic-p)
     (set-face-attribute 'default nil :family cn-size)
     (dolist (charset '(kana han cjk-misc bopomofo))
       (set-fontset-font (frame-parameter nil 'font) charset
                         (font-spec :family cn-font :size cn-size)))))
-;; (config-font-size 17 18)
-(config-font-size (default-value 'en-font-size) (default-value 'cn-font-size))
-
-(defvar emacs-english-font nil
-  "The font name of English.")
-
-(defvar emacs-cjk-font nil
-  "The font name for CJK.")
-(defvar emacs-font-size-pair nil
-  "Default font size pair for (latin . cjk).")
 
 (defun font-exist-p (fontname)
   "Test if this FONTNAME is exist or not."
@@ -205,26 +108,194 @@
     (if (not (x-list-fonts fontname))
         nil t)))
 
+;; adjust the fonts
+(defun available-font (font-list)
+  "Get the first available font from FONT-LIST."
+  (catch 'font
+    (dolist (font font-list)
+      (if (member font (font-family-list))
+	  (throw 'font font)))))
+
+(setq efl '(
+        "asu-cjk-mono"
+	    "Cascadia Code"
+	    "Source Code Pro"
+	    "LXGW WenKai Mono"
+	    "霞鹜文楷等宽"
+	    "JetBrains Mono"
+	    "Victor Mono"
+	    "Consolas"
+	    "Courier New"
+	    "Monaco"
+	    "Ubuntu Mono"
+	    "lucida grande"
+	    "lucida sans unicode"
+	    "lucida"
+	    "helvetica"
+	    "Tahoma"
+	    "Times New Roman"
+	    "Migu 1M Less"
+	    "DejaVu Sans Mono"
+	    ))
+
+(setq cfl '(
+        "asu-cjk-mono"
+	    "asu-cjk-sans"
+	    "asu-cjk-serif"
+	    "KleeOne+CJK"
+	    "LXGW WenKai"
+	    "霞鹜文楷"
+	    "LXGW WenKai Mono"
+	    "霞鹜文楷等宽"
+	    "仓耳今楷01-27533 W04"
+	    "Hiragino Sans GB"
+	    "Microsoft YaHei"
+	    "微软雅黑"
+	    "WenQuanYi Micro Hei"
+	    "Sarasa Mono SC"
+	    "Sarasa Mono HK"
+	    "Sarasa Mono TC"
+	    "Sarasa Mono JP"
+	    "Simsun"
+	    "宋体"
+	    ))
+(setq en-font "Time New Roman"
+      cn-font "LXGW WenKai")
+
+(setq cn-font (available-font cfl))
+(setq en-font (available-font efl))
+
+;; Fonts
+(setq emacs-font-size-pair '(30 . 32))
+
+(setq en-font-size (car emacs-font-size-pair)
+      cn-font-size (cdr emacs-font-size-pair))
+
+(defvar emacs-english-font en-font
+  "The font name of English.")
+
+(defvar emacs-cjk-font cn-font
+  "The font name for CJK.")
+
+(defvar emacs-font-size-pair (emacs-english-font . emacs-cjk-font)
+  "Default font size pair for (latin . cjk).")
+
+
+;; (config-font-size 17 18)
+(config-font-size (default-value 'en-font-size) (default-value 'cn-font-size))
+
+
+;; 解决卡顿
+(setq inhibit-compacting-font-caches t)
+;;只渲染当前屏幕语法高亮，加快显示速度
+(setq font-lock-maximum-decoration t)
+(global-font-lock-mode t)
+(setq font-lock-maximum-size 5000000); set 5mb file size limit for fontification
+
+
+;; font-family: "lucida grande", "lucida sans unicode", lucida, helvetica,
+;; "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+;; (cond
+;;  ((member "asu-cjk-mono" (font-family-list))
+;;   (setq en-font "asu-cjk-mono"))
+;;  ((member "Consolas" (font-family-list))
+;;   (setq en-font "Consolas"))
+;;  ((member "LXGW WenKai Mono" (font-family-list))
+;;   (setq en-font "LXGW WenKai Mono"))
+;;  ((member "霞鹜文楷等宽" (font-family-list))
+;;   (setq en-font "霞鹜文楷等宽"))
+;;  ((member "Victor Mono" (font-family-list))
+;;   (setq en-font "Victor Mono"))
+;;  ((member "JetBrains Mono" (font-family-list))
+;;   (setq en-font "JetBrains Mono"))
+;;  ((member "lucida grande" (font-family-list))
+;;   (setq en-font "lucida grande"))
+;;  ((member "lucida sans unicode" (font-family-list))
+;;   (setq en-font "lucida sans unicode"))
+;;  ((member "lucida" (font-family-list))
+;;   (setq en-font "lucida"))
+;;  ((member "helvetica" (font-family-list))
+;;   (setq en-font "helvetica"))
+;;  ((member "Tahoma" (font-family-list))
+;;   (setq en-font "Tahoma"))
+;;  ((member "Times New Roman" (font-family-list))
+;;   (setq en-font "Times New Roman"))
+;;  ((member "Migu 1M Less" (font-family-list))
+;;   (setq en-font "Migu 1M Less"))
+;;  ((member "Source Code Pro" (font-family-list))
+;;   (setq en-font "Source Code Pro"))
+;;  ((member "Monaco" (font-family-list))
+;;   (setq en-font "Monaco"))
+;;  ((member "DejaVu Sans Mono" (font-family-list))
+;;   (setq en-font "DejaVu Sans Mono"))
+;;  ((member "Consolas" (font-family-list))
+;;   (setq en-font "Consolas"))
+;;  )
+;; (cond
+;;  ((member "asu-cjk-sans" (font-family-list))
+;;   (setq cn-font "asu-cjk-sans"))
+;;  ((member "asu-cjk-mono" (font-family-list))
+;;   (setq cn-font "asu-cjk-mono"))
+;;  ((member "asu-cjk-serif" (font-family-list))
+;;   (setq cn-font "asu-cjk-serif"))
+;;  ((member "KleeOne+CJK" (font-family-list))
+;;   (setq cn-font "KleeOne+CJK"))
+
+;;  ((member "LXGW WenKai" (font-family-list))
+;;   (setq cn-font "LXGW WenKai"))
+;;  ((member "霞鹜文楷" (font-family-list))
+;;   (setq cn-font "霞鹜文楷"))
+;;  ((member "LXGW WenKai Mono" (font-family-list))
+;;   (setq cn-font "LXGW WenKai Mono"))
+;;  ((member "霞鹜文楷等宽" (font-family-list))
+;;   (setq cn-font "霞鹜文楷等宽"))
+;;  ((member "仓耳今楷01-27533 W04" (font-family-list))
+;;   (setq cn-font "仓耳今楷01-27533 W04"))
+;;  ((member "Hiragino Sans GB" (font-family-list))
+;;   (setq cn-font "Hiragino Sans GB"))
+;;  ((member "Microsoft YaHei" (font-family-list))
+;;   (setq cn-font "Microsoft YaHei"))
+;;  ((member "WenQuanYi Micro Hei" (font-family-list))
+;;   (setq cn-font "WenQuanYi Micro Hei"))
+;;  ((member "Sarasa Mono SC" (font-family-list))
+;;   (setq cn-font "Sarasa Mono SC"))
+;;  ((member "Simsun" (font-family-list))
+;;   (setq cn-font "Simsun"))
+;;  ((member "宋体" (font-family-list))
+;;   (setq cn-font "宋体"))
+;;  ((member "微软雅黑" (font-family-list))
+;;   (setq cn-font "微软雅黑"))
+;;  )
+
+
 (defun set-font (latin cjk size-pair)
   "Setup Emacs LATIN and CJK fonts with SIZE-PAIR on x window-system."
   (when (font-exist-p latin)
-    (set-frame-font (format "%s:pixelsize=%d" latin (car size-pair)) t))
+    (set-frame-font (format "%s:pixelsize=%d" latin (car size-pair)) t)
+    ;; (dolist (face '(default fixed-pitch fixed-pitch-serif variable-pitch))
+    ;;   (set-face-attribute face nil :family latin))
+    )
 
   (when (font-exist-p cjk)
     ;;(set-face-attribute 'default nil :family "JetBrainsMono NFM")
-    (dolist (charset '(kana
-                       han
-                       symbol
-                       cjk-misc
-                       bopomofo
-                       japanese-jisx0208
-                       japanese-jisx0212
-                       katakana-jisx0201
-                       ;;latin
-                       symbol
-                       ))
-      (set-fontset-font (frame-parameter nil 'font) charset
-                        (font-spec :family cjk :size (cdr size-pair))))))
+    (dolist (charset
+	         '(kana
+               han
+               symbol
+               cjk-misc
+               bopomofo
+               japanese-jisx0208
+               japanese-jisx0212
+               katakana-jisx0201
+               ;;latin
+               symbol
+               ))
+      (set-fontset-font
+       (frame-parameter nil 'font) charset
+       (font-spec :family cjk :size (cdr size-pair))))
+    (setq face-font-rescale-alist
+ 	      (mapcar (lambda (item) (cons item 1.2)) cfl))
+    ))
 
 (defun emacs-step-font-size (step)
   "Increase/Decrease Emacs's font by STEP size."
@@ -245,29 +316,17 @@
   "Increase Emacs's font-size acording emacs-font-size-pair-list."
   (interactive) (emacs-step-font-size -1))
 
-(when (member "Symbols Nerd Font Mono" (font-family-list))
-  (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
-  ;; FontAwesome 范围
-  (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
-  ;; 扩展至可能包含 Material Design Icons 的范围
-  (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
+;; (when (member "Symbols Nerd Font Mono" (font-family-list))
+;;   (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
+;;   ;; FontAwesome 范围
+;;   (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
+;;   ;; 扩展至可能包含 Material Design Icons 的范围
+;;   (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
+;; (set-face-attribute 'variable-pitch nil :family "asu-cjk-serif" :height 120)
+;; (set-face-attribute 'fixed-pitch nil :family "asu-cjk-mono" :height 120)
 
 
-(when sys/win32p
-  ;; (set-frame-font "Simsun 12")
-  ;; setup change size font, base on emacs-font-size-pair-list
-  (global-set-key (kbd "C-M-=") 'increase-emacs-font-size)
-  (global-set-key (kbd "C-M--") 'decrease-emacs-font-size)
 
-  )
-
-(set-face-attribute 'variable-pitch nil :family "asu-cjk-serif" :height 120)
-(set-face-attribute 'fixed-pitch nil :family "asu-cjk-mono" :height 120)
-;; (dolist (mode '(text-mode-hook markdown-hook))
-;;   (add-hook mode 'variable-pitch-mode)
-;;   )
-(add-hook 'prog-mode-hook 'load-program-font)
-(add-hook 'prog-mode-hook  (lambda () (variable-pitch-mode -1)))
 
 (defvar loaded-font-type nil
   "Current font type.")
@@ -284,19 +343,13 @@
     (message "Set default font")
   ))
 
-
-(load-default-font)
-
-
 ;;----------------------------------------------------------
 (defun load-program-font ()
   "Load Program font."
   (interactive)
   (unless (eq loaded-font-type 2)
-    ;; 设置英文字体并指定字号。
     (setq emacs-english-font "asu-cjk-mono")
     ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
-    ;; 给相应的字符集设置中文字体。
     (setq emacs-cjk-font "asu-cjk-mono")
     (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
     (when (member "Symbols Nerd Font Mono" (font-family-list))
@@ -308,6 +361,9 @@
     (variable-pitch-mode -1)
     (setq loaded-font-type 2)
     (message "Set program font")))
+
+;;(add-hook 'prog-mode-hook 'load-program-font)
+(add-hook 'prog-mode-hook  (lambda () (variable-pitch-mode -1)))
 
 ;;----------------------------------------------------------
 (defun load-org-font ()
@@ -376,11 +432,11 @@
   (setq loaded-font-type 3)
   (message "Set org-mode font")))
 
-;; (with-eval-after-load 'org
+(with-eval-after-load 'org
+  (add-hook 'org-mode-hook 'load-org-font)
+)
 
-;; )
 
-(add-hook 'org-mode-hook 'load-org-font)
 ;;; ----------------------------------------------------------
 
 ;; 解决 daemon 时， 字体无效。
@@ -422,16 +478,27 @@
 ;; (my-set-font)
 ;; (load-default-font)
 
+;; 新版已经绑定字体缩放
+;; ;; For Linux
+;; (when sys/linuxp
+;;   (global-set-key (kbd "<C-mouse-4>") 'text-scale-increase)
+;;   (global-set-key (kbd "<C-mouse-5>") 'text-scale-decrease)
+;;   )
+;; ;; For Windows
+;; (when sys/win32p
+;;   (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
+;;   (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+;;   )
 
-;; For Linux
-(when sys/linuxp
-  (global-set-key (kbd "<C-mouse-4>") 'text-scale-increase)
-  (global-set-key (kbd "<C-mouse-5>") 'text-scale-decrease)
-  )
-;; For Windows
+
 (when sys/win32p
-  (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
-  (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+  ;; (set-frame-font "Simsun 12")
+  ;; setup change size font, base on emacs-font-size-pair-list
+  (global-set-key (kbd "C-M-=") 'increase-emacs-font-size)
+  (global-set-key (kbd "C-M--") 'decrease-emacs-font-size)
   )
+
+(add-hook 'after-init-hook #'load-default-font)
+
 (provide 'load-set-font)
 ;;; load-set-font.el ends here.

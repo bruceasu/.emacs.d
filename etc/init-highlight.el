@@ -9,9 +9,15 @@
 (provide 'init-highlight)
 
 (eval-when-compile
-  (require '+const))
+  (require '+const)
+  (require '+custom)
+  (require '+fn)
+  (require 'init-package))
+
+;;(require-package 'highlight-symbol)
 
 ;; Highlight the current line
+(require-package 'hl-line)
 (use-package hl-line
   :ensure nil
   :hook ((after-init . global-hl-line-mode)
@@ -75,12 +81,14 @@ FACE defaults to inheriting from default and highlight."
 
 
 ;; Colorize color names in buffers
+
+(require-package 'helpful)
 (use-package rainbow-mode
   :diminish
   :defines helpful-mode-map
   :bind (:map help-mode-map
          ("w" . rainbow-mode))
-  :hook ((html-mode php-mode helpful-mode) . rainbow-mode)
+  :hook ((prog-mode html-mode php-mode helpful-mode) . rainbow-mode)
   :init (with-eval-after-load 'helpful
           (bind-key "w" #'rainbow-mode helpful-mode-map))
   :config
@@ -102,10 +110,17 @@ FACE defaults to inheriting from default and highlight."
     (advice-add #'rainbow-turn-off :after #'my-rainbow-clear-overlays)))
 
 ;; Highlight brackets according to their depth
+(require-package 'rainbow-delimiters)
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
-;; Highlight uncommitted changes using VC
+(require-package 'highlight-parentheses)
+(use-package highlight-parentheses
+  :init (add-hook 'prog-mode-hook 'highlight-parentheses-mode))
+
+
+;; Highliht uncommitted changes using VC
+(require-package 'diff-hl)
 (use-package diff-hl
   :custom (diff-hl-draw-borders nil)
   :custom-face

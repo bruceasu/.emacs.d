@@ -10,77 +10,74 @@
   (require '+const)
   (require '+custom))
 
-(when sys/linuxp
-  (progn
-    ;; =========================================================
-    ;; 普通用户调用root权限写文件
-    ;; ---------------------------------------------------------
-        ;;;###autoload
-    (defun suk/sudo-edit (&optional arg)
-      (interactive "P")
-      (if (or arg (not buffer-file-name))
-          (find-file (concat "/sudo:root@localhost:"
-                             (ido-read-file-name "Find file(as root): ")))
-        (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
-        )
-      )
-    ;; ---------------------------------------------------------
-        ;;;###autoload
-    (defadvice ido-find-file (after suk/sudo-find-file activate)
-      "Find file as root if necessary."
-      (unless (and buffer-file-name
-                   (file-writable-p buffer-file-name))
-        (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
-    ;; ---------------------------------------------------------
-        ;;;###autoload
-    (defun suk/sudo-find-file (file-name)
-      "Like find file, but opens the file as root."
-      (interactive "Find File for sudo-edit: ")
-      (let ((tramp-file-name
-             (concat "/sudo::"
-                     (expand-file-name file-name)
-                     )
-             )
-            )
-        (find-file tramp-file-name)
-        )
-      )
-
-    ;; ---------------------------------------------------------
-        ;;;###autoload
-    (defun suk/sudo-save ()
-      (interactive)
-      (if (not buffer-file-name)
-                                        ; true condition
-          (write-file (concat "/sudo:root@localhost:"
-                              (ido-read-file-name "File:")
-                              )
-                      )
-                                        ; false condition
-        (write-file (concat "/sudo:root@localhost:" buffer-file-name))
-        )
-      )
-    ;; Just hook on `find-file-hook', don't hook `dired-mode-hook', it's unnecessary.
-    (add-hook 'find-file-hook
-              #'(lambda ()
-                  (require 'auto-sudoedit)
-                  (auto-sudoedit)))         ;默认打开忽略模式
+;; 普通用户调用root权限写文件
+;;;###autoload
+(defun suk/sudo-edit (&optional arg)
+  (interactive "P")
+  (if (or arg (not buffer-file-name))
+      (find-file (concat "/sudo:root@localhost:"
+                         (ido-read-file-name "Find file(as root): ")))
+    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
     )
-
-  (defun suk/sudo-actions-one-key ()
-    (interactive)
-    (require 'one-key)
-    (one-key-create-menu
-     "SUDO ACTION"
-     '(
-       (("s" . "Sudo Save") . suk/sudo-save)
-       (("f" . "Sudo Find") . suk/sudo-find-file)
-       (("e" . "Sudo edit") . suk/sudo-edit)
-       )
-     t)
-    )
-
   )
+
+ ;;;###autoload
+(defadvice ido-find-file (after suk/sudo-find-file activate)
+  "Find file as root if necessary."
+  (unless (and buffer-file-name
+               (file-writable-p buffer-file-name))
+    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
+
+;;;###autoload
+(defun suk/sudo-find-file (file-name)
+  "Like find file, but opens the file as root."
+  (interactive "Find File for sudo-edit: ")
+  (let ((tramp-file-name
+         (concat "/sudo::"
+                 (expand-file-name file-name)
+                 )
+         )
+        )
+    (find-file tramp-file-name)
+    )
+  )
+ ;;;###autoload
+(defun suk/sudo-save ()
+  (interactive)
+  (if (not buffer-file-name)
+                                        ; true condition
+      (write-file (concat "/sudo:root@localhost:"
+                          (ido-read-file-name "File:")
+                          )
+                  )
+                                        ; false condition
+    (write-file (concat "/sudo:root@localhost:" buffer-file-name))
+    )
+  )
+
+;; Just hook on `find-file-hook', don't hook `dired-mode-hook', it's unnecessary.
+(add-hook 'find-file-hook
+          #'(lambda ()
+              (require 'auto-sudoedit)
+              (auto-sudoedit)))         ;默认打开忽略模式
+
+(with-eval-after-load 'hydra
+  (defhydra suk/sudo (:color blue)
+    "
+^SUDO EDIT^
+--------------------------------------------------------
+[_f_] Sudo Find
+[_e_] Sudo Edit
+[_s_] Sudo Save
+[_q_] Quit
+"
+    ("f" suk/sudo-find-file)
+    ("e" suk/sudo-edit)
+    ("s" suk/sudo-save)
+    ("q" nil :color red))
+  ;; (global-set-key (kbd "C-c C-y") 'suk/bookmark-launcher/body)
+  )
+
 
 ;; ---------------------------------------------------------
 ;;emacs sudo编辑远端文件由 jay 发表于 on 六月 20日, 2011我在之前的一篇

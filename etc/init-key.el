@@ -1,3 +1,4 @@
+;;; init-key --- initial the shortcut
 ;; -*- lexical-binding: t -*-
 
 (provide 'init-key)
@@ -30,15 +31,10 @@
   '("C-z" ))
 
 ;;; ### sudo ###
-(when sys/linuxp
-  (progn
-    (lazy-load-global-keys
-     '(("C-z C-s" . suk/sudo-actions-one-key))
-     "init-sudo"
-     )
-    )
-  )
-
+(lazy-load-global-keys
+ '(("C-z C-s" . suk/sudo/body))
+ "init-sudo"
+ )
 ;;; ### Sdcv ###
 ;;; --- 星际译王命令行
 (when  (eq system-type 'gnu/linux)
@@ -119,7 +115,13 @@
    )
  "basic-toolkit")
 
-    ;;; ### goto-line-preview ###
+
+(lazy-load-global-keys
+ '(
+   ("<f7>" . olivetti-mode))
+ "olivetti")
+
+;;; ### goto-line-preview ###
 (lazy-load-global-keys
  '(
    ("M-g p" . goto-line-preview))
@@ -156,6 +158,7 @@
  "move-text")
 
 ;; ### duplicate-line ###
+
 (lazy-load-global-keys
  '(
    ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
@@ -163,16 +166,17 @@
    ("C-S-s-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
    ("C-S-s-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
    ("C-:" . comment-or-uncomment-region+)     ;注释当前行
+
    )
  "duplicate-line")
 
 ;;; ### open new line ###
 (lazy-load-global-keys
- '(
-   ("C-o" . open-newline-above)         ;在上面一行新建一行
-   ("C-l" . open-newline-below)         ;在下面一行新建一行
-   )
- "open-newline")
+  '(
+    ("C-o" . open-newline-above)         ;在上面一行新建一行
+    ("C-l" . open-newline-below)         ;在下面一行新建一行
+    )
+  "open-newline")
 
 
 ;; ### Rect ###
@@ -222,6 +226,8 @@
 (lazy-load-global-keys
  '(
     ("C-c b"   . my-hydra-buffers/body)
+    ("M-<f7>"  . suk-read-mode)
+    ("C-;" . suk/close-current-buffer)            ;关闭当前buffer
    )
  "init-buffers")
 ;; ### Font ###
@@ -237,10 +243,10 @@
 ;; --- 窗口操作
 (lazy-load-set-keys
  '(
-   ("C-c :" . split-window-vertically)   ;纵向分割窗口
-   ("C-c |" . split-window-horizontally) ;横向分割窗口
-   ("C-;" . kill-this-buffer)            ;关闭当前buffer
-   ("C-x ;" . delete-other-windows)      ;关闭其它窗口
+   ;;("C-c :" . split-window-vertically)   ;纵向分割窗口
+   ;;("C-c |" . split-window-horizontally) ;横向分割窗口
+
+   ;;("C-x ;" . delete-other-windows)      ;关闭其它窗口
    ))
 (lazy-load-global-keys
  '(
@@ -390,6 +396,9 @@
 	   	("R" . boxquote-region)
 	   	("v" . visible-mode)
 	   	("f" . suk/file-shortcuts/body)
+	   	("<f9>" . emacs-session-save )
+   		("C-4" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
+   		("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
 	)
   "init-org"
   "<f9>")
@@ -398,7 +407,7 @@
 	)
 "init-string-inflection"
 	)
-	
+
 ;;; Dash.
 ;;(lazy-load-global-keys
 ;; '(("y" . dash-at-point)
@@ -439,7 +448,37 @@
    )
  "init-bookmark")
 
+(lazy-load-global-keys
+'(
+  ;;文件操作:
+  ;;("C-c r" . crux-rename-file) ; 重命名当前文件或目录。
+  ("C-c D"  . crux-delete-file-and-buffer) ;  删除当前文件并关闭相关缓冲区。
+  ;; 行/区域操作:
+  ;;crux-move-beginning-of-line: 将光标移动到行的开头。
+  ;;crux-move-end-of-line: 将光标移动到行的末尾。
+  ;;crux-top-join-line: 将当前行与上一行合并。
 
+  ("C-K" . crux-kill-whole-line) ;; 剪切整行。
+  ;;("C-J" .crux-kill-and-join-forward) ;;除当前行尾的空白字符，并与下一行合并。
+  ;;复制/剪切/粘贴操作:
+  ;;("C-l" . crux-smart-copy-line-above); 在当前行上方复制当前行。
+  ;;("C-o" . crux-smart-copy-line-below);  在当前行下方复制当前行。
+   ;;   缩进操作:
+
+  ("C-c TAB" . crux-indent-defun) ;; 对当前函数或代码块重新缩进。
+  ;; crux-cleanup-buffer-or-region ;; 清理缓冲区中选定区域或整个缓冲区中的尾随空格和空行。
+  ;; 查找/替换操作:
+  ;; crux-find-user-init-file ;; 快速打开 Emacs 用户配置文件。
+  ;; crux-view-url ;; 在浏览器中查看当前 URL。
+  ;; 其他实用功能:
+
+  ("C-c ;" . crux-kill-other-buffers) ;;关闭所有除当前缓冲区外的其他缓冲区。
+  ("C-k" . crux-kill-line-backwards) ;;向后删除整行内容（包括行尾换行符）。
+  ;; crux-reopen-as-root-mode: 以 root 身份重新打开当前文件。
+
+  )
+"init-crux"
+ )
 
 ;; kèitá bongding
 ;; f3 start macro(kmacro-start-macro-or-insert-counter),
@@ -572,7 +611,6 @@
 ;; (define-prefix-command 'comma-map)
 ;; (global-set-key (kbd ",") 'comma-map)
 ;; (global-set-key [(meta c)] 'meta-c-map)
-
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键. 退出isearch-mode, 所有按键失效.
 ;; (add-hook 'isearch-mode-hook
 ;;        '(lambda ()
@@ -607,19 +645,11 @@
 ;;C-M-\ 是排版
 
 ;; C-x C-q set/unset readonly
-
-;; (require 'undo-tree)
-;;(define-key undo-tree-map (kbd "C-x u") #'(lambda ()
-;;   (interactive)
-;;   (undo-tree-visualize)
-;;   (undo-tree-visualize-undo)))
-;; c-/ c-_  undo | c-x u undo-tree | c-s-/ s-? M-_ redo
-
 ;; 大小写转换： M-u, M-l, M-c
 
 ;; M-x align-regexp 可以方便的对齐一些文字
 
-  ;;; rectangle
+;;; rectangle
 ;; C-x r k
 ;; Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
 ;; C-x r M-w
@@ -657,3 +687,9 @@
 
 (define-prefix-command 'leader-key)
 (global-set-key (kbd "M-s-SPC") 'leader-key)
+
+;; Delete
+(global-set-key (kbd "C-c <backspace>") #'hungry-delete-backward)
+(global-set-key (kbd "C-c <delete>") #'hungry-delete-forward)
+
+(global-set-key (kbd "C-c C-j") #'yas-expand)

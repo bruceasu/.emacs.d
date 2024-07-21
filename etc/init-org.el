@@ -50,7 +50,7 @@
  '((plantuml . t)
    (dot . t)
    ))
-                                        ;(setq process-environment (cons "PATH=D:/green/plantUML/bin;%PATH%" process-environment))
+;;(setq process-environment (cons "PATH=D:/green/plantUML/bin;%PATH%" process-environment))
 
 (defun my-org-export-before-processing-hook (backend)
   (;let ((process-environment (cons "PATH=%PATH%" process-environment)))
@@ -106,47 +106,10 @@
 (setq org-log-done 'time)
 (setq org-catch-invisible-edits 'smart)
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Agenda
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq org-alphabetical-lists t)
-;; Keep tasks with dates on the global todo lists
-(setq org-agenda-todo-ignore-with-date nil)
-;; Keep tasks with deadlines on the global todo lists
-(setq org-agenda-todo-ignore-deadlines nil)
-;; Keep tasks with scheduled dates on the global todo lists
-(setq org-agenda-todo-ignore-scheduled nil)
-;; Keep tasks with timestamps on the global todo lists
-(setq org-agenda-todo-ignore-timestamp nil)
-;; Remove completed deadline tasks from the agenda view
-(setq org-agenda-skip-deadline-if-done t)
-;; Remove completed scheduled tasks from the agenda view
-(setq org-agenda-skip-scheduled-if-done t)
-;; Remove completed items from search results
-(setq org-agenda-skip-timestamp-if-done t)
-(setq org-agenda-include-diary nil)
-(setq org-agenda-insert-diary-extract-time t)
-;; Include agenda archive files when searching for things
-(setq org-agenda-text-search-extra-files (quote (agenda-archives)))
-;; Show all future entries for repeating tasks
-(setq org-agenda-repeating-timestamp-show-all t)
-;; Show all agenda dates - even if they are empty
-(setq org-agenda-show-all-dates t)
-;; Sorting order for tasks on the agenda
-(setq org-agenda-sorting-strategy
-      '((agenda habit-down time-up user-defined-up effort-up category-keep)
-        (todo category-up effort-up)
-        (tags category-up effort-up)
-        (search category-up)))
 ;; Start the weekly agenda on Monday
 (setq org-agenda-start-on-weekday 1)
 (setq org-agenda-diary-file (expand-file-name "diary.org" org-files-directory))
 
-(setq org-agenda-persistent-filter t)
-;; Do not dim blocked tasks
-(setq org-agenda-dim-blocked-tasks nil)
-;; Compact the block agenda view
-(setq org-agenda-compact-blocks t)
 ;; capture template
 (setq org-default-notes-file (expand-file-name "notes.org" org-files-directory))
 ;; Capture templates for: TODO tasks, Notes,
@@ -247,25 +210,6 @@
         ("NEXT" ("WAITTING") ("CANCELLED") ("HOLD"))
         ("DONE" ("WAITTING") ("CANCELLED") ("HOLD"))))
 
-;; Filetags look like this:
-;; #+FILETAGS: NORANG @office
-;; Allow setting single tags without the menu
-(setq org-fast-tag-selection-single-key (quote expert))
-(setq org-tags-match-list-sublevels t)
-;; allows changing todo states with S-left and S-right skipping all of the
-;; normal processing when entering or leaving a todo state. This cycles
-;; through the todo states but skips setting timestamps and entering notes
-;; which is very convenient when all you want to do is fix up the status of an
-;; entry.
-(setq org-treat-S-cursor-todo-selection-as-state-change nil)
-(setq org-deadline-warning-days 30)
-(setq org-log-done 'time)
-(setq org-log-into-drawer t)
-(setq org-log-state-notes-insert-after-drawers nil)
-;; Sometimes I change tasks I'm clocking quickly
-;; - this removes clocked tasks with 0:00 duration
-(setq org-clock-out-remove-zero-time-clocks t)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EXPORTER
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -327,14 +271,6 @@
             (load-org-font)
             ))
 
-(add-hook 'org-agenda-mode-hook
-          (lambda() (hl-line-mode 1)))
-(add-hook 'org-clock-out-hook
-          (lambda()
-            (save-excursion
-              (beginning-of-line 0)
-              (org-remove-empty-drawer-at "LOGBOOK" (point)))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Refile settings
@@ -380,16 +316,7 @@
 ;;
 ;; To open the attachment for a task use C-c C-a o. This prompts for
 ;; the attachment to open and TAB completion works here.
-;;
-;; The ID changes for every task header when a new ID is generated.
-;;
-;; It's possible to use named directories for attachments but I
-;; haven't needed this functionality yet 鈥?it's there if you need
-;; it.
-;;
-;; I store my org-mode attachments with my org files in a
-;; subdirectory data. These are automatically added to my git
-;; repository along with any other org-mode changes I've made.
+
 
 ;; 运行 Org Babel Tangle 命令：`M-x org-babel-tangle`。
 ;; 从 org 文件中生成 el 配置文件
@@ -442,13 +369,6 @@
   :hook ((org-mode . org-modern-mode)
          (org-agenda-finalize . org-modern-agenda)
          ))
-
-;; Export text/html MIME emails
-(use-package org-mime
-  :bind (:map message-mode-map
-              ("C-c M-o" . org-mime-htmlize)
-              :map org-mode-map
-              ("C-c M-o" . org-mime-org-buffer-htmlize)))
 
 ;; covert to html
 (use-package htmlize

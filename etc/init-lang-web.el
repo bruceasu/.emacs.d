@@ -3,7 +3,7 @@
 
 (eval-when-compile
   (require '+custom)
-  (require '+func)
+  (require '+fn)
   (require 'init-package))
 
 ;; {{ typescript
@@ -271,6 +271,7 @@ If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it.
 (with-eval-after-load 'rjsx-mode
   (define-key rjsx-mode-map "<" nil))
 
+(require-package 'emmet-mode)
 (use-package emmet-mode
   :defer 3
   :init (setq emmet-expand-jsx-className? t)

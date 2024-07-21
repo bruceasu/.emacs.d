@@ -1,22 +1,7 @@
 ;;; init-buffers.el --- Initialize buffers configurations. -*- lexical-binding: t -*-
 
 (eval-when-compile
-  (require '+const)
-  (require '+custom)
-  (require '+func)
   (require 'buffer-extension))
-
-(suk-set-key-bindings
- 'global-set-key
- (list
-  ;;'([C-t]               transpose-chars)
-  ;;'([S-f6]              hs-minor-mode)
-  ;;'([S-f5]              toggle-truncate-lines)
-  (list (kbd "C-S-t") #'suk/open-last-closed)
-  (list (kbd "C-x R") #'recentf-open)
-  (list (kbd "C-S-<f6>") #'suk/move-buffer-file)
-  (list (kbd "C-S-<f2>")  #'suk/rename-file-and-buffer)
-  ))
 
 (with-eval-after-load 'hydra
   (defhydra my-hydra-buffers ()

@@ -6,7 +6,7 @@
 (eval-when-compile
   (require '+const)
   (require '+custom)
-  (require '+func)
+  (require '+fn)
   (require 'init-package)
   )
 
@@ -41,80 +41,6 @@
 (setq-default fill-column 80)
 (setq column-number-mode t)
 
-(require 'display-line-numbers)
-;; 设置行号
-;;(global-display-line-numbers-mode 1)
-;; Alternatively, to use it only in programming modes:
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
-
-;; Line numbers are not displayed when large files are used.
-(setq line-number-display-limit large-file-warning-threshold)
-(setq line-number-display-limit-width 1000)
-
-(dolist (hook (list
-               'c-mode-common-hook
-               'c-mode-hook
-               'emacs-lisp-mode-hook
-               'lisp-interaction-mode-hook
-               'lisp-mode-hook
-               'java-mode-hook
-               'asm-mode-hook
-               'haskell-mode-hook
-               'rcirc-mode-hook
-               'erc-mode-hook
-               'sh-mode-hook
-               'makefile-gmake-mode-hook
-               'python-mode-hook
-               'js-mode-hook
-               'html-mode-hook
-               'css-mode-hook
-               'tuareg-mode-hook
-               'go-mode-hook
-               'coffee-mode-hook
-               'qml-mode-hook
-               'markdown-mode-hook
-               'slime-repl-mode-hook
-               'package-menu-mode-hook
-               'cmake-mode-hook
-               'php-mode-hook
-               'web-mode-hook
-               'coffee-mode-hook
-               'sws-mode-hook
-               'jade-mode-hook
-               'vala-mode-hook
-               'rust-mode-hook
-               'ruby-mode-hook
-               'qmake-mode-hook
-               'lua-mode-hook
-               'swift-mode-hook
-               'llvm-mode-hook
-               'conf-toml-mode-hook
-               'nxml-mode-hook
-               'nim-mode-hook
-               'typescript-mode-hook
-               'elixir-mode-hook
-               'clojure-mode-hook
-               'dart-mode-hook
-               'zig-mode-hook
-
-               'c-ts-mode-hook
-               'c++-ts-mode-hook
-               'cmake-ts-mode-hook
-               'toml-ts-mode-hook
-               'css-ts-mode-hook
-               'js-ts-mode-hook
-               'json-ts-mode-hook
-               'python-ts-mode-hook
-               'bash-ts-mode-hook
-               'typescript-ts-mode-hook
-               'rust-ts-mode-hook
-               'java-ts-mode-hook
-               'kotlin-mode-hook
-               'prog-mode-hook
-               'yaml-mode-hook
-               'conf-mode-hook
-               ))
-  (add-hook hook (lambda () (display-line-numbers-mode))))
 
 ;; Easily adjust the font size in all frames
 (use-package default-text-scale
@@ -185,13 +111,13 @@
 ;; 最常用的功能
 (defhydra my-hydra-launcher (:color blue)
   "
-^Emms^				^Study^             
+^Emms^				^Study^
 -------------------------------------------------------------------
 [_R_] Random	 	[_vv_] Pronounce word
 [_n_] Next			[_W_] Big word list
 [_p_] Previous 		[_vi_] Play word's video
-[_P_] Pause 		[_im_] Image of word 
-[_S_] Stop			[_w_] Select big word 
+[_P_] Pause 		[_im_] Image of word
+[_S_] Stop			[_w_] Select big word
 [_O_] Open
 [_L_] Playlist
 [_K_] Search
@@ -781,17 +707,27 @@
 
 
 
-(suk-set-key-bindings 'global-set-key
-                      (list
-                       (list (kbd "C-M-<return>")     #'suk/frame-maximize)
-                       (list (kbd "C-M-<backspace>")  #'suk/frame-restore)
-                       (list (kbd "C-M-<left>")       #'suk/frame-left-half)
-                       (list (kbd "C-M-<right>")      #'suk/frame-right-half)
-                       (list (kbd "C-M-<up>")         #'suk/frame-top-half)
-                       (list (kbd "C-M-<down>")       #'suk/frame-bottom-half)
-                       ))
+;; (suk-set-key-bindings 'global-set-key
+;;                       (list
+;;                        (list (kbd "C-M-<return>")     #'suk/frame-maximize)
+;;                        (list (kbd "C-M-<backspace>")  #'suk/frame-restore)
+;;                        (list (kbd "C-M-<left>")       #'suk/frame-left-half)
+;;                        (list (kbd "C-M-<right>")      #'suk/frame-right-half)
+;;                        (list (kbd "C-M-<up>")         #'suk/frame-top-half)
+;;                        (list (kbd "C-M-<down>")       #'suk/frame-bottom-half)
+;;                        ))
 
-
+(lazy-load-set-keys
+ '(
+   ("C-z C-s" . suk/sudo-actions-one-key)
+   ("C-M-<return>" . suk/frame-maximize)
+   ("C-M-<backspace>" . suk/frame-restore)
+   ("C-M-<left>" . suk/frame-left-half)
+   ("C-M-<right>" . suk/frame-right-half)
+   ("C-M-<up>" .suk/frame-top-half)
+   ("C-M-<down>" . suk/frame-bottom-half)
+   )
+ )
 ;; 调节屏幕亮度
 ;;;###autoload
 (defun suk/set-backlight (&optional light-value)
