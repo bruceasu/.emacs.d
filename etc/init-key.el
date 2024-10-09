@@ -38,22 +38,22 @@
 ;;; ### Sdcv ###
 ;;; --- 星际译王命令行
 (when  (eq system-type 'gnu/linux)
-(lazy-load-global-keys
- '(("p" . sdcv-search-pointer)		   ;光标处的单词, buffer显示
-   ("P" . sdcv-search-pointer+)		   ;光标处的单词, tooltip显示
-   ("i" . sdcv-search-input)		   ;输入的单词, buffer显示
-   (";" . sdcv-search-input+)
-   ("y" . my-youdao-dictionary-search-at-point)
-   ("Y" . youdao-dictionary-search-at-point)
-   ("g" . google-translate-at-point)
-   ("G" . google-translate-query-translate)
-   ("s" . google-translate-smooth-translate)
-   ("f" . fanyi-dwim)
-   ("d" . fanyi-dwim2)
-   ("h" . fanyi-from-history)
-   )
- "init-translate"
- "C-z"))
+    (lazy-load-global-keys
+     '(("p" . sdcv-search-pointer)           ;光标处的单词, buffer显示
+       ("P" . sdcv-search-pointer+)           ;光标处的单词, tooltip显示
+       ("i" . sdcv-search-input)           ;输入的单词, buffer显示
+       (";" . sdcv-search-input+)
+       ("y" . my-youdao-dictionary-search-at-point)
+       ("Y" . youdao-dictionary-search-at-point)
+       ("g" . google-translate-at-point)
+       ("G" . google-translate-query-translate)
+       ("s" . google-translate-smooth-translate)
+       ("f" . fanyi-dwim)
+       ("d" . fanyi-dwim2)
+       ("h" . fanyi-from-history)
+       )
+     "init-translate"
+     "C-z"))
 
 ;;; ### Insert translated name ###
 ;; youdao / google
@@ -88,32 +88,7 @@
    ("C-c ," . hs-show-all)
    )
  )
-   ;;; ### basic-toolkit ###
-(lazy-load-global-keys
- '(
-   ("M-s-n" . comment-part-move-down)   ;向下移动注释
-   ("M-s-p" . comment-part-move-up)     ;向上移动注释
-   ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
-   ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
-   ("M-2" . indent-buffer)              ;自动格式化当前Buffer
-   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
-   ;;("C-x u" . mark-line)              ;选中整行
-   ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
-   ("M-G" . goto-column)                ;到指定列
-   ("C->" . remember-init)              ;记忆初始函数
-   ("C-<" . remember-jump)              ;记忆跳转函数
-   ("M-s-," . point-stack-pop)          ;buffer索引跳转
-   ("M-s-." . point-stack-push)         ;buffer索引标记
-   ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
-   ("M-I" . backward-indent)            ;向后移动4个字符
-                                        ;   ("s-J" . scroll-up-one-line)         ;向上滚动一行
-                                        ;   ("s-K" . scroll-down-one-line)       ;向下滚动一行
-   ("<f2>" . refresh-file)              ;自动刷新文件
-   ("s-f" . find-file-root)             ;用root打开文件
-   ("s-r" . find-file-smb)              ;访问sambao
-   ("C-J" . join-lines)                ;连接行
-   )
- "basic-toolkit")
+
 
 
 (lazy-load-global-keys
@@ -127,14 +102,6 @@
    ("M-g p" . goto-line-preview))
  "goto-line-preview")
 
-    ;;; ### Delete block ###
-    ;;; --- 快速删除光标左右的内容
-(lazy-load-global-keys
- '(
-   ("M-," . delete-block-backward)
-   ("M-." . delete-block-forward))
- "delete-block")
-
 
     ;;; ### watch other window ###
     ;;; --- 滚动其他窗口
@@ -146,57 +113,6 @@
    ("M-n" . window-move-down)           ;向上滚动当前窗口
    )
  "win-move")
-
-;; ### move text ###
-(lazy-load-global-keys
- '(
-   ("M-N" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
-   ("M-P" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
-   ("M-<DOWN>" . move-text-down)	;把光标所在的整行文字(或标记)下移一行
-   ("M-<UP>"   . move-text-up)	;把光标所在的整行文字(或标记)上移一行
-   )
- "move-text")
-
-;; ### duplicate-line ###
-
-(lazy-load-global-keys
- '(
-   ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
-   ("C-S-l" . duplicate-line-or-region-below) ;向下复制当前行或区域
-   ("C-S-s-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
-   ("C-S-s-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
-   ("C-:" . comment-or-uncomment-region+)     ;注释当前行
-
-   )
- "duplicate-line")
-
-;;; ### open new line ###
-(lazy-load-global-keys
-  '(
-    ("C-o" . open-newline-above)         ;在上面一行新建一行
-    ("C-l" . open-newline-below)         ;在下面一行新建一行
-    )
-  "open-newline")
-
-
-;; ### Rect ###
-;; --- 矩形操作
-(lazy-load-global-keys
- '(
-   ("s-M" . rm-set-mark)                ;矩形标记
-   ("s-X" . rm-exchange-point-and-mark) ;矩形对角交换
-   ("s-D" . rm-kill-region)             ;矩形删除
-   ("s-S" . rm-kill-ring-save)          ;矩形保存
-   ("s-Y" . yank-rectangle)             ;粘帖矩形
-   ("s-O" . open-rectangle)       ;用空白填充矩形, 并向右移动文本
-   ("s-C" . clear-rectangle)      ;清空矩形
-   ("s-T" . string-rectangle)     ;用字符串替代矩形的每一行
-   ("s-I" . string-insert-rectangle)    ;插入字符串在矩形的每一行
-   ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
-   ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
-   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
-   )
- "rect-extension")
 
 ;; ### Buffer Move ###
 ;; --- 缓存移动
@@ -223,13 +139,14 @@
    ("C-M-S-h" . mark-paragraph)            ;选中段落
    ("M-SPC" . just-one-space)              ;只有一个空格在光标处
    ))
+
 (lazy-load-global-keys
  '(
     ("C-c b"   . my-hydra-buffers/body)
     ("M-<f7>"  . suk-read-mode)
     ("C-;" . suk/close-current-buffer)            ;关闭当前buffer
    )
- "init-buffers")
+ "buffer-extension")
 ;; ### Font ###
 ;; --- 字体命令
 (lazy-load-set-keys
@@ -268,50 +185,8 @@
    ("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
    ))
 
-  ;;; ### Awesome-Pair ###
-  ;;; --- 结构化编程
-
-  ;;; ### Thingh-edit ###
-  ;;; --- 增强式编辑当前光标的对象
-(lazy-load-global-keys
- '(
-   ("C-c w" . thing-copy-word)
-   ("C-c s" . thing-copy-symbol)
-   ("C-c m" . thing-copy-email)
-   ("C-c f" . thing-copy-filename)
-   ("C-c u" . thing-copy-url)
-   ("C-c x" . thing-copy-sexp)
-   ("C-c g" . thing-copy-page)
-   ("C-c t" . thing-copy-sentence)
-   ("C-c o" . thing-copy-witespace)
-   ("C-c i" . thing-copy-list)
-   ("C-c c" . thing-copy-comment)
-   ("C-c h" . thing-copy-defun)
-   ("C-c p" . thing-copy-parentheses)
-   ("C-c l" . thing-copy-line)
-   ("C-c a" . thing-copy-to-line-begining)
-   ("C-c e" . thing-copy-to-line-end)
-   ("C-c W" . thing-cut-word)
-   ("C-c S" . thing-cut-symbol)
-   ("C-c M" . thing-cut-email)
-   ("C-c F" . thing-cut-filename)
-   ("C-c G" . thing-cut-page)
-   ("C-c T" . thing-cut-sentence)
-   ("C-c O" . thing-cut-whitespace)
-   ("C-c I" . thing-cut-list)
-   ("C-c C" . thing-cut-comment)
-   ("C-c H" . thing-cut-defun)
-   ("C-c P" . thing-cut-parentheses)
-   ("C-c L" . thing-cut-line)
-   ("C-c A" . thing-cut-to-line-beginning)
-   ("C-c E" . thing-cut-to-line-end)
-   )
- "thing-edit"
- "C-z"
- )
-
-  ;;; ### Isearch ###
-  ;;; --- 交互式搜索
+;;; ### Isearch ###
+;;; --- 交互式搜索
 (lazy-load-set-keys
  '(
    ("TAB" . isearch-complete)               ;isearch补全
@@ -340,12 +215,6 @@
  )
 
 
-  ;;; ### expand-region ###
-(lazy-load-global-keys
- '(
-   ("C-+" . er/expand-region))
- "expand-region")
-
 ;; ### vdiff ###
 (lazy-load-global-keys
  '(
@@ -364,8 +233,8 @@
  )
 
 
-  ;;; ### Company en words ###
-  ;;; --- 英文助手
+;;; ### Company en words ###
+;;; --- 英文助手
 (lazy-load-global-keys
  '(
    ("M-r" . toggle-company-english-helper) ;英文助手
@@ -385,28 +254,28 @@
 (define-prefix-command 'F9-map)
 (global-set-key (kbd "<f9>") 'F9-map)
 (lazy-load-global-keys
-	'(("a" . org-agenda)
-	   	("A" . org-attach)
-	   	("s" . show-org-agenda)
-	   	("c" . org-capture)
-	   	("i" . org-toggle-inline-images)
-	   	("l" . org-toggle-link-display)
-	   	("d" . calendar)
-	   	("F" . boxquote-insert-file)
-	   	("R" . boxquote-region)
-	   	("v" . visible-mode)
-	   	("f" . suk/file-shortcuts/body)
-	   	("<f9>" . emacs-session-save )
-   		("C-4" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
-   		("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
-	)
+    '(("a" . org-agenda)
+           ("A" . org-attach)
+           ("s" . show-org-agenda)
+           ("c" . org-capture)
+           ("i" . org-toggle-inline-images)
+           ("l" . org-toggle-link-display)
+           ("d" . calendar)
+           ("F" . boxquote-insert-file)
+           ("R" . boxquote-region)
+           ("v" . visible-mode)
+           ("f" . suk/file-shortcuts/body)
+           ("<f9>" . emacs-session-save )
+           ("C-4" . insert-changelog-date)      ;插入日志时间 (%Y/%m/%d)
+           ("C-&" . switch-to-messages)         ;跳转到 *Messages* buffer
+    )
   "init-org"
   "<f9>")
 (lazy-load-global-keys
-	'(("C-c C-u" . string-inflection-hydra/body)
-	)
+    '(("C-c C-u" . string-inflection-hydra/body)
+    )
 "init-string-inflection"
-	)
+    )
 
 ;;; Dash.
 ;;(lazy-load-global-keys
@@ -447,38 +316,6 @@
     ("C-<f7>"   . suk/bookmark-launcher/body)
    )
  "init-bookmark")
-
-(lazy-load-global-keys
-'(
-  ;;文件操作:
-  ;;("C-c r" . crux-rename-file) ; 重命名当前文件或目录。
-  ("C-c D"  . crux-delete-file-and-buffer) ;  删除当前文件并关闭相关缓冲区。
-  ;; 行/区域操作:
-  ;;crux-move-beginning-of-line: 将光标移动到行的开头。
-  ;;crux-move-end-of-line: 将光标移动到行的末尾。
-  ;;crux-top-join-line: 将当前行与上一行合并。
-
-  ("C-K" . crux-kill-whole-line) ;; 剪切整行。
-  ;;("C-J" .crux-kill-and-join-forward) ;;除当前行尾的空白字符，并与下一行合并。
-  ;;复制/剪切/粘贴操作:
-  ;;("C-l" . crux-smart-copy-line-above); 在当前行上方复制当前行。
-  ;;("C-o" . crux-smart-copy-line-below);  在当前行下方复制当前行。
-   ;;   缩进操作:
-
-  ("C-c TAB" . crux-indent-defun) ;; 对当前函数或代码块重新缩进。
-  ;; crux-cleanup-buffer-or-region ;; 清理缓冲区中选定区域或整个缓冲区中的尾随空格和空行。
-  ;; 查找/替换操作:
-  ;; crux-find-user-init-file ;; 快速打开 Emacs 用户配置文件。
-  ;; crux-view-url ;; 在浏览器中查看当前 URL。
-  ;; 其他实用功能:
-
-  ("C-c ;" . crux-kill-other-buffers) ;;关闭所有除当前缓冲区外的其他缓冲区。
-  ("C-k" . crux-kill-line-backwards) ;;向后删除整行内容（包括行尾换行符）。
-  ;; crux-reopen-as-root-mode: 以 root 身份重新打开当前文件。
-
-  )
-"init-crux"
- )
 
 ;; kèitá bongding
 ;; f3 start macro(kmacro-start-macro-or-insert-counter),

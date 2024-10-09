@@ -2,6 +2,7 @@
 #+OPTIONS: ^:{}
 #+TITLE: SUK GE EMACS PUIJI
 
+HELP：调用 check-parens： 你可以直接在任何缓冲区中使用命令 M-x check-parens，它会检查当前缓冲区的括号是否平衡。
 * Cinyin
 ni go citding mangin hai yunglai taigòu makying ge Emacs taiyim.
 kêi saugoi zo hòu do ge makying citding tungmai zápsing zo dáilöng ge cápgin.
@@ -602,78 +603,46 @@ The configuration entrance is mainly used to load other settings and plug-ins.
     (require '+custom)
     )
 
+  (provide '+fn)
+
+
+  (defmacro suk/timer (&rest body)
+    "Measure the time of code BODY running."
+    `(let ((time (current-time)))
+       ,@body
+       (float-time (time-since time))))
+
+
+  ;;;###autoload
   (defun childframe-workable-p ()
     "Whether childframe is workable."
     (not (or noninteractive
              emacs-basic-display
              (not (display-graphic-p)))))
-
+  ;;;###autoload
   (defun childframe-completion-workable-p ()
     "Whether childframe completion is workable."
     (and (eq suk-completion-style 'childframe)
          (childframe-workable-p)))
-
+  ;;;###autoload
   (defun icons-displayable-p ()
     "Return non-nil if icons are displayable."
     (and suk-icon
          (or (featurep 'nerd-icons)
              (require 'nerd-icons nil t))))
-
+  ;;;###autoload
   (defun suk-treesit-available-p ()
     "Check whether tree-sitter is available.
   Native tree-sitter is introduced since 29.1."
-    (and suk-tree-sitter
-         (fboundp 'treesit-available-p)
+    (and (fboundp 'treesit-available-p)
          (treesit-available-p)))
-
+  ;;;###autoload
   (defun too-long-file-p ()
     "Check whether the file is too long."
     (or (> (buffer-size) 100000)
         (and (fboundp 'buffer-line-statistics)
              (> (car (buffer-line-statistics)) 10000))))
-
-  ;; Increase selected region by semantic units
-  (defun suk-treesit-available-p ()
-    "Check whether tree-sitter is available.
-  Native tree-sitter is introduced since 29.1."
-    (and suk-tree-sitter
-         (fboundp 'treesit-available-p)
-         (treesit-available-p)))
-
-
-  ;; Browse URL
   ;;;###autoload
-  (defun suk-webkit-browse-url (url &optional pop-buffer new-session)
-    "Browse URL with xwidget-webkit' and switch or pop to the buffer.
-
-    POP-BUFFER specifies whether to pop to the buffer.
-    NEW-SESSION specifies whether to create a new xwidget-webkit session."
-    (interactive (progn
-                   (require 'browse-url)
-                   (browse-url-interactive-arg "xwidget-webkit URL: ")))
-    (or (featurep 'xwidget-internal)
-        (user-error "Your Emacs was not compiled with xwidgets support"))
-
-    (xwidget-webkit-browse-url url new-session)
-    (let ((buf (xwidget-buffer (xwidget-webkit-current-session))))
-      (when (buffer-live-p buf)
-        (and (eq buf (current-buffer)) (quit-window))
-        (if pop-buffer
-            (pop-to-buffer buf)
-          (switch-to-buffer buf)))))
-
-
-  (defun local-require (pkg)
-    "Require PKG in site-lisp directory."
-    (unless (featurep pkg)
-      (load (expand-file-name
-             (cond
-              ((eq pkg 'go-mode-load)
-               (format "%s/go-mode/%s" suk-emacs-extension-dir pkg))
-              (t
-               (format "%s/%s/%s" suk-emacs-extension-dir pkg pkg))))
-            t t)))
-
   (defun my-ensure (feature)
     "Make sure FEATURE is required."
     (unless (featurep feature)
@@ -681,60 +650,7 @@ The configuration entrance is mainly used to load other settings and plug-ins.
           (require feature)
         (error nil))))
 
-  (when sys/linuxp
-  ;;;###autoload
-    (defun my-hostname ()
-      "Return stripped output of cli program hostname."
-      (let* ((output (shell-command-to-string "hostname")))
-        ;; Windows DOS might output some extra noise
-        (string-trim (replace-regexp-in-string "hostname" "" output))))
 
-    )
-
-  ;;;###autoload
-  (defun my-git-root-dir ()
-    "Git root directory."
-    ;;(interactive)
-    (locate-dominating-file default-directory ".git"))
-
-  ;;;###autoload
-  (defun my-git-files-in-rev-command (rev level)
-    "Return git command line to show files in REV and LEVEL."
-    (unless level (setq level 0))
-    (concat "git diff-tree --no-commit-id --name-only -r "
-            rev
-            (make-string level ?^)))
-
-  ;;;###autoload
-  (defun my-nonempty-lines (str)
-    "Split STR into lines."
-    (split-string str "[\r\n]+" t))
-
-  ;;;###autoload
-  (defun my-lines-from-command-output (command)
-    "Return lines of COMMAND output."
-    (let* ((output (string-trim (shell-command-to-string command)))
-           (cands (my-nonempty-lines output)))
-      (delq nil (delete-dups cands))))
-
-  ;;;###autoload
-  (defun run-cmd-and-replace-region (cmd)
-    "Run CMD in shell on selected region or current buffer.
-  Then replace the region or buffer with cli output."
-    (let* ((orig-point (point))
-           (b (if (region-active-p) (region-beginning) (point-min)))
-           (e (if (region-active-p) (region-end) (point-max))))
-      (shell-command-on-region b e cmd nil t)
-      (goto-char orig-point)))
-
-  ;;;###autoload
-  (defun my-use-tags-as-imenu-function-p ()
-    "Can use tags file to build imenu function"
-    (my-ensure 'counsel-etags)
-    (and (locate-dominating-file default-directory "TAGS")
-         ;; latest universal ctags has built in parser for javascript/typescript
-         (counsel-etags-universal-ctags-p "ctags")
-         (memq major-mode '(typescript-mode js-mode javascript-mode))))
 
   ;; {{ copied from http://ergoemacs.org/emacs/elisp_read_file_content.html
   ;;;###autoload
@@ -749,56 +665,6 @@ The configuration entrance is mainly used to load other settings and plug-ins.
     (split-string (my-get-string-from-file file) "\n" t))
   ;; }}
 
-  ;;;###autoload
-  (defun my-write-to-file (str file)
-    "Write STR to FILE."
-    (with-temp-buffer
-      (insert str)
-      (write-file (file-truename file))))
-
-  ;;;###autoload
-  (defun my-write-to-missing-file (str file)
-    "Write STR to FILE if it's missing."
-    (unless (file-exists-p file)
-      (my-write-to-file str file)))
-
-  ;;;###autoload
-  ;; Handier way to add modes to auto-mode-alist
-  (defun my-add-auto-mode (mode &rest patterns)
-    "Add entries to `auto-mode-alist' to use MODE for given file PATTERNS."
-    (dolist (pattern patterns)
-      (push (cons pattern mode) auto-mode-alist)))
-
-  ;;;###autoload
-  (defun my-add-interpreter-mode (mode &rest patterns)
-    "Add entries to `interpreter-mode-alist' to use MODE for given file PATTERNS."
-    (dolist (pattern patterns)
-      (push (cons pattern mode) interpreter-mode-alist )))
-
-  ;;;###autoload
-  (defmacro my-push-if-uniq (item items)
-    "Push ITEM into ITEMS if it's unique."
-    `(unless (member ,item ,items) (push ,item ,items)))
-
-  ;;;###autoload
-  (defun my-what-face (&optional position)
-    "Show all faces at POSITION."
-    (let* ((face (get-text-property (or position (point)) 'face)))
-      (unless (keywordp (car-safe face)) (list face))))
-
-
-
-  ;; String utilities missing from core emacs
-  ;;;###autoload
-  (defun string-all-matches (regex str &optional group)
-    "Find matches for REGEX in STR, returning the full match or GROUP."
-    (let ((result nil)
-          (pos 0)
-          (group (or group 0)))
-      (while (string-match regex str pos)
-        (push (match-string group str) result)
-        (setq pos (match-end group)))
-      result))
 
   ;;;###autoload
   (defun path-in-directory-p (file directory)
@@ -806,131 +672,7 @@ The configuration entrance is mainly used to load other settings and plug-ins.
     (let* ((pattern (concat "^" (file-name-as-directory directory))))
       (if (string-match pattern file) file)))
 
-  ;;;###autoload
-  (defun my-prepare-candidate-fit-into-screen (s)
-    (let* ((w (frame-width))
-           ;; display kill ring item in one line
-           (key (replace-regexp-in-string "[ \t]*[\n\r]+[ \t]*" "\\\\n" s)))
-      ;; strip the whitespace
-      (setq key (replace-regexp-in-string "^[ \t]+" "" key))
-      ;; fit to the minibuffer width
-      (if (> (length key) w)
-          (setq key (concat (substring key 0 (- w 4)) "...")))
-      (cons key s)))
-
-  ;;;###autoload
-  (defun my-select-from-kill-ring (fn)
-    "If N > 1, yank the Nth item in `kill-ring'.
-  If N is nil, use `ivy-mode' to browse `kill-ring'."
-    (interactive "P")
-    (let* ((candidates (cl-remove-if
-                        (lambda (s)
-                          (or (< (length s) 5)
-                              (string-match "\\`[\n[:blank:]]+\\'" s)))
-                        (delete-dups kill-ring)))
-           (ivy-height (/ (frame-height) 2)))
-      (ivy-read "Browse `kill-ring':"
-                (mapcar #'my-prepare-candidate-fit-into-screen candidates)
-                :action fn)))
-
-  ;;;###autoload
-  (defun my-delete-selected-region ()
-    "Delete selected region."
-    (when (region-active-p)
-      (delete-region (region-beginning) (region-end))))
-
-  ;;;###autoload
-  (defun my-insert-str (str)
-    "Insert STR into current buffer."
-    ;; ivy8 or ivy9
-    (if (consp str) (setq str (cdr str)))
-    ;; evil-mode?
-    (if (and (functionp 'evil-normal-state-p)
-             (boundp 'evil-move-cursor-back)
-             (evil-normal-state-p)
-             (not (eolp))
-             (not (eobp)))
-        (forward-char))
-
-    (my-delete-selected-region)
-
-    ;; insert now
-    (insert str)
-    str)
-
-  ;;;###autoload
-  (defun my-line-str (&optional line-end)
-    (buffer-substring-no-properties (line-beginning-position)
-                                    (if line-end line-end (line-end-position))))
-
-  ;;;###autoload
-  (defun my-is-in-one-line (b e)
-    (save-excursion
-      (goto-char b)
-      (and (<= (line-beginning-position) b)
-           (<= e (line-end-position)))))
-
-  ;;;###autoload
-  (defun my-buffer-str ()
-    (buffer-substring-no-properties (point-min) (point-max)))
-
-  ;;;###autoload
-  (defun my-selected-str ()
-    "Get string of selected region."
-    (buffer-substring-no-properties (region-beginning) (region-end)))
-
-  ;;;###autoload
-  (defun my-use-selected-string-or-ask (&optional hint)
-    "Use selected region or ask for input.
-  If HINT is empty, use symbol at point."
-    (cond
-     ((region-active-p)
-      (my-selected-str))
-     ((or (not hint) (string= "" hint))
-      (thing-at-point 'symbol))
-     (t
-      (read-string hint))))
-
-  ;;;###autoload
-  (defun delete-this-file ()
-    "Delete the current file, and kill the buffer."
-    (interactive)
-    (or (buffer-file-name) (error "No file is currently being edited"))
-    (when (yes-or-no-p (format "Really delete '%s'?"
-                               (file-name-nondirectory buffer-file-name)))
-      (delete-file (buffer-file-name))
-      (kill-this-buffer)))
-
-  ;;;###autoload
-  (defun rename-this-file-and-buffer (new-name)
-    "Renames both current buffer and file it's visiting to NEW-NAME."
-    (interactive "sNew name: ")
-    (let ((name (buffer-name))
-          (filename (buffer-file-name)))
-      (unless filename
-        (error "Buffer '%s' is not visiting a file!" name))
-      (if (get-buffer new-name)
-          (message "A buffer named '%s' already exists!" new-name)
-        (progn
-          (rename-file filename new-name 1)
-          (rename-buffer new-name)
-          (set-visited-file-name new-name)
-          (set-buffer-modified-p nil)))))
-
   (defvar my-load-user-customized-major-mode-hook t)
-
-  ;;;###autoload
-  (defun buffer-too-big-p ()
-    "Test if current buffer is too big."
-    ;; 5000 lines
-    (> (buffer-size) (* 5000 80)))
-
-  ;;;###autoload
-  (defun my-file-too-big-p (file)
-    "Test if FILE is too big."
-    (> (nth 7 (file-attributes file))
-       (* 5000 64)))
-
   (defvar my-force-buffer-file-temp-p nil)
   ;;;###autoload
   (defun my-buffer-file-temp-p ()
@@ -964,106 +706,6 @@ The configuration entrance is mainly used to load other settings and plug-ins.
         (setq rlt nil)))
       rlt))
 
-
-  (defvar my-mplayer-extra-opts ""
-    "Extra options for mplayer (ao or vo setup).
-  For example, you can '(setq my-mplayer-extra-opts \"-fs -ao alsa -vo vdpau\")'.")
-
-  ;;;###autoload
-  (defun my-guess-mplayer-path ()
-    "Guess cli program mplayer's path."
-    (let* ((program "mplayer")
-           (common-opts "-fs -quiet"))
-      (cond
-       (*is-a-mac*
-        (cond
-         ((executable-find "mplayer")
-          (setq program "mplayer"))
-         (t
-          (setq program "open")))
-
-        (setq program "mplayer"))
-
-       (sys/linuxp
-        (setq program "mplayer -stop-xscreensaver"))
-
-       (sys/cygwin
-        (if (file-executable-p "/cygdrive/c/mplayer/mplayer.exe")
-            (setq program "/cygdrive/c/mplayer/mplayer.exe")
-          (setq program "/cygdrive/d/mplayer/mplayer.exe")))
-
-       (sys/win32p
-        (cond
-         ((file-executable-p "c:/mplayer/mplayer.exe")
-          (setq program "c:/mplayer/mplayer.exe"))
-         ((file-executable-p "d:/mplayer/mplayer.exe")
-          (setq program "d:/mplayer/mplayer.exe"))
-         ((file-executable-p "c:/Program Files/mplayer/mplayer.exe")
-          (setq program "\"c:/Program Files/mplayer/mplayer.exe\""))
-         ((file-executable-p "d:/Program Files/mplayer/mplayer.exe")
-          (setq program "\"d:/Program Files/mplayer/mplayer.exe\""))
-         ((file-executable-p "c:/mpv/mpv.exe")
-          (setq program "c:/mpv/mpv.exe"))
-         ((file-executable-p "d:/mpv/mpv.exe")
-          (setq program "d:/mpv/mpv.exe"))
-         ((file-executable-p "c:/Program Files/mpv/mpv.exe")
-          (setq program "\"c:/Program Files/mpv/mpv.exe\""))
-         ((file-executable-p "d:/Program Files/mpv/mpv.exe")
-          (setq program "\"d:/Program Files/mpv/mpv.exe\""))
-         (t
-          (error "Can't find media player."))))
-
-
-       (t
-        (error "Can't find any media player!")))
-
-      (unless (string-match "mplayer" program)
-        (setq common-opts ""))
-      (format "%s %s %s" program common-opts my-mplayer-extra-opts)))
-
-  ;;;###autoload
-  (defun my-guess-image-viewer-path (image &optional stream-p)
-    "How to open IMAGE which could be STREAM-P."
-    (cond
-     (sys/macp
-      (format "open %s &" image))
-
-     (sys/linuxp
-      (if stream-p (format "curl -L %s | feh -F - &" image)
-        (format "feh -F %s &" image)))
-
-     (sys/cygwin
-      "feh -F")
-
-     (t ; windows
-      (format "rundll32.exe %s\\\\System32\\\\\shimgvw.dll, ImageView_Fullscreen %s &"
-              (getenv "SystemRoot")
-              image))))
-
-  ;;;###autoload
-  (defun my-gclip ()
-    "Get clipboard content."
-    (let (powershell-program)
-      (cond
-       ;; Windows
-       ((and *win64* (fboundp 'w32-get-clipboard-data))
-        ;; `w32-set-clipboard-data' makes `w32-get-clipboard-data' always return null
-        (w32-get-clipboard-data))
-
-       ;; Windows 10
-       ((and sys/win32p (setq powershell-program (executable-find "powershell.exe")))
-        (string-trim-right
-         (with-output-to-string
-           (with-current-buffer standard-output
-             (call-process powershell-program nil t nil "-command" "Get-Clipboard")))))
-
-       (sys/cygwinp
-        (string-trim-right (shell-command-to-string "cat /dev/clipboard")))
-
-       ;; xclip can handle
-       (t
-        (xclip-get-selection 'clipboard)))))
-
   (defvar my-ssh-client-user nil
     "User name of ssh client.")
 
@@ -1080,47 +722,6 @@ The configuration entrance is mainly used to load other settings and plug-ins.
     (with-temp-buffer
       (insert string)
       (write-region (point-min) (point-max) file)))
-
-  ;;;###autoload
-  (defun my-pclip (str-val)
-    "Put STR-VAL into clipboard."
-    (let* (win64-clip-program
-           ssh-client)
-      (cond
-       ;; Windows 10
-       ((and sys/win32p (setq win64-clip-program (executable-find "clip.exe")))
-        (my-send-string-to-cli-stdin str-val win64-clip-program))
-
-       ;; Windows
-       ((and sys/win32p (fboundp 'w32-set-clipboard-data))
-        ;; Don't know why, but on Windows 7 this API does not work.
-        (w32-set-clipboard-data str-val))
-
-       ;; Cygwin
-       (sys/cygwinp
-        (my-write-string-to-file str-val "/dev/clipboard"))
-
-       ;; If Emacs is inside an ssh session, place the clipboard content
-       ;; into "~/.tmp-clipboard" and send it back into ssh client
-       ;; Make sure you already set up ssh correctly.
-       ;; Only enabled if ssh server is macOS
-       ((and (setq ssh-client (getenv "SSH_CLIENT"))
-             (not (string= ssh-client ""))
-             ,*is-a-mac*)
-        (let* ((file "~/.tmp-clipboard")
-               (ip (car (split-string ssh-client "[ \t]+")))
-               (cmd (format "scp %s %s@%s:~/" file my-ssh-client-user ip)))
-          (when my-ssh-client-user
-            (my-write-to-file str-val file)
-            (shell-command cmd)
-            ;; clean up
-            (delete-file file))))
-
-       ;; xclip can handle
-       (t
-        (xclip-set-selection 'clipboard str-val)))))
-  ;; }}
-
 
   ;;;###autoload
   (defun my-should-use-minimum-resource ()
@@ -1490,24 +1091,56 @@ The configuration entrance is mainly used to load other settings and plug-ins.
         (setq i (1- i)))
       (setq str (if (= 0 strip-count) (substring path (1+ i)) path))
       (replace-regexp-in-string "^/" "" str)))
-  ;;;###autoload
-  (defun my-goto-line (n)
-    "Goto line N."
-    (goto-char (point-min))
-    (forward-line (1- n)))
 
-  (provide '+func)
-  ;; =========================================================
-  ;; 通过编辑配置文件使其可以调用外部程序，来为其添加功能。
-  ;; 增加命令
-  ;;(defun lxr (names)
-  ;;  (interactive "s查找联系人，请输入条件：")
-  ;;  (call-process-shell-command "lxr" nil t t "-s" names))
-  ;;执行命令
-  ;;首先按功能键，Alt+x，然后输入命令 lxr 。
-  ;;系统提示：“查找联系人，请输入条件："。
-  ;;输入完成后，emacs 会执行命令lxr -s names，并输出执行的结果。
-  ;; =========================================================
+
+  ;;===================================================
+  ;; Byte Compile
+  ;;===================================================
+  ;;;###autoload
+  (defun byte-compile-elpa ()
+    "Compile packages in elpa directory. Useful if you switch Emacs versions."
+    (interactive)
+    (if (fboundp 'async-byte-recompile-directory)
+        (async-byte-recompile-directory package-user-dir)
+      (byte-recompile-directory package-user-dir 0 t)))
+  ;;;###autoload
+  (defun byte-compile-extensions ()
+    "Compile packages in extensions directory."
+    (interactive)
+    (let ((dir (locate-user-emacs-file "extensions")))
+      (if (fboundp 'async-byte-recompile-directory)
+          (async-byte-recompile-directory dir)
+        (byte-recompile-directory dir 0 t))))
+  ;;;###autoload
+  (defun native-compile-elpa ()
+    "Native-compile packages in elpa directory."
+    (interactive)
+    (if (fboundp 'native-compile-async)
+        (native-compile-async package-user-dir t)))
+  ;;;###autoload
+  (defun native-compile-extensions ()
+    "Native compile packages in extensions directory."
+    (interactive)
+    (let ((dir (locate-user-emacs-file "extensions")))
+      (if (fboundp 'native-compile-async)
+          (native-compile-async dir t))))
+  ;;;###autoload
+  (defun suk-set-variable (variable value &optional no-save)
+    "Set the VARIABLE to VALUE, and return VALUE.
+
+    Save to option `custom-file' if NO-SAVE is nil."
+    (customize-set-variable variable value)
+    (when (and (not no-save)
+               (file-writable-p custom-file))
+      (with-temp-buffer
+        (insert-file-contents custom-file)
+        (goto-char (point-min))
+        (while (re-search-forward
+                (format "^[\t ]*[;]*[\t ]*(setq %s .*)" variable)
+                nil t)
+          (replace-match (format "(setq %s '%s)" variable value) nil nil))
+        (write-region nil nil custom-file)
+        (message "Saved %s (%s) to %s" variable value custom-file))))
 #+end_src
 * Geibun Citding: etc/init-basic.el
 ** Geibun Citding.
@@ -1515,19 +1148,6 @@ The configuration entrance is mainly used to load other settings and plug-ins.
   ;; init-basic.el --- Initialize basic configurations.	-*- lexical-binding: t -*-
 
   (provide 'init-basic)
-
-  (eval-when-compile
-    (require '+const)
-    (require '+custom)
-    (require '+func)
-    (require 'subr-x)
-    )
-
-  ;; Speed up startup
-  (defvar default-file-name-handler-alist file-name-handler-alist)
-  (setq file-name-handler-alist nil)
-  (setq inhibit-startup-message nil)
-  (setq inhibit-startup-screen t) ; hèicèi makying ge kaidung gaimin
   (when (fboundp 'tool-bar-mode) (tool-bar-mode -1)) ; ģánbèi gunggêi lán.
   (when (fboundp 'menu-bar-mode) (menu-bar-mode -1)) ;ģánbèi coidán lán
   (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1)) ;ģánbèi ģandung tiu
@@ -1537,6 +1157,7 @@ The configuration entrance is mainly used to load other settings and plug-ins.
   (setq user-mail-address suk-mail-address)
 
   (setq-default major-mode 'text-mode
+                cursor-type 'bar
                 fill-column 80
                 tab-width 4
                 c-basic-offset 4

@@ -71,6 +71,9 @@
 (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
 ;; Diary
 (setq diary-file (concat user-home-dir "/diary"))
+;; server 无效
+(require 'server)
+;;(setq server-socket-dir suk-emacs-var-dir)
 
 ;; Ignore `cl` expiration warnings
 (setq byte-compile-warnings '(cl-function))
@@ -91,8 +94,8 @@
 (defun add-subdirs-to-load-path (search-dir isFirst)
   (interactive)
   (when isFirst
-    ;; 原来的版本没有把第1个 search-dir 本身添加到 `load path`
-    ;; 递归时的search-dir是在递归前加入了。
+	;; The original version did not add the first search-dir itself to the `load path`
+	;; The recursive search-dir was added before the recursion.
     (add-to-list 'load-path search-dir))
   (let* ((dir (file-name-as-directory search-dir)))
     (dolist (subdir
@@ -127,23 +130,10 @@
 (add-subdirs-to-load-path suk-emacs-extension-dir t)
 (add-subdirs-to-load-path suk-emacs-themes-dir t)
 
-
 ;; Clear to avoid analyzing files when loading remote files.
 (setq file-name-handler-alist nil)
 ;; Don't pass case-insensitive to `auto-mode-alist'
 (setq auto-mode-case-fold nil)
-(unless (or (daemonp) noninteractive init-file-debug)
-  ;; Suppress file handlers operations at startup
-  ;; `file-name-handler-alist' is consulted on each call to `require' and `load'
-  (let ((old-value file-name-handler-alist))
-    (setq file-name-handler-alist nil)
-    (set-default-toplevel-value 'file-name-handler-alist file-name-handler-alist)
-    (add-hook 'emacs-startup-hook
-	      (lambda ()
-	        "Recover file name handlers."
-	        (setq file-name-handler-alist
-	              (delete-dups (append file-name-handler-alist old-value))))
-	      101)))
 
 
 (require '+const)
@@ -154,53 +144,25 @@
 (setq user-full-name suk-full-name)
 (setq user-mail-address suk-mail-address)
 (require 'init-package)
-(require 'lazy-load)
-(require 'init-key)
-(require 'init-completion)
 (require 'init-ui)
+(require 'init-completion)
+(require 'init-search)
+(require 'init-key)
+(require 'init-edit)
 (require 'init-org)
-(require 'init-mode)
-(when sys/linuxp
-  (progn
-    (require 'init-im)   ;; windows 下表现不好
-    (require 'init-sudo)
-    )
-  )
-
-;; delay load
-(run-with-idle-timer 1 nil
-  #'(lambda ()
-    ;; Restore session at last.
-    (require 'init-session)
-    (emacs-session-restore)
-    (server-start)
-    (require 'init-recentf)
-    (require 'init-idle)
-    ;;(require 'highlight-parentheses)
-    (require 'init-highlight)
-    (require 'init-window)
-    (require 'load-abbrev)
-    ;; Programming
-    (require 'init-ide)
-    (autoload 'calendar "init-calendar" "Config Chinese calendar " t)
-    ;; Make gc pauses faster by decreasing the threshold.
-    (setq gc-cons-threshold (* 16 1000 1000))
-    ))
-
+(require 'init-utils)
+(require 'init-recentf)
+;; ;; delay load
+(require 'init-idle)
 
 ;; Reset the GC setting
 (add-hook 'emacs-startup-hook
-         (lambda ()
-           "Fuifuk makying ge zik"
-           (setq file-name-handler-alist default-file-name-handler-alist)
-           (message "*** Emacs ready in %s with %d garbage collections."
-                    (format "%.2f seconds"
-                            (float-time
-                             (time-subtract after-init-time before-init-time)))
-                    gcs-done)
-           (add-hook 'focus-out-hook 'garbage-collect)))
-
-
+	      (lambda ()
+		    (message "*** Emacs ready in %s with %d garbage collections."
+		             (format "%.2f seconds" (float-time
+	                                         (time-subtract after-init-time before-init-time)))
+	                 gcs-done)
+		    (add-hook 'focus-out-hook 'garbage-collect)))
 
 ;; @see https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/
 ;; Emacs 25 does gc too frequently

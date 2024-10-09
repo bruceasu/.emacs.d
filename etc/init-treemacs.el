@@ -10,7 +10,9 @@
 (eval-when-compile
   (require '+custom))
 
-
+;; 设置 Python 可执行文件路径
+(setq python-shell-interpreter "c:/green/Python311/python.exe")
+(setq treemacs-python-executable "c:/green/Python311/python.exe")
 
 ;; A tree layout file explorer
 (use-package treemacs
@@ -40,7 +42,7 @@
   (treemacs-filewatch-mode t)
   (when sys/win32p
     (pcase (cons (not (null (executable-find "git.exe")))
-                 (not (null (executable-find "c:/greem/Python311/python.exe"))))
+                 (not (null (executable-find "c:/green/Python311/python.exe"))))
       (`(t . t)
        (treemacs-git-mode 'deferred))
       (`(t . _)

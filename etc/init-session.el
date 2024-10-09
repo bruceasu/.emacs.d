@@ -36,7 +36,7 @@
     (desktop-save "~/.emacs.d/var/")
     ;; Exit emacs.
     (kill-emacs)))
-
+(global-set-key  (kbd "S-<f9>") 'emacs-session-save)
 (provide 'init-session)
 
 ;;; init-session.el ends here

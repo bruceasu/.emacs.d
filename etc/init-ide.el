@@ -8,6 +8,36 @@
 (eval-when-compile
   (require 'init-package))
 
+
+;; Develop tools
+(require-package 'legalese) ;; create legal boilerplate text such as copyright notices, licenses, or disclaimers into your files.
+(setq legalese-name "Bruce Asu")
+(setq legalease-email "bruceasu@gmail.com")
+;; M-x legalese-insert-license
+(require-package 'web-mode)
+;;(require-package 'lua-mode)
+(require-package 'yaml-mode)
+(require-package 'js2-mode)
+;; (require-package 'rjsx-mode) ; use my package in extensions
+(require-package 'csv-mode)
+(require-package 'emmet-mode)
+;;(require-package 'groovy-mode)
+;; magit sometime use packages which not released yet
+;; so we place it at the end to make sure other packages are installed first
+(require-package 'magit)
+;;(require-package 'graphql-mode)
+(require-package 'auto-yasnippet)
+(require-package 'typescript-mode)
+(require-package 'nvm)
+;;(require-package 'lsp-mode)
+;;(require-package 'elpy) ;; python
+;;(require-package 'request) ;; a http client
+;;(require-package 'websocket) ; for debug debugging of browsers
+;;(require-package 'simple-httpd)
+;;(require-package 'highlight-symbol)
+;;(require-package 'cpputils-cmake)
+;;(require-package 'rust-mode)
+
 ;; 设置行号
 ;; builtin
 (require 'display-line-numbers)
@@ -19,7 +49,8 @@
 (setq line-number-display-limit large-file-warning-threshold)
 (setq line-number-display-limit-width 1000)
 
-; Parentheses
+;;(require 'init-awesome-pair)
+;; Parentheses
 (use-package paren
   :ensure nil
   :config (setq-default show-paren-style 'mixed
@@ -36,24 +67,24 @@
 
 ;; Flymake
 ;; 配置 Python 使用 flymake-pyflakes 后端
-(require 'flymake)
-(when (executable-find "pyflakes")
-  (flymake-python-pyflakes-load))
+;; (require 'flymake)
+;; (when (executable-find "pyflakes")
+;;   (flymake-python-pyflakes-load))
 
 ;; 配置 JavaScript 使用 flymake-eslint 后端
-(when (executable-find "eslint")
-  (setq flymake-eslint-executable "eslint")
-  (add-hook 'js-mode-hook 'flymake-eslint-load))
+;; (when (executable-find "eslint")
+;;   (setq flymake-eslint-executable "eslint")
+;;   (add-hook 'js-mode-hook 'flymake-eslint-load))
 
 ;; 配置 Shell 使用 flymake-shellcheck 后端
-(when (executable-find "shellcheck")
-  (setq flymake-shellcheck-excluded-linters '("SC2162" "SC2164"))
-  (add-hook 'sh-mode-hook 'flymake-shellcheck-load))
+;; (when (executable-find "shellcheck")
+;;   (setq flymake-shellcheck-excluded-linters '("SC2162" "SC2164"))
+;;   (add-hook 'sh-mode-hook 'flymake-shellcheck-load))
 
 ;; 配置 C/C++ 使用 flymake-proc 后端（默认后端）
-(add-hook 'c-mode-hook 'flymake-mode)
-(add-hook 'c++-mode-hook 'flymake-mode)
-(add-hook 'prog-mode-hook 'flymake-mode)
+;; (add-hook 'c-mode-hook 'flymake-mode)
+;; (add-hook 'c++-mode-hook 'flymake-mode)
+;; (add-hook 'prog-mode-hook 'flymake-mode)
 
 
 ;; format all, formatter for almost languages
@@ -177,8 +208,6 @@
 
 
 (require 'init-treemacs)
-(require 'init-lang-web)
-
 (require-package 'projectile)
 (use-package projectile
   :ensure t
@@ -197,14 +226,14 @@
   )
 
 ;; 设置打开 NeoTree 树形列表展示
-(require-package 'neotree)
-(use-package neotree
-  :commands (projectile-switch-project neotree-dir)
-  :config
-  (setq neo-theme 'ascii           ; NeoTree 图标的样式
-        neo-window-width 35
-        neo-window-fixed-size nil) ; 设置 NeoTree 窗口的宽度可以使用鼠标调整
-  :bind ("C-c o" . projectile-switch-project))
+;;(require-package 'neotree)
+;;(use-package neotree
+;;  :commands (projectile-switch-project neotree-dir)
+;;  :config
+;;  (setq neo-theme 'ascii           ; NeoTree 图标的样式
+;;        neo-window-width 35
+;;        neo-window-fixed-size nil) ; 设置 NeoTree 窗口的宽度可以使用鼠标调整
+;;  :bind ("C-c o" . projectile-switch-project))
 
 ;;Show function arglist or variable docstring
 (use-package eldoc
@@ -260,61 +289,13 @@
 
 ;; Tree-sitter support
 (when (suk-treesit-available-p)
-    (use-package treesit-auto
-      :hook (after-init . global-treesit-auto-mode)
-      :init (setq treesit-auto-install 'prompt))
-	(global-tree-sitter-mode)
+  (require-package 'treesit-auto)
+  (use-package treesit-auto
+    :ensure t
+    :hook (after-init . global-treesit-auto-mode)
+    :init (setq treesit-auto-install 'prompt))
+	(global-treesit-auto-mode)
     )
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; settings for LSP MODE ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; (use-package eglot
-;;   :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
-;;   :bind (("C-c e f" . #'eglot-format)
-;;          ("C-c e i" . #'eglot-code-action-organize-imports)
-;;          ("C-c e q" . #'eglot-code-action-quickfix))
-;;   :config
-;;   ;; (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
-;;   (defun eglot-actions-before-save()
-;;     (add-hook 'before-save-hook (lambda ()
-;;                                   (call-interactively #'eglot-format)
-;;                                   (call-interactively #'eglot-code-action-organize-imports))))
-;;   (add-to-list 'eglot-server-programs '(web-mode "vls"))
-;;   (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save))
-
-
-(setenv "PATH" (concat (getenv "PATH") ";c:/green/python311/"))
-(add-to-list 'exec-path "c:/green/python311")
-;; https://github.com/manateelazycat/lsp-bridge
-(require 'lsp-bridge)
-(global-lsp-bridge-mode)
-(add-hook 'prog-mode-hook 'lsp-bridge-mode)
-;; set the python interpreter path if it's different from default
-(setq lsp-bridge-python-command "C:\\green\Python311\\python.exe")
-
-(require 'lsp-bridge-jdtls) ;; 根据项目自动生成自定义配置，添加必要的启动参数
-(setq lsp-bridge-enable-auto-import t) ;; 开启自动导入依赖，目前没有code action。补全时可以通过这个导入相应的依赖，建议开启。
-(setq lsp-bridge-jdtls-jvm-args '("-javaagent:c:/User/suk/.m2/repository/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar"))
-(custom-set-variables '(lsp-bridge-get-workspace-folder 'my-lsp-bridge-workspace))
-(add-hook 'java-mode-hook (lambda ()
-                            (setq-local lsp-bridge-get-lang-server-by-project 'lsp-bridge-get-jdtls-server-by-project)))
-
-
-(defun my-lsp-bridge-workspace (proj)
-  (let* ((proj-2-workspace
-          '(("D:/03_projects/suk/word-process-src" . "file://D:/03_projects/suk")
-            ("D:/03_projects/suk/anysql" . "file://D:/03_projects/suk")
-
-
-          ))
-         (kv (assoc proj proj-2-workspace)))
-    (when kv
-        (cdr kv))))
-
 
 
 ;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
@@ -484,3 +465,667 @@
                'conf-mode-hook
                ))
   (add-hook hook (lambda () (display-line-numbers-mode))))
+
+
+;;;###autoload
+(defun run-cmd-and-replace-region (cmd)
+  "Run CMD in shell on selected region or current buffer.
+Then replace the region or buffer with cli output."
+  (let* ((orig-point (point))
+         (b (if (region-active-p) (region-beginning) (point-min)))
+         (e (if (region-active-p) (region-end) (point-max))))
+    (shell-command-on-region b e cmd nil t)
+    (goto-char orig-point)))
+
+
+;;;###autoload
+(defun my-buffer-str ()
+  (buffer-substring-no-properties (point-min) (point-max)))
+
+;; {{ typescript
+(use-package typescript-mode
+  :load-path "~/.emacs.d/extensions/typescript"
+  :hook ((typescript-mode . (typescript-mode-hook-setup)))
+  :config
+  (defun typescript-mode-hook-setup ()
+    "Set up `typescript-mode'."
+    (when (my-use-tags-as-imenu-function-p)
+      ;; use ctags to calculate imenu items
+      (setq imenu-create-index-function
+            'counsel-etags-imenu-default-create-index-function)))
+
+  (defun my-typescript-beginning-of-defun-hack (orig-func &rest args)
+    "Overwrite typescript beginning detection."
+    (ignore orig-func)
+    (ignore args)
+    (when (my-use-tags-as-imenu-function-p)
+      (let* ((closest (my-closest-imenu-item)))
+        (when closest
+          (imenu closest)))))
+  (advice-add 'typescript-beginning-of-defun
+              :around #'my-typescript-beginning-of-defun-hack)
+  )
+
+
+;;;###autoload
+(defun my-use-tags-as-imenu-function-p ()
+  "Can use tags file to build imenu function"
+  (my-ensure 'counsel-etags)
+  (and (locate-dominating-file default-directory "TAGS")
+       ;; latest universal ctags has built in parser for javascript/typescript
+       (counsel-etags-universal-ctags-p "ctags")
+       (memq major-mode '(typescript-mode js-mode javascript-mode))))
+
+;; }}
+
+
+;; CSS
+(use-package css-mode
+  :init (setq css-indent-offset 2))
+
+;; SCSS
+(use-package scss-mode
+  :init (setq scss-compile-at-save nil))
+
+;; LESS
+(unless (fboundp 'less-css-mode)
+  (use-package less-css-mode))
+
+;; JSON
+(unless (fboundp 'js-json-mode)
+  (use-package json-mode
+    :load-path "~/.emacs.d/extensions/json-mode"))
+
+;; JavaScript
+(use-package js
+  :init (setq js-indent-level 2))
+
+(with-eval-after-load 'js-mode
+  ;; '$' is part of variable name like '$item'
+  (modify-syntax-entry ?$ "w" js-mode-syntax-table))
+
+;; {{ js-beautify
+(defun my-js-beautify (&optional indent-size)
+  "Beautify selected region or whole buffer with js-beautify.
+INDENT-SIZE decide the indentation level.
+`sudo pip install jsbeautifier` to install js-beautify.'"
+  (interactive "P")
+  (let* ((executable (if (executable-find "js-beautify") "js-beautify"
+                       "jsbeautify")))
+    ;; detect indentation level
+    (unless indent-size
+      (setq indent-size
+            (cond
+             ((memq major-mode '(js-mode javascript-mode))
+              js-indent-level)
+
+             ((memq major-mode '(web-mode))
+              web-mode-code-indent-offset)
+
+             ((memq major-mode '(typescript-mode))
+              typescript-indent-level)
+
+             (t
+              2))))
+    ;; do it!
+    (run-cmd-and-replace-region (concat executable
+                                        " --stdin "
+                                        " --jslint-happy --brace-style=end-expand --keep-array-indentation "
+                                        (format " --indent-size=%d " indent-size)))))
+;; }}
+
+
+
+
+(use-package js2-mode
+  :mode (("\\.js\\'" . js2-minor-mode)
+         ("\\.jsx\\'" . js2-minor-jsx-mode))
+  :interpreter (("node" . js2-minor-mode)
+                ("node" . js2-minor-jsx-mode))
+  :hook ((js2-minor-mode . (lambda()  (js2-imenu-extras-mode)
+                             (js2-highlight-unused-variables-mode)
+
+                             )))
+  :config
+  (defun my-validate-json-or-js-expression (&optional not-json-p)
+    "Validate buffer or select region as JSON.
+If NOT-JSON-P is not nil, validate as Javascript expression instead of JSON."
+    (interactive "P")
+    (let* ((json-exp (if (region-active-p) (my-selected-str)
+                       (my-buffer-str)))
+           (jsbuf-offet (if not-json-p 0 (length "var a=")))
+           errs
+           first-err
+           (first-err-pos (if (region-active-p) (region-beginning) 0)))
+      (unless not-json-p
+        (setq json-exp (format "var a=%s;"  json-exp)))
+      (with-temp-buffer
+        (insert json-exp)
+        (my-ensure 'js2-mode)
+        (js2-parse)
+        (setq errs (js2-errors))
+        (cond
+         ((not errs)
+          (message "NO error found. Good job!"))
+         (t
+          ;; yes, first error in buffer is the last element in errs
+          (setq first-err (car (last errs)))
+          (setq first-err-pos (+ first-err-pos (- (cadr first-err) jsbuf-offet)))
+          (message "%d error(s), first at buffer position %d: %s"
+                   (length errs)
+                   first-err-pos
+                   (js2-get-msg (caar first-err))))))
+      (if first-err (goto-char first-err-pos))))
+
+  (defun my-print-json-path (&optional hardcoded-array-index)
+    "Print the path to the JSON value under point, and save it in the kill ring.
+If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it."
+    (interactive "P")
+    (cond
+     ((memq major-mode '(js2-mode))
+      (js2-print-json-path hardcoded-array-index))
+     (t
+      (let* ((cur-pos (point))
+             (str (my-buffer-str)))
+        (when (string= "json" (file-name-extension buffer-file-name))
+          (setq str (format "var a=%s;" str))
+          (setq cur-pos (+ cur-pos (length "var a="))))
+        (my-ensure 'js2-mode)
+        (with-temp-buffer
+          (insert str)
+          (js2-init-scanner)
+          (js2-do-parse)
+          (goto-char cur-pos)
+          (js2-print-json-path))))))
+  (defun my-print-json-path (&optional hardcoded-array-index)
+    "Print the path to the JSON value under point, and save it in the kill ring.
+If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it."
+    (interactive "P")
+    (cond
+     ((memq major-mode '(js2-mode))
+      (js2-print-json-path hardcoded-array-index))
+     (t
+      (let* ((cur-pos (point))
+             (str (my-buffer-str)))
+        (when (string= "json" (file-name-extension buffer-file-name))
+          (setq str (format "var a=%s;" str))
+          (setq cur-pos (+ cur-pos (length "var a="))))
+        (my-ensure 'js2-mode)
+        (with-temp-buffer
+          (insert str)
+          (js2-init-scanner)
+          (js2-do-parse)
+          (goto-char cur-pos)
+          (js2-print-json-path))))))
+
+
+  ;;Latest rjsx-mode does not have indentation issue
+  ;;@see https://emacs.stackexchange.com/questions/33536/how-to-edit-jsx-react-files-in-emacs
+  (setq-default js2-additional-externs
+                '("$"
+                  "$A" ; salesforce lightning component
+                  "$LightningApp" ; salesforce
+                  "AccessifyHTML5"
+                  "Blob"
+                  "FormData"
+                  "KeyEvent"
+                  "Raphael"
+                  "React"
+                  "URLSearchParams"
+                  "__dirname" ; Node
+                  "_content" ; Keysnail
+                  "after"
+                  "afterEach"
+                  "angular"
+                  "app"
+                  "assert"
+                  "assign"
+                  "before"
+                  "beforeEach"
+                  "browser"
+                  "by"
+                  "clearInterval"
+                  "clearTimeout"
+                  "command" ; Keysnail
+                  "content" ; Keysnail
+                  "decodeURI"
+                  "define"
+                  "describe"
+                  "display" ; Keysnail
+                  "documentRef"
+                  "element"
+                  "encodeURI"
+                  "expect"
+                  "ext" ; Keysnail
+                  "fetch"
+                  "gBrowser" ; Keysnail
+                  "global"
+                  "goDoCommand" ; Keysnail
+                  "hook" ; Keysnail
+                  "inject"
+                  "isDev"
+                  "it"
+                  "jest"
+                  "jQuery"
+                  "jasmine"
+                  "key" ; Keysnail
+                  "ko"
+                  "log"
+                  "mockStore"
+                  "module"
+                  "mountWithTheme"
+                  "plugins" ; Keysnail
+                  "process"
+                  "require"
+                  "setInterval"
+                  "setTimeout"
+                  "shell" ; Keysnail
+                  "tileTabs" ; Firefox addon
+                  "util" ; Keysnail
+                  "utag") )
+  )
+
+(use-package rjsx-mode
+  :load-path "~/.emacs.d/extensions/rjsx-mode"
+  :mode ("\\.js\\'")
+  :hook ((rjsx-mode .  (lambda()
+                         (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
+                         (flycheck-select-checker 'javascript-eslint))))
+  ;;:config
+  ;;(add-hook 'rjsx-mode-hook 'setup)
+
+  )
+
+;; @see https://github.com/felipeochoa/rjsx-mode/issues/33
+(with-eval-after-load 'rjsx-mode
+  (define-key rjsx-mode-map "<" nil))
+
+(require-package 'emmet-mode)
+(use-package emmet-mode
+  :defer 3
+  :init (setq emmet-expand-jsx-className? t)
+  :hook (web-mode typescript-mode js-mode js2-mode rjsx-mode css-mode scss-mode sgml-mode))
+
+
+;; Format HTML, CSS and JavaScript/JSON
+;; Install: npm -g install prettier
+(when (executable-find "prettier")
+  (use-package prettier
+    :diminish
+    :hook ((js-mode js2-mode css-mode sgml-mode web-mode) . prettier-mode)
+    :init (setq prettier-pre-warm 'none)))
+
+(use-package prettier-js
+  :ensure t
+  :defer 3
+  :hook ((css-mode web-mode typescript-mode js-mode json-mode js2-mode) . prettier-js-mode))
+
+
+
+;; Major mode for editing web templates
+(use-package web-mode
+  :mode "\\.\\(phtml\\|php\\|[gj]sp\\|as[cp]x\\|erb\\|djhtml\\|html?\\|hbs\\|ejs\\|jade\\|swig\\|tm?pl\\|vue\\)$"
+  :config
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-enable-auto-closing t) ; enable auto close tag in text-mode
+  (setq web-mode-enable-auto-pairing t)
+  (setq web-mode-auto-close-style 2)
+  (setq web-mode-enable-css-colorization t)
+  (setq web-mode-imenu-regexp-list
+        '(("<\\(h[1-9]\\)\\([^>]*\\)>\\([^<]*\\)" 1 3 ">" nil)
+          ("^[ \t]*<\\([@a-z]+\\)[^>]*>? *$" 1 " id=\"\\([a-zA-Z0-9_]+\\)\"" "#" ">")
+          ("^[ \t]*<\\(@[a-z.]+\\)[^>]*>? *$" 1 " contentId=\"\\([a-zA-Z0-9_]+\\)\"" "=" ">")
+          ;; angular imenu
+          (" \\(ng-[a-z]*\\)=\"\\([^\"]+\\)" 1 2 "="))))
+
+;; Adds node_modules/.bin directory to `exec_path'
+(use-package add-node-modules-path
+  :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
+
+(setq-default js2-use-font-lock-faces t
+              js2-mode-must-byte-compile nil
+              ;; {{ comment indention in modern frontend development
+              javascript-indent-level 2
+              js-indent-level 2
+              css-indent-offset 2
+              typescript-indent-level 2
+              ;; }}
+              js2-strict-trailing-comma-warning nil ; it's encouraged to use trailing comma in ES6
+              js2-idle-timer-delay 0.5 ; NOT too big for real time syntax check
+              js2-auto-indent-p nil
+              js2-indent-on-enter-key nil ; annoying instead useful
+              js2-skip-preprocessor-directives t
+              js2-strict-inconsistent-return-warning nil ; return <=> return null
+              js2-enter-indents-newline nil
+              js2-bounce-indent-p t)
+
+(with-eval-after-load 'js-mode
+  ;; '$' is part of variable name like '$item'
+  (modify-syntax-entry ?$ "w" js-mode-syntax-table))
+
+(defun my-validate-json-or-js-expression (&optional not-json-p)
+  "Validate buffer or select region as JSON.
+If NOT-JSON-P is not nil, validate as Javascript expression instead of JSON."
+  (interactive "P")
+  (let* ((json-exp (if (region-active-p) (my-selected-str)
+                     (my-buffer-str)))
+         (jsbuf-offet (if not-json-p 0 (length "var a=")))
+         errs
+         first-err
+         (first-err-pos (if (region-active-p) (region-beginning) 0)))
+    (unless not-json-p
+      (setq json-exp (format "var a=%s;"  json-exp)))
+    (with-temp-buffer
+      (insert json-exp)
+      (my-ensure 'js2-mode)
+      (js2-parse)
+      (setq errs (js2-errors))
+      (cond
+       ((not errs)
+        (message "NO error found. Good job!"))
+       (t
+        ;; yes, first error in buffer is the last element in errs
+        (setq first-err (car (last errs)))
+        (setq first-err-pos (+ first-err-pos (- (cadr first-err) jsbuf-offet)))
+        (message "%d error(s), first at buffer position %d: %s"
+                 (length errs)
+                 first-err-pos
+                 (js2-get-msg (caar first-err))))))
+    (if first-err (goto-char first-err-pos))))
+
+(defun my-print-json-path (&optional hardcoded-array-index)
+  "Print the path to the JSON value under point, and save it in the kill ring.
+If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it."
+  (interactive "P")
+  (cond
+   ((memq major-mode '(js2-mode))
+    (js2-print-json-path hardcoded-array-index))
+   (t
+    (let* ((cur-pos (point))
+           (str (my-buffer-str)))
+      (when (string= "json" (file-name-extension buffer-file-name))
+        (setq str (format "var a=%s;" str))
+        (setq cur-pos (+ cur-pos (length "var a="))))
+      (my-ensure 'js2-mode)
+      (with-temp-buffer
+        (insert str)
+        (js2-init-scanner)
+        (js2-do-parse)
+        (goto-char cur-pos)
+        (js2-print-json-path))))))
+
+(with-eval-after-load 'js2-mode
+  ;; I hate the hotkeys to hide things
+  (define-key js2-mode-map (kbd "C-c C-e") nil)
+  (define-key js2-mode-map (kbd "C-c C-s") nil)
+  (define-key js2-mode-map (kbd "C-c C-f") nil)
+  (define-key js2-mode-map (kbd "C-c C-t") nil)
+  (define-key js2-mode-map (kbd "C-c C-o") nil)
+  (define-key js2-mode-map (kbd "C-c C-w") nil))
+;; }}
+
+(defun my-js2-mode-setup()
+  "Set up javascript."
+  ;; if use node.js we need nice output
+  (js2-imenu-extras-mode)
+  (setq mode-name "JS2")
+  ;; counsel/ivy is more generic and powerful for refactoring
+  ;; js2-mode has its own syntax linter
+
+  ;; call js-doc commands through `counsel-M-x'!
+
+  ;; @see https://github.com/mooz/js2-mode/issues/350
+  (setq forward-sexp-function nil))
+
+(add-hook 'js2-mode-hook 'my-js2-mode-setup)
+
+;; @see https://github.com/felipeochoa/rjsx-mode/issues/33
+(with-eval-after-load 'rjsx-mode
+  (define-key rjsx-mode-map "<" nil))
+
+;; {{ js-beautify
+(defun my-js-beautify (&optional indent-size)
+  "Beautify selected region or whole buffer with js-beautify.
+INDENT-SIZE decide the indentation level.
+`sudo pip install jsbeautifier` to install js-beautify.'"
+  (interactive "P")
+  (let* ((executable (if (executable-find "js-beautify") "js-beautify"
+                       "jsbeautify")))
+    ;; detect indentation level
+    (unless indent-size
+      (setq indent-size
+            (cond
+             ((memq major-mode '(js-mode javascript-mode))
+              js-indent-level)
+
+             ((memq major-mode '(web-mode))
+              web-mode-code-indent-offset)
+
+             ((memq major-mode '(typescript-mode))
+              typescript-indent-level)
+
+             (t
+              2))))
+    ;; do it!
+    (run-cmd-and-replace-region (concat executable
+                                        " --stdin "
+                                        " --jslint-happy --brace-style=end-expand --keep-array-indentation "
+                                        (format " --indent-size=%d " indent-size)))))
+;; }}
+
+
+;; Latest rjsx-mode does not have indentation issue
+;; @see https://emacs.stackexchange.com/questions/33536/how-to-edit-jsx-react-files-in-emacs
+(setq-default js2-additional-externs
+              '("$"
+                "$A" ; salesforce lightning component
+                "$LightningApp" ; salesforce
+                "AccessifyHTML5"
+                "Blob"
+                "FormData"
+                "KeyEvent"
+                "Raphael"
+                "React"
+                "URLSearchParams"
+                "__dirname" ; Node
+                "_content" ; Keysnail
+                "after"
+                "afterEach"
+                "angular"
+                "app"
+                "assert"
+                "assign"
+                "before"
+                "beforeEach"
+                "browser"
+                "by"
+                "clearInterval"
+                "clearTimeout"
+                "command" ; Keysnail
+                "content" ; Keysnail
+                "decodeURI"
+                "define"
+                "describe"
+                "display" ; Keysnail
+                "documentRef"
+                "element"
+                "encodeURI"
+                "expect"
+                "ext" ; Keysnail
+                "fetch"
+                "gBrowser" ; Keysnail
+                "global"
+                "goDoCommand" ; Keysnail
+                "hook" ; Keysnail
+                "inject"
+                "isDev"
+                "it"
+                "jest"
+                "jQuery"
+                "jasmine"
+                "key" ; Keysnail
+                "ko"
+                "log"
+                "mockStore"
+                "module"
+                "mountWithTheme"
+                "plugins" ; Keysnail
+                "process"
+                "require"
+                "setInterval"
+                "setTimeout"
+                "shell" ; Keysnail
+                "tileTabs" ; Firefox addon
+                "util" ; Keysnail
+                "utag"))
+
+(defun my-typescript-beginning-of-defun-hack (orig-func &rest args)
+  "Overwrite typescript beginning detection."
+  (ignore orig-func)
+  (ignore args)
+  (when (my-use-tags-as-imenu-function-p)
+    (let* ((closest (my-closest-imenu-item)))
+      (when closest
+        (imenu closest)))))
+(advice-add 'typescript-beginning-of-defun :around #'my-typescript-beginning-of-defun-hack)
+
+;; {{ typescript
+(defun typescript-mode-hook-setup ()
+  "Set up `typescript-mode'."
+  (when (my-use-tags-as-imenu-function-p)
+    ;; use ctags to calculate imenu items
+    (setq imenu-create-index-function
+          'counsel-etags-imenu-default-create-index-function)))
+(add-hook 'typescript-mode-hook 'typescript-mode-hook-setup)
+;; }}
+
+
+;; Flexible text folding
+(use-package hideshow
+  :ensure nil
+  :diminish hs-minor-mode
+  :pretty-hydra
+  ((:title (pretty-hydra-title "HideShow" 'octicon "nf-oct-fold")
+           :color amaranth :quit-key ("q" "C-g"))
+   ("Fold"
+    (("t" hs-toggle-all "toggle all")
+     ("a" hs-show-all "show all")
+     ("i" hs-hide-all "hide all")
+     ("g" hs-toggle-hiding "toggle hiding")
+     ("c" hs-cycle "cycle block")
+     ("s" hs-show-block "show block")
+     ("h" hs-hide-block "hide block")
+     ("l" hs-hide-level "hide level"))
+    "Move"
+    (("C-a" mwim-beginning-of-code-or-line "⭰")
+     ("C-e" mwim-end-of-code-or-line "⭲")
+     ("C-b" backward-char "←")
+     ("C-n" next-line "↓")
+     ("C-p" previous-line "↑")
+     ("C-f" forward-char "→")
+     ("C-v" pager-page-down "↘")
+     ("M-v" pager-page-up "↖")
+     ("M-<" beginning-of-buffer "⭶")
+     )
+:bind (:map hs-minor-mode-map
+              ("C-~" . hideshow-hydra/body)
+              ("C-S-<escape>" . hideshow-hydra/body))
+  :hook (prog-mode . hs-minor-mode)
+  :config
+  ;; More functions
+  ;; @see https://karthinks.com/software/simple-folding-with-hideshow/
+  (defun hs-cycle (&optional level)
+    (interactive "p")
+    (let (message-log-max
+          (inhibit-message t))
+      (if (= level 1)
+          (pcase last-command
+            ('hs-cycle
+             (hs-hide-level 1)
+             (setq this-command 'hs-cycle-children))
+            ('hs-cycle-children
+             (save-excursion (hs-show-block))
+             (setq this-command 'hs-cycle-subtree))
+            ('hs-cycle-subtree
+             (hs-hide-block))
+            (_
+             (if (not (hs-already-hidden-p))
+                 (hs-hide-block)
+               (hs-hide-level 1)
+               (setq this-command 'hs-cycle-children))))
+        (hs-hide-level level)
+        (setq this-command 'hs-hide-level))))
+
+  (defun hs-toggle-all ()
+    "Toggle hide/show all."
+    (interactive)
+    (pcase last-command
+      ('hs-toggle-all
+       (save-excursion (hs-show-all))
+       (setq this-command 'hs-global-show))
+      (_ (hs-hide-all))))
+
+  ;; Display line counts
+  (defun hs-display-code-line-counts (ov)
+    "Display line counts when hiding codes."
+    (when (eq 'code (overlay-get ov 'hs))
+      (overlay-put ov 'display
+                   (concat
+                    " "
+                    (propertize
+                     (if (char-displayable-p ?⏷) "⏷" "...")
+                     'face 'shadow)
+                    (propertize
+                     (format " (%d lines)"
+                             (count-lines (overlay-start ov)
+                                          (overlay-end ov)))
+                     'face '(:inherit shadow :height 0.8))
+                    " "))))
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; settings for LSP
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (use-package eglot
+;;   :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
+;;   :bind (("C-c e f" . #'eglot-format)
+;;          ("C-c e i" . #'eglot-code-action-organize-imports)
+;;          ("C-c e q" . #'eglot-code-action-quickfix))
+;;   :config
+;;   ;; (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
+;;   (defun eglot-actions-before-save()
+;;     (add-hook 'before-save-hook (lambda ()
+;;                                   (call-interactively #'eglot-format)
+;;                                   (call-interactively #'eglot-code-action-organize-imports))))
+;;   (add-to-list 'eglot-server-programs '(web-mode "vls"))
+;;   (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save))
+
+
+(setenv "PATH" (concat (getenv "PATH") ";c:/green/python311/"))
+(add-to-list 'exec-path "c:/green/python311")
+;; https://github.com/manateelazycat/lsp-bridge
+(require 'lsp-bridge)
+(global-lsp-bridge-mode)
+;; (add-hook 'prog-mode-hook 'lsp-bridge-mode)
+;; set the python interpreter path if it's different from default
+(setq lsp-bridge-python-command "C:\\green\Python311\\python.exe")
+
+(require 'lsp-bridge-jdtls) ;; 根据项目自动生成自定义配置，添加必要的启动参数
+(setq lsp-bridge-enable-auto-import t) ;; 开启自动导入依赖，目前没有code action。补全时可以通过这个导入相应的依赖，建议开启。
+(setq lsp-bridge-jdtls-jvm-args '("-javaagent:c:/User/suk/.m2/repository/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar"))
+(custom-set-variables '(lsp-bridge-get-workspace-folder 'my-lsp-bridge-workspace))
+(add-hook 'java-mode-hook (lambda ()
+  (setq-local lsp-bridge-get-lang-server-by-project 'lsp-bridge-get-jdtls-server-by-project)))
+
+(defun my-lsp-bridge-workspace (proj)
+  (let* ((proj-2-workspace
+          '(("D:/03_projects/suk/word-process-src" . "file://D:/03_projects/suk")
+            ("D:/03_projects/suk/anysql" . "file://D:/03_projects/suk")))
+        (kv (assoc proj proj-2-workspace)))
+        (when kv (cdr kv))
+   )
+)

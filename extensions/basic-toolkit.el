@@ -499,6 +499,62 @@ With the prefix argument UNFILL, unfill it instead."
   (let ((fill-column (if unfill (point-max) fill-column)))
     (fill-paragraph nil region)))
 ;;(global-set-key (kbd "M-q") #'suk/fill-or-unfill-paragraph)
+
+
+;; @see http://endlessparentheses.com/super-smart-capitalization.html
+;;;###autoload
+(defun endless/convert-punctuation (rg rp)
+  "Look for regexp RG around point, and replace with RP.
+   Only applies to text-mode."
+  (let* ((f "\\(%s\\)\\(%s\\)")
+         (space "?:[[:blank:]\n\r]*"))
+    ;; We obviously don't want to do this in prog-mode.
+    (if (and (derived-mode-p 'text-mode)
+             (or (looking-at (format f space rg))
+                 (looking-back (format f rg space) (point-min))))
+        (replace-match rp nil nil nil 1))))
+        
+
+;;;###autoload
+(defun endless/call-subword-cmd (fn)
+  (my-ensure 'subword)
+  (call-interactively fn))
+
+;;;###autoload
+(defun endless/capitalize ()
+  "Capitalize region or word.
+   Also converts commas to full stops, and kills
+   extraneous space at beginning of line."
+  (interactive)
+  (endless/convert-punctuation "," ".")
+  (if (use-region-p)
+      (call-interactively 'capitalize-region)
+    ;; A single space at the start of a line:
+    (when (looking-at "^\\s-\\b")
+      ;; get rid of it!
+      (delete-char 1))
+    (endless/call-subword-cmd 'subword-capitalize)))
+;;;###autoload
+(defun endless/downcase ()
+  "Downcase region or word.
+   Also converts full stops to commas."
+  (interactive)
+  (endless/convert-punctuation "\\." ",")
+  (if (use-region-p)
+      (call-interactively 'downcase-region)
+    (endless/call-subword-cmd 'subword-downcase)))
+;;;###autoload
+(defun endless/upcase ()
+  "Upcase region or word."
+  (interactive)
+  (if (use-region-p)
+      (call-interactively 'upcase-region)
+    (endless/call-subword-cmd 'subword-upcase)))
+
+;; these bindings are fine
+(global-set-key (kbd "M-c") 'endless/capitalize)
+(global-set-key (kbd "M-l") 'endless/downcase)
+(global-set-key (kbd "M-u") 'endless/upcase)
 (provide 'basic-toolkit)
 
 ;;; basic-toolkit.el ends here

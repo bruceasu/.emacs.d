@@ -322,8 +322,15 @@
 ;;   (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
 ;;   ;; 扩展至可能包含 Material Design Icons 的范围
 ;;   (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
-;; (set-face-attribute 'variable-pitch nil :family "asu-cjk-serif" :height 120)
-;; (set-face-attribute 'fixed-pitch nil :family "asu-cjk-mono" :height 120)
+
+
+(when (fboundp 'variable-pitch-mmode)
+  (set-face-attribute 'variable-pitch nil :family "asu-cjk-serif" :height 120))
+(when (fboundp 'fixed-pitch-mode)
+  (set-face-attribute 'fixed-pitch nil :family "asu-cjk-mono" :height 120))
+
+
+
 
 
 
@@ -339,6 +346,7 @@
     (setq emacs-cjk-font cn-font)
     ;; Setup font size based on emacs-font-size-pair
     (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+    (when (fboundp 'variable-pitch-mode) (variable-pitch-mode 1))
     (setq loaded-font-type 1)
     (message "Set default font")
   ))
@@ -358,7 +366,7 @@
       (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
       ;; 扩展至可能包含 Material Design Icons 的范围
       (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
-    (variable-pitch-mode -1)
+    (when (fboundp 'fixed-pitch-mode) (fixed-pitch-mode 1))
     (setq loaded-font-type 2)
     (message "Set program font")))
 
@@ -427,7 +435,7 @@
   ;;   (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
   ;;   ;; 扩展至可能包含 Material Design Icons 的范围
   ;;   (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
-
+  (when (fboundp 'mixed-pitch-mode) (mixed-pitch-mode 1))
 
   (setq loaded-font-type 3)
   (message "Set org-mode font")))

@@ -2,25 +2,18 @@
 ;;; Commentary:
 (provide 'init-basic)
 
-;; Speed up startup
-(defvar default-file-name-handler-alist file-name-handler-alist)
-(setq file-name-handler-alist nil)
-(setq inhibit-startup-message t)
-(setq inhibit-startup-screen t) ; hèicèi makying ge kaidung gaimin
-(setq inhibit-compacting-font-caches t)   ; Don’t compact font caches during GC.
-(setq initial-scratch-message t)
-(setq inhibit-default-init t)
-(setq fast-but-imprecise-scrolling t)
-(setq help-window-select t)
-(setq next-line-add-newlines nil)
+
 ;;(tooltip-mode -1)                       ;不要显示任何 tooltips
 (delete-selection-mode 1)               ; 选中文本后输入会覆盖
 (size-indication-mode 1)
 ;;(blink-cursor-mode -1)
+(setq inhibit-startup-message t)          ; 关闭启动欢迎界面
+(setq initial-scratch-message nil)        ; 清空 *scratch* 缓冲区信息
+(setq inhibit-startup-echo-area-message t) ; 关闭启动时回显区的提示信息
 
 (setq-default
  major-mode 'text-mode
- cursor-type 'box ; 设置光标样式
+ cursor-type 'bar ; 设置光标样式
  tab-width 4
  indent-tabs-mode nil)     ;; Permanently indent with spaces, never with TABs
 ;; only use spaces instead of TAB, use C-q TAB to input the TAB char
@@ -39,16 +32,6 @@
 (add-hook 'after-change-major-mode-hook (lambda () (modify-syntax-entry ?- "w"))) ;; `-` fuhòu tungsöng
 (setq sentence-end-double-space nil)
 
-(setq scroll-step 2)
-(setq scroll-margin 2)
-(setq hscroll-step 2)
-(setq hscroll-margin 2)
-(setq scroll-conservatively 101)
-(setq scroll-up-aggressively 0.01)
-(setq scroll-down-aggressively 0.01)
-(setq scroll-preserve-screen-position 'always)
-
-
 
 ;;====================================================
 ;; Encoding begin
@@ -58,7 +41,7 @@
 (setq default-buffer-file-coding-system 'utf-8)            ;缓存文件编码
 (setq default-file-name-coding-system 'utf-8)              ;文件名编码
 (setq default-keyboard-coding-system 'utf-8)               ;键盘输入编码
-(setq default-process-coding-system '(utf-8 . utf-8)) ;进程输出输入编码
+(setq default-process-coding-system '(utf-8 . utf-8))      ;进程输出输入编码
 (setq default-sendmail-coding-system 'utf-8)               ;发送邮件编码
 (setq default-terminal-coding-system 'utf-8)               ;终端编码
 
@@ -145,11 +128,6 @@
               )))
 
 
-;;; ### Speedbar ###
-(setq speedbar-show-unknown-files t)    ;显示文件
-
-;;; ### Modeline-posn-column-limit ###
-(setq modelinepos-column-limit 80)      ;设置列数限制, 并在mode-line上显示
 
 ;; 如果有两个重名buffer, 则再前面加上路径区别
 (require 'uniquify)
@@ -166,7 +144,6 @@
 (setq kept-new-version 100)  ; 保留最近的100个备份文件
 (setq delete-old-versions t) ; 自动删除旧的备份文件
 
-
 ;; Misc
 (if (boundp 'use-short-answers)
     (setq use-short-answers t)
@@ -178,12 +155,11 @@
 (defadvice yank (after indent-region activate)
   "To make yank content indent automatically."
   (if (member major-mode '(emacs-lisp-mode
-                           scheme-mode
-                           lisp-mode
-                           lisp-interaction-mode
+                           java-mode
+                           web-mode
                            c-mode
                            c++-mode
-                           objc-mode
+                           js-mode
                            latex-mode
                            plain-tex-mode))
       (indent-region (region-beginning) (region-end) nil)))
@@ -192,10 +168,3 @@
 ;; spcial coding settings for Windows
 (unless (memq system-type '(cygwin windows-nt ms-dos))
   (setq selection-coding-system 'utf-8))
-
-
-;;; macOS
-;; <macOS> Command -> Meta, Option -> Super
-(when (eq system-type 'darwin)
-  (setq mac-command-modifier 'meta
-	mac-option-modifier 'super))

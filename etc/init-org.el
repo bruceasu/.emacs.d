@@ -52,12 +52,12 @@
    ))
 ;;(setq process-environment (cons "PATH=D:/green/plantUML/bin;%PATH%" process-environment))
 
-(defun my-org-export-before-processing-hook (backend)
-  (;let ((process-environment (cons "PATH=%PATH%" process-environment)))
-   ;; (org-babel-execute-src-block)
-   (org-babel-execute-buffer)))
+;; (defun my-org-export-before-processing-hook (backend)
+;;   (let ((process-environment (cons "PATH=%PATH%" process-environment)))
+;;     (org-babel-execute-src-block)
+;;     (org-babel-execute-buffer)))
 
-(add-hook 'org-export-before-processing-hook 'my-org-export-before-processing-hook)
+;; (add-hook 'org-export-before-processing-hook 'my-org-export-before-processing-hook)
 
 (defun my-org-mode-refresh-images ()
   (when (derived-mode-p 'org-mode) ; 确保当前模式是 Org-mode
@@ -418,7 +418,7 @@
 					(org-end-of-subtree t t)
 					(org-paste-subtree))))))
 
-					
+
 (define-key my-refile-map "," 'my-org-refile-to-previous)
 (define-key my-refile-map "." 'my-org-refile-in-file)
 ;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
@@ -474,7 +474,7 @@
          (mapcar (lambda (h) (list 'my-defshortcut (string-to-char (elt h 0)) (elt h 1)))
                  heads))))
 
- (with-eval-after-load 'hydra
+(with-eval-after-load 'hydra
   (defshortcuts suk/file-shortcuts ()
     ("C" "~/proj/emacs-calendar/README.org" "Emacs calendar")
     ("e" "~/sync/emacs/Sacha.org" "Config")
@@ -487,13 +487,12 @@
     ("b" "~/sync/orgzly/business.org" "Business")
     ("p" "/scp:web:/mnt/prev/home/sacha/planet/en.ini" "Planet Emacsen")
     ("P" "~/sync/orgzly/posts.org" "Posts")
-;    ("B" "/ssh:web|sudo::/etc/nginx/sites-available" "Nginx sites")
+                                        ;    ("B" "/ssh:web|sudo::/etc/nginx/sites-available" "Nginx sites")
     ("w" "~/Dropbox/public/sharing/index.org" "Sharing index")
     ("W" "~/Dropbox/public/sharing/blog.org" "Blog index")
     ("1" "~/proj/static-blog/" "Static blog")
     ("r" "~/sync/orgzly/reference.org" "Reference")
     ("R" "~/personal/reviews.org" "Reviews")
     ("g" "~/proj/sachac.github.io/evil-plans/index.org" "Evil plans"))
-)
+  )
 ;; ("C-c f" . #'suk/file-shortcuts/body)
-  
