@@ -44,7 +44,14 @@
 ;;; Require
 (require 'string-inflection)
 
-;;; Code:
+;; Handling capitalized subwords in a nomenclature
+(run-with-idle-timer
+    2 nil
+    #'(lambda()
+       (require-package 'subword) ;Handling capitalized subwords in a nomenclature
+       (require 'subword)
+       (add-hook 'prog-mode-hook #'subword-mode)
+       (add-hook 'mimibuffer-setup #'subword-mode)))
 
 (with-eval-after-load 'hydra
   (defhydra string-inflection-hydra (:color blue :hint nil)

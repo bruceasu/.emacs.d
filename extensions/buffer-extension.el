@@ -392,6 +392,7 @@ It returns the buffer."
 (global-set-key "\C-co" 'suk/switch-to-minibuffer) ;; Bind to `C-c o'
 
 
+(require-package 'olivetti)
 (define-minor-mode suk-read-mode
   "Minor Mode for better reading experience."
   :init-value nil

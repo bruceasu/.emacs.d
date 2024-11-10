@@ -83,6 +83,10 @@
 ;;
 ;;
 ;;
+(use-package rect-mark
+  :ensure t
+  :config
+  (rect-mark-mode 1))  ; ÆôÓÃ rect-mark Ä£Ê½
 
 ;;; Require
 (require 'rect)

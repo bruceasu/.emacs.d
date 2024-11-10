@@ -1,63 +1,28 @@
-;;; init.el --- Initialize configurations.  -*- lexical-binding: t -*-
-;; Copyright (C) 1999 - 2024 Suk
-;; Author: Suk
-
-;; This file is not part of GNU Emacs.
-;;
-
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or
-;; (at your option) any later version.
-;;
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-;;
-;;; Commentary
-;;
-;; Emacs configurations.
-;;
-
-;;; Code:
-
 (provide 'init)
 
-
-;; Dingyi yidit muluk, fongbin yathòu cingyi.
-;; user-emacs-directory tungsöng hai ~/.emacs.d
-;; windows há, ~/ tungsöng hai $EMACS_INSTALL_DIR, wákze EMACS citding de `HOME` binlöng
+;; Dingyi yidit mukluk, fongbin yathou cingyi.
+;; user-emacs-directory tungseung hai ~/.emacs.d
+;; windows haa, ~/ tungseung hai $EMACS_INSTALL_DIR, waakze EMACS citding de `HOME` binleung
 (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
 (defvar suk-emacs-config-dir (expand-file-name "etc" suk-emacs-root-dir))
 (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
 (defvar suk-emacs-share-dir (expand-file-name "share" suk-emacs-root-dir))
 (defvar suk-emacs-themes-dir (expand-file-name "themes" suk-emacs-share-dir))
-(defvar suk-emacs-elpa-dir (expand-file-name "elpa" suk-emacs-root-dir))
 (defvar suk-emacs-var-dir (expand-file-name "var" suk-emacs-root-dir))
 (defvar suk-emacs-tmp-dir (expand-file-name "tmp" suk-emacs-var-dir))
 (defvar suk-emacs-backup-dir (expand-file-name "backup" suk-emacs-tmp-dir))
 
-;; OS ge HOME muluk.
+;; OS ge HOME mukluk.
 (defvar user-home-dir (getenv "HOME"))
 
 (if (eq system-type 'windows-nt)
     (defvar user-home-dir (getenv "USERPROFILE")))
-
 ;; blink search
 (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
-;; Saveplace
-(setq save-place-file (concat suk-emacs-var-dir "/saveplace"))
-;; Recentf
-(setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
-;;(setq recentf-save-file "~/.emacs.d/var/recentf")
+
 ;; History
 (setq savehist-file (concat suk-emacs-var-dir "/history"))
-; Amx
+;; Amx
 (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
 ;; Auto save
 (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
@@ -75,12 +40,13 @@
 (require 'server)
 ;;(setq server-socket-dir suk-emacs-var-dir)
 
+;; Clear to avoid analyzing files when loading remote files.
+(setq file-name-handler-alist nil)
+;; Don't pass case-insensitive to `auto-mode-alist'
+(setq auto-mode-case-fold nil)
+
 ;; Ignore `cl` expiration warnings
 (setq byte-compile-warnings '(cl-function))
-
-;; kill buffer without my confirmation
-(setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions))
-
 
 ;; original version
 ;;(defun add-subdirs-to-load-path (dir)
@@ -94,94 +60,248 @@
 (defun add-subdirs-to-load-path (search-dir isFirst)
   (interactive)
   (when isFirst
-	;; The original version did not add the first search-dir itself to the `load path`
-	;; The recursive search-dir was added before the recursion.
+    ;; The original version did not add the first search-dir itself to
+    ;; the `load path`. The recursive search-dir was added before the
+    ;; recursion.
     (add-to-list 'load-path search-dir))
   (let* ((dir (file-name-as-directory search-dir)))
     (dolist (subdir
-             ;; golöi bat bityiu ge mukluk, taising Emacs kaidung cudou.
+             ;; goleui bat bityiu ge mukluk, taising Emacs kaidung cudou.
              (cl-remove-if
               #'(lambda (subdir)
                   (or
                    ;; m hai mangin
                    (not (file-directory-p (concat dir subdir)))
-                   ;; yicöi hámin ge mukluk
-                   (member subdir '("." ".." ; Linux/Uniux haitung ge  dongcin mukluk tungmái fu mukluk
-                                    "dist" "node_modules" "__pycache__" ; takding ge yüyin söngģán ge mukluk
-                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ; bánbun hungjai mukluk
+                   ;; yiceui haamin ge mukluk
+                   (member subdir '("." ".." ; Linux/Uniux haitung ge  dongcin mukluk tungmaai fu mukluk
+                                    "dist" "node_modules" "__pycache__" ; takding ge yüyin seunggwaan ge mukluk
+                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ; baanbun hungjai mukluk
               (directory-files dir)))
       (let ((subdir-path (concat dir (file-name-as-directory subdir))))
-        ;; mukluk bauhám  .el .so .dll ge mangin di louging sinji gá dou `load-path` binlöng
+        ;; mukluk bauhaam  .el .so .dll ge mangin di louging sinji gaa dou `load-path` binleung
         (when (cl-some #'(lambda (subdir-file)
                            (and (file-regular-p (concat subdir-path subdir-file))
                                 ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
                                 (member (file-name-extension subdir-file) '("el" "so" "dll"))))
                        (directory-files subdir-path))
 
-          ;; jüyi: add-to-list ge daisám go cámsou bitsöiwai t, timgá dou meibou,
-          ;; kokbou ģongdou yausin
+          ;; jüyi: add-to-list ge daisaam go caamsou bitseuiwai t, timgaa dou meibou,
+          ;; kokbou gwongdou yausin
           (add-to-list 'load-path subdir-path t))
 
-        ;; geiöuk daiģai sausok ji mukluk.
+        ;; geieuuk daigwai sausok ji mukluk.
         (add-subdirs-to-load-path subdir-path nil)))))
 
-;; gázoi tsiding ge muluk.
+;; gaazoi tsiding ge mukluk.
 (add-subdirs-to-load-path suk-emacs-config-dir t)
 (add-subdirs-to-load-path suk-emacs-extension-dir t)
 (add-subdirs-to-load-path suk-emacs-themes-dir t)
 
-;; Clear to avoid analyzing files when loading remote files.
-(setq file-name-handler-alist nil)
-;; Don't pass case-insensitive to `auto-mode-alist'
-(setq auto-mode-case-fold nil)
 
+;; (add-to-list 'load-path "/usr/local/share/emacs/site-lisp")
+;; (add-to-list 'load-path "~/vendor/org-mode/lisp")
+;; (add-to-list 'load-path "~/vendor/org-mode/contrib/lisp")
+;; (setq custom-file "~/.config/emacs/custom-settings.el")
+;; (setq use-package-always-ensure t)
+;; (load custom-file t)
 
-(require '+const)
-(require '+custom)
-(require '+fn)
-(require 'init-basic)
-;; Goyan sönsik
-(setq user-full-name suk-full-name)
-(setq user-mail-address suk-mail-address)
-(require 'init-package)
-(require 'init-ui)
-(require 'init-completion)
-(require 'init-search)
-(require 'init-key)
-(require 'init-edit)
-(require 'init-org)
-(require 'init-utils)
-(require 'init-recentf)
-;; ;; delay load
-(require 'init-idle)
-
+(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-percentage 0.8)
 ;; Reset the GC setting
 (add-hook 'emacs-startup-hook
-	      (lambda ()
-		    (message "*** Emacs ready in %s with %d garbage collections."
-		             (format "%.2f seconds" (float-time
-	                                         (time-subtract after-init-time before-init-time)))
-	                 gcs-done)
-		    (add-hook 'focus-out-hook 'garbage-collect)))
+          (lambda ()
+             ;; makying zik wai 0.8MB
+             ;;(setq gc-cons-threshold 80000000)
+             (message "Emacs ready in %s with %d garbage collections."
+                      (format "%.2f seconds"
+                              (float-time
+                               (time-subtract after-init-time before-init-time)))
+                      gcs-done)
+             (add-hook 'focus-out-hook 'garbage-collect)))
 
-;; @see https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/
-;; Emacs 25 does gc too frequently
-;; (setq garbage-collection-messages t) ; for debug
-(defun my-cleanup-gc ()
-  "Clean up gc."
-  (setq gc-cons-threshold  67108864) ; 64M
-  (setq gc-cons-percentage 0.1) ; original value
-  (garbage-collect))
-(run-with-idle-timer 4 nil #'my-cleanup-gc)
-;; =========================================================
-;; 通过编辑配置文件使其可以调用外部程序，来为其添加功能。
-;; 增加命令
-;;(defun lxr (names)
-;;  (interactive "s查找联系人，请输入条件：")
-;;  (call-process-shell-command "lxr" nil t t "-s" names))
-;;执行命令
-;;首先按功能键，Alt+x，然后输入命令 lxr 。
-;;系统提示：“查找联系人，请输入条件："。
-;;输入完成后，emacs 会执行命令lxr -s names，并输出执行的结果。
-;; =========================================================
-;; async-shell-command
+  ;; @see https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/
+  ;; Emacs 25 does gc too frequently
+  ;; (setq garbage-collection-messages t) ; for debug
+  (defun my-cleanup-gc ()
+    "Clean up gc."
+    (setq gc-cons-threshold  67108864) ; 64M
+    (setq gc-cons-percentage 0.1) ; original value
+    (garbage-collect))
+  (run-with-idle-timer 4 nil #'my-cleanup-gc)
+
+(defconst sys/win32p
+  (eq system-type 'windows-nt)
+  "Are we running on a WinTel system?")
+
+(defconst sys/linuxp
+  (eq system-type 'gnu/linux)
+  "Are we running on a GNU/Linux system?")
+
+(defconst sys/macp
+  (eq system-type 'darwin)
+  "Are we running on a Mac system?")
+
+(defconst sys/mac-x-p
+  (and (display-graphic-p) sys/macp)
+  "Are we running under X on a Mac system?")
+
+(defconst sys/linux-x-p
+  (and (display-graphic-p) sys/linuxp)
+  "Are we running under X on a GNU/Linux system?")
+
+(defconst sys/cygwinp
+  (eq system-type 'cygwin)
+  "Are we running on a Cygwin system?")
+
+(defconst sys/rootp
+  (string-equal "root" (getenv "USER"))
+  "Are you using ROOT user?")
+
+(defconst emacs/>=25p
+  (>= emacs-major-version 25)
+  "Emacs is 25 or above.")
+
+(defconst emacs/>=26p
+  (>= emacs-major-version 26)
+  "Emacs is 26 or above.")
+
+(defconst emacs/>=27p
+  (>= emacs-major-version 27)
+  "Emacs is 27 or above.")
+
+(defconst emacs/>=28p
+  (>= emacs-major-version 28)
+  "Emacs is 28 or above.")
+
+(defconst emacs/>=29p
+  (>= emacs-major-version 29)
+  "Emacs is 29 or above.")
+
+(defconst emacs/>=30p
+  (>= emacs-major-version 30)
+  "Emacs is 30 or above.")
+
+;; This sets up the load path so that we can override it
+ (setq warning-suppress-log-types '((package reinitialization)))
+ ;; 指定ELPA目录
+ (setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
+ (add-subdirs-to-load-path package-user-dir t)
+
+ ;; HACK: DO NOT copy package-selected-packages to init/custom file forcibly.
+ ;; https://github.com/jwiegley/use-package/issues/383#issuecomment-247801751
+ (defun my-save-selected-packages (&optional value)
+   "Set `package-selected-packages' to VALUE but don't save to `custom-file'."
+   (when value
+     (setq package-selected-packages value)))
+
+ (advice-add 'package--save-selected-packages :override #'my-save-selected-packages)
+
+ (require 'package)
+ ;; gnu：
+ ;; http://elpa.gnu.org/packages/
+ ;; https://elpa.emacs-china.org/gnu/ http://1.15.88.122/gnu/
+ ;; https://mirrors.163.com/elpa/gnu/
+ ;; https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/
+ ;; melpa:
+ ;; http://melpa.org/packages/
+ ;; https://www.mirrorservice.org/sites/melpa.org/packages/
+ ;; https://elpa.emacs-china.org/melpa/ http://1.15.88.122/melpa/
+ ;; https://mirrors.163.com/elpa/melpa/
+ ;; https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/
+
+ ;;(setq package-archives '(("melpa" . "http://melpa.org/packages/")
+ ;;                         ("gnu" . "http://elpa.gnu.org/packages/")
+ ;;                         ("nongnu" . "https://elpa.nongnu.org/nongnu/"))
+
+ (add-to-list 'package-archives
+              '("melpa" . "https://melpa.org/packages/"))
+ (add-to-list 'package-archives
+              '("melpa-stable" . "https://stable.melpa.org/packages/"))
+ (add-to-list 'package-archives
+              '("org" . "https://orgmode.org/elpa/"))
+ (add-to-list 'package-archives
+              '("gnu" . "https://elpa.gnu.org/packages/"))
+ (add-to-list 'package-archives
+              '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
+
+ ;; Un-comment below line if you follow "Install stable version in easiest way"
+ ;; (setq package-archives '(("myelpa" . "~/myelpa/")))
+
+ ;; my local repository is always needed.
+ ;; (push (cons "localelpa" (expand-file-name  "localelpa/" suk-emacs-root-dir)) package-archives)
+
+ (setq package-check-signature nil) ; 个别时候会出现签名校验失败
+
+ ;; Initialize packages
+ ;; (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
+ ;;   (setq package-enable-at-startup nil)          ; To prevent initializing twice
+ ;;   (package-initialize))
+
+ (unless (bound-and-true-p package--initialized)
+   (package-initialize))
+
+ ;; Setup `use-package'
+ (unless (package-installed-p 'use-package)
+   (package-refresh-contents)
+   (package-install 'use-package))
+
+ ;; Should set before loading `use-package'
+ ;; make use-package default behavior better
+ ;; with `use-package-always-ensure' you won't need ":ensure t" all the time
+ ;; with `use-package-always-defer' you won't need ":defer t" all the time
+ (setq use-package-always-ensure t
+       use-package-always-defer t
+       use-package-enable-imenu-support t
+       use-package-expand-minimally t)
+
+ (require 'use-package)
+
+
+    ;;;###autoload
+ (defun my-ensure (feature)
+   "Make sure FEATURE is required."
+   (unless (featurep feature)
+     (condition-case nil
+         (require feature)
+       (error nil))))
+
+ ;; On-demand installation of packages
+ (defun require-package (&rest packages)
+   "Ensure PACKAGES are installed.
+ If a package is not installed, it will be installed automatically."
+   (dolist (package packages)
+     (unless (package-installed-p package)
+       (package-install package)))
+   (use-package package)
+   )
+
+;; Compatibility
+ (use-package compat :demand t)
+
+(load-file (expand-file-name "suk.el" suk-emacs-root-dir))
+
+(unless (server-running-p)
+     (server-start))
+
+;; Programming
+;;(require 'init-ide)
+(run-with-idle-timer
+ 1
+ nil
+ #'(lambda()
+   (require 'load-abbrev)
+
+
+   ))
+;; chmod +x
+;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
+(add-hook 'after-save-hook'executable-make-buffer-file-executable-if-script-p)
+(autoload 'calendar "init-calendar" "Config Chinese calendar " t)
+;; Hanlde minified code
+   (if emacs/>=27p (add-hook 'after-init-hook #'global-so-long-mode))
+(when sys/linuxp
+  (load-file (expand-file-name "linux.el" suk-emacs-root-dir)))
+(when sys/win32p
+   (load-file (expand-file-name "windows.el" suk-emacs-root-dir)))
+ (when sys/macp
+     (load-file (expand-file-name "mac.el" suk-emacs-root-dir)))

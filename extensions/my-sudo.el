@@ -6,10 +6,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require '+const)
-  (require '+custom))
-
 ;; 普通用户调用root权限写文件
 ;;;###autoload
 (defun suk/sudo-edit (&optional arg)
@@ -286,5 +282,5 @@
 ;;
 ;; The default port number for the socks server is 1080, if not specified otherwise.
 
-(provide 'init-sudo)
-;;; init-sudo.el ends here
+(provide 'my-sudo)
+;;; my-sudo.el ends here

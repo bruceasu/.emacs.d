@@ -76,7 +76,7 @@ If bookmark with same file name already exists, override it quietly."
       (setq bookmark-default-file file))))
 
 ;; =========================================================
-;; fáicuk tiu dòu bookmark
+;; faaicuk tiu dou bookmark
 ;; ---------------------------------------------------------
 ;;;###autoload
 (defun suk/point-to-register()
@@ -146,5 +146,5 @@ If bookmark with same file name already exists, override it quietly."
 
 
 ;; Bookmark
-(provide 'init-bookmark)
-;;; init-bookmark.el ends here
+(provide 'my-bookmark)
+;;; my-bookmark.el ends here

@@ -1004,11 +1004,12 @@ INDENT-SIZE decide the indentation level.
 
 ;; Flexible text folding
 (use-package hideshow
-  :ensure nil
+  :ensure t
   :diminish hs-minor-mode
   :pretty-hydra
   ((:title (pretty-hydra-title "HideShow" 'octicon "nf-oct-fold")
-           :color amaranth :quit-key ("q" "C-g"))
+           :color amaranth
+           :quit-key ("q" "C-g"))
    ("Fold"
     (("t" hs-toggle-all "toggle all")
      ("a" hs-show-all "show all")
@@ -1027,9 +1028,9 @@ INDENT-SIZE decide the indentation level.
      ("C-f" forward-char "→")
      ("C-v" pager-page-down "↘")
      ("M-v" pager-page-up "↖")
-     ("M-<" beginning-of-buffer "⭶")
-     )
-:bind (:map hs-minor-mode-map
+     ("M-<" beginning-of-buffer "⭶"))
+    ))
+  :bind (:map hs-minor-mode-map
               ("C-~" . hideshow-hydra/body)
               ("C-S-<escape>" . hideshow-hydra/body))
   :hook (prog-mode . hs-minor-mode)
@@ -1056,8 +1057,8 @@ INDENT-SIZE decide the indentation level.
                (hs-hide-level 1)
                (setq this-command 'hs-cycle-children))))
         (hs-hide-level level)
-        (setq this-command 'hs-hide-level))))
-
+        ))
+    )
   (defun hs-toggle-all ()
     "Toggle hide/show all."
     (interactive)
@@ -1083,7 +1084,7 @@ INDENT-SIZE decide the indentation level.
                                           (overlay-end ov)))
                      'face '(:inherit shadow :height 0.8))
                     " "))))
-)
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
