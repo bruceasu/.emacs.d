@@ -8,10 +8,10 @@
 
 (lazy-load-global-keys
  '(
-   ("C-c b"   . my-hydra-buffers/body)
-   ("M-<f7>"  . suk-read-mode)
-   ("<f7>" . olivetti-mode)
-   ("C-;" . suk/close-current-buffer)            ;关闭当前buffer
+   ("C-c b"  . my-hydra-buffers/body)
+   ("M-<f7>" . suk-read-mode)
+   ("<f7>"   . olivetti-mode)
+   ("C-;"    . suk/close-current-buffer) ;关闭当前buffer
    )
  "buffer-extension")
 
@@ -22,9 +22,6 @@
 ;;  "olivetti")
 
 ;; default keys: C-x LEFT/RIGHT C-, C-.
-;; (global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
-;; (global-set-key (kbd "<C-tab>") 'next-buffer)
-;; (global-set-key (kbd "C-x C-b") 'buffer-menu)
 
 ;; --- 缓存移动
 (lazy-load-set-keys
@@ -41,70 +38,30 @@
    ("C-M-e" . end-of-defun)             ;函数末尾
    ))
 
+(lazy-load-global-keys
+ '(
+   ("<C-S-up>" . buf-move-up)   
+   ("<C-S-down>" . buf-move-down)
+   ("<C-S-left>" . buf-move-left)  
+   ("<C-S-right>" . buf-move-right)   
+   )
+ "buffer-move")
+
 ;; ### move text ###
 (lazy-load-global-keys
  '(
-   ("M-N" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
-   ("M-P" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
+   ("M-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
+   ("M-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
    ("M-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
    ("M-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
 
-;;; ### basic-toolkit ###
-(lazy-load-global-keys
- '(
-   ("M-s-n" . comment-part-move-down)   ;向下移动注释
-   ("M-s-p" . comment-part-move-up)     ;向上移动注释
-   ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
-   ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
-   ("M-2" . indent-buffer)              ;自动格式化当前Buffer
-   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
-   ;;("C-x u" . mark-line)              ;选中整行
-   ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
-   ("M-G" . goto-column)                ;到指定列
-   ("C->" . remember-init)              ;记忆初始函数
-   ("C-<" . remember-jump)              ;记忆跳转函数
-   ("M-s-," . point-stack-pop)          ;buffer索引跳转
-   ("M-s-." . point-stack-push)         ;buffer索引标记
-   ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
-   ("M-I" . backward-indent)            ;向后移动4个字符
-                                        ;   ("s-J" . scroll-up-one-line)         ;向上滚动一行
-                                        ;   ("s-K" . scroll-down-one-line)       ;向下滚动一行
-   ("<f2>" . refresh-file)              ;自动刷新文件
-   ("s-f" . find-file-root)             ;用root打开文件
-   ("s-r" . find-file-smb)              ;访问sambao
-   ("C-J" . join-lines)                ;连接行
-   ("M-c" . endless/capitalize)
-   ("M-l" . endless/downcase)
-   ("M-u" . endless/upcase)
-   )
- "basic-toolkit")
-
-;; ### Rect ###
-;; --- 矩形操作
-(lazy-load-global-keys
- '(
-   ("s-M" . rm-set-mark)                ;矩形标记
-   ("s-X" . rm-exchange-point-and-mark) ;矩形对角交换
-   ("s-D" . rm-kill-region)             ;矩形删除
-   ("s-S" . rm-kill-ring-save)          ;矩形保存
-   ("s-Y" . yank-rectangle)             ;粘帖矩形
-   ("s-O" . open-rectangle)       ;用空白填充矩形, 并向右移动文本
-   ("s-C" . clear-rectangle)      ;清空矩形
-   ("s-T" . string-rectangle)     ;用字符串替代矩形的每一行
-   ("s-I" . string-insert-rectangle)    ;插入字符串在矩形的每一行
-   ("s-F" . delete-whitespace-rectangle) ;删除矩形中空格
-   ("s-\"" . copy-rectangle-to-register) ;拷贝矩形到寄存器
-   ("s-:" . mark-rectangle-to-end)       ;标记矩形到行末
-   )
- "rect-extension")
-
 ;;; ### open new line ###
 (lazy-load-global-keys
  '(
-   ("C-o" . open-newline-above)         ;在上面一行新建一行
-   ("C-l" . open-newline-below)         ;在下面一行新建一行
+   ("C-o" . open-newline-above) ;在上面一行新建一行
+   ("C-l" . open-newline-below) ;在下面一行新建一行
    )
  "open-newline")
 
@@ -127,6 +84,14 @@
    ("M-," . delete-block-backward)
    ("M-." . delete-block-forward))
  "delete-block")
+
+;; ### String Inflection ###
+;; --- 单词语法风格快速转换
+(lazy-load-global-keys
+ '(
+   ("C-c C-u" . string-inflection-hydra/body)
+   )
+ "init-string-inflection")
 
 ;;; ### Thing-edit ###
 ;;; --- 增强式编辑当前光标的对象
@@ -177,6 +142,36 @@
      ("M-SPC" . just-one-space)              ;只有一个空格在光标处
      ))
 
+;;; ### basic-toolkit ###
+(lazy-load-global-keys
+ '(
+   ("M-s-n" . comment-part-move-down)   ;向下移动注释
+   ("M-s-p" . comment-part-move-up)     ;向上移动注释
+   ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
+   ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
+   ("M-2" . indent-buffer)              ;自动格式化当前Buffer
+   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
+   ;;("C-x u" . mark-line)              ;选中整行
+   ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
+   ("M-G" . goto-column)                ;到指定列
+   ("C->" . remember-init)              ;记忆初始函数
+   ("C-<" . remember-jump)              ;记忆跳转函数
+   ("M-s-," . point-stack-pop)          ;buffer索引跳转
+   ("M-s-." . point-stack-push)         ;buffer索引标记
+   ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
+   ("M-I" . backward-indent)            ;向后移动4个字符
+                                        ;   ("s-J" . scroll-up-one-line)         ;向上滚动一行
+                                        ;   ("s-K" . scroll-down-one-line)       ;向下滚动一行
+   ("<f2>" . refresh-file)              ;自动刷新文件
+   ("s-f" . find-file-root)             ;用root打开文件
+   ("s-r" . find-file-smb)              ;访问sambao
+   ("C-S-j" . join-lines)                ;连接行
+   ("M-c" . endless/capitalize)
+   ("M-l" . endless/downcase)
+   ("M-u" . endless/upcase)
+   )
+ "basic-toolkit")
+
 (lazy-load-global-keys
        '(("M-=" . er/expand-region)
          ("M--" . er/contract-region)
@@ -197,14 +192,6 @@
    "undo-tree")
   )
 
-;; ### String Inflection ###
-;; --- 单词语法风格快速转换
-(lazy-load-global-keys
- '(
-   ("C-c C-u" . string-inflection-hydra/body)
-   )
- "init-string-inflection")
-
 ;;; --- 笔记管理和组织
 (define-prefix-command 'F9-map)
 (global-set-key (kbd "<f9>") 'F9-map)
@@ -221,6 +208,16 @@
    )
  "init-org"
  "<f9>")
+
+  ;; I use C-c c to start capture mode
+  (global-set-key (kbd "C-c c") #'org-capture)
+  ;; ;; (global-set-key (kbd "C-c C") 'org-capture)
+  (global-set-key "\C-cl" #'org-store-link)
+  (global-set-key "\C-ca" #'org-agenda)
+  ;;(global-set-key "\C-cb" #'org-iswitchb)
+
+  ;; C-',  C-, is org-cycle-agenda-files keys
+  ;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。
 
 (lazy-load-set-keys
   '(

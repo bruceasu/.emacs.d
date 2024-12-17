@@ -12,27 +12,6 @@
     (switch-to-buffer current-element)
     (deactivate-mark)))
 
-(defun insert-line-number (beg end &optional start-line)
-  "Insert line numbers into buffer."
-  (interactive "r")
-  (save-excursion
-    (let ((max (count-lines beg end))
-          (line (or start-line 1))
-          (counter 1))
-      (goto-char beg)
-      (while (<= counter max)
-        (insert (format "%0d " line))
-        (beginning-of-line 2)
-        (cl-incf line)
-        (cl-incf counter)))))
-
-(defun insert-line-number+ ()
-  "Insert line number into buffer."
-  (interactive)
-  (if mark-active
-      (insert-line-number (region-beginning) (region-end) (read-number "Start line: "))
-    (insert-line-number (point-min) (point-max))))
-
 (defun strip-blank-lines()
   "Strip all blank lines in select area of buffer,
 if not select any area, then strip all blank lines of buffer."
@@ -442,6 +421,8 @@ Otherwise return nil."
         (fill-region (region-beginning) (region-end)))
     (dotimes (_ (abs n))
       (delete-indentation (natnump n)))))
+(global-set-key (kbd "C-S-j") #'Join-lines)
+
 ;; =========================================================
 ;;;###autoload
 (defun suk/indent-buffer ()
@@ -472,10 +453,8 @@ Version 2022-01-22"
                      (setq $p2 (point)))
             (setq $p2 (point))))
         (narrow-to-region $p1 $p2)))))
+(global-set-key (kbd "C-x n N") #'suk/xah-narrow-to-region)
 
-;; =========================================================
-;; ¶ÎÂä¸ñÊ½»¯
-;; ---------------------------------------------------------
 ;;;###autoload
 (defun suk/unfill-paragraph (&optional region)
   "Takes a multi-line paragraph (or REGION) and make it into a single line of text."

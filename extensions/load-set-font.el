@@ -232,67 +232,67 @@
   "Load org mode font."
   (interactive)
   (unless (eq loaded-font-type 3)
-  ;;(load-default-font)
-  ;; (set-face-attribute FACE FRAME &rest ARGS)
-  ;; or (set-face-attribute FACE FRAME &rest ARGS)
-  ;; 字体和字号
-  ;; :family 指定字体家族，如 "Monaco"、"DejaVu Sans Mono"。
-  ;; :height 指定字体大小，以 1/10 点为单位，如 120 表示 12 点大小。
-  ;; :weight 指定字重，如 'normal、'bold。
-  ;; :width 指定字体宽度，如 'normal、'condensed。
-  ;; 颜色
-  ;; :foreground 指定前景色，即文字颜色。
-  ;; :background 指定背景色。
-  ;; 下划线、删除线等
-  ;; :underline 指定是否添加下划线，可以是 t、nil 或颜色名称/值。
-  ;; :overline 指定是否添加上划线。
-  ;; :strike-through 或 :strike 指定是否添加删除线。
-  ;; 其他
-  ;; :slant 指定字体倾斜样式，如 'italic、'oblique、'normal。
-  ;; :inherit 指定从其他 face 继承属性。
-  ;; 关于 :font 参数
-  ;; :font 参数可以用于直接指定整个字体描述字符串，
-  ;; 这是一种快捷方式，它允许你同时指定字体家族、大小等信息，格式通常是 "家族-大小"，
-  ;; 如 "Monaco-12"。使用 :font 时，可能无法单独指定字重、宽度等属性。
-  ;; (set-face-attribute 'default nil
-  ;;                     :family "asu-cjk-sans" ; 字体家族，如 "Sarasa Mono SC"
-  ;;                     :height 120 ; 字号，120 表示 12pt
-  ;;                     :weight 'normal ; 字体粗细
-  ;;                     :width 'normal) ; 字体宽度
-  ;;(variable-pitch-mode -1)
-  ;; 设置英文字体并指定字号。
-  (setq emacs-english-font "asu-cjk-code")
-  ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
-  ;; 给相应的字符集设置中文字体。
-  ;; abcdefg
-  ;; hij汉字
-  (setq emacs-cjk-font "asu-cjk-code")
-  (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-  ;; (face-remap-add-relative 'default nil :font "asu-cjk-code")
+    ;;(load-default-font)
+    ;; (set-face-attribute FACE FRAME &rest ARGS)
+    ;; or (set-face-attribute FACE FRAME &rest ARGS)
+    ;; 字体和字号
+    ;; :family 指定字体家族，如 "Monaco"、"DejaVu Sans Mono"。
+    ;; :height 指定字体大小，以 1/10 点为单位，如 120 表示 12 点大小。
+    ;; :weight 指定字重，如 'normal、'bold。
+    ;; :width 指定字体宽度，如 'normal、'condensed。
+    ;; 颜色
+    ;; :foreground 指定前景色，即文字颜色。
+    ;; :background 指定背景色。
+    ;; 下划线、删除线等
+    ;; :underline 指定是否添加下划线，可以是 t、nil 或颜色名称/值。
+    ;; :overline 指定是否添加上划线。
+    ;; :strike-through 或 :strike 指定是否添加删除线。
+    ;; 其他
+    ;; :slant 指定字体倾斜样式，如 'italic、'oblique、'normal。
+    ;; :inherit 指定从其他 face 继承属性。
+    ;; 关于 :font 参数
+    ;; :font 参数可以用于直接指定整个字体描述字符串，
+    ;; 这是一种快捷方式，它允许你同时指定字体家族、大小等信息，格式通常是 "家族-大小"，
+    ;; 如 "Monaco-12"。使用 :font 时，可能无法单独指定字重、宽度等属性。
+    ;; (set-face-attribute 'default nil
+    ;;                     :family "asu-cjk-sans" ; 字体家族，如 "Sarasa Mono SC"
+    ;;                     :height 120 ; 字号，120 表示 12pt
+    ;;                     :weight 'normal ; 字体粗细
+    ;;                     :width 'normal) ; 字体宽度
+    ;;(variable-pitch-mode -1)
+    ;; 设置英文字体并指定字号。
+    (setq emacs-english-font "asu-cjk-code")
+    ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
+    ;; 给相应的字符集设置中文字体。
+    ;; abcdefg
+    ;; hij汉字
+    (setq emacs-cjk-font "asu-cjk-code")
+    (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+    ;; (face-remap-add-relative 'default nil :font "asu-cjk-code")
 
-  (set-face-attribute 'org-block nil :family "M+CodeLat50 Nerd Font Mono")
-  (set-face-attribute 'org-code nil :family "M+CodeLat50 Nerd Font Mono")
-  (set-face-attribute 'org-table nil :family "M+CodeLat50 Nerd Font Mono")
-  (set-face-attribute 'org-table nil :family "asu-cjk-mono")
-  ;; (set-face-attribute 'org-table nil :family "asu-cjk-code")
-  ;; (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-3 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-4 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-5 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-6 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-7 nil :family "asu-cjk-sans")
-  ;; (set-face-attribute 'org-level-8 nil :family "asu-cjk-sans")
-  ;; (when (member "Symbols Nerd Font Mono" (font-family-list))
-  ;; (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
-  ;; ;; FontAwesome 范围
-  ;; (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
-  ;; ;; 扩展至可能包含 Material Design Icons 的范围
-  ;; (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
-  (when (fboundp 'mixed-pitch-mode) (mixed-pitch-mode 1))
+    ;;(set-face-attribute 'org-block nil :family "M+CodeLat50 Nerd Font Mono")
+;;    (set-face-attribute 'org-code nil :family "M+CodeLat50 Nerd Font Mono")
+    (set-face-attribute 'org-table nil :family "M+CodeLat50 Nerd Font Mono")
+    ;;(set-face-attribute 'org-table nil :family "asu-cjk-mono")
+    ;; (set-face-attribute 'org-table nil :family "asu-cjk-code")
+    ;; (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
+    ;; (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")
+    ;; (set-face-attribute 'org-level-3 nil :family "asu-cjk-sans")
+    ;; (set-face-attribute 'org-level-4 nil :family "asu-cjk-sans")
+    ;; (set-face-attribute 'org-level-5 nil :family "asu-cjk-sans")
+    ;; (set-face-attribute 'org-level-6 nil :family "asu-cjk-sans")
+    ;; (set-face-attribute 'org-level-7 nil :family "asu-cjk-sans")
+    ;; (set-face-attribute 'org-level-8 nil :family "asu-cjk-sans")
+    ;; (when (member "Symbols Nerd Font Mono" (font-family-list))
+    ;; (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
+    ;; ;; FontAwesome 范围
+    ;; (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
+    ;; ;; 扩展至可能包含 Material Design Icons 的范围
+    ;; (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
+    (when (fboundp 'mixed-pitch-mode) (mixed-pitch-mode 1))
 
-  (setq loaded-font-type 3)
-  (message "Set org-mode font")))
+    (setq loaded-font-type 3)
+    (message "Set org-mode font")))
 
 (with-eval-after-load 'org
   (add-hook 'org-mode-hook 'load-org-font)

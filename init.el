@@ -1,8 +1,8 @@
 (provide 'init)
 
-;; Dingyi yidit mukluk, fongbin yathou cingyi.
-;; user-emacs-directory tungseung hai ~/.emacs.d
-;; windows haa, ~/ tungseung hai $EMACS_INSTALL_DIR, waakze EMACS citding de `HOME` binleung
+;; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
+;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
+;; 变量。
 (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
 (defvar suk-emacs-config-dir (expand-file-name "etc" suk-emacs-root-dir))
 (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
@@ -12,7 +12,7 @@
 (defvar suk-emacs-tmp-dir (expand-file-name "tmp" suk-emacs-var-dir))
 (defvar suk-emacs-backup-dir (expand-file-name "backup" suk-emacs-tmp-dir))
 
-;; OS ge HOME mukluk.
+;; OS 嘅 HOME 目录。
 (defvar user-home-dir (getenv "HOME"))
 
 (if (eq system-type 'windows-nt)
@@ -283,15 +283,12 @@
 (unless (server-running-p)
      (server-start))
 
-;; Programming
-;;(require 'init-ide)
 (run-with-idle-timer
  1
  nil
  #'(lambda()
    (require 'load-abbrev)
-
-
+   (require 'init-ide)
    ))
 ;; chmod +x
 ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod

@@ -34,18 +34,12 @@
 [submodule "extensions/posframe"]
 	path = extensions/posframe
 	url = git@github.com:tumashu/posframe.git
-[submodule "extensions/smex"]
-	path = extensions/smex
-	url = git@github.com:nonsequitur/smex
 [submodule "extensions/cal-china-x"]
 	path = extensions/cal-china-x
 	url = git@github.com:xwl/cal-china-x
 [submodule "extensions/vundo"]
 	path = extensions/vundo
 	url = https://github.com/casouri/vundo
-[submodule "extensions/lsp-bridge"]
-	path = extensions/lsp-bridge
-	url = https://github.com/manateelazycat/lsp-bridge
 [submodule "extensions/fingertip"]
 	path = extensions/fingertip
 	url = https://github.com/manateelazycat/fingertip

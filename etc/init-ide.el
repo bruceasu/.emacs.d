@@ -8,11 +8,6 @@
 (eval-when-compile
   (require 'init-package))
 
-
-;; Develop tools
-(require-package 'legalese) ;; create legal boilerplate text such as copyright notices, licenses, or disclaimers into your files.
-(setq legalese-name "Bruce Asu")
-(setq legalease-email "bruceasu@gmail.com")
 ;; M-x legalese-insert-license
 (require-package 'web-mode)
 ;;(require-package 'lua-mode)
@@ -56,7 +51,8 @@
   :config (setq-default show-paren-style 'mixed
                         show-paren-when-point-inside-paren t
                         show-paren-when-point-in-periphery t)
-  :hook (prog-mode . show-paren-mode))
+  :hook (prog-mode . show-paren-mode)
+  )
 
 
 ;; 语法检查包
@@ -270,32 +266,32 @@
           xref-show-xrefs-function #'xref-show-definitions-completing-read))
 ;; Jump to definition
 (use-package dumb-jump
-    :pretty-hydra
-    ((:title (pretty-hydra-title "Dump Jump" 'faicon "nf-fa-anchor")
-      :color blue :quit-key ("q" "C-g"))
-     ("Jump"
-      (("j" dumb-jump-go "Go")
-       ("o" dumb-jump-go-other-window "Go other window")
-       ("e" dumb-jump-go-prefer-external "Go external")
-       ("x" dumb-jump-go-prefer-external-other-window "Go external other window"))
-      "Other"
-      (("i" dumb-jump-go-prompt "Prompt")
-       ("l" dumb-jump-quick-look "Quick look")
-       ("b" dumb-jump-back "Back"))))
-    :bind (("C-M-j" . dumb-jump-hydra/body))
-    :init
-    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-    (setq dumb-jump-selector 'completing-read))
+  :pretty-hydra
+  ((:title (pretty-hydra-title "Dump Jump" 'faicon "nf-fa-anchor")
+           :color blue :quit-key ("q" "C-g"))
+   ("Jump"
+    (("j" dumb-jump-go "Go")
+     ("o" dumb-jump-go-other-window "Go other window")
+     ("e" dumb-jump-go-prefer-external "Go external")
+     ("x" dumb-jump-go-prefer-external-other-window "Go external other window"))
+    "Other"
+    (("i" dumb-jump-go-prompt "Prompt")
+     ("l" dumb-jump-quick-look "Quick look")
+     ("b" dumb-jump-back "Back"))))
+  :bind (("C-M-j" . dumb-jump-hydra/body))
+  :init
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+  (setq dumb-jump-selector 'completing-read))
 
 ;; Tree-sitter support
-(when (suk-treesit-available-p)
-  (require-package 'treesit-auto)
-  (use-package treesit-auto
-    :ensure t
-    :hook (after-init . global-treesit-auto-mode)
-    :init (setq treesit-auto-install 'prompt))
-	(global-treesit-auto-mode)
-    )
+;; (when (suk-treesit-available-p)
+;;   (require-package 'treesit-auto)
+;;   (use-package treesit-auto
+;;     :ensure t
+;;     :hook (after-init . global-treesit-auto-mode)
+;;     :init (setq treesit-auto-install 'prompt))
+;; 	(global-treesit-auto-mode)
+;;     )
 
 
 ;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
@@ -314,91 +310,6 @@
 ;; Misc. programming modes
 (use-package csv-mode)
 (use-package yaml-mode)
-
-(require 'fingertip) ;; M-x treesit-install-language-grammar RET
-(dolist (hook (list
-                'c-mode-common-hook
-                'c-mode-hook
-                'c++-mode-hook
-                'java-mode-hook
-                'haskell-mode-hook
-                'emacs-lisp-mode-hook
-                'lisp-interaction-mode-hook
-                'lisp-mode-hook
-                'maxima-mode-hook
-                'ielm-mode-hook
-                'sh-mode-hook
-                'makefile-gmake-mode-hook
-                'php-mode-hook
-                'python-mode-hook
-                'js-mode-hook
-                'go-mode-hook
-                'qml-mode-hook
-                'jade-mode-hook
-                'css-mode-hook
-                'ruby-mode-hook
-                'coffee-mode-hook
-                'rust-mode-hook
-                'rust-ts-mode-hook
-                'qmake-mode-hook
-                'lua-mode-hook
-                'swift-mode-hook
-                'web-mode-hook
-                'markdown-mode-hook
-                'llvm-mode-hook
-                'conf-toml-mode-hook
-                'nim-mode-hook
-                'typescript-mode-hook
-                'c-ts-mode-hook
-                'c++-ts-mode-hook
-                'cmake-ts-mode-hook
-                'toml-ts-mode-hook
-                'css-ts-mode-hook
-                'js-ts-mode-hook
-                'json-ts-mode-hook
-                'python-ts-mode-hook
-                'bash-ts-mode-hook
-                'typescript-ts-mode-hook
-                ))
-   (add-hook hook #'(lambda () (fingertip-mode 1))))
-
-(define-key fingertip-mode-map (kbd "(") 'fingertip-open-round)
-(define-key fingertip-mode-map (kbd "[") 'fingertip-open-bracket)
-(define-key fingertip-mode-map (kbd "{") 'fingertip-open-curly)
-(define-key fingertip-mode-map (kbd ")") 'fingertip-close-round)
-(define-key fingertip-mode-map (kbd "]") 'fingertip-close-bracket)
-(define-key fingertip-mode-map (kbd "}") 'fingertip-close-curly)
-(define-key fingertip-mode-map (kbd "=") 'fingertip-equal)
-(define-key fingertip-mode-map (kbd "（") 'fingertip-open-chinese-round)
-(define-key fingertip-mode-map (kbd "「") 'fingertip-open-chinese-bracket)
-(define-key fingertip-mode-map (kbd "【") 'fingertip-open-chinese-curly)
-(define-key fingertip-mode-map (kbd "）") 'fingertip-close-chinese-round)
-(define-key fingertip-mode-map (kbd "」") 'fingertip-close-chinese-bracket)
-(define-key fingertip-mode-map (kbd "】") 'fingertip-close-chinese-curly)
-
-(define-key fingertip-mode-map (kbd "%") 'fingertip-match-paren)
-(define-key fingertip-mode-map (kbd "\"") 'fingertip-double-quote)
-(define-key fingertip-mode-map (kbd "'") 'fingertip-single-quote)
-
-;(define-key fingertip-mode-map (kbd "SPC") 'fingertip-space)
-;(define-key fingertip-mode-map (kbd "RET") 'fingertip-newline)
-
-(define-key fingertip-mode-map (kbd "M-o") 'fingertip-backward-delete)
-(define-key fingertip-mode-map (kbd "C-d") 'fingertip-forward-delete)
-(define-key fingertip-mode-map (kbd "C-k") 'fingertip-kill)
-
-(define-key fingertip-mode-map (kbd "M-\"") 'fingertip-wrap-double-quote)
-(define-key fingertip-mode-map (kbd "M-'") 'fingertip-wrap-single-quote)
-(define-key fingertip-mode-map (kbd "M-[") 'fingertip-wrap-bracket)
-(define-key fingertip-mode-map (kbd "M-{") 'fingertip-wrap-curly)
-(define-key fingertip-mode-map (kbd "M-(") 'fingertip-wrap-round)
-(define-key fingertip-mode-map (kbd "M-)") 'fingertip-unwrap)
-
-(define-key fingertip-mode-map (kbd "M-p") 'fingertip-jump-right)
-(define-key fingertip-mode-map (kbd "M-n") 'fingertip-jump-left)
-(define-key fingertip-mode-map (kbd "M-:") 'fingertip-jump-out-pair-and-newline)
-
-(define-key fingertip-mode-map (kbd "C-j") 'fingertip-jump-up)
 
 
 (dolist (hook (list
@@ -1091,42 +1002,20 @@ INDENT-SIZE decide the indentation level.
 ;; settings for LSP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (use-package eglot
-;;   :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
-;;   :bind (("C-c e f" . #'eglot-format)
-;;          ("C-c e i" . #'eglot-code-action-organize-imports)
-;;          ("C-c e q" . #'eglot-code-action-quickfix))
-;;   :config
-;;   ;; (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
-;;   (defun eglot-actions-before-save()
-;;     (add-hook 'before-save-hook (lambda ()
-;;                                   (call-interactively #'eglot-format)
-;;                                   (call-interactively #'eglot-code-action-organize-imports))))
-;;   (add-to-list 'eglot-server-programs '(web-mode "vls"))
-;;   (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save))
+(use-package eglot
+  :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
+  :bind (("C-c e f" . #'eglot-format)
+         ("C-c e i" . #'eglot-code-action-organize-imports)
+         ("C-c e q" . #'eglot-code-action-quickfix))
+  :config
+  ;; (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
+  (defun eglot-actions-before-save()
+    (add-hook 'before-save-hook (lambda ()
+                                  (call-interactively #'eglot-format)
+                                  (call-interactively #'eglot-code-action-organize-imports))))
+  (add-to-list 'eglot-server-programs '(web-mode "vls"))
+  (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save))
 
 
 (setenv "PATH" (concat (getenv "PATH") ";c:/green/python311/"))
 (add-to-list 'exec-path "c:/green/python311")
-;; https://github.com/manateelazycat/lsp-bridge
-(require 'lsp-bridge)
-(global-lsp-bridge-mode)
-;; (add-hook 'prog-mode-hook 'lsp-bridge-mode)
-;; set the python interpreter path if it's different from default
-(setq lsp-bridge-python-command "C:\\green\Python311\\python.exe")
-
-(require 'lsp-bridge-jdtls) ;; 根据项目自动生成自定义配置，添加必要的启动参数
-(setq lsp-bridge-enable-auto-import t) ;; 开启自动导入依赖，目前没有code action。补全时可以通过这个导入相应的依赖，建议开启。
-(setq lsp-bridge-jdtls-jvm-args '("-javaagent:c:/User/suk/.m2/repository/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar"))
-(custom-set-variables '(lsp-bridge-get-workspace-folder 'my-lsp-bridge-workspace))
-(add-hook 'java-mode-hook (lambda ()
-  (setq-local lsp-bridge-get-lang-server-by-project 'lsp-bridge-get-jdtls-server-by-project)))
-
-(defun my-lsp-bridge-workspace (proj)
-  (let* ((proj-2-workspace
-          '(("D:/03_projects/suk/word-process-src" . "file://D:/03_projects/suk")
-            ("D:/03_projects/suk/anysql" . "file://D:/03_projects/suk")))
-        (kv (assoc proj proj-2-workspace)))
-        (when kv (cdr kv))
-   )
-)

@@ -561,10 +561,10 @@ _u_tf-8 realod       _G_et mode              _s_cratch
 _g_bk reload         _d_elete file           _o_rg
 _l_ast reopen        _M_ove                  _O_rg scratch
 _R_eopen             _t_oggle margin right
-_r_ecentf            re_n_ame
+_r_ecentf            re_N_ame
 _k_ close current    _C_opy filename
 _K_ close other      _c_ount
-close _A_ll
+close _A_ll          [x] narrow-region
 "
 
     ("n" suk/new-empty-buffer)
@@ -581,7 +581,8 @@ close _A_ll
     ("c" suk/count-brf-lines)
     ("G" suk/get-mode-name)
     ("M" suk/move-buffer-file)
-    ("n" suk/rename-file-and-buffer)
+    ("N" suk/rename-file-and-buffer)
+    ("x" suk/xah-narrow-to-region)
     ("t" suk/toggle-margin-right)
 
     ("m" suk/switch-to-minibuffer)
@@ -591,7 +592,7 @@ close _A_ll
     ("r" recentf-open)
     ("R" suk/open-recently-closed)
     ("q" nil))
-    ;;(global-set-key (kbd "C-c b") 'my-hydra-buffers/body)
+  ;;(global-set-key (kbd "C-c b") 'my-hydra-buffers/body)
   )
 (provide 'buffer-extension)
 
