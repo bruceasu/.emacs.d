@@ -5,8 +5,6 @@
 
 (provide 'init-ide)
 
-(eval-when-compile
-  (require 'init-package))
 
 ;; M-x legalese-insert-license
 (require-package 'web-mode)

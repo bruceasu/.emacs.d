@@ -7,7 +7,7 @@
  2
  nil
  #'(lambda()
-   (require 'sudo)
+   (require 'my-sudo)
     (require-package 'sudo-edit)
     ;;(use-package sudo-edit)
     ))
@@ -40,7 +40,6 @@
   	;; run "M-x pdf-tool-install" at debian and open pdf in GUI Emacs
 	;;(require-package 'pdf-tools) ;; use the package in extension
 	(require-package 'nov) ; read epub
-	 (require 'init-shell)
     (require 'init-im)   ;; windows 下表现不好
   
     (when (display-graphic-p)

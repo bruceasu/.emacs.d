@@ -6,9 +6,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'init-package))
-
 (require 'sdcv)
 (setq sdcv-say-word-p t)                ;say word after search
 

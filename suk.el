@@ -1384,8 +1384,8 @@ _w_ where is something defined
 
 
 ;; Jump to Chinese characters
-(my-run-with-idle-timer
- 1
+(run-with-idle-timer
+ 1 nil
  #'(lambda()
      (require-package 'pinyinlib)
      (require-package 'ace-pinyin)
