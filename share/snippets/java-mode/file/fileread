@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: fileread
-# key: fileread
-# --
-FileReader fileReader = new FileReader("test.properties");
-String result = fileReader.readString();

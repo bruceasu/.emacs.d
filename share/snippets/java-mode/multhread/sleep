@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: sleep
-# key: sleep
-# --
-try {Thread.sleep(new Random().nextInt(10) * 1000L + 1000L);}
-catch (InterruptedException e) {e.printStackTrace();}

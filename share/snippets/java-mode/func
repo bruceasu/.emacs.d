@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name:func
-# key:func
-# --
-public void functiont(){
-    $0
-}

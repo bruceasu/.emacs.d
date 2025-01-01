@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: gitc
-# key: gitc
-# --
-[user]
-	name = vanniuner
-	email = vanniuner@qq.com

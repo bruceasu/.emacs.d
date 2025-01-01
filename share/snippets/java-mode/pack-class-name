@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: pack-class-name
-# key: pan
-# --
-package `(mapconcat 'identity (split-string (replace-regexp-in-string ".*src\\(/\\(main\\|test\\)\\)?\\(/java\\)?" "" default-directory) "/" t) ".")`;

@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: diffDate
-# key: diffdate
-# --
-
-Calendar start = Calendar.getInstance();
-log.info("\n====[consume]: {}ms",  Calendar.getInstance().getTimeInMillis() - start.getTimeInMillis());

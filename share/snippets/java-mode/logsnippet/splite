@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: splite
-# key: lsp
-# --
-log.info("===================this is Divider line===============");

@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: ram
-# key: ram
-# --
-log.info("\n==== [log]: {}", RamUsageEstimator.shallowSizeOf($0));

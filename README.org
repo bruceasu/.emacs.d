@@ -424,7 +424,6 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
    nil
    #'(lambda()
      (require 'load-abbrev)
-     (require 'init-ide)
      ))
   ;; chmod +x
   ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
@@ -3782,27 +3781,6 @@ install
 #+end_src
 * Coding
 其实使用emacs来做工程开发是不太好，用来编写一啲脚本类嘅还好。
-** Yasnippet
-用等唔多。
-#+begin_src emacs-lisp :tangle suk.el
-  ;; 代码片段
-  (when sys/linuxp
-    (require-package 'yasnippet)
-    (require-package 'auto-yasnippet)
-    (require 'yasnippet)
-    (with-eval-after-load 'yasnippet
-      (setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
-      (yas-global-mode 1)
-      (autoload 'yas-minor-mode-on "yasnippet")
-      (dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook))
-        (add-hook x #'yas-minor-mode-on))
-
-      )
-
-    (use-package yasnippet)
-    (use-package yasnippet-snippets)
-    )
-#+end_src
 ** Git
 在WIndows下效率极低，速度好慢，冇必要使用。
 #+begin_src emacs-lisp :tangle suk.el

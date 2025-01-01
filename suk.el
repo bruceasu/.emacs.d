@@ -2436,24 +2436,6 @@ _w_ where is something defined
   (require-package 'nov) ; read epub
   )
 
-;; 代码片段
-(when sys/linuxp
-  (require-package 'yasnippet)
-  (require-package 'auto-yasnippet)
-  (require 'yasnippet)
-  (with-eval-after-load 'yasnippet
-    (setq yas-snippet-dirs '("~/.emacs.d/share/snippets"))
-    (yas-global-mode 1)
-    (autoload 'yas-minor-mode-on "yasnippet")
-    (dolist (x '(org-mode-hook prog-mode-hook snippet-mode-hook))
-      (add-hook x #'yas-minor-mode-on))
-
-    )
-
-  (use-package yasnippet)
-  (use-package yasnippet-snippets)
-  )
-
 (when sys/linuxp
  (require-package 'magit)
  (require-package 'fringe-helper)

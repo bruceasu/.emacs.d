@@ -287,7 +287,6 @@
  nil
  #'(lambda()
    (require 'load-abbrev)
-   (require 'init-ide)
    ))
 ;; chmod +x
 ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod

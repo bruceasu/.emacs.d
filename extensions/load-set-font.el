@@ -161,7 +161,7 @@
        (frame-parameter nil 'font) charset
        (font-spec :family cjk :size (cdr size-pair))))
     (setq face-font-rescale-alist
- 	      (mapcar (lambda (item) (cons item 1.2)) cfl))
+ 	      (mapcar (lambda (item) (cons item 1.0)) cfl))
     ))
 
 (defun emacs-step-font-size (step)

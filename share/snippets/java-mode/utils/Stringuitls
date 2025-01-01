@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: Stringuitls
-# key: ie                             
-# --
-if (!StringUtils.isEmpty(${1:value})) {
-    $0
-}
