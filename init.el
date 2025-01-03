@@ -3,14 +3,14 @@
 ;; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
 ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
 ;; 变量。
-(defvar suk-emacs-root-dir (file-truename user-emacs-directory))
-(defvar suk-emacs-config-dir (expand-file-name "etc" suk-emacs-root-dir))
+(defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
+(defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
 (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
-(defvar suk-emacs-share-dir (expand-file-name "share" suk-emacs-root-dir))
-(defvar suk-emacs-themes-dir (expand-file-name "themes" suk-emacs-share-dir))
-(defvar suk-emacs-var-dir (expand-file-name "var" suk-emacs-root-dir))
-(defvar suk-emacs-tmp-dir (expand-file-name "tmp" suk-emacs-var-dir))
-(defvar suk-emacs-backup-dir (expand-file-name "backup" suk-emacs-tmp-dir))
+(defvar suk-emacs-share-dir     (expand-file-name "share" suk-emacs-root-dir))
+(defvar suk-emacs-themes-dir    (expand-file-name "themes" suk-emacs-share-dir))
+(defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
+(defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
+(defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
 
 ;; OS 嘅 HOME 目录。
 (defvar user-home-dir (getenv "HOME"))
@@ -280,8 +280,7 @@
 
 (load-file (expand-file-name "suk.el" suk-emacs-root-dir))
 
-(unless (server-running-p)
-     (server-start))
+(unless (server-running-p) (server-start))
 
 (run-with-idle-timer
  1

@@ -36,8 +36,7 @@
   :group 'suk
   :type 'string)
 
-;;minibuffer childframe
-(setq suk-completion-style "childframe")
+
 
 (defcustom suk-prettify-symbols-alist
   '(("lambda" . ?λ)
@@ -116,11 +115,13 @@
               (if (file-exists-p file)
                   (load file)))))
 
+;; basic settings
 (setq-default
  major-mode 'text-mode ; 默认使用text模式
  cursor-type 'bar      ; 设置光标样式
  tab-width 4           ; tab 的宽度为 4 空格
- indent-tabs-mode nil  ; 永久使用空格縮排，唔好用 TAB 只係用空格代替 TAB，使用 C-q TAB 來輸入 TAB 字符
+ indent-tabs-mode nil  ; 永久使用空格縮排，唔好用 TAB 只係用空格代替
+                       ; TAB，使用 C-q TAB 來輸入 TAB 字符
  )
 (tooltip-mode -1)                          ;不要显示任何 tooltips
 (delete-selection-mode 1)                  ; 选中文本后输入会覆盖
@@ -198,6 +199,7 @@
     (setq use-short-answers t)
   (fset 'yes-or-no-p 'y-or-n-p))
 
+;; backup settings
 (setq make-backup-files t)
 (setq version-control t)     ; 允许多次备份
 (setq kept-old-versions 2)   ; 保留最早的2个备份文件
@@ -303,18 +305,6 @@ Then replace the region or buffer with cli output."
      ,@body
      (float-time (time-since time))))
 
-
-;;;###autoload
-(defun childframe-workable-p ()
-  "Whether childframe is workable."
-  (not (or noninteractive
-           emacs-basic-display
-           (not (display-graphic-p)))))
-;;;###autoload
-(defun childframe-completion-workable-p ()
-  "Whether childframe completion is workable."
-  (and (eq suk-completion-style 'childframe)
-       (childframe-workable-p)))
 ;;;###autoload
 (defun icons-displayable-p ()
   "Return non-nil if icons are displayable."
@@ -406,20 +396,10 @@ Native tree-sitter is introduced since 29.1."
   (load-theme 'doom-one t)
   )
 
-(defvar after-load-theme-hook nil
-  "Hook run after a color theme is loaded using `load-theme'.")
-
-;;;###autoload
-(defun run-after-load-theme-hook (&rest _)
-  "Run `after-load-theme-hook'."
-  (run-hooks 'after-load-theme-hook))
-(advice-add #'load-theme :after #'run-after-load-theme-hook)
 
 (use-package doom-modeline
-  ;;  :load-path "~/.emacs.d/extensions/doom-modeline"
   :hook (after-init . doom-modeline-mode)
   :init
-  ;;(doom-modeline-mode 1)
   (setq doom-modeline-icon suk-icon
         doom-modeline-minor-modes t)
   :config
@@ -478,7 +458,7 @@ Native tree-sitter is introduced since 29.1."
     :config
     (centaur-tabs-mode t)
     :bind
-    ("C-<prior>" . centaur-tabs-backward) ;; Ctrl PgUp
+    ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
     ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
 )
 
@@ -518,104 +498,101 @@ Native tree-sitter is introduced since 29.1."
 
      ))
 
-(require-package 'hydra)
-
+;; setup hydra
 (use-package hydra
   :hook (emacs-lisp-mode . hydra-add-imenu)
-  :init
-  (when (childframe-completion-workable-p)
+  :config
+  (with-eval-after-load 'posframe
     (setq hydra-hint-display-type 'posframe)
-    (with-eval-after-load 'posframe
-      (defun hydra-set-posframe-show-params ()
-        "Set hydra-posframe style."
-        (setq hydra-posframe-show-params
-              `(:left-fringe 8
-                             :right-fringe 8
-                             :internal-border-width 2
-                             :internal-border-color ,(face-background 'posframe-border nil t)
-                             :background-color ,(face-background 'tooltip nil t)
-                             :foreground-color ,(face-foreground 'tooltip nil t)
-                             :lines-truncate t
-                             )))
-      (hydra-set-posframe-show-params)
-      (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t)))
+    (defun hydra-set-posframe-show-params ()
+      "Set hydra-posframe style."
+      (setq hydra-posframe-show-params
+            `(
+              :left-fringe 8
+              :right-fringe 8
+              :internal-border-width 2
+              :internal-border-color ,(face-background 'posframe-border nil t)
+              :background-color ,(face-background 'tooltip nil t)
+              :foreground-color ,(face-foreground 'tooltip nil t)
+              :lines-truncate t
+              )))
+    (hydra-set-posframe-show-params)
+    (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))
   )
 
-(with-eval-after-load 'hydra
-    (use-package pretty-hydra
-      :custom (pretty-hydra-default-title-body-format-spec " %s%s")
-      :bind ("<f6>" . toggles-hydra/body)
-      :hook (emacs-lisp-mode . (lambda ()
-                                 (add-to-list
-                                  'imenu-generic-expression
-                                  '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
-      :init
-      (cl-defun pretty-hydra-title (title &optional icon-type icon-name &key face height v-adjust)
-        "Add an icon in the hydra title."
-        (let ((face (or face `(:inherit highlight :reverse-video t)))
-              (height (or height 1.2))
-              (v-adjust (or v-adjust 0.0)))
-          (concat
-           (when (and (icons-displayable-p) icon-type icon-name)
-             (let ((f (intern (format "nerd-icons-%s" icon-type))))
-               (when (fboundp f)
-                 (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
-           (propertize title 'face face))))
+(use-package pretty-hydra
+  :requires hydra
+  :custom (pretty-hydra-default-title-body-format-spec " %s%s")
+  :bind ("<f6>" . toggles-hydra/body)
+  :hook (emacs-lisp-mode . (lambda ()
+                             (add-to-list
+                              'imenu-generic-expression
+                              '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
+  :init
+  (cl-defun pretty-hydra-title (title &optional icon-type icon-name &key face height v-adjust)
+    "Add an icon in the hydra title."
+    (let ((face (or face `(:inherit highlight :reverse-video t)))
+          (height (or height 1.2))
+          (v-adjust (or v-adjust 0.0)))
+      (concat
+       (when (and (icons-displayable-p) icon-type icon-name)
+         (let ((f (intern (format "nerd-icons-%s" icon-type))))
+           (when (fboundp f)
+             (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
+       (propertize title 'face face))))
 
-      ;; Global toggles
-      (with-no-warnings
-        (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
-          ("Basic"
-           (("n" (cond ((fboundp 'display-line-numbers-mode)
-                        (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
-                       ((fboundp 'gblobal-linum-mode)
-                        (global-linum-mode (if global-linum-mode -1 1))))
-             "line number"
-             :toggle (or (bound-and-true-p display-line-numbers-mode)
-                         (bound-and-true-p global-linum-mode)))
-            ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
-            ("d" global-hungry-delete-mode "hungry delete" :toggle t)
-            ("e" electric-pair-mode "electric pair" :toggle t)
-            ("c" flyspell-mode "spell check" :toggle t)
-            ("s" prettify-symbols-mode "pretty symbol" :toggle t)
-            ("l" global-page-break-lines-mode "page break lines" :toggle t)
-            ("B" display-battery-mode "battery" :toggle t)
-            ("T" display-time-mode "time" :toggle t)
-            ("a" abbrev-mode "abrev" :toggle t)
-            ("F" auto-fill-mode "auto fill" :toggle t)
-            ("m" doom-modeline-mode "modern mode-line" :toggle t)
-            ("t" toggle-truncate-lines "truncate lines" :toggle t)
-            ("u" toggle-company-ispell "Company Ispell" :toggle t))
-           "Highlight"
-           (("h l" global-hl-line-mode "line" :toggle t)
-            ("h p" show-paren-mode "paren" :toggle t)
-            ("h s" symbol-overlay-mode "symbol" :toggle t)
-            ("h r" rainbow-mode "rainbow" :toggle t)
-            ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
-             "whitespace" :toggle show-trailing-whitespace)
-            ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
-            ("h i" highlight-indent-guides-mode "indent" :toggle t)
-            ("h t" global-hl-todo-mode "todo" :toggle t))
-           "Program"
-           (("f" flymake-mode "flymake" :toggle t)
-            ("O" hs-minor-mode "hideshow" :toggle t)
-            ("U" subword-mode "subword" :toggle t)
-            ("w" whitespace-mode "whitespace" :toggle t)
-            ("W" which-function-mode "which function" :toggle t)
-            ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
-            ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
-            ("v" global-diff-hl-mode "gutter" :toggle t)
-            ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
-            ("M" diff-hl-margin-mode "margin gutter" :toggle t)
-            ("D" diff-hl-dired-mode "dired gutter" :toggle t))
-           ))))
-    )
+  ;; Global toggles
+  (with-no-warnings
+    (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
+      ("Basic"
+       (("n" (cond ((fboundp 'display-line-numbers-mode)
+                    (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
+                   ((fboundp 'gblobal-linum-mode)
+                    (global-linum-mode (if global-linum-mode -1 1))))
+         "line number"
+         :toggle (or (bound-and-true-p display-line-numbers-mode)
+                     (bound-and-true-p global-linum-mode)))
+        ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
+        ("d" global-hungry-delete-mode "hungry delete" :toggle t)
+        ("e" electric-pair-mode "electric pair" :toggle t)
+        ("c" flyspell-mode "spell check" :toggle t)
+        ("s" prettify-symbols-mode "pretty symbol" :toggle t)
+        ("l" global-page-break-lines-mode "page break lines" :toggle t)
+        ("B" display-battery-mode "battery" :toggle t)
+        ("T" display-time-mode "time" :toggle t)
+        ("a" abbrev-mode "abrev" :toggle t)
+        ("F" auto-fill-mode "auto fill" :toggle t)
+        ("m" doom-modeline-mode "modern mode-line" :toggle t)
+        ("t" toggle-truncate-lines "truncate lines" :toggle t)
+        ("u" toggle-company-ispell "Company Ispell" :toggle t))
+       "Highlight"
+       (("h l" global-hl-line-mode "line" :toggle t)
+        ("h p" show-paren-mode "paren" :toggle t)
+        ("h s" symbol-overlay-mode "symbol" :toggle t)
+        ("h r" rainbow-mode "rainbow" :toggle t)
+        ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
+         "whitespace" :toggle show-trailing-whitespace)
+        ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
+        ("h i" highlight-indent-guides-mode "indent" :toggle t)
+        ("h t" global-hl-todo-mode "todo" :toggle t))
+       "Program"
+       (("f" flymake-mode "flymake" :toggle t)
+        ("O" hs-minor-mode "hideshow" :toggle t)
+        ("U" subword-mode "subword" :toggle t)
+        ("w" whitespace-mode "whitespace" :toggle t)
+        ("W" which-function-mode "which function" :toggle t)
+        ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
+        ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
+        ("v" global-diff-hl-mode "gutter" :toggle t)
+        ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
+        ("M" diff-hl-margin-mode "margin gutter" :toggle t)
+        ("D" diff-hl-dired-mode "dired gutter" :toggle t))
+       ))))
 
 ;; @see https://github.com/abo-abo/hydra
-;; color could: red, blue, amaranth, pink, teal
-(with-eval-after-load 'hydra
-  (with-eval-after-load 'ivy
-    (use-package ivy-hydra)))
+  ;; color could: red, blue, amaranth, pink, teal
+(use-package ivy-hydra
+  :after (hydra ivy))
 
 (when (display-graphic-p)
   (use-package vertico
@@ -625,29 +602,26 @@ Native tree-sitter is introduced since 29.1."
                 ("M-DEL" . vertico-directory-delete-word))
     :hook ((after-init . vertico-mode)
            (rfn-eshadow-update-overlay . vertico-directory-tidy))
-    :config
-    (with-eval-after-load 'posframe
-      (when (childframe-completion-workable-p)
-        (use-package vertico-posframe
-          :ensure t
-          :hook (vertico-mode . vertico-posframe-mode)
-          :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
-          )))
     )
+   (use-package vertico-posframe
+      :ensure t
+      :after (posframe vertico)
+      :hook (vertico-mode . vertico-posframe-mode)
+      :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
+      )
   )
 
 (when (display-graphic-p)
-  ;; Child frame
-  (when (childframe-workable-p)
-    (use-package posframe
-      :hook (after-load-theme . posframe-delete-all)
-      :init
-      (defface posframe-border `((t (:inherit region)))
-        "Face used by the `posframe' border."
-        :group 'posframe)
-      (defvar posframe-border-width 2
-        "Default posframe border width.")
-      )))
+  (use-package posframe
+     :hook (after-load-theme . posframe-delete-all)
+     :init
+     (defface posframe-border `((t (:inherit region)))
+       "Face used by the `posframe' border."
+       :group 'posframe)
+     (defvar posframe-border-width 2
+       "Default posframe border width.")
+     )
+)
 
 ;; Optimization
 (setq idle-update-delay 1.0)
@@ -727,40 +701,44 @@ Native tree-sitter is introduced since 29.1."
    ("M-s-u" . vdiff-buffers))
  "vdiff")
 
-;; Frame transparence
-(require-package 'transwin)
-(use-package transwin
-  :bind (("C-M-9" . transwin-inc)
-         ("C-M-8" . transwin-dec)
-         ("C-M-7" . transwin-toggle))
-  :init
-  (when sys/linux-x-p
-    (setq transwin-parameter-alpha 'alpha-background)))
+;; Toggle two most recent buffers
+(fset 'quick-switch-buffer [?\C-x ?b return])
+(global-set-key (kbd "s-b") 'quick-switch-buffer)
 
-;; Directional window-selection routines
-(require-package 'windmove)
-(use-package windmove
-  :ensure nil
-  :bind*
-  (("M-<left>" . (lambda ()
-                   (interactive)
-                   (message "Moving left!")
-                   (windmove-left)))
-   ("M-<right>" . (lambda ()
-                    (interactive)
-                    (message "Moving right")
-                    (windmove-right)))
-   ("M-<up>" . (lambda ()
+(defun ignore-error-wrapper (fn)
+  "Funtion return new function that ignore errors.
+     The function wraps a function with `ignore-errors' macro."
+  (lexical-let ((fn fn))
+               (lambda ()
                  (interactive)
-                 (message "Moving up")
-                 (windmove-up)))
-   ("M-<down>" . (lambda ()
-                   (interactive)
-                   (message "Moving down")
-                   (windmove-down)))))
+                 (ignore-errors
+                   (funcall fn)))))  
+;; Directional window-selection routines
+
+(lazy-load-global-keys
+ '(
+   ("<M-up>"    . (ignore-error-wrapper 'windmove-up))   
+   ("<M-down>"  . (ignore-error-wrapper 'windmove-down))
+   ("<M-left>"  . (ignore-error-wrapper 'windmove-left))  
+   ("<M-right>" . (ignore-error-wrapper 'windmove-right))   
+   )
+ "windmove")
+)
+
+;; Frame transparence
+(lazy-load-global-keys
+ '(
+   ("C-M-9" . transwin-inc)
+   ("C-M-8" . transwin-dec)
+   ("C-M-7" . transwin-toggle)
+   )
+ "transwin")
+)
+
+(with-eval-after-load 'transwin
+  (setq transwin-parameter-alpha 'alpha-background)
 
 ;; Restore old window configurations
-(require-package 'winner)
 (use-package winner
   :ensure nil
   :commands (winner-undo winner-redo) ;; C-c <Left>/C-c <Right>
@@ -778,109 +756,107 @@ Native tree-sitter is introduced since 29.1."
   )
 
 ;; Quickly switch windows
- (require-package 'ace-window)
- (use-package ace-window
-   :pretty-hydra
-   ((:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
-            :foreign-keys warn :quit-key ("q" "C-g"))
-    ("Actions"
-     (("TAB" other-window "switch")
-      ("x" ace-delete-window "delete")
-      ("X" ace-delete-other-windows "delete other" :exit t)
-      ("s" ace-swap-window "swap")
-      ("a" ace-select-window "select" :exit t)
-      ("m" toggle-frame-maximized "maximize" :exit t)
-      ("u" toggle-frame-fullscreen "fullscreen" :exit t))
-     "Movement"
-     (("i" windmove-up "move ↑")
-      ("k" windmove-down "move ↓")
-      ("j" windmove-left "move ←")
-      ("l" windmove-right "move →")
-      ("f" follow-mode "follow"))
-     "Resize"
-     (("<left>" shrink-window-horizontally "shrink H")
-      ("<right>" enlarge-window-horizontally "enlarge H")
-      ("<up>" shrink-window "shrink V")
-      ("<down>" enlarge-window "enlarge V")
-      ("n" balance-windows "balance"))
-     "Split"
-     (("r" split-window-right "horizontally")
-      ("R" split-window-horizontally-instead "horizontally instead")
-      ("v" split-window-below "vertically")
-      ("V" split-window-vertically-instead "vertically instead")
-      ("t" toggle-window-split "toggle")
-      ("o" delete-other-windows "only this")
-      )
-     "Zoom"
-     (("+" text-scale-increase "in")
-      ("=" text-scale-increase "in")
-      ("-" text-scale-decrease "out")
-      ("0" (text-scale-increase 0) "reset"))
-     "Misc"
-     (("o" set-frame-font "frame font")
-      ("f" make-frame-command "new frame")
-      ("d" delete-frame "delete frame")
-      ("z" winner-undo "winner undo")
-      ("Z" winner-redo "winner redo"))))
-   :custom-face
-   (aw-leading-char-face ((t (:inherit font-lock-keyword-face :foreground unspecified :bold t :height 3.0))))
-   (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
-   (aw-mode-line-face ((t (:inherit mode-line-emphasis :bold t))))
-   :bind (([remap other-window] . ace-window)
-          ("C-c w" . ace-window-hydra/body))
-   :hook (emacs-startup . ace-window-display-mode)
-   :config
-   (defun toggle-window-split ()
-     (interactive)
-     (if (= (count-windows) 2)
-         (let* ((this-win-buffer (window-buffer))
-                (next-win-buffer (window-buffer (next-window)))
-                (this-win-edges (window-edges (selected-window)))
-                (next-win-edges (window-edges (next-window)))
-                (this-win-2nd (not (and (<= (car this-win-edges)
-                                            (car next-win-edges))
-                                        (<= (cadr this-win-edges)
-                                            (cadr next-win-edges)))))
-                (splitter
-                 (if (= (car this-win-edges)
-                        (car (window-edges (next-window))))
-                     'split-window-horizontally
-                   'split-window-vertically)))
-           (delete-other-windows)
-           (let ((first-win (selected-window)))
-             (funcall splitter)
-             (if this-win-2nd (other-window 1))
-             (set-window-buffer (selected-window) this-win-buffer)
-             (set-window-buffer (next-window) next-win-buffer)
-             (select-window first-win)
-             (if this-win-2nd (other-window 1))))
-       (user-error "`toggle-window-split' only supports two windows")))
+(use-package ace-window
+  :pretty-hydra
+  ((:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
+           :foreign-keys warn :quit-key ("q" "C-g"))
+   ("Actions"
+    (("TAB" other-window "switch")
+     ("x" ace-delete-window "delete")
+     ("X" ace-delete-other-windows "delete other" :exit t)
+     ("s" ace-swap-window "swap")
+     ("a" ace-select-window "select" :exit t)
+     ("m" toggle-frame-maximized "maximize" :exit t)
+     ("u" toggle-frame-fullscreen "fullscreen" :exit t))
+    "Movement"
+    (("i" windmove-up "move ↑")
+     ("k" windmove-down "move ↓")
+     ("j" windmove-left "move ←")
+     ("l" windmove-right "move →")
+     ("f" follow-mode "follow"))
+    "Resize"
+    (("<left>" shrink-window-horizontally "shrink H")
+     ("<right>" enlarge-window-horizontally "enlarge H")
+     ("<up>" shrink-window "shrink V")
+     ("<down>" enlarge-window "enlarge V")
+     ("n" balance-windows "balance"))
+    "Split"
+    (("r" split-window-right "horizontally")
+     ("R" split-window-horizontally-instead "horizontally instead")
+     ("v" split-window-below "vertically")
+     ("V" split-window-vertically-instead "vertically instead")
+     ("t" toggle-window-split "toggle")
+     ("o" delete-other-windows "only this")
+     )
+    "Zoom"
+    (("+" text-scale-increase "in")
+     ("=" text-scale-increase "in")
+     ("-" text-scale-decrease "out")
+     ("0" (text-scale-increase 0) "reset"))
+    "Misc"
+    (("o" set-frame-font "frame font")
+     ("f" make-frame-command "new frame")
+     ("d" delete-frame "delete frame")
+     ("z" winner-undo "winner undo")
+     ("Z" winner-redo "winner redo"))))
 
-   ;; Bind hydra to dispatch list
-   (add-to-list 'aw-dispatch-alist '(?w ace-window-hydra/body) t)
+  (aw-leading-char-face ((t (:inherit font:custom-face-lock-keyword-face :foreground unspecified :bold t :height 3.0))))
+  (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
+  (aw-mode-line-face ((t (:inherit mode-line-emphasis :bold t))))
+  :bind (([remap other-window] . ace-window)
+         ("C-c w" . ace-window-hydra/body))
+  :hook (emacs-startup . ace-window-display-mode)
+  :config
+  (defun toggle-window-split ()
+    (interactive)
+    (if (= (count-windows) 2)
+        (let* ((this-win-buffer (window-buffer))
+               (next-win-buffer (window-buffer (next-window)))
+               (this-win-edges (window-edges (selected-window)))
+               (next-win-edges (window-edges (next-window)))
+               (this-win-2nd (not (and (<= (car this-win-edges)
+                                           (car next-win-edges))
+                                       (<= (cadr this-win-edges)
+                                           (cadr next-win-edges)))))
+               (splitter
+                (if (= (car this-win-edges)
+                       (car (window-edges (next-window))))
+                    'split-window-horizontally
+                  'split-window-vertically)))
+          (delete-other-windows)
+          (let ((first-win (selected-window)))
+            (funcall splitter)
+            (if this-win-2nd (other-window 1))
+            (set-window-buffer (selected-window) this-win-buffer)
+            (set-window-buffer (next-window) next-win-buffer)
+            (select-window first-win)
+            (if this-win-2nd (other-window 1))))
+      (user-error "`toggle-window-split' only supports two windows")))
 
-   ;; Select widnow via `M-1'...`M-9'
-   (defun aw--select-window (number)
-     "Slecet the specified window."
-     (when (numberp number)
-       (let ((found nil))
-         (dolist (win (aw-window-list))
-           (when (and (window-live-p win)
-                      (eq number
-                          (string-to-number
-                           (window-parameter win 'ace-window-path))))
-             (setq found t)
-             (aw-switch-to-window win)))
-         (unless found
-           (message "No specified window: %d" number)))))
-   (dotimes (n 9)
-     (bind-key (format "M-%d" (1+ n))
-               (lambda ()
-                 (interactive)
-                 (aw--select-window (1+ n))))))
+  ;; Bind hydra to dispatch list
+  (add-to-list 'aw-dispatch-alist '(?w ace-window-hydra/body) t)
+
+  ;; Select widnow via `M-1'...`M-9'
+  (defun aw--select-window (number)
+    "Slecet the specified window."
+    (when (numberp number)
+      (let ((found nil))
+        (dolist (win (aw-window-list))
+          (when (and (window-live-p win)
+                     (eq number
+                         (string-to-number
+                          (window-parameter win 'ace-window-path))))
+            (setq found t)
+            (aw-switch-to-window win)))
+        (unless found
+          (message "No specified window: %d" number)))))
+  (dotimes (n 9)
+    (bind-key (format "M-%d" (1+ n))
+              (lambda ()
+                (interactive)
+                (aw--select-window (1+ n))))))
 
 ;; Enforce rules for popups
-(require-package 'popper)
 (use-package popper
   :custom
   (popper-group-function #'popper-group-by-directory)
@@ -1071,6 +1047,17 @@ Native tree-sitter is introduced since 29.1."
  "ace-jump-mode"
  "C-z"
  )
+
+;; Jump to Chinese characters
+(run-with-idle-timer
+ 1
+ nil
+ #'(lambda()     
+     (use-package ace-pinyin
+       :diminish
+       :hook (after-init . ace-pinyin-global-mode))
+     (require 'goto-chg)
+     ))
 
 ;;; ### sudo ###
 (when sys/linuxp
@@ -1330,25 +1317,6 @@ _w_ where is something defined
  isearch-mode-map
  )
 
-;; search tools
-
-;;(require-package 'git-timemachine)
-(require-package 'exec-path-from-shell)
-(require-package 'findr) ;; a light file search tools.
-(require-package 'find-by-pinyin-dired)
-(require-package 'jump)
-
-;;(require-package 'counsel) ; counsel => swiper => ivy
-;;(require-package 'counsel-bbdb)
-;;(require-package 'counsel-gtags)
-;;(require-package 'counsel-css)
-;;(require-package 'bbdb)
-
-
-(require-package 'ivy)
-(require-package 'find-file-in-project)
-(require-package 'swiper)
-
 (with-eval-after-load 'ivy
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
@@ -1381,141 +1349,97 @@ _w_ where is something defined
     )
   )
 
+(lazy-load-global-keys
+ ' (("C-:"   . avy-goto-char)
+    ("C-M-;" . avy-goto-char-2)
+    ("M-g l" . avy-goto-line)
+    ("M-g w" . avy-goto-word-1)
+    ("M-g e" . avy-goto-word-0))
+ "avy")
+(with-eval-after-load 'avy
+  (setq avy-all-windows nil
+        avy-all-windows-alt t
+        avy-background t
+        avy-style 'pre)
+  (add-hook 'after-init-hook #'avy-setup-default)
 
 
-;; Jump to Chinese characters
-(run-with-idle-timer
- 1 nil
- #'(lambda()
-     (require-package 'pinyinlib)
-     (require-package 'ace-pinyin)
-     (use-package ace-pinyin
-       :diminish
-       :hook (after-init . ace-pinyin-global-mode))
-     (require-package 'goto-chg)
-     (require 'goto-chg)
-     (require-package 'avy)
-     (with-eval-after-load 'avy
-       (setq avy-all-windows nil
-             avy-all-windows-alt t
-             avy-background t
-             avy-style 'pre)
-       (add-hook 'after-init-hook #'avy-setup-default)
-       (lazy-load-global-keys
-        ' (("C-:"   . avy-goto-char)
-           ("C-M-;" . avy-goto-char-2)
-           ("M-g l" . avy-goto-line)
-           ("M-g w" . avy-goto-word-1)
-           ("M-g e" . avy-goto-word-0))
-        "avy")
-       (require-package 'avy-zap)
-       )
+  )
 
-     (with-eval-after-load 'avy-zap
-       ;; Kill text between the point and the character CHAR
-       (lazy-load-global-keys
-        '(("M-z" . avy-zap-to-char-dwim)
-          ("M-Z" . avy-zap-up-to-char-dwim))
-        "avy-zap")
-       )
-     (require-package 'anzu)
-     (use-package anzu
-       :diminish
-       :bind (([remap query-replace] . anzu-query-replace)
-              ([remap query-replace-regexp] . anzu-query-replace-regexp)
-              :map isearch-mode-map
-              ([remap isearch-query-replace] . anzu-isearch-query-replace)
-              ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
-       :hook (after-init . global-anzu-mode))
+(with-eval-after-load 'avy-zap
+  ;; Kill text between the point and the character CHAR
+  (lazy-load-global-keys
+   '(("M-z" . avy-zap-to-char-dwim)
+     ("M-Z" . avy-zap-up-to-char-dwim))
+   "avy-zap")
+  )
 
-     ))
+(use-package anzu
+  :diminish
+  :bind (([remap query-replace] . anzu-query-replace)
+         ([remap query-replace-regexp] . anzu-query-replace-regexp)
+         :map isearch-mode-map
+         ([remap isearch-query-replace] . anzu-isearch-query-replace)
+         ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
+  :hook (after-init . global-anzu-mode))
+
+;; Writable `grep' buffer
+(use-package wgrep
+  :init
+  (setq wgrep-auto-save-buffer t
+        wgrep-change-readonly-file t))
+
+;; Search tool
+(use-package grep
+  :ensure nil
+  :autoload grep-apply-setting
+  :init
+  (when (executable-find "rg")
+    (grep-apply-setting
+     'grep-command "rg --color=auto --null -nH --no-heading -e ")
+    (grep-apply-setting
+     'grep-template "rg --color=auto --null --no-heading -g '!*/' -e <R> <D>")
+    (grep-apply-setting
+     'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 38))
+    (grep-apply-setting
+     'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>")))
 
 
-  ;;;###autoload
-  (defun github-code-search ()
-    "Search code on github for a given language."
-    (interactive)
-    (let ((language (completing-read
-                     "Language: "
-                     '("Java" "C/C++" "Emacs Javascript" "Lisp"  "Python" "Rust")))
-          (code (read-string "Code: ")))
-      (browse-url
-       (concat "https://github.com/search?l=" language
-               "&type=code&q=" code))))
-
-  ;;;###autoload
-  (defun google-search-str (str)
-    (browse-url
-     (concat "https://www.google.com/search?q=" str)))
-
-  ;;;###autoload
-  (defun google-search ()
-    "Google search region, if active, or ask for search string."
-    (interactive)
-    (if (region-active-p)
-        (google-search-str
-         (buffer-substring-no-properties (region-beginning)
-                                         (region-end)))
-      (google-search-str (read-from-minibuffer "Search: "))))
-
-
-  ;; Writable `grep' buffer
-  (use-package wgrep
-    :init
-    (setq wgrep-auto-save-buffer t
-          wgrep-change-readonly-file t))
-
-  ;; Search tool
-  (use-package grep
-    :ensure nil
-    :autoload grep-apply-setting
-    :init
-    (when (executable-find "rg")
-      (grep-apply-setting
-       'grep-command "rg --color=auto --null -nH --no-heading -e ")
-      (grep-apply-setting
-       'grep-template "rg --color=auto --null --no-heading -g '!*/' -e <R> <D>")
-      (grep-apply-setting
-       'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 38))
-      (grep-apply-setting
-       'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>")))
-
-
-  ;; Fast search tool `ripgrep'
-  (use-package rg
-    :hook (after-init . rg-enable-default-bindings)
-    :bind (:map rg-global-map
-                ("c" . rg-dwim-current-dir)
-                ("f" . rg-dwim-current-file)
-                ("m" . rg-menu))
-    :init (setq rg-group-result t
-                rg-show-columns t)
-    :config
-    (cl-pushnew '("tmpl" . "*.tmpl") rg-custom-type-aliases))
+;; Fast search tool `ripgrep'
+(use-package rg
+  :hook (after-init . rg-enable-default-bindings)
+  :bind (:map rg-global-map
+              ("c" . rg-dwim-current-dir)
+              ("f" . rg-dwim-current-file)
+              ("m" . rg-menu))
+  :init (setq rg-group-result t
+              rg-show-columns t)
+  :config
+  (cl-pushnew '("tmpl" . "*.tmpl") rg-custom-type-aliases))
 
 (use-package webjump
-:ensure nil
-:bind ("C-c /" . webjump)
-:custom
-(webjump-sites '(
-                 ;; Emacs.
-                 ("Emacs Home Page" .
-                  "www.gnu.org/software/emacs/emacs.html")
-                 ("Savannah Emacs page" .
-                  "savannah.gnu.org/projects/emacs")
+  :ensure nil
+  :bind ("C-c /" . webjump)
+  :custom
+  (webjump-sites '(
+                   ;; Emacs.
+                   ("Emacs Home Page" .
+                    "www.gnu.org/software/emacs/emacs.html")
+                   ("Savannah Emacs page" .
+                    "savannah.gnu.org/projects/emacs")
 
-                 ;; Internet search engines.
-                 ("DuckDuckGo" .
-                  [simple-query "duckduckgo.com"
-                                "duckduckgo.com/?q=" ""])
-                 ("Google" .
-                  [simple-query "www.google.com"
-                                "www.google.com/search?q=" ""])
-                 ("Google Groups" .
-                  [simple-query "groups.google.com"
-                                "groups.google.com/groups?q=" ""])
-                 ("Wikipedia" .
-                  [simple-query "wikipedia.org" "wikipedia.org/wiki/" ""]))))
+                   ;; Internet search engines.
+                   ("DuckDuckGo" .
+                    [simple-query "duckduckgo.com"
+                                  "duckduckgo.com/?q=" ""])
+                   ("Google" .
+                    [simple-query "www.google.com"
+                                  "www.google.com/search?q=" ""])
+                   ("Google Groups" .
+                    [simple-query "groups.google.com"
+                                  "groups.google.com/groups?q=" ""])
+                   ("Wikipedia" .
+                    [simple-query "wikipedia.org" "wikipedia.org/wiki/" ""]))))
 
 (lazy-load-set-keys
  '(
@@ -1523,6 +1447,33 @@ _w_ where is something defined
    ("C-z S c" . suk/github-code-search)
    )
  )
+
+;;;###autoload
+(defun github-code-search ()
+  "Search code on github for a given language."
+  (interactive)
+  (let ((language (completing-read
+                   "Language: "
+                   '("Java" "C/C++" "Emacs Javascript" "Lisp"  "Python" "Rust")))
+        (code (read-string "Code: ")))
+    (browse-url
+     (concat "https://github.com/search?l=" language
+             "&type=code&q=" code))))
+
+;;;###autoload
+(defun google-search-str (str)
+  (browse-url
+   (concat "https://www.google.com/search?q=" str)))
+
+;;;###autoload
+(defun google-search ()
+  "Google search region, if active, or ask for search string."
+  (interactive)
+  (if (region-active-p)
+      (google-search-str
+       (buffer-substring-no-properties (region-beginning)
+                                       (region-end)))
+    (google-search-str (read-from-minibuffer "Search: "))))
 
 ;;; ### Sdcv ###
 ;;; --- 星际译王命令行
@@ -2174,7 +2125,7 @@ _w_ where is something defined
 (require-package 'markdown-mode)
 
 ;; Display available keybindings in popup
-(require-package 'which-key)
+
 (use-package which-key
   :diminish
   :bind (("C-h M-m" . which-key-show-major-mode)
@@ -2188,18 +2139,12 @@ _w_ where is something defined
               which-key-lighter nil
               which-key-show-remaining-keys t)
   :config
-  (which-key-mode)
-  (when (childframe-completion-workable-p)
-    (use-package which-key-posframe
-      :diminish
-      :custom-face
-      (which-key-posframe ((t (:inherit tooltip))))
-      (which-key-posframe-border ((t (:inherit posframe-border :background unspecified))))
-      :init
-      (setq which-key-posframe-border-width posframe-border-width
-            which-key-posframe-parameters '((left-fringe . 8)
-                                            (right-fringe . 8)))
-      (which-key-posframe-mode 1))))
+  (which-key-mode))
+
+(use-package which-key-posframe
+  :after (which-key posframe)
+  :config
+  (which-key-posframe-mode 1))
 
 ;; Music
 ;;(require-package 'emms)
@@ -2748,10 +2693,6 @@ _w_ where is something defined
 
 ;; }}
 
-;;(require-package 'lsp-mode)
-;;(require-package 'lsp-ui)
-;;(require-package 'dap-mode)
-
 (use-package eglot
   :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
   :bind (("C-c e f" . #'eglot-format)
@@ -2764,7 +2705,18 @@ _w_ where is something defined
                                   (call-interactively #'eglot-format)
                                   (call-interactively #'eglot-code-action-organize-imports))))
   (add-to-list 'eglot-server-programs '(web-mode "vls"))
-  (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save))
+  (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save)
+  ;; Java
+  (defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
+  (defun my-eglot-eclipse-jdt-contact (interactive)
+    "Contact with the jdt server input INTERACTIVE."
+    (let ((cp (getenv "CLASSPATH")))
+      (setenv "CLASSPATH" (concat cp ":" my-eclipse-jdt-home))
+      (unwind-protect (eglot--eclipse-jdt-contact nil)
+        (setenv "CLASSPATH" cp))))
+  (setcdr (assq 'java-mode eglot-server-programs) #'my-eglot-eclipse-jdt-contact)
+  (add-hook 'java-mode-hook 'eglot-ensure)
+  )
 
 ;;Show function arglist or variable docstring
 (run-with-idle-timer
@@ -2775,8 +2727,7 @@ _w_ where is something defined
        :ensure nil
        :diminish
        :config
-       (when (childframe-workable-p)
-         (use-package eldoc-box
+       (use-package eldoc-box
            :diminish (eldoc-box-hover-mode eldoc-box-hover-at-point-mode)
            :custom
            (eldoc-box-lighter nil)
@@ -2789,7 +2740,7 @@ _w_ where is something defined
            :config
            ;; Prettify `eldoc-box' frame
            (setf (alist-get 'left-fringe eldoc-box-frame-parameters) 8
-                 (alist-get 'right-fringe eldoc-box-frame-parameters) 8))))
+                 (alist-get 'right-fringe eldoc-box-frame-parameters) 8)))
      ))
 
 ;; Cross-referencing commands

@@ -38,17 +38,12 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 置。同样对于 ~use-package~ ，我通常用佢嚟将同软件包有关嘅配置放埋一齐，
 而唔需要好多 ~with-eval-after-load~ 调用，仲令到定义快捷键方便啲。
 
-** 开头
+** 呢个係我嘅 eary-init.el :
 :PROPERTIES:
 :CUSTOM_ID: starting-up
 :END:
+<<starting-up>>
 
-我哋开始嘅方法係噉样：
-
-配置入口主要係用嚟载入其他設定同插件。
-
-
-*** 呢个係我嘅 eary-init.el :
 #+begin_src emacs-lisp :tangle early-init.el :eval never-export
   (setq gc-cons-threshold most-positive-fixnum
         gc-cons-percentage 0.8)
@@ -80,23 +75,27 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   ;;(global-unset-key (kbd "C-SPC"))
 #+end_src
 
-
-*** 呢个係我嘅 init.el :
+** 呢个係我嘅 init.el :
+:PROPERTIES:
+:CUSTOM_ID: init
+:END:
 #+NAME: startup
+<<init>>
+
 #+BEGIN_SRC emacs-lisp :tangle init.el :eval never-export
   (provide 'init)
 
   ;; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
   ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
   ;; 变量。
-  (defvar suk-emacs-root-dir (file-truename user-emacs-directory))
-  (defvar suk-emacs-config-dir (expand-file-name "etc" suk-emacs-root-dir))
+  (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
+  (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
   (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
-  (defvar suk-emacs-share-dir (expand-file-name "share" suk-emacs-root-dir))
-  (defvar suk-emacs-themes-dir (expand-file-name "themes" suk-emacs-share-dir))
-  (defvar suk-emacs-var-dir (expand-file-name "var" suk-emacs-root-dir))
-  (defvar suk-emacs-tmp-dir (expand-file-name "tmp" suk-emacs-var-dir))
-  (defvar suk-emacs-backup-dir (expand-file-name "backup" suk-emacs-tmp-dir))
+  (defvar suk-emacs-share-dir     (expand-file-name "share" suk-emacs-root-dir))
+  (defvar suk-emacs-themes-dir    (expand-file-name "themes" suk-emacs-share-dir))
+  (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
+  (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
+  (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
 
   ;; OS 嘅 HOME 目录。
   (defvar user-home-dir (getenv "HOME"))
@@ -133,7 +132,12 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 
 #+END_SRC
 
-**** 加载目录函数：递归  Emacs 同埋插件嘅设定目录到 `load-path`
+*** 加载目录函数：递归  Emacs 同埋插件嘅设定目录到 `load-path`
+:PROPERTIES:
+:CUSTOM_ID: load-path-settings
+:END:
+<<load-path-settings>>
+
 #+BEGIN_SRC emacs-lisp :tangle init.el  :eval never-export
   ;; Ignore `cl` expiration warnings
   (setq byte-compile-warnings '(cl-function))
@@ -196,7 +200,12 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   ;; (load custom-file t)
 #+END_SRC
 
-**** 设置 GC
+*** 设置 GC
+:PROPERTIES:
+:CUSTOM_ID: gc-settings
+:END:
+<<gc-settings>>
+
 #+begin_src emacs-lisp :tangle init.el :eavl never-export
 
   (setq gc-cons-threshold most-positive-fixnum)
@@ -226,10 +235,12 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 
 #+end_src
 
-**** 常量定义
+*** 常量定义
 :PROPERTIES:
 :CUSTOM_ID: const
 :END:
+<<const>>
+
 #+begin_src emacs-lisp :tangle init.el :eval never-export
   (defconst sys/win32p
     (eq system-type 'windows-nt)
@@ -284,7 +295,12 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
     "Emacs is 30 or above.")
 #+end_src
 
-**** Emacs Package 初始化
+*** Emacs Package 初始化
+:PROPERTIES:
+:CUSTOM_ID: setup-package
+:END:
+<<setup-package>>
+
 #+begin_src emacs-lisp :tangle init.el :eval never-export
   ;; This sets up the load path so that we can override it
   (setq warning-suppress-log-types '((package reinitialization)))
@@ -384,6 +400,11 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   (use-package compat :demand t)
 #+end_src
 
+*** 加载特定嘅设定文件
+:PROPERTIES:
+:CUSTOM_ID: load-file-settings
+:END:
+<<load-file-settings>>
 
 =suk.el= 係由 =M-x org-babel-tangle= (=C-c C-v t=) 命令生成嘅。
 
@@ -393,15 +414,10 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 係有效嘅，另一個可能係多餘嘅，但可能係一種「皮帶加吊帶」嘅做法。由於我
 通過 =org-babel-tangle= 生成 =suk.el= ，所以我嘅 Emacs 配置可以喺唔需要先
 加載 Org 嘅情況下加載 =suk.el= 。
-
-
-**** 加载特定嘅设定文件
-
 #+begin_src emacs-lisp :tangle init.el :eval never-export
   (load-file (expand-file-name "suk.el" suk-emacs-root-dir))
 
-  (unless (server-running-p)
-       (server-start))
+  (unless (server-running-p) (server-start))
 
   (run-with-idle-timer
    1
@@ -428,19 +444,26 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 如果啲嘢壞咗，我可以用：
 
 - ~check-parens~ 嚟搵唔啱嘅括號
-- package： bug-hunter 將我嘅配置分成兩半
+- package: *bug-hunter* 將我嘅配置分成兩半
 - ~trace-function-background~ 將資訊列印到緩衝區
 - ~profiler-start~ 嚟搵多啲有關慢函數嘅資訊
 * 我嘅設定
 ** 個人信息
+:PROPERTIES:
+:CUSTOM_ID: setup-personal-info
+:END:
+<<setup-personal-info>>
+
 #+begin_src emacs-lisp :tangle suk.el :eval never-export
   (setq user-full-name "Suk")
   (setq user-mail-address "bruceasu@gmail.com")
 #+end_src
 ** 載入自訂設定
 :PROPERTIES:
-:CUSTOM_ID: custom
+:CUSTOM_ID: setup-custom
 :END:
+<<setup-custom>>
+
 #+begin_src emacs-lisp :tangle suk.el :eval never-export
   ;; set const
   (defconst custom-template-file
@@ -477,8 +500,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
     :group 'suk
     :type 'string)
 
-  ;;minibuffer childframe
-  (setq suk-completion-style "childframe")
+
 
   (defcustom suk-prettify-symbols-alist
     '(("lambda" . ?λ)
@@ -559,16 +581,25 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 #+end_src
 
 * Editor setting
+:PROPERTIES:
+:CUSTOM_ID: setup-editor
+:END:
+<<setup-editor>>
+
 ** 基本設定
 :PROPERTIES:
-:CUSTOM_ID: setup-basic-settinsg
+:CUSTOM_ID: setup-basic
 :END:
+<<setup-basic>>
+
 #+begin_src emacs-lisp :tangle suk.el :eval never-export
+  ;; basic settings
   (setq-default
    major-mode 'text-mode ; 默认使用text模式
    cursor-type 'bar      ; 设置光标样式
    tab-width 4           ; tab 的宽度为 4 空格
-   indent-tabs-mode nil  ; 永久使用空格縮排，唔好用 TAB 只係用空格代替 TAB，使用 C-q TAB 來輸入 TAB 字符
+   indent-tabs-mode nil  ; 永久使用空格縮排，唔好用 TAB 只係用空格代替
+                         ; TAB，使用 C-q TAB 來輸入 TAB 字符
    )
   (tooltip-mode -1)                          ;不要显示任何 tooltips
   (delete-selection-mode 1)                  ; 选中文本后输入会覆盖
@@ -649,7 +680,13 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 
 #+end_src
 ** 備份設定
+:PROPERTIES:
+:CUSTOM_ID: setup-backup
+:END:
+<<setup-backup>>
+
 #+begin_src emacs-lisp :tangle suk.el :eval never-export
+  ;; backup settings
   (setq make-backup-files t)
   (setq version-control t)     ; 允许多次备份
   (setq kept-old-versions 2)   ; 保留最早的2个备份文件
@@ -657,6 +694,11 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq delete-old-versions t) ; 自动删除旧的备份文件
 #+end_src
 ** 歴史
+:PROPERTIES:
+:CUSTOM_ID: setup-history
+:END:
+<<setup-history>>
+
 #+begin_src emacs-lisp :tangle suk.el
   ;;saveplace
   (setq save-place-file (expand-file-name "saveplace" suk-emacs-var-dir)) ; "~/.emacs.d/var/saveplace"
@@ -684,6 +726,10 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (savehist-mode 1)
 #+end_src
 ** 編碼設定
+:PROPERTIES:
+:CUSTOM_ID: setup-charset
+:END:
+<<setup-charset>>
 #+begin_src emacs-lisp :tangle suk.el
   ;; Set UTF-8 as the default coding system
   (prefer-coding-system 'utf-8)
@@ -721,6 +767,8 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 :PROPERTIES:
 :CUSTOM_ID: setup-common-functions
 :END:
+<<setup-coommon-functions>>
+
 #+begin_src emacs-lisp :tangle suk.el :eval never-export
   ;; -*- coding: utf-8; lexical-binding: t; -*-
   (defun suk/wait-for-modules (callback &rest modules)
@@ -764,18 +812,6 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
        ,@body
        (float-time (time-since time))))
 
-
-  ;;;###autoload
-  (defun childframe-workable-p ()
-    "Whether childframe is workable."
-    (not (or noninteractive
-             emacs-basic-display
-             (not (display-graphic-p)))))
-  ;;;###autoload
-  (defun childframe-completion-workable-p ()
-    "Whether childframe completion is workable."
-    (and (eq suk-completion-style 'childframe)
-         (childframe-workable-p)))
   ;;;###autoload
   (defun icons-displayable-p ()
     "Return non-nil if icons are displayable."
@@ -856,9 +892,13 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 #+end_src
 
 ** Lazy Load
-全局 lazy-load-global-keys
+:PROPERTIES:
+:CUSTOM_ID: setup-lazy-load
+:END:
+<<setup-lazy-load>>
 
-模式 lazy-load-local-keys
+- 全局 lazy-load-global-keys
+- 模式 lazy-load-local-keys
 
 支持最后一个参数传递前缀按键，
 
@@ -868,6 +908,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 好多全局按键默认已经被 Emacs 占用咗，必须先卸载先可以重新绑定啲全局按
 键，例如 Ctrl + x，下面呢段代码就系用 lazy-load-unset-keys 卸载默认绑
 定嘅全局按键。
+
 #+begin_example
  ;;; --- 卸载按键
  (lazy-load-unset-keys ;全局按键的卸载
@@ -896,7 +937,17 @@ Add to suk.el
   (require 'init-key)
 #+end_src
 * User Interface
+:PROPERTIES:
+:CUSTOM_ID: setup-ui
+:END:
+<<setup-ui>>
+
 ** Theme
+:PROPERTIES:
+:CUSTOM_ID: setup-theme
+:END:
+<<setup-theme>>
+
 #+begin_src emacs-lisp :tangle suk.el
   ;;(require 'lazycat-theme)
   ;;(lazycat-theme-load-dark)
@@ -910,20 +961,10 @@ Add to suk.el
     (load-theme 'doom-one t)
     )
 
-  (defvar after-load-theme-hook nil
-    "Hook run after a color theme is loaded using `load-theme'.")
-
-  ;;;###autoload
-  (defun run-after-load-theme-hook (&rest _)
-    "Run `after-load-theme-hook'."
-    (run-hooks 'after-load-theme-hook))
-  (advice-add #'load-theme :after #'run-after-load-theme-hook)
-
+ 
   (use-package doom-modeline
-    ;;  :load-path "~/.emacs.d/extensions/doom-modeline"
     :hook (after-init . doom-modeline-mode)
     :init
-    ;;(doom-modeline-mode 1)
     (setq doom-modeline-icon suk-icon
           doom-modeline-minor-modes t)
     :config
@@ -956,6 +997,11 @@ Add to suk.el
 
 #+end_src
 ** Font
+:PROPERTIES:
+:CUSTOM_ID: setup-fonts
+:END:
+<<setup-fonts>>
+
 #+begin_src emacs-lisp :tangle suk.el
     ;; 字体
     (lazy-load-set-keys
@@ -976,6 +1022,11 @@ Add to suk.el
   (require 'load-set-font)
 #+end_src
 ** Tabs
+:PROPERTIES:
+:CUSTOM_ID: setup-tabs
+:END:
+<<setup-tabs>>
+
 #+begin_src emacs-lisp :tangle suk.el
   (when (display-graphic-p)
     (use-package centaur-tabs
@@ -987,11 +1038,16 @@ Add to suk.el
       :config
       (centaur-tabs-mode t)
       :bind
-      ("C-<prior>" . centaur-tabs-backward) ;; Ctrl PgUp
+      ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
       ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
   )
 #+end_src
 ** Icons
+:PROPERTIES:
+:CUSTOM_ID: setup-icons
+:END:
+<<setup-icons>>
+
 #+begin_src emacs-lisp :tangle suk.el
   (when (display-graphic-p)
      ;; Icons
@@ -1009,6 +1065,11 @@ Add to suk.el
     )
 #+end_src
 ** Display ugly ^L page breaks as tidy horizontal lines
+:PROPERTIES:
+:CUSTOM_ID: setup-break-lines
+:END:
+<<setup-break-lines>>
+
 #+begin_src emacs-lisp :tangle suk-unload.el
   (run-with-idle-timer
    10
@@ -1057,117 +1118,126 @@ Add to suk.el
          :hook (after-init . beacon-mode))))
 #+end_src
 ** hydra
+:PROPERTIES:
+:CUSTOM_ID: setup-hydra
+:END:
+<<setup-hydra>>
+*** install
+#+begin_src emacs-lisp :tangle install.el
+   (require-package 'hydra)
+#+end_src
 *** Setup hydra
 #+begin_src emacs-lisp :tangle suk.el
-  (require-package 'hydra)
-
+  ;; setup hydra
   (use-package hydra
     :hook (emacs-lisp-mode . hydra-add-imenu)
-    :init
-    (when (childframe-completion-workable-p)
+    :config
+    (with-eval-after-load 'posframe
       (setq hydra-hint-display-type 'posframe)
-      (with-eval-after-load 'posframe
-        (defun hydra-set-posframe-show-params ()
-          "Set hydra-posframe style."
-          (setq hydra-posframe-show-params
-                `(:left-fringe 8
-                               :right-fringe 8
-                               :internal-border-width 2
-                               :internal-border-color ,(face-background 'posframe-border nil t)
-                               :background-color ,(face-background 'tooltip nil t)
-                               :foreground-color ,(face-foreground 'tooltip nil t)
-                               :lines-truncate t
-                               )))
-        (hydra-set-posframe-show-params)
-        (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t)))
+      (defun hydra-set-posframe-show-params ()
+        "Set hydra-posframe style."
+        (setq hydra-posframe-show-params
+              `(
+                :left-fringe 8
+                :right-fringe 8
+                :internal-border-width 2
+                :internal-border-color ,(face-background 'posframe-border nil t)
+                :background-color ,(face-background 'tooltip nil t)
+                :foreground-color ,(face-foreground 'tooltip nil t)
+                :lines-truncate t
+                )))
+      (hydra-set-posframe-show-params)
+      (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))
     )
 
 #+end_src
-*** Setup Pretty-hydra
+*** Setup pretty-hydra
 #+begin_src emacs-lisp :tangle suk.el
+  (use-package pretty-hydra
+    :requires hydra
+    :custom (pretty-hydra-default-title-body-format-spec " %s%s")
+    :bind ("<f6>" . toggles-hydra/body)
+    :hook (emacs-lisp-mode . (lambda ()
+                               (add-to-list
+                                'imenu-generic-expression
+                                '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
+    :init
+    (cl-defun pretty-hydra-title (title &optional icon-type icon-name &key face height v-adjust)
+      "Add an icon in the hydra title."
+      (let ((face (or face `(:inherit highlight :reverse-video t)))
+            (height (or height 1.2))
+            (v-adjust (or v-adjust 0.0)))
+        (concat
+         (when (and (icons-displayable-p) icon-type icon-name)
+           (let ((f (intern (format "nerd-icons-%s" icon-type))))
+             (when (fboundp f)
+               (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
+         (propertize title 'face face))))
 
-    (with-eval-after-load 'hydra
-        (use-package pretty-hydra
-          :custom (pretty-hydra-default-title-body-format-spec " %s%s")
-          :bind ("<f6>" . toggles-hydra/body)
-          :hook (emacs-lisp-mode . (lambda ()
-                                     (add-to-list
-                                      'imenu-generic-expression
-                                      '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
-          :init
-          (cl-defun pretty-hydra-title (title &optional icon-type icon-name &key face height v-adjust)
-            "Add an icon in the hydra title."
-            (let ((face (or face `(:inherit highlight :reverse-video t)))
-                  (height (or height 1.2))
-                  (v-adjust (or v-adjust 0.0)))
-              (concat
-               (when (and (icons-displayable-p) icon-type icon-name)
-                 (let ((f (intern (format "nerd-icons-%s" icon-type))))
-                   (when (fboundp f)
-                     (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
-               (propertize title 'face face))))
+    ;; Global toggles
+    (with-no-warnings
+      (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
+        ("Basic"
+         (("n" (cond ((fboundp 'display-line-numbers-mode)
+                      (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
+                     ((fboundp 'gblobal-linum-mode)
+                      (global-linum-mode (if global-linum-mode -1 1))))
+           "line number"
+           :toggle (or (bound-and-true-p display-line-numbers-mode)
+                       (bound-and-true-p global-linum-mode)))
+          ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
+          ("d" global-hungry-delete-mode "hungry delete" :toggle t)
+          ("e" electric-pair-mode "electric pair" :toggle t)
+          ("c" flyspell-mode "spell check" :toggle t)
+          ("s" prettify-symbols-mode "pretty symbol" :toggle t)
+          ("l" global-page-break-lines-mode "page break lines" :toggle t)
+          ("B" display-battery-mode "battery" :toggle t)
+          ("T" display-time-mode "time" :toggle t)
+          ("a" abbrev-mode "abrev" :toggle t)
+          ("F" auto-fill-mode "auto fill" :toggle t)
+          ("m" doom-modeline-mode "modern mode-line" :toggle t)
+          ("t" toggle-truncate-lines "truncate lines" :toggle t)
+          ("u" toggle-company-ispell "Company Ispell" :toggle t))
+         "Highlight"
+         (("h l" global-hl-line-mode "line" :toggle t)
+          ("h p" show-paren-mode "paren" :toggle t)
+          ("h s" symbol-overlay-mode "symbol" :toggle t)
+          ("h r" rainbow-mode "rainbow" :toggle t)
+          ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
+           "whitespace" :toggle show-trailing-whitespace)
+          ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
+          ("h i" highlight-indent-guides-mode "indent" :toggle t)
+          ("h t" global-hl-todo-mode "todo" :toggle t))
+         "Program"
+         (("f" flymake-mode "flymake" :toggle t)
+          ("O" hs-minor-mode "hideshow" :toggle t)
+          ("U" subword-mode "subword" :toggle t)
+          ("w" whitespace-mode "whitespace" :toggle t)
+          ("W" which-function-mode "which function" :toggle t)
+          ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
+          ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
+          ("v" global-diff-hl-mode "gutter" :toggle t)
+          ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
+          ("M" diff-hl-margin-mode "margin gutter" :toggle t)
+          ("D" diff-hl-dired-mode "dired gutter" :toggle t))
+         ))))
 
-          ;; Global toggles
-          (with-no-warnings
-            (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
-              ("Basic"
-               (("n" (cond ((fboundp 'display-line-numbers-mode)
-                            (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
-                           ((fboundp 'gblobal-linum-mode)
-                            (global-linum-mode (if global-linum-mode -1 1))))
-                 "line number"
-                 :toggle (or (bound-and-true-p display-line-numbers-mode)
-                             (bound-and-true-p global-linum-mode)))
-                ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
-                ("d" global-hungry-delete-mode "hungry delete" :toggle t)
-                ("e" electric-pair-mode "electric pair" :toggle t)
-                ("c" flyspell-mode "spell check" :toggle t)
-                ("s" prettify-symbols-mode "pretty symbol" :toggle t)
-                ("l" global-page-break-lines-mode "page break lines" :toggle t)
-                ("B" display-battery-mode "battery" :toggle t)
-                ("T" display-time-mode "time" :toggle t)
-                ("a" abbrev-mode "abrev" :toggle t)
-                ("F" auto-fill-mode "auto fill" :toggle t)
-                ("m" doom-modeline-mode "modern mode-line" :toggle t)
-                ("t" toggle-truncate-lines "truncate lines" :toggle t)
-                ("u" toggle-company-ispell "Company Ispell" :toggle t))
-               "Highlight"
-               (("h l" global-hl-line-mode "line" :toggle t)
-                ("h p" show-paren-mode "paren" :toggle t)
-                ("h s" symbol-overlay-mode "symbol" :toggle t)
-                ("h r" rainbow-mode "rainbow" :toggle t)
-                ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
-                 "whitespace" :toggle show-trailing-whitespace)
-                ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
-                ("h i" highlight-indent-guides-mode "indent" :toggle t)
-                ("h t" global-hl-todo-mode "todo" :toggle t))
-               "Program"
-               (("f" flymake-mode "flymake" :toggle t)
-                ("O" hs-minor-mode "hideshow" :toggle t)
-                ("U" subword-mode "subword" :toggle t)
-                ("w" whitespace-mode "whitespace" :toggle t)
-                ("W" which-function-mode "which function" :toggle t)
-                ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
-                ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
-                ("v" global-diff-hl-mode "gutter" :toggle t)
-                ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
-                ("M" diff-hl-margin-mode "margin gutter" :toggle t)
-                ("D" diff-hl-dired-mode "dired gutter" :toggle t))
-               ))))
-        )
 
 #+end_src
 *** Setup ivy-hydra
 #+begin_src emacs-lisp :tangle suk.el
 
-  ;; @see https://github.com/abo-abo/hydra
-  ;; color could: red, blue, amaranth, pink, teal
-  (with-eval-after-load 'hydra
-    (with-eval-after-load 'ivy
-      (use-package ivy-hydra)))
-
+    ;; @see https://github.com/abo-abo/hydra
+    ;; color could: red, blue, amaranth, pink, teal
+  (use-package ivy-hydra
+    :after (hydra ivy))
 #+end_src
-*** Setup vertico
+** Setup vertico
+:PROPERTIES:
+:CUSTOM_ID: setup-vertico
+:END:
+<<setup-vertico>>
+
 #+begin_src emacs-lisp :tangle suk.el
   (when (display-graphic-p)
     (use-package vertico
@@ -1177,23 +1247,19 @@ Add to suk.el
                   ("M-DEL" . vertico-directory-delete-word))
       :hook ((after-init . vertico-mode)
              (rfn-eshadow-update-overlay . vertico-directory-tidy))
-      :config
-      (with-eval-after-load 'posframe
-        (when (childframe-completion-workable-p)
-          (use-package vertico-posframe
-            :ensure t
-            :hook (vertico-mode . vertico-posframe-mode)
-            :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
-            )))
       )
+     (use-package vertico-posframe
+        :ensure t
+        :after (posframe vertico)
+        :hook (vertico-mode . vertico-posframe-mode)
+        :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
+        )
     )
 #+end_src
-*** Setup posframe
+** Setup posframe
 #+begin_src emacs-lisp :tangle suk.el
-    (when (display-graphic-p)
-      ;; Child frame
-      (when (childframe-workable-p)
-        (use-package posframe
+     (when (display-graphic-p)
+       (use-package posframe
           :hook (after-load-theme . posframe-delete-all)
           :init
           (defface posframe-border `((t (:inherit region)))
@@ -1201,7 +1267,8 @@ Add to suk.el
             :group 'posframe)
           (defvar posframe-border-width 2
             "Default posframe border width.")
-          )))
+          )
+     )
 #+end_src
 ** Misc
 #+begin_src emacs-lisp :tangle suk.el
@@ -1335,43 +1402,6 @@ I want to persist the scratch buffer, so I can  test continuely.
      ("M-s-u" . vdiff-buffers))
    "vdiff")
 #+end_src
-* Window
-** Transwin
-#+begin_src emacs-lisp :tangle suk.el
-  ;; Frame transparence
-  (require-package 'transwin)
-  (use-package transwin
-    :bind (("C-M-9" . transwin-inc)
-           ("C-M-8" . transwin-dec)
-           ("C-M-7" . transwin-toggle))
-    :init
-    (when sys/linux-x-p
-      (setq transwin-parameter-alpha 'alpha-background)))
-#+end_src
-** Move cursor to window
-#+begin_src emacs-lisp :tangle suk.el
-  ;; Directional window-selection routines
-  (require-package 'windmove)
-  (use-package windmove
-    :ensure nil
-    :bind*
-    (("M-<left>" . (lambda ()
-                     (interactive)
-                     (message "Moving left!")
-                     (windmove-left)))
-     ("M-<right>" . (lambda ()
-                      (interactive)
-                      (message "Moving right")
-                      (windmove-right)))
-     ("M-<up>" . (lambda ()
-                   (interactive)
-                   (message "Moving up")
-                   (windmove-up)))
-     ("M-<down>" . (lambda ()
-                     (interactive)
-                     (message "Moving down")
-                     (windmove-down)))))
-#+end_src
 ** Move buffer to window
 #+begin_src emacs-lisp :tangle etc/init-key.el
   (lazy-load-global-keys
@@ -1383,10 +1413,65 @@ I want to persist the scratch buffer, so I can  test continuely.
      )
    "buffer-move")
 #+end_src
+* Navigate
+#+begin_src emacs-lisp :tangle install.el
+   (require-package 'windmove)
+#+end_src
+#+begin_src emacs-lisp :tangle suk.el
+  ;; Toggle two most recent buffers
+  (fset 'quick-switch-buffer [?\C-x ?b return])
+  (global-set-key (kbd "s-b") 'quick-switch-buffer)
+#+end_src
+** Move cursor to window
+#+begin_src emacs-lisp :tangle suk.el
+  (defun ignore-error-wrapper (fn)
+    "Funtion return new function that ignore errors.
+       The function wraps a function with `ignore-errors' macro."
+    (lexical-let ((fn fn))
+                 (lambda ()
+                   (interactive)
+                   (ignore-errors
+                     (funcall fn)))))  
+  ;; Directional window-selection routines
+ 
+  (lazy-load-global-keys
+   '(
+     ("<M-up>"    . (ignore-error-wrapper 'windmove-up))   
+     ("<M-down>"  . (ignore-error-wrapper 'windmove-down))
+     ("<M-left>"  . (ignore-error-wrapper 'windmove-left))  
+     ("<M-right>" . (ignore-error-wrapper 'windmove-right))   
+     )
+   "windmove")
+  )
+#+end_src
+* Window
+#+begin_src emacs-lisp :tangle install.el
+ 
+  (require-package 'transwin)
+  (require-package 'buffer-move)
+  (require-package 'winner)
+  (require-package 'ace-window)
+  (require-package 'popper)
+#+end_src
+** Transwin
+#+begin_src emacs-lisp :tangle suk.el
+  ;; Frame transparence
+  (lazy-load-global-keys
+   '(
+     ("C-M-9" . transwin-inc)
+     ("C-M-8" . transwin-dec)
+     ("C-M-7" . transwin-toggle)
+     )
+   "transwin")
+  )
+
+  (with-eval-after-load 'transwin
+    (setq transwin-parameter-alpha 'alpha-background)
+
+#+end_src
 ** Winner
 #+begin_src emacs-lisp :tangle suk.el
   ;; Restore old window configurations
-  (require-package 'winner)
   (use-package winner
     :ensure nil
     :commands (winner-undo winner-redo) ;; C-c <Left>/C-c <Right>
@@ -1405,8 +1490,7 @@ I want to persist the scratch buffer, so I can  test continuely.
 #+end_src
 ** Ace-window
 #+begin_src emacs-lisp :tangle suk.el
- ;; Quickly switch windows
-  (require-package 'ace-window)
+  ;; Quickly switch windows
   (use-package ace-window
     :pretty-hydra
     ((:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
@@ -1450,8 +1534,8 @@ I want to persist the scratch buffer, so I can  test continuely.
        ("d" delete-frame "delete frame")
        ("z" winner-undo "winner undo")
        ("Z" winner-redo "winner redo"))))
-    :custom-face
-    (aw-leading-char-face ((t (:inherit font-lock-keyword-face :foreground unspecified :bold t :height 3.0))))
+  
+    (aw-leading-char-face ((t (:inherit font:custom-face-lock-keyword-face :foreground unspecified :bold t :height 3.0))))
     (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
     (aw-mode-line-face ((t (:inherit mode-line-emphasis :bold t))))
     :bind (([remap other-window] . ace-window)
@@ -1511,7 +1595,6 @@ I want to persist the scratch buffer, so I can  test continuely.
 ** Enforce rules for popups
 #+begin_src emacs-lisp :tangle suk.el
   ;; Enforce rules for popups
-  (require-package 'popper)
   (use-package popper
     :custom
     (popper-group-function #'popper-group-by-directory)
@@ -1764,22 +1847,35 @@ global-set-key examples:
 ** Move cursor
 
 #+begin_src emacs-lisp :tangle suk.el
-  ;;; ### goto-line-preview ###
-  (lazy-load-global-keys
-   '(
-     ("M-g p" . goto-line-preview))
-   "goto-line-preview")
+     ;;; ### goto-line-preview ###
+     (lazy-load-global-keys
+      '(
+        ("M-g p" . goto-line-preview))
+      "goto-line-preview")
 
-  ;;; ### Ace jump ###
-  (lazy-load-global-keys
-   '(
-     ("C-c w" . ace-jump-word-mode)
-     ("C-c c" . ace-jump-char-mode)
-     ("C-c l" . ace-jump-line-mode)
-     )
-   "ace-jump-mode"
-   "C-z"
-   )
+     ;;; ### Ace jump ###
+     (lazy-load-global-keys
+      '(
+        ("C-c w" . ace-jump-word-mode)
+        ("C-c c" . ace-jump-char-mode)
+        ("C-c l" . ace-jump-line-mode)
+        )
+      "ace-jump-mode"
+      "C-z"
+      )
+
+     ;; Jump to Chinese characters
+     (run-with-idle-timer
+      1
+      nil
+      #'(lambda()     
+          (use-package ace-pinyin
+            :diminish
+            :hook (after-init . ace-pinyin-global-mode))
+          (require 'goto-chg)
+          ))
+
+
 #+end_src
 ** Move text
 #+begin_src emacs-lisp :tangle etc/init-key.el
@@ -1914,7 +2010,6 @@ global-set-key examples:
 #+end_src
 ** Basic Toolkit
 #+begin_src emacs-lisp :tangle etc/init-key.el
-
   ;;; ### basic-toolkit ###
   (lazy-load-global-keys
    '(
@@ -1938,7 +2033,8 @@ global-set-key examples:
      ("<f2>" . refresh-file)              ;自动刷新文件
      ("s-f" . find-file-root)             ;用root打开文件
      ("s-r" . find-file-smb)              ;访问sambao
-     ("C-S-j" . join-lines)                ;连接行
+     ("C-S-j" . join-lines)               ;连接下行
+     ("M-j"   . join-line)                ;连接上行
      ("M-c" . endless/capitalize)
      ("M-l" . endless/downcase)
      ("M-u" . endless/upcase)
@@ -2374,8 +2470,8 @@ Add shortcuts.
 
 #+end_src
 ** Search tools
-#+begin_src emacs-lisp :tangle suk.el
-  ;; search tools
+*** Install
+#+begin_src emacs-lisp :tangle install.el
 
   ;;(require-package 'git-timemachine)
   (require-package 'exec-path-from-shell)
@@ -2394,22 +2490,35 @@ Add shortcuts.
   (require-package 'find-file-in-project)
   (require-package 'swiper)
 
-  (with-eval-after-load 'ivy
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq enable-recursive-minibuffers t)
-    (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
-    (setq ivy-re-builders-alist
-          '((counsel-rg . ivy--regex-plus)
-            (swiper . ivy--regex-plus)
-            (swiper-isearch . ivy--regex-plus)
-            (t . ivy--regex-ignore-order)))
+  (require-package 'pinyinlib)
+  (require-package 'ace-pinyin)
+  (require-package 'goto-chg)
+  (require-package 'avy)
+  (require-package 'avy-zap)
+   (require-package 'anzu)
+#+end_src
+*** ivy
+#+begin_src emacs-lisp :tangle suk.el
+  
+    (with-eval-after-load 'ivy
+      (ivy-mode 1)
+      (setq ivy-use-virtual-buffers t)
+      (setq enable-recursive-minibuffers t)
+      (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
+      (setq ivy-re-builders-alist
+            '((counsel-rg . ivy--regex-plus)
+              (swiper . ivy--regex-plus)
+              (swiper-isearch . ivy--regex-plus)
+              (t . ivy--regex-ignore-order)))
 
-    (when (display-graphic-p)
-      (require-package 'ivy-posframe)
-      (use-package ivy-posframe))
-    )
-
+      (when (display-graphic-p)
+        (require-package 'ivy-posframe)
+        (use-package ivy-posframe))
+      )
+#+end_src
+*** swiper
+#+begin_src emacs-lisp :tangle suk.el
+  
   (use-package swiper
     :bind
     (
@@ -2425,145 +2534,110 @@ Add shortcuts.
       ;;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
       )
     )
+#+end_src
+*** avy
+#+begin_src emacs-lisp :tangle suk.el
+  (lazy-load-global-keys
+   ' (("C-:"   . avy-goto-char)
+      ("C-M-;" . avy-goto-char-2)
+      ("M-g l" . avy-goto-line)
+      ("M-g w" . avy-goto-word-1)
+      ("M-g e" . avy-goto-word-0))
+   "avy")
+  (with-eval-after-load 'avy
+    (setq avy-all-windows nil
+          avy-all-windows-alt t
+          avy-background t
+          avy-style 'pre)
+    (add-hook 'after-init-hook #'avy-setup-default)
 
 
+    )
 
-  ;; Jump to Chinese characters
-  (run-with-idle-timer
-   1 nil
-   #'(lambda()
-       (require-package 'pinyinlib)
-       (require-package 'ace-pinyin)
-       (use-package ace-pinyin
-         :diminish
-         :hook (after-init . ace-pinyin-global-mode))
-       (require-package 'goto-chg)
-       (require 'goto-chg)
-       (require-package 'avy)
-       (with-eval-after-load 'avy
-         (setq avy-all-windows nil
-               avy-all-windows-alt t
-               avy-background t
-               avy-style 'pre)
-         (add-hook 'after-init-hook #'avy-setup-default)
-         (lazy-load-global-keys
-          ' (("C-:"   . avy-goto-char)
-             ("C-M-;" . avy-goto-char-2)
-             ("M-g l" . avy-goto-line)
-             ("M-g w" . avy-goto-word-1)
-             ("M-g e" . avy-goto-word-0))
-          "avy")
-         (require-package 'avy-zap)
-         )
+  (with-eval-after-load 'avy-zap
+    ;; Kill text between the point and the character CHAR
+    (lazy-load-global-keys
+     '(("M-z" . avy-zap-to-char-dwim)
+       ("M-Z" . avy-zap-up-to-char-dwim))
+     "avy-zap")
+    )
 
-       (with-eval-after-load 'avy-zap
-         ;; Kill text between the point and the character CHAR
-         (lazy-load-global-keys
-          '(("M-z" . avy-zap-to-char-dwim)
-            ("M-Z" . avy-zap-up-to-char-dwim))
-          "avy-zap")
-         )
-       (require-package 'anzu)
-       (use-package anzu
-         :diminish
-         :bind (([remap query-replace] . anzu-query-replace)
-                ([remap query-replace-regexp] . anzu-query-replace-regexp)
-                :map isearch-mode-map
-                ([remap isearch-query-replace] . anzu-isearch-query-replace)
-                ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
-         :hook (after-init . global-anzu-mode))
+ 
+#+end_src
+*** anzu
+#+begin_src emacs-lisp :tangle suk.el
+  (use-package anzu
+    :diminish
+    :bind (([remap query-replace] . anzu-query-replace)
+           ([remap query-replace-regexp] . anzu-query-replace-regexp)
+           :map isearch-mode-map
+           ([remap isearch-query-replace] . anzu-isearch-query-replace)
+           ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
+    :hook (after-init . global-anzu-mode))
+#+end_src
+*** Grep
+#+begin_src emacs-lisp :tangle suk.el
+  
+  ;; Writable `grep' buffer
+  (use-package wgrep
+    :init
+    (setq wgrep-auto-save-buffer t
+          wgrep-change-readonly-file t))
 
-       ))
-
-
-    ;;;###autoload
-    (defun github-code-search ()
-      "Search code on github for a given language."
-      (interactive)
-      (let ((language (completing-read
-                       "Language: "
-                       '("Java" "C/C++" "Emacs Javascript" "Lisp"  "Python" "Rust")))
-            (code (read-string "Code: ")))
-        (browse-url
-         (concat "https://github.com/search?l=" language
-                 "&type=code&q=" code))))
-
-    ;;;###autoload
-    (defun google-search-str (str)
-      (browse-url
-       (concat "https://www.google.com/search?q=" str)))
-
-    ;;;###autoload
-    (defun google-search ()
-      "Google search region, if active, or ask for search string."
-      (interactive)
-      (if (region-active-p)
-          (google-search-str
-           (buffer-substring-no-properties (region-beginning)
-                                           (region-end)))
-        (google-search-str (read-from-minibuffer "Search: "))))
+  ;; Search tool
+  (use-package grep
+    :ensure nil
+    :autoload grep-apply-setting
+    :init
+    (when (executable-find "rg")
+      (grep-apply-setting
+       'grep-command "rg --color=auto --null -nH --no-heading -e ")
+      (grep-apply-setting
+       'grep-template "rg --color=auto --null --no-heading -g '!*/' -e <R> <D>")
+      (grep-apply-setting
+       'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 38))
+      (grep-apply-setting
+       'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>")))
 
 
-    ;; Writable `grep' buffer
-    (use-package wgrep
-      :init
-      (setq wgrep-auto-save-buffer t
-            wgrep-change-readonly-file t))
-
-    ;; Search tool
-    (use-package grep
-      :ensure nil
-      :autoload grep-apply-setting
-      :init
-      (when (executable-find "rg")
-        (grep-apply-setting
-         'grep-command "rg --color=auto --null -nH --no-heading -e ")
-        (grep-apply-setting
-         'grep-template "rg --color=auto --null --no-heading -g '!*/' -e <R> <D>")
-        (grep-apply-setting
-         'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 38))
-        (grep-apply-setting
-         'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>")))
-
-
-    ;; Fast search tool `ripgrep'
-    (use-package rg
-      :hook (after-init . rg-enable-default-bindings)
-      :bind (:map rg-global-map
-                  ("c" . rg-dwim-current-dir)
-                  ("f" . rg-dwim-current-file)
-                  ("m" . rg-menu))
-      :init (setq rg-group-result t
-                  rg-show-columns t)
-      :config
-      (cl-pushnew '("tmpl" . "*.tmpl") rg-custom-type-aliases))
+  ;; Fast search tool `ripgrep'
+  (use-package rg
+    :hook (after-init . rg-enable-default-bindings)
+    :bind (:map rg-global-map
+                ("c" . rg-dwim-current-dir)
+                ("f" . rg-dwim-current-file)
+                ("m" . rg-menu))
+    :init (setq rg-group-result t
+                rg-show-columns t)
+    :config
+    (cl-pushnew '("tmpl" . "*.tmpl") rg-custom-type-aliases))
 
 #+end_src
 ** Web search
 #+begin_src emacs-lisp :tangle suk.el
   (use-package webjump
-  :ensure nil
-  :bind ("C-c /" . webjump)
-  :custom
-  (webjump-sites '(
-                   ;; Emacs.
-                   ("Emacs Home Page" .
-                    "www.gnu.org/software/emacs/emacs.html")
-                   ("Savannah Emacs page" .
-                    "savannah.gnu.org/projects/emacs")
+    :ensure nil
+    :bind ("C-c /" . webjump)
+    :custom
+    (webjump-sites '(
+                     ;; Emacs.
+                     ("Emacs Home Page" .
+                      "www.gnu.org/software/emacs/emacs.html")
+                     ("Savannah Emacs page" .
+                      "savannah.gnu.org/projects/emacs")
 
-                   ;; Internet search engines.
-                   ("DuckDuckGo" .
-                    [simple-query "duckduckgo.com"
-                                  "duckduckgo.com/?q=" ""])
-                   ("Google" .
-                    [simple-query "www.google.com"
-                                  "www.google.com/search?q=" ""])
-                   ("Google Groups" .
-                    [simple-query "groups.google.com"
-                                  "groups.google.com/groups?q=" ""])
-                   ("Wikipedia" .
-                    [simple-query "wikipedia.org" "wikipedia.org/wiki/" ""]))))
+                     ;; Internet search engines.
+                     ("DuckDuckGo" .
+                      [simple-query "duckduckgo.com"
+                                    "duckduckgo.com/?q=" ""])
+                     ("Google" .
+                      [simple-query "www.google.com"
+                                    "www.google.com/search?q=" ""])
+                     ("Google Groups" .
+                      [simple-query "groups.google.com"
+                                    "groups.google.com/groups?q=" ""])
+                     ("Wikipedia" .
+                      [simple-query "wikipedia.org" "wikipedia.org/wiki/" ""]))))
 
   (lazy-load-set-keys
    '(
@@ -2571,6 +2645,35 @@ Add shortcuts.
      ("C-z S c" . suk/github-code-search)
      )
    )
+
+  ;;;###autoload
+  (defun github-code-search ()
+    "Search code on github for a given language."
+    (interactive)
+    (let ((language (completing-read
+                     "Language: "
+                     '("Java" "C/C++" "Emacs Javascript" "Lisp"  "Python" "Rust")))
+          (code (read-string "Code: ")))
+      (browse-url
+       (concat "https://github.com/search?l=" language
+               "&type=code&q=" code))))
+
+  ;;;###autoload
+  (defun google-search-str (str)
+    (browse-url
+     (concat "https://www.google.com/search?q=" str)))
+
+  ;;;###autoload
+  (defun google-search ()
+    "Google search region, if active, or ask for search string."
+    (interactive)
+    (if (region-active-p)
+        (google-search-str
+         (buffer-substring-no-properties (region-beginning)
+                                         (region-end)))
+      (google-search-str (read-from-minibuffer "Search: "))))
+
+
 #+end_src
 ** 星际译王命令行
 #+begin_src emacs-lisp :tangle suk.el
@@ -3311,10 +3414,18 @@ Another tree view component
   (require-package 'markdown-mode)
 #+end_src
 ** Which Keys
+:PROPERTIES:
+:CUSTOM_ID: setup-which-keys
+:END:
+<<setup-which-keys>>
+install
+#+begin_src emacs-lisp :tangle install.el
+    (require-package 'which-key)
+#+end_src
 #+begin_src emacs-lisp :tangle suk.el
 
   ;; Display available keybindings in popup
-  (require-package 'which-key)
+
   (use-package which-key
     :diminish
     :bind (("C-h M-m" . which-key-show-major-mode)
@@ -3328,18 +3439,13 @@ Another tree view component
                 which-key-lighter nil
                 which-key-show-remaining-keys t)
     :config
-    (which-key-mode)
-    (when (childframe-completion-workable-p)
-      (use-package which-key-posframe
-        :diminish
-        :custom-face
-        (which-key-posframe ((t (:inherit tooltip))))
-        (which-key-posframe-border ((t (:inherit posframe-border :background unspecified))))
-        :init
-        (setq which-key-posframe-border-width posframe-border-width
-              which-key-posframe-parameters '((left-fringe . 8)
-                                              (right-fringe . 8)))
-        (which-key-posframe-mode 1))))
+    (which-key-mode))
+
+  (use-package which-key-posframe
+    :after (which-key posframe)
+    :config
+    (which-key-posframe-mode 1))
+
 #+end_src
 ** Music
 #+begin_src emacs-lisp :tangle suk.el
@@ -3967,7 +4073,7 @@ Another tree view component
 ** lsp
  settings for LSP
 *** use  lsp
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle suk-unload.el
   ;;(require-package 'lsp-mode)
   ;;(require-package 'lsp-ui)
   ;;(require-package 'dap-mode)
@@ -3986,7 +4092,18 @@ Another tree view component
                                     (call-interactively #'eglot-format)
                                     (call-interactively #'eglot-code-action-organize-imports))))
     (add-to-list 'eglot-server-programs '(web-mode "vls"))
-    (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save))
+    (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save)
+    ;; Java
+    (defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
+    (defun my-eglot-eclipse-jdt-contact (interactive)
+      "Contact with the jdt server input INTERACTIVE."
+      (let ((cp (getenv "CLASSPATH")))
+        (setenv "CLASSPATH" (concat cp ":" my-eclipse-jdt-home))
+        (unwind-protect (eglot--eclipse-jdt-contact nil)
+          (setenv "CLASSPATH" cp))))
+    (setcdr (assq 'java-mode eglot-server-programs) #'my-eglot-eclipse-jdt-contact)
+    (add-hook 'java-mode-hook 'eglot-ensure)
+    )
 
 #+end_src
 
@@ -4001,8 +4118,7 @@ Another tree view component
          :ensure nil
          :diminish
          :config
-         (when (childframe-workable-p)
-           (use-package eldoc-box
+         (use-package eldoc-box
              :diminish (eldoc-box-hover-mode eldoc-box-hover-at-point-mode)
              :custom
              (eldoc-box-lighter nil)
@@ -4015,7 +4131,7 @@ Another tree view component
              :config
              ;; Prettify `eldoc-box' frame
              (setf (alist-get 'left-fringe eldoc-box-frame-parameters) 8
-                   (alist-get 'right-fringe eldoc-box-frame-parameters) 8))))
+                   (alist-get 'right-fringe eldoc-box-frame-parameters) 8)))
        ))
 #+end_src
 ** Corss referencing
@@ -4592,6 +4708,134 @@ Another tree view component
                   "tileTabs" ; Firefox addon
                   "util" ; Keysnail
                   "utag"))
+
+#+end_src
+* 操作系统相关
+** Linux
+*** install
+#+begin_src emacs-lisp :tangle install.el
+  (require-package 'sudo-edit)
+  (require-package 'pdf-tools) ;; use the package in extension
+  (require-package 'nov) ; read epub
+  (require-package 'org-pdfview)
+#+end_src
+#+begin_src emacs-lisp :tangle linux.el
+  ;; Your Linux specific settings
+
+  ;; (setenv "JAVA_HOME" "/usr/lib/jvm/java-14-openjdk-amd64")
+
+  ;; Open files as another user
+  (run-with-idle-timer
+   2
+   nil
+   #'(lambda()
+       (require 'my-sudo)
+       (use-package sudo-edit)
+       ))
+
+  ;; On-the-fly spell checker
+  (run-with-idle-timer
+   2
+   nil
+   #'(lambda()
+       (use-package flyspell
+         :ensure t
+         :defer 2
+         :diminish flyspell-mode
+         :if (executable-find "aspell")
+         :hook (((text-mode outline-mode) . flyspell-mode)
+                (prog-mode . flyspell-prog-mode)
+                (flyspell-mode . (lambda ()
+                                   (unbind-key "C-;" flyspell-mode-map)
+                                   (unbind-key "C-," flyspell-mode-map)
+                                   (unbind-key "C-." flyspell-mode-map))))
+         :init
+         (setq flyspell-issue-message-flag nil)
+         (setq ispell-program-name "aspell")
+         (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together")))))
+
+  (run-with-idle-timer
+   2
+   nil
+   #'(lambda()
+       ;; run "M-x pdf-tools-install" at debian and open pdf in GUI Emacs
+       (use-package pdf-tool
+          :ensure t
+          :config (pdf-tools-install))
+       
+       (use-package org-pdfview
+         :ensure t)
+
+     
+       (require 'init-im)
+
+       (when (display-graphic-p)
+         ;; only graphic packages
+         (require-package 'vterm))
+       (unless (display-graphic-p)
+         ;; only conole packages
+         )  
+       ))
+
+
+
+#+end_src
+** Windows
+#+begin_src emacs-lisp :tangle windows.el
+  ;; Your windows specific settings
+
+  ;; on windows, make pwsh the default shell
+  ;; 2023-09-09
+  (setq
+   explicit-shell-file-name
+   (cond
+    ((eq system-type 'windows-nt)
+     (let ((xlist
+            (list
+             "~/AppData/Local/Microsoft/WindowsApps/pwsh.exe"
+             "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
+             )))
+       (seq-some (lambda (x) (if (file-exists-p x) x nil)) xlist)))
+    (t nil)))
+
+  (run-with-idle-timer
+   2
+   nil
+   #'(lambda()
+       ;; Key Modifiers
+       ;; make PC keyboard's Win key or other to type Super or Hyper
+       ;; (setq w32-pass-lwindow-to-system nil)
+       (setq w32-lwindow-modifier 'super)    ; Left Windows key
+       (setq w32-apps-modifier 'hyper)       ; Menu/App key
+
+       ;; Optimization
+       (setq w32-get-true-file-attributes nil   ; decrease file IO workload
+             w32-use-native-image-API t         ; use native w32 API
+             w32-pipe-read-delay 0              ; faster IPC
+             w32-pipe-buffer-size 65536)        ; read more at a time (64K, was 4K)
+      ;;; Windows
+       ;; spcial coding settings for Windows
+       (unless (memq system-type '(cygwin windows-nt ms-dos))
+         (setq selection-coding-system 'utf-8))
+       )
+
+
+   )
+
+  (when (display-graphic-p)
+    ;; only graphic packages
+    )
+  (unless (display-graphic-p)
+    ;; only conole packages
+    )
+#+end_src
+** MacOs
+#+begin_src emacs-lisp :tangle mac.el
+  ;; Your mac specific setting
+
+
+  ;;(setenv "JAVA_HOME"  "path_to_java_folder/Contents/Home/")
+  ;;(setq lsp-java-java-path "path_to_java_folder/Contents/Home/bin/java")
 
 #+end_src
 * 归档和例子

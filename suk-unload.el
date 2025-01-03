@@ -114,6 +114,10 @@
 
 (require-package 'command-log-mode) ;; show the command you press the shortcuts. M-x command-log-mode, M-x clm/open-command-log-buffer
 
+;;(require-package 'lsp-mode)
+;;(require-package 'lsp-ui)
+;;(require-package 'dap-mode)
+
 ;; Tree-sitter support
 (when sys/linuxp
  (when (suk-treesit-available-p)

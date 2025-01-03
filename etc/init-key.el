@@ -165,7 +165,8 @@
    ("<f2>" . refresh-file)              ;自动刷新文件
    ("s-f" . find-file-root)             ;用root打开文件
    ("s-r" . find-file-smb)              ;访问sambao
-   ("C-S-j" . join-lines)                ;连接行
+   ("C-S-j" . join-lines)               ;连接下行
+   ("M-j"   . join-line)                ;连接上行
    ("M-c" . endless/capitalize)
    ("M-l" . endless/downcase)
    ("M-u" . endless/upcase)
