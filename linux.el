@@ -37,13 +37,9 @@
  nil
  #'(lambda()
      ;; run "M-x pdf-tools-install" at debian and open pdf in GUI Emacs
-     (use-package pdf-tool
+     (use-package pdf-tools
         :ensure t
         :config (pdf-tools-install))
-
-     (use-package org-pdfview
-       :ensure t)
-
 
      (require 'init-im)
 
