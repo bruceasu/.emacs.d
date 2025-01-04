@@ -1,4 +1,17 @@
+;; UI
+(require-package 'doom-themes)
+(require-package 'doom-modeline)
+(require-package 'hide-mode-line)
+(require-package 'minions)
+(require-package 'centaur-tabs)
+(require-package 'all-the-icons)
+(require-package 'nerd-icons)
+(require-package 'page-break-lines)
+(require-package 'hl-line)
+(require-package 'beacon)
 (require-package 'hydra)
+(require-package 'pretty-hydra)
+(require-package 'ivy-hydra)
 
 (require-package 'windmove)
 
@@ -34,7 +47,9 @@
 
 (require-package 'which-key)
 
+(require-package 'company)
+(require-package 'company-box)
+
 (require-package 'sudo-edit)
 (require-package 'pdf-tools) ;; use the package in extension
 (require-package 'nov) ; read epub
-(require-package 'org-pdfview)

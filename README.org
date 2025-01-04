@@ -941,6 +941,22 @@ Add to suk.el
 :END:
 <<setup-ui>>
 
+#+begin_src emacs-lisp :tangle install.el
+  ;; UI
+  (require-package 'doom-themes)
+  (require-package 'doom-modeline)
+  (require-package 'hide-mode-line)
+  (require-package 'minions)
+  (require-package 'centaur-tabs)
+  (require-package 'all-the-icons)
+  (require-package 'nerd-icons)
+  (require-package 'page-break-lines)
+  (require-package 'hl-line)
+  (require-package 'beacon)
+  (require-package 'hydra)
+  (require-package 'pretty-hydra)
+  (require-package 'ivy-hydra)
+#+end_src
 ** Theme
 :PROPERTIES:
 :CUSTOM_ID: setup-theme
@@ -1121,10 +1137,6 @@ Add to suk.el
 :CUSTOM_ID: setup-hydra
 :END:
 <<setup-hydra>>
-*** install
-#+begin_src emacs-lisp :tangle install.el
-   (require-package 'hydra)
-#+end_src
 *** Setup hydra
 #+begin_src emacs-lisp :tangle suk.el
   ;; setup hydra
@@ -1423,25 +1435,15 @@ I want to persist the scratch buffer, so I can  test continuely.
 #+end_src
 ** Move cursor to window
 #+begin_src emacs-lisp :tangle suk.el
-  (defun ignore-error-wrapper (fn)
-    "Funtion return new function that ignore errors.
-       The function wraps a function with `ignore-errors' macro."
-    (lexical-let ((fn fn))
-                 (lambda ()
-                   (interactive)
-                   (ignore-errors
-                     (funcall fn)))))  
   ;; Directional window-selection routines
- 
   (lazy-load-global-keys
    '(
-     ("<M-up>"    . (ignore-error-wrapper 'windmove-up))   
-     ("<M-down>"  . (ignore-error-wrapper 'windmove-down))
-     ("<M-left>"  . (ignore-error-wrapper 'windmove-left))  
-     ("<M-right>" . (ignore-error-wrapper 'windmove-right))   
+     ("<M-up>"    .  windmove-up)   
+     ("<M-down>"  .  windmove-down)
+     ("<M-left>"  .  windmove-left)
+     ("<M-right>" .  windmove-right)
      )
    "windmove")
-  )
 #+end_src
 * Window
 #+begin_src emacs-lisp :tangle install.el
@@ -1461,11 +1463,11 @@ I want to persist the scratch buffer, so I can  test continuely.
      ("C-M-8" . transwin-dec)
      ("C-M-7" . transwin-toggle)
      )
-   "transwin")
+   "transwin"
   )
 
   (with-eval-after-load 'transwin
-    (setq transwin-parameter-alpha 'alpha-background)
+    (setq transwin-parameter-alpha 'alpha-background))
 
 #+end_src
 ** Winner
@@ -1489,106 +1491,103 @@ I want to persist the scratch buffer, so I can  test continuely.
 #+end_src
 ** Ace-window
 #+begin_src emacs-lisp :tangle suk.el
-  ;; Quickly switch windows
-  (use-package ace-window
-    :pretty-hydra
-    ((:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
-             :foreign-keys warn :quit-key ("q" "C-g"))
-     ("Actions"
-      (("TAB" other-window "switch")
-       ("x" ace-delete-window "delete")
-       ("X" ace-delete-other-windows "delete other" :exit t)
-       ("s" ace-swap-window "swap")
-       ("a" ace-select-window "select" :exit t)
-       ("m" toggle-frame-maximized "maximize" :exit t)
-       ("u" toggle-frame-fullscreen "fullscreen" :exit t))
-      "Movement"
-      (("i" windmove-up "move ↑")
-       ("k" windmove-down "move ↓")
-       ("j" windmove-left "move ←")
-       ("l" windmove-right "move →")
-       ("f" follow-mode "follow"))
-      "Resize"
-      (("<left>" shrink-window-horizontally "shrink H")
-       ("<right>" enlarge-window-horizontally "enlarge H")
-       ("<up>" shrink-window "shrink V")
-       ("<down>" enlarge-window "enlarge V")
-       ("n" balance-windows "balance"))
-      "Split"
-      (("r" split-window-right "horizontally")
-       ("R" split-window-horizontally-instead "horizontally instead")
-       ("v" split-window-below "vertically")
-       ("V" split-window-vertically-instead "vertically instead")
-       ("t" toggle-window-split "toggle")
-       ("o" delete-other-windows "only this")
-       )
-      "Zoom"
-      (("+" text-scale-increase "in")
-       ("=" text-scale-increase "in")
-       ("-" text-scale-decrease "out")
-       ("0" (text-scale-increase 0) "reset"))
-      "Misc"
-      (("o" set-frame-font "frame font")
-       ("f" make-frame-command "new frame")
-       ("d" delete-frame "delete frame")
-       ("z" winner-undo "winner undo")
-       ("Z" winner-redo "winner redo"))))
-  
-    (aw-leading-char-face ((t (:inherit font:custom-face-lock-keyword-face :foreground unspecified :bold t :height 3.0))))
-    (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
-    (aw-mode-line-face ((t (:inherit mode-line-emphasis :bold t))))
-    :bind (([remap other-window] . ace-window)
-           ("C-c w" . ace-window-hydra/body))
-    :hook (emacs-startup . ace-window-display-mode)
-    :config
-    (defun toggle-window-split ()
-      (interactive)
-      (if (= (count-windows) 2)
-          (let* ((this-win-buffer (window-buffer))
-                 (next-win-buffer (window-buffer (next-window)))
-                 (this-win-edges (window-edges (selected-window)))
-                 (next-win-edges (window-edges (next-window)))
-                 (this-win-2nd (not (and (<= (car this-win-edges)
-                                             (car next-win-edges))
-                                         (<= (cadr this-win-edges)
-                                             (cadr next-win-edges)))))
-                 (splitter
-                  (if (= (car this-win-edges)
-                         (car (window-edges (next-window))))
-                      'split-window-horizontally
-                    'split-window-vertically)))
-            (delete-other-windows)
-            (let ((first-win (selected-window)))
-              (funcall splitter)
-              (if this-win-2nd (other-window 1))
-              (set-window-buffer (selected-window) this-win-buffer)
-              (set-window-buffer (next-window) next-win-buffer)
-              (select-window first-win)
-              (if this-win-2nd (other-window 1))))
-        (user-error "`toggle-window-split' only supports two windows")))
+      ;; Quickly switch windows
+      (use-package ace-window
+        :pretty-hydra
+        ((:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
+                 :foreign-keys warn :quit-key ("q" "C-g"))
+         ("Actions"
+          (("TAB" other-window "switch")
+           ("x" ace-delete-window "delete")
+           ("X" ace-delete-other-windows "delete other" :exit t)
+           ("s" ace-swap-window "swap")
+           ("a" ace-select-window "select" :exit t)
+           ("m" toggle-frame-maximized "maximize" :exit t)
+           ("u" toggle-frame-fullscreen "fullscreen" :exit t))
+          "Movement"
+          (("i" windmove-up "move ↑")
+           ("k" windmove-down "move ↓")
+           ("j" windmove-left "move ←")
+           ("l" windmove-right "move →")
+           ("f" follow-mode "follow"))
+          "Resize"
+          (("<left>" shrink-window-horizontally "shrink H")
+           ("<right>" enlarge-window-horizontally "enlarge H")
+           ("<up>" shrink-window "shrink V")
+           ("<down>" enlarge-window "enlarge V")
+           ("n" balance-windows "balance"))
+          "Split"
+          (("r" split-window-right "horizontally")
+           ("R" split-window-horizontally-instead "horizontally instead")
+           ("v" split-window-below "vertically")
+           ("V" split-window-vertically-instead "vertically instead")
+           ("t" toggle-window-split "toggle")
+           ("o" delete-other-windows "only this")
+           )
+          "Zoom"
+          (("+" text-scale-increase "in")
+           ("=" text-scale-increase "in")
+           ("-" text-scale-decrease "out")
+           ("0" (text-scale-increase 0) "reset"))
+          "Misc"
+          (("o" set-frame-font "frame font")
+           ("f" make-frame-command "new frame")
+           ("d" delete-frame "delete frame")
+           ("z" winner-undo "winner undo")
+           ("Z" winner-redo "winner redo"))
+          ))
+        :bind (([remap other-window] . ace-window)
+               ("C-c w" . ace-window-hydra/body))
+        :hook (emacs-startup . ace-window-display-mode)
+        :config
+        (defun toggle-window-split ()
+          (interactive)
+          (if (= (count-windows) 2)
+              (let* ((this-win-buffer (window-buffer))
+                     (next-win-buffer (window-buffer (next-window)))
+                     (this-win-edges (window-edges (selected-window)))
+                     (next-win-edges (window-edges (next-window)))
+                     (this-win-2nd (not (and (<= (car this-win-edges)
+                                                 (car next-win-edges))
+                                             (<= (cadr this-win-edges)
+                                                 (cadr next-win-edges)))))
+                     (splitter
+                      (if (= (car this-win-edges)
+                             (car (window-edges (next-window))))
+                          'split-window-horizontally
+                        'split-window-vertically)))
+                (delete-other-windows)
+                (let ((first-win (selected-window)))
+                  (funcall splitter)
+                  (if this-win-2nd (other-window 1))
+                  (set-window-buffer (selected-window) this-win-buffer)
+                  (set-window-buffer (next-window) next-win-buffer)
+                  (select-window first-win)
+                  (if this-win-2nd (other-window 1))))
+            (user-error "`toggle-window-split' only supports two windows")))
 
-    ;; Bind hydra to dispatch list
-    (add-to-list 'aw-dispatch-alist '(?w ace-window-hydra/body) t)
+        ;; Bind hydra to dispatch list
+        (add-to-list 'aw-dispatch-alist '(?w ace-window-hydra/body) t)
 
-    ;; Select widnow via `M-1'...`M-9'
-    (defun aw--select-window (number)
-      "Slecet the specified window."
-      (when (numberp number)
-        (let ((found nil))
-          (dolist (win (aw-window-list))
-            (when (and (window-live-p win)
-                       (eq number
-                           (string-to-number
-                            (window-parameter win 'ace-window-path))))
-              (setq found t)
-              (aw-switch-to-window win)))
-          (unless found
-            (message "No specified window: %d" number)))))
-    (dotimes (n 9)
-      (bind-key (format "M-%d" (1+ n))
-                (lambda ()
-                  (interactive)
-                  (aw--select-window (1+ n))))))
+        ;; Select widnow via `M-1'...`M-9'
+        (defun aw--select-window (number)
+          "Slecet the specified window."
+          (when (numberp number)
+            (let ((found nil))
+              (dolist (win (aw-window-list))
+                (when (and (window-live-p win)
+                           (eq number
+                               (string-to-number
+                                (window-parameter win 'ace-window-path))))
+                  (setq found t)
+                  (aw-switch-to-window win)))
+              (unless found
+                (message "No specified window: %d" number)))))
+        (dotimes (n 9)
+          (bind-key (format "M-%d" (1+ n))
+                    (lambda ()
+                      (interactive)
+                      (aw--select-window (1+ n))))))
 
 #+end_src
 ** Enforce rules for popups
@@ -3561,11 +3560,16 @@ install
   (emacs-session-restore)
 #+end_src
 * Completion
+** install
+#+begin_src emacs-lisp :tangle install.el
+  (require-package 'company)
+  (require-package 'company-box)
+#+end_src
 ** Company
 #+begin_src emacs-lisp :tangle suk.el
   
   ;;据说跟 lsp-bridge 冲突
-  (require-package 'company)
+
   ;;(require-package 'company-native-complete)
   (require-package 'company-c-headers)
   (require-package 'company-statistics)
@@ -4695,7 +4699,7 @@ install
   (require-package 'sudo-edit)
   (require-package 'pdf-tools) ;; use the package in extension
   (require-package 'nov) ; read epub
-  (require-package 'org-pdfview)
+  
 #+end_src
 #+begin_src emacs-lisp :tangle linux.el
   ;; Your Linux specific settings
@@ -4737,14 +4741,10 @@ install
    nil
    #'(lambda()
        ;; run "M-x pdf-tools-install" at debian and open pdf in GUI Emacs
-       (use-package pdf-tool
+       (use-package pdf-tools
           :ensure t
           :config (pdf-tools-install))
-       
-       (use-package org-pdfview
-         :ensure t)
-
-     
+      
        (require 'init-im)
 
        (when (display-graphic-p)

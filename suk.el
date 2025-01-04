@@ -705,25 +705,15 @@ Native tree-sitter is introduced since 29.1."
 (fset 'quick-switch-buffer [?\C-x ?b return])
 (global-set-key (kbd "s-b") 'quick-switch-buffer)
 
-(defun ignore-error-wrapper (fn)
-  "Funtion return new function that ignore errors.
-     The function wraps a function with `ignore-errors' macro."
-  (lexical-let ((fn fn))
-               (lambda ()
-                 (interactive)
-                 (ignore-errors
-                   (funcall fn)))))  
 ;; Directional window-selection routines
-
 (lazy-load-global-keys
  '(
-   ("<M-up>"    . (ignore-error-wrapper 'windmove-up))   
-   ("<M-down>"  . (ignore-error-wrapper 'windmove-down))
-   ("<M-left>"  . (ignore-error-wrapper 'windmove-left))  
-   ("<M-right>" . (ignore-error-wrapper 'windmove-right))   
+   ("<M-up>"    .  windmove-up)   
+   ("<M-down>"  .  windmove-down)
+   ("<M-left>"  .  windmove-left)
+   ("<M-right>" .  windmove-right)
    )
  "windmove")
-)
 
 ;; Frame transparence
 (lazy-load-global-keys
@@ -732,11 +722,11 @@ Native tree-sitter is introduced since 29.1."
    ("C-M-8" . transwin-dec)
    ("C-M-7" . transwin-toggle)
    )
- "transwin")
+ "transwin"
 )
 
 (with-eval-after-load 'transwin
-  (setq transwin-parameter-alpha 'alpha-background)
+  (setq transwin-parameter-alpha 'alpha-background))
 
 ;; Restore old window configurations
 (use-package winner
@@ -798,11 +788,8 @@ Native tree-sitter is introduced since 29.1."
      ("f" make-frame-command "new frame")
      ("d" delete-frame "delete frame")
      ("z" winner-undo "winner undo")
-     ("Z" winner-redo "winner redo"))))
-
-  (aw-leading-char-face ((t (:inherit font:custom-face-lock-keyword-face :foreground unspecified :bold t :height 3.0))))
-  (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
-  (aw-mode-line-face ((t (:inherit mode-line-emphasis :bold t))))
+     ("Z" winner-redo "winner redo"))
+    ))
   :bind (([remap other-window] . ace-window)
          ("C-c w" . ace-window-hydra/body))
   :hook (emacs-startup . ace-window-display-mode)
@@ -2242,7 +2229,7 @@ _w_ where is something defined
 (emacs-session-restore)
 
 ;;据说跟 lsp-bridge 冲突
-(require-package 'company)
+
 ;;(require-package 'company-native-complete)
 (require-package 'company-c-headers)
 (require-package 'company-statistics)
