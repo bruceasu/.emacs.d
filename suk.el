@@ -1646,9 +1646,7 @@ _w_ where is something defined
          (mapcar (lambda (h) (list 'my-defshortcut (string-to-char (elt h 0)) (elt h 1)))
                  heads))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; TODO
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; GTD
 (setq org-use-fast-todo-selection t)
 ;; ! 的含义是记录某项更改为状态的时间。我不把这个添加到完成的状态，是因为它们已
 ;; 经被记录了。
@@ -1676,6 +1674,15 @@ _w_ where is something defined
         (?B . warning)
         (?C . success)))
 
+(setq org-tag-alist '((:startgroup . nil)
+                    ("urgent-important" . ?u) ;; 第一象限：紧急且重要
+                    ("not-urgent-important" . ?n) ;; 第二象限：不紧急但重要
+                    ("urgent-not-important" . ?i) ;; 第三象限：紧急但不重要
+                    ("not-urgent-not-important" . ?t) ;; 第四象限：不紧急且不重要
+                    (:endgroup . nil)))
+
+;; 可以使用 org-tags-view 来过滤和查看不同象限的任务
+;; 例如：M-x org-tags-view RET +urgent-important
 ;; The triggers break down to the following rules:
 ;;   Moving a task to CANCELLED adds a CANCELLED tag
 ;;   Moving a task to WAITTING adds a WAITTING tag
@@ -2020,6 +2027,46 @@ _w_ where is something defined
   :hook ((org-mode . org-modern-mode)
          (org-agenda-finalize . org-modern-agenda)
          ))
+
+(use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  (setq org-roam-db-location "~/.emacs.d/var/org-roam.db")
+  :custom
+  ;; (org-roam-directory (file-truename "~/RoadNotes"))
+  ;; The file-truename function is only necessary when you use
+  ;; symbolic links inside org-roam-directory: Org-roam does not
+  ;; resolve symbolic links.
+  (make-directory (expand-file-name "daily" org-roam-directory) t)
+  (org-roam-completion-everywhere t)
+  (org-roam-dailies-capture-templates
+   '(("d" "default" entry "* %<%I:%M %p>: %?"
+      :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         :map org-mode-map
+         ("C-M-i" . completion-at-point)
+         :map org-roam-dailies-map
+         ("Y" . org-roam-dailies-capture-yesterday)
+         ("n" . org-roam-dailies-capture-today)
+         ("T" . org-roam-dailies-capture-tomorrow)
+         ("v" . org-roam-dailies-capture-date)
+         ("d" . org-roam-dailies-goto-today)
+         ("t" . org-roam-dailies-goto-tomorrow)
+         ("y" . org-roam-dailies-goto-yesterday)
+         ("c" . org-roam-dailies-goto-date)
+         ("b" . org-roam-dailies-goto-next-note)
+         ("f" . org-roam-dailies-goto-previous-note)
+         )
+  :bind-keymap
+  ("C-c n d" . org-roam-dailies-map)
+  :config
+  (require 'org-roam-dailies) ;; Ensure the keymap is available
+  (org-roam-db-autosync-mode)
+
+  )
 
 ;; Recentf
 (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
@@ -2661,31 +2708,6 @@ _w_ where is something defined
        (memq major-mode '(typescript-mode js-mode javascript-mode))))
 
 ;; }}
-
-(use-package eglot
-  :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
-  :bind (("C-c e f" . #'eglot-format)
-         ("C-c e i" . #'eglot-code-action-organize-imports)
-         ("C-c e q" . #'eglot-code-action-quickfix))
-  :config
-  ;; (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
-  (defun eglot-actions-before-save()
-    (add-hook 'before-save-hook (lambda ()
-                                  (call-interactively #'eglot-format)
-                                  (call-interactively #'eglot-code-action-organize-imports))))
-  (add-to-list 'eglot-server-programs '(web-mode "vls"))
-  (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save)
-  ;; Java
-  (defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
-  (defun my-eglot-eclipse-jdt-contact (interactive)
-    "Contact with the jdt server input INTERACTIVE."
-    (let ((cp (getenv "CLASSPATH")))
-      (setenv "CLASSPATH" (concat cp ":" my-eclipse-jdt-home))
-      (unwind-protect (eglot--eclipse-jdt-contact nil)
-        (setenv "CLASSPATH" cp))))
-  (setcdr (assq 'java-mode eglot-server-programs) #'my-eglot-eclipse-jdt-contact)
-  (add-hook 'java-mode-hook 'eglot-ensure)
-  )
 
 ;;Show function arglist or variable docstring
 (run-with-idle-timer

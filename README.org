@@ -31,17 +31,7 @@ package-install~ 来安装嗰个包。
 喺独立嘅 buffer。只需要将光标移入代码块，然后按 ~C-c '~
 (~org-edit-special~)。咁样会开一个新嘅 buffer 用 =emacs-lisp-mode= ，你可
 以用 =M-x eval-buffer= 来加载修改。想深入了解函数点样运作，可以用 =M-x
-edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Edebug.html][Emacs Lisp]] 手册了解更
-多关于 edebug 嘅内容。
-
-我钟意用 ~(setq ...)~ 多过用 Customize。因为咁样可以更加整齐咁组织我嘅配
-置。同样对于 ~use-package~ ，我通常用佢嚟将同软件包有关嘅配置放埋一齐，
-而唔需要好多 ~with-eval-after-load~ 调用，仲令到定义快捷键方便啲。
-
-** 呢个係我嘅 eary-init.el :
-:PROPERTIES:
-:CUSTOM_ID: starting-up
-:END:
+edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Edebug.html][Emacs Lisp]] 手册了解更:END:
 <<starting-up>>
 
 #+begin_src emacs-lisp :tangle early-init.el :eval never-export
@@ -71,6 +61,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   (toggle-frame-maximized)
    ;; kill buffer without my confirmation
   (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions))
+  (setq find-file-visit-truename t)
   (provide 'early-init)
   ;;(global-unset-key (kbd "C-SPC"))
 #+end_src
@@ -2866,9 +2857,7 @@ Add shortcuts.
 #+end_src
 ** GTD
 #+begin_src emacs-lisp :tangle suk.el
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; TODO
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; GTD
   (setq org-use-fast-todo-selection t)
   ;; ! 的含义是记录某项更改为状态的时间。我不把这个添加到完成的状态，是因为它们已
   ;; 经被记录了。
@@ -2896,6 +2885,15 @@ Add shortcuts.
           (?B . warning)
           (?C . success)))
 
+  (setq org-tag-alist '((:startgroup . nil)
+                      ("urgent-important" . ?u) ;; 第一象限：紧急且重要
+                      ("not-urgent-important" . ?n) ;; 第二象限：不紧急但重要
+                      ("urgent-not-important" . ?i) ;; 第三象限：紧急但不重要
+                      ("not-urgent-not-important" . ?t) ;; 第四象限：不紧急且不重要
+                      (:endgroup . nil)))
+
+  ;; 可以使用 org-tags-view 来过滤和查看不同象限的任务
+  ;; 例如：M-x org-tags-view RET +urgent-important
   ;; The triggers break down to the following rules:
   ;;   Moving a task to CANCELLED adds a CANCELLED tag
   ;;   Moving a task to WAITTING adds a WAITTING tag
@@ -3267,6 +3265,48 @@ Add shortcuts.
            (org-agenda-finalize . org-modern-agenda)
            ))
   
+#+end_src
+** Use org-roam
+#+begin_src emacs-lisp :tangle suk.el
+  (use-package org-roam
+    :ensure t
+    :init
+    (setq org-roam-v2-ack t)
+    (setq org-roam-db-location "~/.emacs.d/var/org-roam.db")
+    :custom
+    ;; (org-roam-directory (file-truename "~/RoadNotes"))
+    ;; The file-truename function is only necessary when you use
+    ;; symbolic links inside org-roam-directory: Org-roam does not
+    ;; resolve symbolic links.
+    (make-directory (expand-file-name "daily" org-roam-directory) t)
+    (org-roam-completion-everywhere t)
+    (org-roam-dailies-capture-templates
+     '(("d" "default" entry "* %<%I:%M %p>: %?"
+        :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n i" . org-roam-node-insert)
+           :map org-mode-map
+           ("C-M-i" . completion-at-point)
+           :map org-roam-dailies-map
+           ("Y" . org-roam-dailies-capture-yesterday)
+           ("n" . org-roam-dailies-capture-today)
+           ("T" . org-roam-dailies-capture-tomorrow)
+           ("v" . org-roam-dailies-capture-date)
+           ("d" . org-roam-dailies-goto-today)
+           ("t" . org-roam-dailies-goto-tomorrow)
+           ("y" . org-roam-dailies-goto-yesterday)
+           ("c" . org-roam-dailies-goto-date)
+           ("b" . org-roam-dailies-goto-next-note)
+           ("f" . org-roam-dailies-goto-previous-note)
+           )
+    :bind-keymap
+    ("C-c n d" . org-roam-dailies-map)
+    :config
+    (require 'org-roam-dailies) ;; Ensure the keymap is available
+    (org-roam-db-autosync-mode)
+
+    )
 #+end_src
 ** Add shortcuts
 #+begin_src emacs-lisp :tangle etc/init-key.el
@@ -4061,7 +4101,12 @@ install
   ;;(require-package 'dap-mode)
 #+end_src
 *** use eglot
-#+begin_src emacs-lisp :tangle suk.el
+因为影响了org-mode的export，原因不详。
+给出的信息太少了，无法定位
+: progn: Wrong type argument: consp, nil
+鬼知係边，呢个系elisp乞人憎嘅地方。
+暂时不使用。
+#+begin_src emacs-lisp :tangle suk-unload.el
   (use-package eglot
     :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
     :bind (("C-c e f" . #'eglot-format)

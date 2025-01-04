@@ -118,6 +118,31 @@
 ;;(require-package 'lsp-ui)
 ;;(require-package 'dap-mode)
 
+(use-package eglot
+  :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
+  :bind (("C-c e f" . #'eglot-format)
+         ("C-c e i" . #'eglot-code-action-organize-imports)
+         ("C-c e q" . #'eglot-code-action-quickfix))
+  :config
+  ;; (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
+  (defun eglot-actions-before-save()
+    (add-hook 'before-save-hook (lambda ()
+                                  (call-interactively #'eglot-format)
+                                  (call-interactively #'eglot-code-action-organize-imports))))
+  (add-to-list 'eglot-server-programs '(web-mode "vls"))
+  (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save)
+  ;; Java
+  (defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
+  (defun my-eglot-eclipse-jdt-contact (interactive)
+    "Contact with the jdt server input INTERACTIVE."
+    (let ((cp (getenv "CLASSPATH")))
+      (setenv "CLASSPATH" (concat cp ":" my-eclipse-jdt-home))
+      (unwind-protect (eglot--eclipse-jdt-contact nil)
+        (setenv "CLASSPATH" cp))))
+  (setcdr (assq 'java-mode eglot-server-programs) #'my-eglot-eclipse-jdt-contact)
+  (add-hook 'java-mode-hook 'eglot-ensure)
+  )
+
 ;; Tree-sitter support
 (when sys/linuxp
  (when (suk-treesit-available-p)

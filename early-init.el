@@ -24,5 +24,6 @@
 (toggle-frame-maximized)
  ;; kill buffer without my confirmation
 (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions))
+(setq find-file-visit-truename t)
 (provide 'early-init)
 ;;(global-unset-key (kbd "C-SPC"))
