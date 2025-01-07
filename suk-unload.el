@@ -118,125 +118,24 @@
 ;;(require-package 'lsp-ui)
 ;;(require-package 'dap-mode)
 
-(use-package eglot
-  :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
-  :bind (("C-c e f" . #'eglot-format)
-         ("C-c e i" . #'eglot-code-action-organize-imports)
-         ("C-c e q" . #'eglot-code-action-quickfix))
-  :config
-  ;; (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
-  (defun eglot-actions-before-save()
-    (add-hook 'before-save-hook (lambda ()
-                                  (call-interactively #'eglot-format)
-                                  (call-interactively #'eglot-code-action-organize-imports))))
-  (add-to-list 'eglot-server-programs '(web-mode "vls"))
-  (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save)
-  ;; Java
-  (defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
-  (defun my-eglot-eclipse-jdt-contact (interactive)
-    "Contact with the jdt server input INTERACTIVE."
-    (let ((cp (getenv "CLASSPATH")))
-      (setenv "CLASSPATH" (concat cp ":" my-eclipse-jdt-home))
-      (unwind-protect (eglot--eclipse-jdt-contact nil)
-        (setenv "CLASSPATH" cp))))
-  (setcdr (assq 'java-mode eglot-server-programs) #'my-eglot-eclipse-jdt-contact)
-  (add-hook 'java-mode-hook 'eglot-ensure)
-  )
+(require 'eglot)
+;; Java
+(defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
+(add-hook 'java-mode-hook 'eglot-java-mode)
+(use-package eglot-java)
+(with-eval-after-load 'eglot-java
+  (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
+  (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
+  (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
+  (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
+  (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
+  (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh))
 
 ;; Tree-sitter support
 (when sys/linuxp
- (when (suk-treesit-available-p)
-   (require-package 'treesit-auto)
-   (use-package treesit-auto
+  (require-package 'treesit-auto)
+  (use-package treesit-auto
      :ensure t
      :hook (after-init . global-treesit-auto-mode)
      :init (setq treesit-auto-install 'prompt))
-   (global-treesit-auto-mode)
-   )
-(require 'fingertip) ;; M-x treesit-install-language-grammar RET
-(dolist (hook (list
-               'c-mode-common-hook
-               'c-mode-hook
-               'c++-mode-hook
-               'java-mode-hook
-               'haskell-mode-hook
-               'emacs-lisp-mode-hook
-               'lisp-interaction-mode-hook
-               'lisp-mode-hook
-               'maxima-mode-hook
-               'ielm-mode-hook
-               'sh-mode-hook
-               'makefile-gmake-mode-hook
-               'php-mode-hook
-               'python-mode-hook
-               'js-mode-hook
-               'go-mode-hook
-               'qml-mode-hook
-               'jade-mode-hook
-               'css-mode-hook
-               'ruby-mode-hook
-               'coffee-mode-hook
-               'rust-mode-hook
-               'rust-ts-mode-hook
-               'qmake-mode-hook
-               'lua-mode-hook
-               'swift-mode-hook
-               'web-mode-hook
-               'markdown-mode-hook
-               'llvm-mode-hook
-               'conf-toml-mode-hook
-               'nim-mode-hook
-               'typescript-mode-hook
-               'c-ts-mode-hook
-               'c++-ts-mode-hook
-               'cmake-ts-mode-hook
-               'toml-ts-mode-hook
-               'css-ts-mode-hook
-               'js-ts-mode-hook
-               'json-ts-mode-hook
-               'python-ts-mode-hook
-               'bash-ts-mode-hook
-               'typescript-ts-mode-hook
-               ))
-  (add-hook hook #'(lambda () (fingertip-mode 1))))
-
-(define-key fingertip-mode-map (kbd "(") 'fingertip-open-round)
-(define-key fingertip-mode-map (kbd "[") 'fingertip-open-bracket)
-(define-key fingertip-mode-map (kbd "{") 'fingertip-open-curly)
-(define-key fingertip-mode-map (kbd ")") 'fingertip-close-round)
-(define-key fingertip-mode-map (kbd "]") 'fingertip-close-bracket)
-(define-key fingertip-mode-map (kbd "}") 'fingertip-close-curly)
-(define-key fingertip-mode-map (kbd "=") 'fingertip-equal)
-(define-key fingertip-mode-map (kbd "（") 'fingertip-open-chinese-round)
-(define-key fingertip-mode-map (kbd "「") 'fingertip-open-chinese-bracket)
-(define-key fingertip-mode-map (kbd "【") 'fingertip-open-chinese-curly)
-(define-key fingertip-mode-map (kbd "）") 'fingertip-close-chinese-round)
-(define-key fingertip-mode-map (kbd "」") 'fingertip-close-chinese-bracket)
-(define-key fingertip-mode-map (kbd "】") 'fingertip-close-chinese-curly)
-
-(define-key fingertip-mode-map (kbd "%") 'fingertip-match-paren)
-(define-key fingertip-mode-map (kbd "\"") 'fingertip-double-quote)
-(define-key fingertip-mode-map (kbd "'") 'fingertip-single-quote)
-
-;;(define-key fingertip-mode-map (kbd "SPC") 'fingertip-space)
-;;(define-key fingertip-mode-map (kbd "RET") 'fingertip-newline)
-
-(define-key fingertip-mode-map (kbd "M-o") 'fingertip-backward-delete)
-(define-key fingertip-mode-map (kbd "C-d") 'fingertip-forward-delete)
-(define-key fingertip-mode-map (kbd "C-k") 'fingertip-kill)
-
-(define-key fingertip-mode-map (kbd "M-\"") 'fingertip-wrap-double-quote)
-(define-key fingertip-mode-map (kbd "M-'") 'fingertip-wrap-single-quote)
-(define-key fingertip-mode-map (kbd "M-[") 'fingertip-wrap-bracket)
-(define-key fingertip-mode-map (kbd "M-{") 'fingertip-wrap-curly)
-(define-key fingertip-mode-map (kbd "M-(") 'fingertip-wrap-round)
-(define-key fingertip-mode-map (kbd "M-)") 'fingertip-unwrap)
-
-(define-key fingertip-mode-map (kbd "M-p") 'fingertip-jump-right)
-(define-key fingertip-mode-map (kbd "M-n") 'fingertip-jump-left)
-(define-key fingertip-mode-map (kbd "M-:") 'fingertip-jump-out-pair-and-newline)
-
-(define-key fingertip-mode-map (kbd "C-j") 'fingertip-jump-up)
-
-
-)
+  (global-treesit-auto-mode)

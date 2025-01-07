@@ -70,56 +70,55 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 :PROPERTIES:
 :CUSTOM_ID: init
 :END:
-#+NAME: startup
 <<init>>
 
 #+BEGIN_SRC emacs-lisp :tangle init.el :eval never-export
-  (provide 'init)
+   (provide 'init)
 
-  ;; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
-  ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
-  ;; 变量。
-  (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
-  (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
-  (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
-  (defvar suk-emacs-share-dir     (expand-file-name "share" suk-emacs-root-dir))
-  (defvar suk-emacs-themes-dir    (expand-file-name "themes" suk-emacs-share-dir))
-  (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
-  (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
-  (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
+   ;; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
+   ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
+   ;; 变量。
+   (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
+   (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
+   (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
+   (defvar suk-emacs-share-dir     (expand-file-name "share" suk-emacs-root-dir))
+   (defvar suk-emacs-themes-dir    (expand-file-name "themes" suk-emacs-share-dir))
+   (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
+   (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
+   (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
 
-  ;; OS 嘅 HOME 目录。
-  (defvar user-home-dir (getenv "HOME"))
+   ;; OS 嘅 HOME 目录。
+   (defvar user-home-dir (getenv "HOME"))
 
-  (if (eq system-type 'windows-nt)
-      (defvar user-home-dir (getenv "USERPROFILE")))
-  ;; blink search
-  (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
+   (if (eq system-type 'windows-nt)
+       (defvar user-home-dir (getenv "USERPROFILE")))
+   ;; blink search
+   (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
 
-  ;; History
-  (setq savehist-file (concat suk-emacs-var-dir "/history"))
-  ;; Amx
-  (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
-  ;; Auto save
-  (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
-  ;; Eshell
-  (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
-  (setq eshell-history-file-name (concat eshell-directory-name "/history"))
-  ;; projectitle-bookmarks
-  (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
-  (setq backup-directory-alist `(("" . ,suk-emacs-tmp-dir)))
-  ;; Bookmark
-  (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
-  ;; Diary
-  (setq diary-file (concat user-home-dir "/diary"))
-  ;; server 无效
-  (require 'server)
-  ;;(setq server-socket-dir suk-emacs-var-dir)
+   ;; History
+   (setq savehist-file (concat suk-emacs-var-dir "/history"))
+   ;; Amx
+   (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
+   ;; Auto save
+   (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
+   ;; Eshell
+   (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
+   (setq eshell-history-file-name (concat eshell-directory-name "/history"))
+   ;; projectitle-bookmarks
+   (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
+   (setq backup-directory-alist `(("" . ,suk-emacs-tmp-dir)))
+   ;; Bookmark
+   (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
+   ;; Diary
+   (setq diary-file (concat user-home-dir "/diary"))
+   ;; server 无效
+   (require 'server)
+   ;;(setq server-socket-dir suk-emacs-var-dir)
 
-  ;; Clear to avoid analyzing files when loading remote files.
-  (setq file-name-handler-alist nil)
-  ;; Don't pass case-insensitive to `auto-mode-alist'
-  (setq auto-mode-case-fold nil)
+   ;; Clear to avoid analyzing files when loading remote files.
+   (setq file-name-handler-alist nil)
+   ;; Don't pass case-insensitive to `auto-mode-alist'
+   (setq auto-mode-case-fold nil)
 
 #+END_SRC
 
@@ -633,7 +632,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq minibuffer-message-timeout 2)       ;显示消息超时的时间
   (setq auto-revert-mode 1)                 ;自动更新buffer
   (setq show-paren-style 'parentheses)      ;括号匹配显示但不是烦人的跳到另一个括号。
-  (setq blink-matching-paren nil)           ;当插入右括号时不显示匹配的左括号
+  ;;(setq blink-matching-paren nil)           ;当插入右括号时不显示匹配的左括号
   (setq message-log-max t)                  ;设置message记录全部消息, 而不用截去
   (setq require-final-newline nil)          ;不自动添加换行符到末尾, 有些情况会出现错误
   (setq ediff-window-setup-function
@@ -2191,29 +2190,28 @@ Add shortcuts.
 
 ** Expand region
 #+begin_src emacs-lisp :tangle suk.el
-  ;; expand-region
-  (run-with-idle-timer
-   2 nil
-   #'(lambda()
-       ;; (use-package expand-region ; I prefer stable version
-       ;;   :load-path "~/.emacs.d/extensions/expand-region"
-       ;;   )
-       (with-eval-after-load 'expand-region
-         (when (suk-treesit-available-p)
-           (defun treesit-mark-bigger-node ()
-             "Use tree-sitter to mark regions."
-             (let* ((root (treesit-buffer-root-node))
-                    (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
-                    (node-start (treesit-node-start node))
-                    (node-end (treesit-node-end node)))
-               ;; Node fits the region exactly. Try its parent node instead.
-               (when (and (= (region-beginning) node-start) (= (region-end) node-end))
-                 (when-let ((node (treesit-node-parent node)))
-                   (setq node-start (treesit-node-start node)
-                         node-end (treesit-node-end node))))
-               (set-mark node-end)
-               (goto-char node-start)))
-           ))))
+    ;; expand-region
+    (run-with-idle-timer
+     2 nil
+     #'(lambda()
+         (use-package expand-region ; I prefer stable version
+            :load-path "~/.emacs.d/extensions/expand-region"
+         )
+         (with-eval-after-load 'expand-region
+            (defun treesit-mark-bigger-node ()
+               "Use tree-sitter to mark regions."
+               (let* ((root (treesit-buffer-root-node))
+                      (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
+                      (node-start (treesit-node-start node))
+                      (node-end (treesit-node-end node)))
+                 ;; Node fits the region exactly. Try its parent node instead.
+                 (when (and (= (region-beginning) node-start) (= (region-end) node-end))
+                   (when-let ((node (treesit-node-parent node)))
+                     (setq node-start (treesit-node-start node)
+                           node-end (treesit-node-end node))))
+                 (set-mark node-end)
+                 (goto-char node-start)))
+            )))
 
 #+end_src
 Add shortcut.
@@ -4107,31 +4105,18 @@ install
 鬼知係边，呢个系elisp乞人憎嘅地方。
 暂时不使用。
 #+begin_src emacs-lisp :tangle suk-unload.el
-  (use-package eglot
-    :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
-    :bind (("C-c e f" . #'eglot-format)
-           ("C-c e i" . #'eglot-code-action-organize-imports)
-           ("C-c e q" . #'eglot-code-action-quickfix))
-    :config
-    ;; (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
-    (defun eglot-actions-before-save()
-      (add-hook 'before-save-hook (lambda ()
-                                    (call-interactively #'eglot-format)
-                                    (call-interactively #'eglot-code-action-organize-imports))))
-    (add-to-list 'eglot-server-programs '(web-mode "vls"))
-    (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save)
-    ;; Java
-    (defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
-    (defun my-eglot-eclipse-jdt-contact (interactive)
-      "Contact with the jdt server input INTERACTIVE."
-      (let ((cp (getenv "CLASSPATH")))
-        (setenv "CLASSPATH" (concat cp ":" my-eclipse-jdt-home))
-        (unwind-protect (eglot--eclipse-jdt-contact nil)
-          (setenv "CLASSPATH" cp))))
-    (setcdr (assq 'java-mode eglot-server-programs) #'my-eglot-eclipse-jdt-contact)
-    (add-hook 'java-mode-hook 'eglot-ensure)
-    )
-
+  (require 'eglot)
+  ;; Java
+  (defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
+  (add-hook 'java-mode-hook 'eglot-java-mode)
+  (use-package eglot-java)
+  (with-eval-after-load 'eglot-java
+    (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
+    (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
+    (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
+    (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
+    (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
+    (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh))
 #+end_src
 
 ** Show function arglist or varibale docstring
@@ -4199,101 +4184,12 @@ install
 #+begin_src emacs-lisp :tangle suk-unload.el
   ;; Tree-sitter support
   (when sys/linuxp
-   (when (suk-treesit-available-p)
-     (require-package 'treesit-auto)
-     (use-package treesit-auto
+    (require-package 'treesit-auto)
+    (use-package treesit-auto
        :ensure t
        :hook (after-init . global-treesit-auto-mode)
        :init (setq treesit-auto-install 'prompt))
-     (global-treesit-auto-mode)
-     )
-  (require 'fingertip) ;; M-x treesit-install-language-grammar RET
-  (dolist (hook (list
-                 'c-mode-common-hook
-                 'c-mode-hook
-                 'c++-mode-hook
-                 'java-mode-hook
-                 'haskell-mode-hook
-                 'emacs-lisp-mode-hook
-                 'lisp-interaction-mode-hook
-                 'lisp-mode-hook
-                 'maxima-mode-hook
-                 'ielm-mode-hook
-                 'sh-mode-hook
-                 'makefile-gmake-mode-hook
-                 'php-mode-hook
-                 'python-mode-hook
-                 'js-mode-hook
-                 'go-mode-hook
-                 'qml-mode-hook
-                 'jade-mode-hook
-                 'css-mode-hook
-                 'ruby-mode-hook
-                 'coffee-mode-hook
-                 'rust-mode-hook
-                 'rust-ts-mode-hook
-                 'qmake-mode-hook
-                 'lua-mode-hook
-                 'swift-mode-hook
-                 'web-mode-hook
-                 'markdown-mode-hook
-                 'llvm-mode-hook
-                 'conf-toml-mode-hook
-                 'nim-mode-hook
-                 'typescript-mode-hook
-                 'c-ts-mode-hook
-                 'c++-ts-mode-hook
-                 'cmake-ts-mode-hook
-                 'toml-ts-mode-hook
-                 'css-ts-mode-hook
-                 'js-ts-mode-hook
-                 'json-ts-mode-hook
-                 'python-ts-mode-hook
-                 'bash-ts-mode-hook
-                 'typescript-ts-mode-hook
-                 ))
-    (add-hook hook #'(lambda () (fingertip-mode 1))))
-
-  (define-key fingertip-mode-map (kbd "(") 'fingertip-open-round)
-  (define-key fingertip-mode-map (kbd "[") 'fingertip-open-bracket)
-  (define-key fingertip-mode-map (kbd "{") 'fingertip-open-curly)
-  (define-key fingertip-mode-map (kbd ")") 'fingertip-close-round)
-  (define-key fingertip-mode-map (kbd "]") 'fingertip-close-bracket)
-  (define-key fingertip-mode-map (kbd "}") 'fingertip-close-curly)
-  (define-key fingertip-mode-map (kbd "=") 'fingertip-equal)
-  (define-key fingertip-mode-map (kbd "（") 'fingertip-open-chinese-round)
-  (define-key fingertip-mode-map (kbd "「") 'fingertip-open-chinese-bracket)
-  (define-key fingertip-mode-map (kbd "【") 'fingertip-open-chinese-curly)
-  (define-key fingertip-mode-map (kbd "）") 'fingertip-close-chinese-round)
-  (define-key fingertip-mode-map (kbd "」") 'fingertip-close-chinese-bracket)
-  (define-key fingertip-mode-map (kbd "】") 'fingertip-close-chinese-curly)
-
-  (define-key fingertip-mode-map (kbd "%") 'fingertip-match-paren)
-  (define-key fingertip-mode-map (kbd "\"") 'fingertip-double-quote)
-  (define-key fingertip-mode-map (kbd "'") 'fingertip-single-quote)
-
-  ;;(define-key fingertip-mode-map (kbd "SPC") 'fingertip-space)
-  ;;(define-key fingertip-mode-map (kbd "RET") 'fingertip-newline)
-
-  (define-key fingertip-mode-map (kbd "M-o") 'fingertip-backward-delete)
-  (define-key fingertip-mode-map (kbd "C-d") 'fingertip-forward-delete)
-  (define-key fingertip-mode-map (kbd "C-k") 'fingertip-kill)
-
-  (define-key fingertip-mode-map (kbd "M-\"") 'fingertip-wrap-double-quote)
-  (define-key fingertip-mode-map (kbd "M-'") 'fingertip-wrap-single-quote)
-  (define-key fingertip-mode-map (kbd "M-[") 'fingertip-wrap-bracket)
-  (define-key fingertip-mode-map (kbd "M-{") 'fingertip-wrap-curly)
-  (define-key fingertip-mode-map (kbd "M-(") 'fingertip-wrap-round)
-  (define-key fingertip-mode-map (kbd "M-)") 'fingertip-unwrap)
-
-  (define-key fingertip-mode-map (kbd "M-p") 'fingertip-jump-right)
-  (define-key fingertip-mode-map (kbd "M-n") 'fingertip-jump-left)
-  (define-key fingertip-mode-map (kbd "M-:") 'fingertip-jump-out-pair-and-newline)
-
-  (define-key fingertip-mode-map (kbd "C-j") 'fingertip-jump-up)
-
-
-  )
+    (global-treesit-auto-mode)
 #+end_src
 ** copilot
 #+begin_src emacs-lisp :tangle suk.el
@@ -4567,7 +4463,7 @@ install
 
   ;; Adds node_modules/.bin directory to `exec_path'
   (use-package add-node-modules-path
-    :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
+     :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
 
   (setq-default js2-use-font-lock-faces t
                 js2-mode-must-byte-compile nil

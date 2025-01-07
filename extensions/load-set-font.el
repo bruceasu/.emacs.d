@@ -109,7 +109,7 @@
 (setq en-font (available-font efl))
 
 ;; Fonts
-(setq emacs-font-size-pair '(18 . 20))
+(setq emacs-font-size-pair '(24 . 24))
 
 (setq en-font-size (car emacs-font-size-pair)
       cn-font-size (cdr emacs-font-size-pair))

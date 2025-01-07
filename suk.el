@@ -165,7 +165,7 @@
 (setq minibuffer-message-timeout 2)       ;显示消息超时的时间
 (setq auto-revert-mode 1)                 ;自动更新buffer
 (setq show-paren-style 'parentheses)      ;括号匹配显示但不是烦人的跳到另一个括号。
-(setq blink-matching-paren nil)           ;当插入右括号时不显示匹配的左括号
+;;(setq blink-matching-paren nil)           ;当插入右括号时不显示匹配的左括号
 (setq message-log-max t)                  ;设置message记录全部消息, 而不用截去
 (setq require-final-newline nil)          ;不自动添加换行符到末尾, 有些情况会出现错误
 (setq ediff-window-setup-function
@@ -1120,12 +1120,11 @@ _w_ where is something defined
 (run-with-idle-timer
  2 nil
  #'(lambda()
-     ;; (use-package expand-region ; I prefer stable version
-     ;;   :load-path "~/.emacs.d/extensions/expand-region"
-     ;;   )
+     (use-package expand-region ; I prefer stable version
+        :load-path "~/.emacs.d/extensions/expand-region"
+     )
      (with-eval-after-load 'expand-region
-       (when (suk-treesit-available-p)
-         (defun treesit-mark-bigger-node ()
+        (defun treesit-mark-bigger-node ()
            "Use tree-sitter to mark regions."
            (let* ((root (treesit-buffer-root-node))
                   (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
@@ -1138,7 +1137,7 @@ _w_ where is something defined
                        node-end (treesit-node-end node))))
              (set-mark node-end)
              (goto-char node-start)))
-         ))))
+        )))
 
 ;; Treat undo history as a tree, ^x u
 (run-with-idle-timer
@@ -3020,7 +3019,7 @@ If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it.
 
 ;; Adds node_modules/.bin directory to `exec_path'
 (use-package add-node-modules-path
-  :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
+   :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
 
 (setq-default js2-use-font-lock-faces t
               js2-mode-must-byte-compile nil
