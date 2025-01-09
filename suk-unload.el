@@ -1,22 +1,8 @@
-(run-with-idle-timer
- 10
- nil
- #'(lambda()
-     ;; Display ugly ^L page breaks as tidy horizontal lines
-     (use-package page-break-lines
-       :diminish
-       :hook (after-init . global-page-break-lines-mode))
-     ))
-
-(run-with-idle-timer
- 1
- nil
- #'(lambda()
-     ;; 切换buffer焦点时高亮动画
-     (require-package 'beacon)
-     (use-package beacon
-       :ensure t
-       :hook (after-init . beacon-mode))))
+(defvar-keymap hsk/notetaking-map
+:doc "My notetaking keymap"
+"d" #'denote
+"t" #'denote-keywords-add
+"T" #'denote-keywords-remove)
 
 ;; hungry-delete
 (run-with-idle-timer
@@ -111,6 +97,26 @@
    ("M-s-q" . apply-macro-to-region-lines) ;应用键盘宏到选择的区域
    )
  "macros+")
+
+(run-with-idle-timer
+ 10
+ nil
+ #'(lambda()
+     ;; Display ugly ^L page breaks as tidy horizontal lines
+     (use-package page-break-lines
+       :diminish
+       :hook (after-init . global-page-break-lines-mode))
+     ))
+
+(run-with-idle-timer
+ 1
+ nil
+ #'(lambda()
+     ;; 切换buffer焦点时高亮动画
+     (require-package 'beacon)
+     (use-package beacon
+       :ensure t
+       :hook (after-init . beacon-mode))))
 
 (require-package 'command-log-mode) ;; show the command you press the shortcuts. M-x command-log-mode, M-x clm/open-command-log-buffer
 

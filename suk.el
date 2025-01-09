@@ -384,6 +384,260 @@ Native tree-sitter is introduced since 29.1."
 
 (require 'init-key)
 
+;; 一啲方便嘅函数
+(global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
+(global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp
+(global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
+(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)  ;; 快捷键 C-x t T 用于切换透明度
+(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)  ;; 快捷键 C-x t p 用于切换代理
+(global-set-key (kbd "C-x t f") 'global-flycheck-mode)     ;; 快捷键 C-x t f 用于开启全局语法检查
+(global-set-key (kbd "C-x R") 'recentf-open)   ;; 快捷键 C-x R 用于打开最近文件
+(global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)  ;; 快捷键 C-<f11> 用于切换全屏模式
+(keymap-set global-map "M-s-<return>" 'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
+(keymap-set global-map "RET" 'newline-and-indent)  ;; 回车键 RET 用于创建新行并对齐
+(keymap-set global-map "S-<return>" 'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
+
+(use-package bind-key)
+;;(bind-key "C-c x" #'some-function some-package-mode-map)
+;;(bind-key "C-c y" #'another-function)
+
+;; Toggle fullscreen <F11> also bind to fullscreen
+(bind-keys ("C-<f11>" . toggle-frame-fullscreen)
+           ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
+           ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
+           )
+
+;;; ### goto-line-preview ###
+(lazy-load-global-keys
+ '(
+   ("M-g p" . goto-line-preview))
+ "goto-line-preview")
+
+;;; ### Ace jump ###
+(lazy-load-global-keys
+ '(
+   ("C-c w" . ace-jump-word-mode)
+   ("C-c c" . ace-jump-char-mode)
+   ("C-c l" . ace-jump-line-mode)
+   )
+ "ace-jump-mode"
+ "C-z"
+ )
+
+;; Jump to Chinese characters
+(run-with-idle-timer
+ 1
+ nil
+ #'(lambda()     
+     (use-package ace-pinyin
+       :diminish
+       :hook (after-init . ace-pinyin-global-mode))
+     (require 'goto-chg)
+     ))
+
+;;; ### sudo ###
+(when sys/linuxp
+  (lazy-load-global-keys
+   '(("C-z C-s" . suk/sudo/body))
+   "my-sudo"
+   ))
+
+;; vi like key binds
+;; (require-package 'evil)
+;; (require-package 'evil-escape)
+;; (require-package 'evil-exchange)
+;; (require-package 'evil-find-char-pinyin)
+;; (require-package 'evil-mark-replace)
+;; (require-package 'evil-matchit)
+;; (require-package 'evil-nerd-commenter)
+;; (require-package 'evil-surround)
+;; (require-package 'evil-visualstar)
+
+;;;###autoload
+(with-eval-after-load 'hydra
+  (defhydra my-hydra-describe (:color blue :hint nil)
+    "
+Describe Something: (q to quit)
+_a_ all help for everything screen
+_b_ bindings
+_c_ char
+_C_ coding system
+_f_ function
+_i_ input method
+_k_ key briefly
+_K_ key
+_l_ language environment
+_m_ major mode
+_M_ minor mode
+_n_ current coding system briefly
+_N_ current coding system full
+_o_ lighter indicator
+_O_ lighter symbol
+_p_ package
+_P_ text properties
+_s_ symbol
+_t_ theme
+_v_ variable
+_w_ where is something defined
+"
+	("b" describe-bindings)
+	("C" describe-categories)
+	("c" describe-char)
+	("C" describe-coding-system)
+	("f" describe-function)
+	("i" describe-input-method)
+	("K" describe-key)
+	("k" describe-key-briefly)
+	("l" describe-language-environment)
+	("M" describe-minor-mode)
+	("m" describe-mode)
+	("N" describe-current-coding-system)
+	("n" describe-current-coding-system-briefly)
+	("o" describe-minor-mode-from-indicator)
+	("O" describe-minor-mode-from-symbol)
+	("p" describe-package)
+	("P" describe-text-properties)
+	("q" nil)
+	("a" help)
+	("s" describe-symbol)
+	("t" describe-theme)
+	("v" describe-variable)
+	("w" where-is))
+  (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
+
+;; expand-region
+(run-with-idle-timer
+ 2 nil
+ #'(lambda()
+     (use-package expand-region ; I prefer stable version
+        :load-path "~/.emacs.d/extensions/expand-region"
+     )
+     (with-eval-after-load 'expand-region
+        (defun treesit-mark-bigger-node ()
+           "Use tree-sitter to mark regions."
+           (let* ((root (treesit-buffer-root-node))
+                  (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
+                  (node-start (treesit-node-start node))
+                  (node-end (treesit-node-end node)))
+             ;; Node fits the region exactly. Try its parent node instead.
+             (when (and (= (region-beginning) node-start) (= (region-end) node-end))
+               (when-let ((node (treesit-node-parent node)))
+                 (setq node-start (treesit-node-start node)
+                       node-end (treesit-node-end node))))
+             (set-mark node-end)
+             (goto-char node-start)))
+        )))
+
+;; Treat undo history as a tree, ^x u
+(run-with-idle-timer
+ 2 nil
+ #'(lambda()
+       (if emacs/>=28p
+           (progn
+             ;; vundo :load-path "~/.emacs.d/extensions/vundo"
+             (with-eval-after-load 'vundo
+               (setq vundo-glyph-alist vundo-unicode-symbols)))
+         (progn
+           ;; use undo-tree
+           ;; (unless emacs/>=28p
+           ;;   (require-package 'undo-tree))
+           (setq undo-tree-visualizer-timestamps t
+                 undo-tree-visualizer-diff t
+                 undo-tree-enable-undo-in-region nil
+                 undo-tree-auto-save-history nil)
+           ;; HACK: keep the diff window
+           (with-no-warnings
+             (make-variable-buffer-local 'undo-tree-visualizer-diff)
+             (setq-default undo-tree-visualizer-diff t))
+           (with-eval-after-load 'undo-tree
+             (add-hook 'after-init-hook #'global-undo-tree-mode))
+           ))
+       ))
+
+;;; ### Advice ###
+;;; --- 各种emacs行为建议
+;; 在特定地模式下粘贴时自动缩进
+(defadvice yank (after indent-region activate)
+  "To make yank content indent automatically."
+  (if (member major-mode
+              '(emacs-lisp-mode
+                java-mode
+                web-mode
+                c-mode
+                c++-mode
+                js-mode
+                latex-mode
+                plain-tex-mode))
+      (indent-region (region-beginning) (region-end) nil)))
+
+(require-package 'flyspell)
+(require-package 'langtool)
+;; my own patched version is better an open-source grammar, spelling,
+;; and style checker, directly into Emacs. LanguageTool supports
+;; multiple languages, including English, Spanish, French, German, and
+;; many others, making it a versatile tool for checking the quality of
+;; your writing.
+
+(run-with-idle-timer
+ 2 nil
+ #'(lambda()
+     (require-package 'paredit) ;; useful for lisp
+     (require-package 'tagedit) ;; useful for html
+     (require-package 'cliphist)
+     (require-package 'iedit)
+     (require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
+     ;;(require-package 'textile-mode)
+     ;;(require-package 'vimrc-mode)
+     ;;(require-package 'qrencode)
+     (use-package writeroom-mode)
+
+     ))
+
+(global-set-key  (kbd "C-S-SPC") 'set-mark-command)
+
+(define-prefix-command 'leader-key)
+(global-set-key (kbd "M-s-SPC") 'leader-key)
+(global-set-key (kbd "C-c C-j") #'yas-expand)
+;;; ### Toolkit ###
+;;; --- 工具函数
+(lazy-load-set-keys
+ '(
+   ("C-," . bury-buffer)                ;隐藏当前buffer
+   ("C-." . unbury-buffer)              ;反隐藏当前buffer
+   ("s-[" . eval-expression)            ;执行表达式
+   ("s-1" . sort-lines)                 ;排序
+   ("s-2" . hanconvert-region)          ;转换简体或繁体中文
+   ("s-3" . uniquify-all-lines-buffer)  ;删除重复的行
+   ("s-<f12>" . calendar)
+   ("C-<f12>" . lazycat-theme-toggle)
+   ;;([c-t] . transpose-chars)
+   ([S-f5] . toggle-truncate-lines)
+   ("C-x M-a" . align-regexp)
+   )
+ )
+
+;; C-c TAB indent-region
+;; C-u C-c TAB => (un)indent-region
+
+;;(global-set-key (kbd "C-(") 'backward-sexp)
+;;(global-set-key (kbd "C-)") 'forward-sexp)
+;;(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
+;;(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
+;;(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
+;;(global-set-key (kbd "C-x R") 'recentf)
+;; M-x global-set-key RET 交互式的绑定你的键。
+;; C-x Esc Esc 调出上一条“复杂命令”
+
+;;Emacs 自动排版
+;;很简单：C-x h C-M-\
+;;其中C-x h 是全选
+;;C-M-\ 是排版
+
+;; C-x C-q set/unset readonly
+;; 大小写转换： M-u, M-l, M-c
+
+;; M-x align-regexp 可以方便的对齐一些文字
+
 ;;(require 'lazycat-theme)
 ;;(lazycat-theme-load-dark)
 (use-package doom-themes
@@ -995,260 +1249,6 @@ Native tree-sitter is introduced since 29.1."
        ))
   )
 
-;; 一啲方便嘅函数
-(global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
-(global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp
-(global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
-(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)  ;; 快捷键 C-x t T 用于切换透明度
-(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)  ;; 快捷键 C-x t p 用于切换代理
-(global-set-key (kbd "C-x t f") 'global-flycheck-mode)     ;; 快捷键 C-x t f 用于开启全局语法检查
-(global-set-key (kbd "C-x R") 'recentf-open)   ;; 快捷键 C-x R 用于打开最近文件
-(global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)  ;; 快捷键 C-<f11> 用于切换全屏模式
-(global-set-key (kbd "M-S-<return>") 'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
-(global-set-key (kbd "RET") 'newline-and-indent)  ;; 回车键 RET 用于创建新行并对齐
-(global-set-key (kbd "S-<return>") 'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
-
-(use-package bind-key)
-;;(bind-key "C-c x" #'some-function some-package-mode-map)
-;;(bind-key "C-c y" #'another-function)
-
-;; Toggle fullscreen <F11> also bind to fullscreen
-(bind-keys ("C-<f11>" . toggle-frame-fullscreen)
-           ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
-           ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
-           )
-
-;;; ### goto-line-preview ###
-(lazy-load-global-keys
- '(
-   ("M-g p" . goto-line-preview))
- "goto-line-preview")
-
-;;; ### Ace jump ###
-(lazy-load-global-keys
- '(
-   ("C-c w" . ace-jump-word-mode)
-   ("C-c c" . ace-jump-char-mode)
-   ("C-c l" . ace-jump-line-mode)
-   )
- "ace-jump-mode"
- "C-z"
- )
-
-;; Jump to Chinese characters
-(run-with-idle-timer
- 1
- nil
- #'(lambda()     
-     (use-package ace-pinyin
-       :diminish
-       :hook (after-init . ace-pinyin-global-mode))
-     (require 'goto-chg)
-     ))
-
-;;; ### sudo ###
-(when sys/linuxp
-  (lazy-load-global-keys
-   '(("C-z C-s" . suk/sudo/body))
-   "my-sudo"
-   ))
-
-;; vi like key binds
-;; (require-package 'evil)
-;; (require-package 'evil-escape)
-;; (require-package 'evil-exchange)
-;; (require-package 'evil-find-char-pinyin)
-;; (require-package 'evil-mark-replace)
-;; (require-package 'evil-matchit)
-;; (require-package 'evil-nerd-commenter)
-;; (require-package 'evil-surround)
-;; (require-package 'evil-visualstar)
-
-;;;###autoload
-(with-eval-after-load 'hydra
-  (defhydra my-hydra-describe (:color blue :hint nil)
-    "
-Describe Something: (q to quit)
-_a_ all help for everything screen
-_b_ bindings
-_c_ char
-_C_ coding system
-_f_ function
-_i_ input method
-_k_ key briefly
-_K_ key
-_l_ language environment
-_m_ major mode
-_M_ minor mode
-_n_ current coding system briefly
-_N_ current coding system full
-_o_ lighter indicator
-_O_ lighter symbol
-_p_ package
-_P_ text properties
-_s_ symbol
-_t_ theme
-_v_ variable
-_w_ where is something defined
-"
-	("b" describe-bindings)
-	("C" describe-categories)
-	("c" describe-char)
-	("C" describe-coding-system)
-	("f" describe-function)
-	("i" describe-input-method)
-	("K" describe-key)
-	("k" describe-key-briefly)
-	("l" describe-language-environment)
-	("M" describe-minor-mode)
-	("m" describe-mode)
-	("N" describe-current-coding-system)
-	("n" describe-current-coding-system-briefly)
-	("o" describe-minor-mode-from-indicator)
-	("O" describe-minor-mode-from-symbol)
-	("p" describe-package)
-	("P" describe-text-properties)
-	("q" nil)
-	("a" help)
-	("s" describe-symbol)
-	("t" describe-theme)
-	("v" describe-variable)
-	("w" where-is))
-  (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
-
-;; expand-region
-(run-with-idle-timer
- 2 nil
- #'(lambda()
-     (use-package expand-region ; I prefer stable version
-        :load-path "~/.emacs.d/extensions/expand-region"
-     )
-     (with-eval-after-load 'expand-region
-        (defun treesit-mark-bigger-node ()
-           "Use tree-sitter to mark regions."
-           (let* ((root (treesit-buffer-root-node))
-                  (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
-                  (node-start (treesit-node-start node))
-                  (node-end (treesit-node-end node)))
-             ;; Node fits the region exactly. Try its parent node instead.
-             (when (and (= (region-beginning) node-start) (= (region-end) node-end))
-               (when-let ((node (treesit-node-parent node)))
-                 (setq node-start (treesit-node-start node)
-                       node-end (treesit-node-end node))))
-             (set-mark node-end)
-             (goto-char node-start)))
-        )))
-
-;; Treat undo history as a tree, ^x u
-(run-with-idle-timer
- 2 nil
- #'(lambda()
-       (if emacs/>=28p
-           (progn
-             ;; vundo :load-path "~/.emacs.d/extensions/vundo"
-             (with-eval-after-load 'vundo
-               (setq vundo-glyph-alist vundo-unicode-symbols)))
-         (progn
-           ;; use undo-tree
-           ;; (unless emacs/>=28p
-           ;;   (require-package 'undo-tree))
-           (setq undo-tree-visualizer-timestamps t
-                 undo-tree-visualizer-diff t
-                 undo-tree-enable-undo-in-region nil
-                 undo-tree-auto-save-history nil)
-           ;; HACK: keep the diff window
-           (with-no-warnings
-             (make-variable-buffer-local 'undo-tree-visualizer-diff)
-             (setq-default undo-tree-visualizer-diff t))
-           (with-eval-after-load 'undo-tree
-             (add-hook 'after-init-hook #'global-undo-tree-mode))
-           ))
-       ))
-
-;;; ### Advice ###
-;;; --- 各种emacs行为建议
-;; 在特定地模式下粘贴时自动缩进
-(defadvice yank (after indent-region activate)
-  "To make yank content indent automatically."
-  (if (member major-mode
-              '(emacs-lisp-mode
-                java-mode
-                web-mode
-                c-mode
-                c++-mode
-                js-mode
-                latex-mode
-                plain-tex-mode))
-      (indent-region (region-beginning) (region-end) nil)))
-
-(require-package 'flyspell)
-(require-package 'langtool)
-;; my own patched version is better an open-source grammar, spelling,
-;; and style checker, directly into Emacs. LanguageTool supports
-;; multiple languages, including English, Spanish, French, German, and
-;; many others, making it a versatile tool for checking the quality of
-;; your writing.
-
-(run-with-idle-timer
- 2 nil
- #'(lambda()
-     (require-package 'paredit) ;; useful for lisp
-     (require-package 'tagedit) ;; useful for html
-     (require-package 'cliphist)
-     (require-package 'iedit)
-     (require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
-     ;;(require-package 'textile-mode)
-     ;;(require-package 'vimrc-mode)
-     ;;(require-package 'qrencode)
-     (use-package writeroom-mode)
-
-     ))
-
-(global-set-key  (kbd "C-S-SPC") 'set-mark-command)
-
-(define-prefix-command 'leader-key)
-(global-set-key (kbd "M-s-SPC") 'leader-key)
-(global-set-key (kbd "C-c C-j") #'yas-expand)
-;;; ### Toolkit ###
-;;; --- 工具函数
-(lazy-load-set-keys
- '(
-   ("C-," . bury-buffer)                ;隐藏当前buffer
-   ("C-." . unbury-buffer)              ;反隐藏当前buffer
-   ("s-[" . eval-expression)            ;执行表达式
-   ("s-1" . sort-lines)                 ;排序
-   ("s-2" . hanconvert-region)          ;转换简体或繁体中文
-   ("s-3" . uniquify-all-lines-buffer)  ;删除重复的行
-   ("s-<f12>" . calendar)
-   ("C-<f12>" . lazycat-theme-toggle)
-   ;;([c-t] . transpose-chars)
-   ([S-f5] . toggle-truncate-lines)
-   ("C-x M-a" . align-regexp)
-   )
- )
-
-;; C-c TAB indent-region
-;; C-u C-c TAB => (un)indent-region
-
-;;(global-set-key (kbd "C-(") 'backward-sexp)
-;;(global-set-key (kbd "C-)") 'forward-sexp)
-;;(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
-;;(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
-;;(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
-;;(global-set-key (kbd "C-x R") 'recentf)
-;; M-x global-set-key RET 交互式的绑定你的键。
-;; C-x Esc Esc 调出上一条“复杂命令”
-
-;;Emacs 自动排版
-;;很简单：C-x h C-M-\
-;;其中C-x h 是全选
-;;C-M-\ 是排版
-
-;; C-x C-q set/unset readonly
-;; 大小写转换： M-u, M-l, M-c
-
-;; M-x align-regexp 可以方便的对齐一些文字
-
 ;;(global-set-key  [C-f7] 'suk/point-to-register)
 ;;(global-set-key  [f7] 'suk/jump-to-register)
 
@@ -1694,6 +1694,7 @@ _w_ where is something defined
       '(("CANCELLED" ("CANCELLED" . t))
         ("WAIT⚑" ("WAITTING" . t))
         ("HOLD" ("WAITTING") ("HOLD" . t))
+        (done ("WAITING") ("HOLD"))
         ("DONE" ("WAITTING") ("CANCELLED") ("HOLD"))
         ("ABORT" ("WAITTING") ("CANCELLED") ("HOLD"))
         ("TODO" ("WAITTING") ("CANCELLED") ("HOLD"))
@@ -1735,21 +1736,17 @@ _w_ where is something defined
       '(
         ("t" "Todo"
          entry (file+headline (expand-file-name "gtd.org" org-files-directory) "Tasks")
-         "* TODO %?\n%U\n%a\n"
-         :immediate-finishe t)
+         "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
         ("n" "Note"
          entry (file (expand-file-name "notes.org" org-files-directory))
-         "* %? :NOTE:\n%U\n%a\n"
-         :immediate-finishe t)
-        ("r" "respond"
+         "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+        ("r" "Respond"
          entry (file (expand-file-name "gtd.org" org-files-directory))
          "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n"
-         :clock-in t
-         :clock-resume t
-         :immediate-finish t)
+         :clock-in t :clock-resume t :immediate-finish t)
         ("j" "Journal"
          entry (file+datetree (expand-file-name "journal.org" org-files-directory))
-         "* %?\nEntered on %U\n  %i\n  %a")
+         "* %?\nEntered on %U\n  %i\n  %a" :clock-in t :clock-resume t)
         ("w" "Review"
          entry (file (expand-file-name "gtd.org" org-files-directory))
          "* TODO Review %c\n%U\n"
@@ -1757,13 +1754,11 @@ _w_ where is something defined
         ("m" "Meeting"
          entry (file (expand-file-name "gtd.org" org-files-directory))
          "* MEETING with %? :MEETING:\n%U"
-         :clock-in t
-         :clock-resume t)
+         :clock-in t :clock-resume t)
         ("p" "Phone call"
          entry (file (expand-file-name "gtd.org" org-files-directory))
          "* PHONE %? :PHONE:\n%U"
-         :clock-in t
-         :clock-resume t)
+         :clock-in t :clock-resume t)
         ("h" "Habit"
          entry (file (expand-file-name "gtd.org" org-files-directory))
          "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")

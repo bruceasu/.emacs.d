@@ -6,47 +6,6 @@
  ;; '("C-z"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
  '("C-z" ))
 
-(lazy-load-global-keys
- '(
-   ("C-c b"  . my-hydra-buffers/body)
-   ("M-<f7>" . suk-read-mode)
-   ("<f7>"   . olivetti-mode)
-   ("C-;"    . suk/close-current-buffer) ;关闭当前buffer
-   )
- "buffer-extension")
-
-;; (lazy-load-global-keys
-;;  '(
-;;     ("<f7>" . olivetti-mode)
-;;   )
-;;  "olivetti")
-
-;; default keys: C-x LEFT/RIGHT C-, C-.
-
-;; --- 缓存移动
-(lazy-load-set-keys
- '(
-   ;;("C-z i" . beginning-of-buffer)      ;缓存开始 M-<
-   ;;("C-z k" . end-of-buffer)            ;缓存结尾 M->
-   ("C-M-f" . forward-paragraph)        ;下一个段落
-   ("C-M-b" . backward-paragraph)       ;上一个段落
-   ("C-M-y" . backward-up-list)         ;向左跳出 LIST
-   ("C-M-o" . up-list)                  ;向右跳出 LIST
-   ("C-M-u" . backward-down-list)       ;向左跳进 LIST
-   ("C-M-i" . down-list)                ;向右跳进 LIST
-   ("C-M-a" . beginning-of-defun)       ;函数开头
-   ("C-M-e" . end-of-defun)             ;函数末尾
-   ))
-
-(lazy-load-global-keys
- '(
-   ("<C-S-up>" . buf-move-up)   
-   ("<C-S-down>" . buf-move-down)
-   ("<C-S-left>" . buf-move-left)  
-   ("<C-S-right>" . buf-move-right)   
-   )
- "buffer-move")
-
 ;; ### move text ###
 (lazy-load-global-keys
  '(
@@ -192,6 +151,47 @@
      )
    "undo-tree")
   )
+
+(lazy-load-global-keys
+ '(
+   ("C-c b"  . my-hydra-buffers/body)
+   ("M-<f7>" . suk-read-mode)
+   ("<f7>"   . olivetti-mode)
+   ("C-;"    . suk/close-current-buffer) ;关闭当前buffer
+   )
+ "buffer-extension")
+
+;; (lazy-load-global-keys
+;;  '(
+;;     ("<f7>" . olivetti-mode)
+;;   )
+;;  "olivetti")
+
+;; default keys: C-x LEFT/RIGHT C-, C-.
+
+;; --- 缓存移动
+(lazy-load-set-keys
+ '(
+   ;;("C-z i" . beginning-of-buffer)      ;缓存开始 M-<
+   ;;("C-z k" . end-of-buffer)            ;缓存结尾 M->
+   ("C-M-f" . forward-paragraph)        ;下一个段落
+   ("C-M-b" . backward-paragraph)       ;上一个段落
+   ("C-M-y" . backward-up-list)         ;向左跳出 LIST
+   ("C-M-o" . up-list)                  ;向右跳出 LIST
+   ("C-M-u" . backward-down-list)       ;向左跳进 LIST
+   ("C-M-i" . down-list)                ;向右跳进 LIST
+   ("C-M-a" . beginning-of-defun)       ;函数开头
+   ("C-M-e" . end-of-defun)             ;函数末尾
+   ))
+
+(lazy-load-global-keys
+ '(
+   ("<C-S-up>" . buf-move-up)   
+   ("<C-S-down>" . buf-move-down)
+   ("<C-S-left>" . buf-move-left)  
+   ("<C-S-right>" . buf-move-right)   
+   )
+ "buffer-move")
 
 ;;; --- 笔记管理和组织
 (define-prefix-command 'F9-map)
