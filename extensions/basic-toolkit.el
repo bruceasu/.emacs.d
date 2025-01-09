@@ -421,7 +421,7 @@ Otherwise return nil."
         (fill-region (region-beginning) (region-end)))
     (dotimes (_ (abs n))
       (delete-indentation (natnump n)))))
-(global-set-key (kbd "C-S-j") #'Join-lines)
+(global-set-key (kbd "C-S-j") #'join-lines)
 
 ;; =========================================================
 ;;;###autoload

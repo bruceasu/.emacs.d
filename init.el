@@ -182,101 +182,98 @@
   "Emacs is 30 or above.")
 
 ;; This sets up the load path so that we can override it
- (setq warning-suppress-log-types '((package reinitialization)))
- ;; 指定ELPA目录
- (setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
- (add-subdirs-to-load-path package-user-dir t)
+(setq warning-suppress-log-types '((package reinitialization)))
+;; 指定ELPA目录
+(setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
+(add-subdirs-to-load-path package-user-dir t)
 
- ;; HACK: DO NOT copy package-selected-packages to init/custom file forcibly.
- ;; https://github.com/jwiegley/use-package/issues/383#issuecomment-247801751
- (defun my-save-selected-packages (&optional value)
-   "Set `package-selected-packages' to VALUE but don't save to `custom-file'."
-   (when value
-     (setq package-selected-packages value)))
+;; HACK: DO NOT copy package-selected-packages to init/custom file forcibly.
+;; https://github.com/jwiegley/use-package/issues/383#issuecomment-247801751
+(defun my-save-selected-packages (&optional value)
+  "Set `package-selected-packages' to VALUE but don't save to `custom-file'."
+  (when value
+    (setq package-selected-packages value)))
 
- (advice-add 'package--save-selected-packages :override #'my-save-selected-packages)
+(advice-add 'package--save-selected-packages :override #'my-save-selected-packages)
 
- (require 'package)
- ;; gnu：
- ;; http://elpa.gnu.org/packages/
- ;; https://elpa.emacs-china.org/gnu/ http://1.15.88.122/gnu/
- ;; https://mirrors.163.com/elpa/gnu/
- ;; https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/
- ;; melpa:
- ;; http://melpa.org/packages/
- ;; https://www.mirrorservice.org/sites/melpa.org/packages/
- ;; https://elpa.emacs-china.org/melpa/ http://1.15.88.122/melpa/
- ;; https://mirrors.163.com/elpa/melpa/
- ;; https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/
+(require 'package)
+;; gnu：
+;; http://elpa.gnu.org/packages/
+;; https://elpa.emacs-china.org/gnu/ http://1.15.88.122/gnu/
+;; https://mirrors.163.com/elpa/gnu/
+;; https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/
+;; melpa:
+;; http://melpa.org/packages/
+;; https://www.mirrorservice.org/sites/melpa.org/packages/
+;; https://elpa.emacs-china.org/melpa/ http://1.15.88.122/melpa/
+;; https://mirrors.163.com/elpa/melpa/
+;; https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/
 
- ;;(setq package-archives '(("melpa" . "http://melpa.org/packages/")
- ;;                         ("gnu" . "http://elpa.gnu.org/packages/")
- ;;                         ("nongnu" . "https://elpa.nongnu.org/nongnu/"))
+;;(setq package-archives '(("melpa" . "http://melpa.org/packages/")
+;;                         ("gnu" . "http://elpa.gnu.org/packages/")
+;;                         ("nongnu" . "https://elpa.nongnu.org/nongnu/"))
 
- (add-to-list 'package-archives
-              '("melpa" . "https://melpa.org/packages/"))
- (add-to-list 'package-archives
-              '("melpa-stable" . "https://stable.melpa.org/packages/"))
- (add-to-list 'package-archives
-              '("org" . "https://orgmode.org/elpa/"))
- (add-to-list 'package-archives
-              '("gnu" . "https://elpa.gnu.org/packages/"))
- (add-to-list 'package-archives
-              '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
+;; (add-to-list 'package-archives
+;;              '("melpa-stable" . "https://stable.melpa.org/packages/"))
+(add-to-list 'package-archives
+             '("org" . "https://orgmode.org/elpa/"))
+(add-to-list 'package-archives
+             '("gnu" . "https://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives
+             '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
 
- ;; Un-comment below line if you follow "Install stable version in easiest way"
- ;; (setq package-archives '(("myelpa" . "~/myelpa/")))
+;; Un-comment below line if you follow "Install stable version in easiest way"
+(setq package-archives '(("myelpa" . "~/myelpa/")))
 
- ;; my local repository is always needed.
- ;; (push (cons "localelpa" (expand-file-name  "localelpa/" suk-emacs-root-dir)) package-archives)
+(setq package-check-signature nil) ; 个别时候会出现签名校验失败
 
- (setq package-check-signature nil) ; 个别时候会出现签名校验失败
+;; Initialize packages
+;; (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
+;;   (setq package-enable-at-startup nil)          ; To prevent initializing twice
+;;   (package-initialize))
 
- ;; Initialize packages
- ;; (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
- ;;   (setq package-enable-at-startup nil)          ; To prevent initializing twice
- ;;   (package-initialize))
+(unless (bound-and-true-p package--initialized)
+  (package-initialize))
 
- (unless (bound-and-true-p package--initialized)
-   (package-initialize))
+;; Setup `use-package'
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
- ;; Setup `use-package'
- (unless (package-installed-p 'use-package)
-   (package-refresh-contents)
-   (package-install 'use-package))
+;; Should set before loading `use-package'
+;; make use-package default behavior better
+;; with `use-package-always-ensure' you won't need ":ensure t" all the time
+;; with `use-package-always-defer' you won't need ":defer t" all the time
+(setq use-package-always-ensure t
+      use-package-always-defer t
+      use-package-enable-imenu-support t
+      use-package-expand-minimally t)
 
- ;; Should set before loading `use-package'
- ;; make use-package default behavior better
- ;; with `use-package-always-ensure' you won't need ":ensure t" all the time
- ;; with `use-package-always-defer' you won't need ":defer t" all the time
- (setq use-package-always-ensure t
-       use-package-always-defer t
-       use-package-enable-imenu-support t
-       use-package-expand-minimally t)
-
- (require 'use-package)
+(require 'use-package)
 
 
     ;;;###autoload
- (defun my-ensure (feature)
-   "Make sure FEATURE is required."
-   (unless (featurep feature)
-     (condition-case nil
-         (require feature)
-       (error nil))))
+(defun my-ensure (feature)
+  "Make sure FEATURE is required."
+  (unless (featurep feature)
+    (condition-case nil
+        (require feature)
+      (error nil))))
 
- ;; On-demand installation of packages
- (defun require-package (&rest packages)
-   "Ensure PACKAGES are installed.
+;; On-demand installation of packages
+(defun require-package (&rest packages)
+  "Ensure PACKAGES are installed.
  If a package is not installed, it will be installed automatically."
-   (dolist (package packages)
-     (unless (package-installed-p package)
-       (package-install package)))
-   (use-package package)
-   )
+  (dolist (package packages)
+    (unless (package-installed-p package)
+      (package-install package)))
+  (use-package package)
+  )
 
 ;; Compatibility
- (use-package compat :demand t)
+(use-package compat :demand t)
 
 (load-file (expand-file-name "suk.el" suk-emacs-root-dir))
 

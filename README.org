@@ -70,56 +70,55 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 :PROPERTIES:
 :CUSTOM_ID: init
 :END:
-#+NAME: startup
 <<init>>
 
 #+BEGIN_SRC emacs-lisp :tangle init.el :eval never-export
-  (provide 'init)
+   (provide 'init)
 
-  ;; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
-  ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
-  ;; 变量。
-  (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
-  (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
-  (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
-  (defvar suk-emacs-share-dir     (expand-file-name "share" suk-emacs-root-dir))
-  (defvar suk-emacs-themes-dir    (expand-file-name "themes" suk-emacs-share-dir))
-  (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
-  (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
-  (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
+   ;; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
+   ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
+   ;; 变量。
+   (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
+   (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
+   (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
+   (defvar suk-emacs-share-dir     (expand-file-name "share" suk-emacs-root-dir))
+   (defvar suk-emacs-themes-dir    (expand-file-name "themes" suk-emacs-share-dir))
+   (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
+   (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
+   (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
 
-  ;; OS 嘅 HOME 目录。
-  (defvar user-home-dir (getenv "HOME"))
+   ;; OS 嘅 HOME 目录。
+   (defvar user-home-dir (getenv "HOME"))
 
-  (if (eq system-type 'windows-nt)
-      (defvar user-home-dir (getenv "USERPROFILE")))
-  ;; blink search
-  (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
+   (if (eq system-type 'windows-nt)
+       (defvar user-home-dir (getenv "USERPROFILE")))
+   ;; blink search
+   (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
 
-  ;; History
-  (setq savehist-file (concat suk-emacs-var-dir "/history"))
-  ;; Amx
-  (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
-  ;; Auto save
-  (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
-  ;; Eshell
-  (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
-  (setq eshell-history-file-name (concat eshell-directory-name "/history"))
-  ;; projectitle-bookmarks
-  (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
-  (setq backup-directory-alist `(("" . ,suk-emacs-tmp-dir)))
-  ;; Bookmark
-  (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
-  ;; Diary
-  (setq diary-file (concat user-home-dir "/diary"))
-  ;; server 无效
-  (require 'server)
-  ;;(setq server-socket-dir suk-emacs-var-dir)
+   ;; History
+   (setq savehist-file (concat suk-emacs-var-dir "/history"))
+   ;; Amx
+   (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
+   ;; Auto save
+   (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
+   ;; Eshell
+   (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
+   (setq eshell-history-file-name (concat eshell-directory-name "/history"))
+   ;; projectitle-bookmarks
+   (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
+   (setq backup-directory-alist `(("" . ,suk-emacs-tmp-dir)))
+   ;; Bookmark
+   (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
+   ;; Diary
+   (setq diary-file (concat user-home-dir "/diary"))
+   ;; server 无效
+   (require 'server)
+   ;;(setq server-socket-dir suk-emacs-var-dir)
 
-  ;; Clear to avoid analyzing files when loading remote files.
-  (setq file-name-handler-alist nil)
-  ;; Don't pass case-insensitive to `auto-mode-alist'
-  (setq auto-mode-case-fold nil)
+   ;; Clear to avoid analyzing files when loading remote files.
+   (setq file-name-handler-alist nil)
+   ;; Don't pass case-insensitive to `auto-mode-alist'
+   (setq auto-mode-case-fold nil)
 
 #+END_SRC
 
@@ -327,8 +326,8 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 
   (add-to-list 'package-archives
                '("melpa" . "https://melpa.org/packages/"))
-  (add-to-list 'package-archives
-               '("melpa-stable" . "https://stable.melpa.org/packages/"))
+  ;; (add-to-list 'package-archives
+  ;;              '("melpa-stable" . "https://stable.melpa.org/packages/"))
   (add-to-list 'package-archives
                '("org" . "https://orgmode.org/elpa/"))
   (add-to-list 'package-archives
@@ -337,10 +336,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
                '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
 
   ;; Un-comment below line if you follow "Install stable version in easiest way"
-  ;; (setq package-archives '(("myelpa" . "~/myelpa/")))
-
-  ;; my local repository is always needed.
-  ;; (push (cons "localelpa" (expand-file-name  "localelpa/" suk-emacs-root-dir)) package-archives)
+  (setq package-archives '(("myelpa" . "~/myelpa/")))
 
   (setq package-check-signature nil) ; 个别时候会出现签名校验失败
 
@@ -369,7 +365,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   (require 'use-package)
 
 
-     ;;;###autoload
+      ;;;###autoload
   (defun my-ensure (feature)
     "Make sure FEATURE is required."
     (unless (featurep feature)
@@ -380,14 +376,14 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   ;; On-demand installation of packages
   (defun require-package (&rest packages)
     "Ensure PACKAGES are installed.
-  If a package is not installed, it will be installed automatically."
+   If a package is not installed, it will be installed automatically."
     (dolist (package packages)
       (unless (package-installed-p package)
         (package-install package)))
     (use-package package)
     )
 
- ;; Compatibility
+  ;; Compatibility
   (use-package compat :demand t)
 #+end_src
 
@@ -633,7 +629,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq minibuffer-message-timeout 2)       ;显示消息超时的时间
   (setq auto-revert-mode 1)                 ;自动更新buffer
   (setq show-paren-style 'parentheses)      ;括号匹配显示但不是烦人的跳到另一个括号。
-  (setq blink-matching-paren nil)           ;当插入右括号时不显示匹配的左括号
+  ;;(setq blink-matching-paren nil)           ;当插入右括号时不显示匹配的左括号
   (setq message-log-max t)                  ;设置message记录全部消息, 而不用截去
   (setq require-final-newline nil)          ;不自动添加换行符到末尾, 有些情况会出现错误
   (setq ediff-window-setup-function
@@ -926,6 +922,710 @@ Add to suk.el
 #+begin_src emacs-lisp :tangle suk.el
   (require 'init-key)
 #+end_src
+
+** how to set keys
+*** Bindkeys examples
+#+begin_src emacs-elisp :tangle achrives-and-examples.el
+global-set-key examples:
+(global-set-key (kbd "C-x C-\\") 'next-line)
+(global-set-key [?\C-x ?\C-\\] 'next-line)
+(global-set-key [(control ?x) (control ?\\)] 'next-line)
+
+(define-prefix-command 'my-leader) ;设定leader
+(define-key keymap "keystrok" 'command-name)   ;将快捷键绑定到 leader按键后，即和键位图绑定。
+(global-set-key "keystroke" 'command-name) ; 定义全局快捷键
+(local-set-key  "keystroke" 'command-name) ; 定义局部快捷键
+;;注意：keystroke中的Control 和 Alternative使用\C, \M表示。
+;;如果是kbd函数，可以使用C和M表示
+
+;; 方式一：
+(define-prefix-command 'SPC-map)
+(global-set-key (kbd "SPC") 'SPC-map)
+(global-set-key (kbd "SPC f") 'find-file)
+
+;; 方式二：
+(define-prefix-command 'SPC-map)
+(global-set-key (kbd "SPC") #'SPC-map)
+(define-key SPC-map (kbd "f") #'find-file)
+
+
+;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
+(define-prefix-command 'comma-map)
+(global-set-key (kbd ",") 'comma-map)
+(global-set-key [(meta c)] 'meta-c-map)
+;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键.
+;; 退出isearch-mode, 所有按键失效.
+(add-hook
+  'isearch-mode-hook
+  '(lambda ()
+    ;; 搜索下一个结果
+    (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
+    ;; 搜索前一个结果
+    (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
+    ;; 替换
+    (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
+    ;; 正则替换
+    (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
+    (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
+    ;; 剪切板作为搜索内容
+    (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
+    ;; 将光标到行尾作为搜索内容
+    (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
+    (define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
+    ;; 向左或向右(选择/取消)单个字符作为搜索内容
+    (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
+    ;; 显示occur视图
+    (define-key isearch-mode-map [(meta o)] 'isearch-occur)
+    ;; 单词搜索
+    (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
+    (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
+    ))
+
+#+END_SRC
+*** Global keys
+#+begin_src emacs-lisp :tangle suk.el
+  ;; 一啲方便嘅函数
+  (global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
+  (global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp
+  (global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
+  (global-set-key (kbd "C-x t T") 'suk/toggle-transparency)  ;; 快捷键 C-x t T 用于切换透明度
+  (global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)  ;; 快捷键 C-x t p 用于切换代理
+  (global-set-key (kbd "C-x t f") 'global-flycheck-mode)     ;; 快捷键 C-x t f 用于开启全局语法检查
+  (global-set-key (kbd "C-x R") 'recentf-open)   ;; 快捷键 C-x R 用于打开最近文件
+  (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)  ;; 快捷键 C-<f11> 用于切换全屏模式
+  (keymap-set global-map "M-s-<return>" 'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
+  (keymap-set global-map "RET" 'newline-and-indent)  ;; 回车键 RET 用于创建新行并对齐
+  (keymap-set global-map "S-<return>" 'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
+
+#+end_src
+*** Set keys
+直接定义全局快捷键：
+:  (global-set-key (kbd "C-c n d") #'denote)
+
+自己定义 keymap 其实很简单的，使用 defvar-keymap ，可以从上面的配置中
+抽取 C-c n 作为一个 prefix key ，定义如下：
+#+begin_src emacs-lisp :tangle suk-unload.el
+  (defvar-keymap hsk/notetaking-map
+  :doc "My notetaking keymap"
+  "d" #'denote
+  "t" #'denote-keywords-add
+  "T" #'denote-keywords-remove)
+#+end_src
+
+然后就可以用：
+: (global-set-key (kbd "C-c n") hsk/notetaking-map)
+
+来将上面定义的 keymap 绑定到 C-c n 上。不过从 emacs-29 开始，更推荐用
+keymap-set ，上面的代码可以改成：
+: (keymap-set global-map "C-c n" hsk/notetaking-map)
+
+省去了 (kbd ...) 这一层，比较方便。
+
+比起原先每个快捷键单独定义，使用 keymap 好处是便于管理，比如之后我想更
+换快捷键前缀，从 C-c n 换成 C-c C-n ，只要改一处 keymap-set 就可以了。
+
+另一个优点是可以嵌套定义，比如我想要将 org-journal 相关的操作也挂到
+hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
+#+BEGIN_EXAMPLE
+  (defvar-keymap hsk/org-journal-map
+  :doc "My org-journal keymap"
+  "n" #'org-journal-new-entry
+  "s" #'org-journal-search
+  "o" #'org-journal-open-current-journal-file)
+#+END_EXAMPLE
+
+
+然后将它嵌套进另一个 map 下面：
+#+BEGIN_EXAMPLE
+  (defvar-keymap hsk/notetaking-map
+  :doc "My notetaking keymap"
+  ;;...
+  "j" hsk/org-journal-map)
+#+END_EXAMPLE
+
+这样 org-journal-new-entry 就映射到 C-c n j n 上了，非常优雅。
+
+
+: (let ((my-keymap (make-sparse-keymap))) ; 创建一个空的 keymap
+:  (keymap-set my-keymap "C-c f" 'find-file)) ; 设置 C-c f 来执行 'find-file 命令
+: (keymap-local-set "C-p" ctl-x-map)
+
+
+*** bind-keys
+是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个
+键。虽然bind-keys 可以独立于 use-package 使用，但它通常与 use-package
+结合使用，以提供更清晰和模块化的键绑定配置。
+#+begin_src emacs-lisp :tangle suk.el
+  (use-package bind-key)
+  ;;(bind-key "C-c x" #'some-function some-package-mode-map)
+  ;;(bind-key "C-c y" #'another-function)
+
+  ;; Toggle fullscreen <F11> also bind to fullscreen
+  (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
+             ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
+             ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
+             )
+#+end_src
+
+** Move cursor
+
+#+begin_src emacs-lisp :tangle suk.el
+     ;;; ### goto-line-preview ###
+     (lazy-load-global-keys
+      '(
+        ("M-g p" . goto-line-preview))
+      "goto-line-preview")
+
+     ;;; ### Ace jump ###
+     (lazy-load-global-keys
+      '(
+        ("C-c w" . ace-jump-word-mode)
+        ("C-c c" . ace-jump-char-mode)
+        ("C-c l" . ace-jump-line-mode)
+        )
+      "ace-jump-mode"
+      "C-z"
+      )
+
+     ;; Jump to Chinese characters
+     (run-with-idle-timer
+      1
+      nil
+      #'(lambda()     
+          (use-package ace-pinyin
+            :diminish
+            :hook (after-init . ace-pinyin-global-mode))
+          (require 'goto-chg)
+          ))
+
+
+#+end_src
+** Move text
+#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;; ### move text ###
+  (lazy-load-global-keys
+   '(
+     ("M-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
+     ("M-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
+     ("M-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
+     ("M-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
+     )
+   "move-text")
+#+end_src
+
+** Open new line
+#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;;; ### open new line ###
+  (lazy-load-global-keys
+   '(
+     ("C-o" . open-newline-above) ;在上面一行新建一行
+     ("C-l" . open-newline-below) ;在下面一行新建一行
+     )
+   "open-newline")
+#+end_src
+** Duplicate line
+#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;; ### duplicate-line ###
+  (lazy-load-global-keys
+   '(
+     ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
+     ("C-S-l" . duplicate-line-or-region-below) ;向下复制当前行或区域
+     ("C-S-s-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
+     ("C-S-s-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
+     ("C-:" . comment-or-uncomment-region+)     ;注释当前行
+
+     )
+   "duplicate-line")
+#+end_src
+** Delete block
+#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;;; ### Delete block ###
+  ;;; --- 快速删除光标左右的内容
+  (lazy-load-global-keys
+   '(
+     ("M-," . delete-block-backward)
+     ("M-." . delete-block-forward))
+   "delete-block")
+#+end_src
+** Hungry delete
+#+begin_src emacs-lisp :tangle suk-unload.el
+  ;; hungry-delete
+  (run-with-idle-timer
+   2 nil
+   #'(lambda()
+       (require-package 'hungry-delete)
+       (require 'hungry-delete)
+       (with-eval-after-load 'hungry-delete
+         (setq hungry-delete-chars-to-skip " \t\f\v"
+               hungry-delete-except-modes
+               '(help-mode
+                 minibuffer-mode
+                 minibuffer-inactive-mode
+                 calc-mode))
+         ;; Delete
+         (global-set-key (kbd "C-c <backspace>") #'hungry-delete-backward)
+         (global-set-key (kbd "C-c <delete>") #'hungry-delete-forward)
+         )))
+#+end_src
+** Word styles
+#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;; ### String Inflection ###
+  ;; --- 单词语法风格快速转换
+  (lazy-load-global-keys
+   '(
+     ("C-c C-u" . string-inflection-hydra/body)
+     )
+   "init-string-inflection")
+#+end_src
+** Thing edit
+#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;;; ### Thing-edit ###
+  ;;; --- 增强式编辑当前光标的对象
+  (lazy-load-global-keys
+   '(
+     ("C-c w" . thing-copy-word)
+     ("C-c s" . thing-copy-symbol)
+     ("C-c m" . thing-copy-email)
+     ("C-c f" . thing-copy-filename)
+     ("C-c u" . thing-copy-url)
+     ("C-c x" . thing-copy-sexp)
+     ("C-c g" . thing-copy-page)
+     ("C-c t" . thing-copy-sentence)
+     ("C-c o" . thing-copy-witespace)
+     ("C-c i" . thing-copy-list)
+     ("C-c c" . thing-copy-comment)
+     ("C-c h" . thing-copy-defun)
+     ("C-c p" . thing-copy-parentheses)
+     ("C-c l" . thing-copy-line)
+     ("C-c a" . thing-copy-to-line-begining)
+     ("C-c e" . thing-copy-to-line-end)
+     ("C-c W" . thing-cut-word)
+     ("C-c S" . thing-cut-symbol)
+     ("C-c M" . thing-cut-email)
+     ("C-c F" . thing-cut-filename)
+     ("C-c G" . thing-cut-page)
+     ("C-c T" . thing-cut-sentence)
+     ("C-c O" . thing-cut-whitespace)
+     ("C-c I" . thing-cut-list)
+     ("C-c C" . thing-cut-comment)
+     ("C-c H" . thing-cut-defun)
+     ("C-c P" . thing-cut-parentheses)
+     ("C-c L" . thing-cut-line)
+     ("C-c A" . thing-cut-to-line-beginning)
+     ("C-c E" . thing-cut-to-line-end)
+     )
+   "thing-edit"
+   "C-z"
+   )
+#+end_src
+
+** Buffer Edit
+#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;; ### Buffer Edit ###
+  ;; --- 缓存编辑
+    (lazy-load-set-keys
+     '(
+       ("C-x C-x" . exchange-point-and-mark)   ;交换当前点和标记点
+       ("M-o" . backward-delete-char-untabify) ;向前删除字符
+       ("C-M-S-h" . mark-paragraph)            ;选中段落
+       ("M-SPC" . just-one-space)              ;只有一个空格在光标处
+       ))
+#+end_src
+** Basic Toolkit
+#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;;; ### basic-toolkit ###
+  (lazy-load-global-keys
+   '(
+     ("M-s-n" . comment-part-move-down)   ;向下移动注释
+     ("M-s-p" . comment-part-move-up)     ;向上移动注释
+     ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
+     ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
+     ("M-2" . indent-buffer)              ;自动格式化当前Buffer
+     ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
+     ;;("C-x u" . mark-line)              ;选中整行
+     ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
+     ("M-G" . goto-column)                ;到指定列
+     ("C->" . remember-init)              ;记忆初始函数
+     ("C-<" . remember-jump)              ;记忆跳转函数
+     ("M-s-," . point-stack-pop)          ;buffer索引跳转
+     ("M-s-." . point-stack-push)         ;buffer索引标记
+     ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
+     ("M-I" . backward-indent)            ;向后移动4个字符
+                                          ;   ("s-J" . scroll-up-one-line)         ;向上滚动一行
+                                          ;   ("s-K" . scroll-down-one-line)       ;向下滚动一行
+     ("<f2>" . refresh-file)              ;自动刷新文件
+     ("s-f" . find-file-root)             ;用root打开文件
+     ("s-r" . find-file-smb)              ;访问sambao
+     ("C-S-j" . join-lines)               ;连接下行
+     ("M-j"   . join-line)                ;连接上行
+     ("M-c" . endless/capitalize)
+     ("M-l" . endless/downcase)
+     ("M-u" . endless/upcase)
+     )
+   "basic-toolkit")
+#+end_src
+** Insert translated name
+#+begin_src emacs-lisp :tangle suk-unload.el
+  ;;; ### Insert translated name ###
+  ;; youdao / google
+  (setq insert-translated-name-translate-engine "google")
+  (lazy-load-global-keys
+   '(
+     ("," . insert-translated-name-insert-with-underline)
+     ("." . insert-translated-name-insert-with-camel)
+     ("/" . insert-translated-name-insert)
+     )
+   "insert-translated-name"
+   "C-z"
+   )
+#+end_src
+** Sudo
+#+begin_src emacs-lisp :tangle suk.el
+  ;;; ### sudo ###
+  (when sys/linuxp
+    (lazy-load-global-keys
+     '(("C-z C-s" . suk/sudo/body))
+     "my-sudo"
+     ))
+#+end_src
+** 有啲人钟意VI嘅绑定
+#+begin_src emacs-lisp :tangle suk.el
+  ;; vi like key binds
+  ;; (require-package 'evil)
+  ;; (require-package 'evil-escape)
+  ;; (require-package 'evil-exchange)
+  ;; (require-package 'evil-find-char-pinyin)
+  ;; (require-package 'evil-mark-replace)
+  ;; (require-package 'evil-matchit)
+  ;; (require-package 'evil-nerd-commenter)
+  ;; (require-package 'evil-surround)
+  ;; (require-package 'evil-visualstar)
+#+end_src
+** Description Keys
+=F1 + {f/k/d/i/k}= 或者  =C-h {f/k/d/i}= 可以打开相关帮助
+Use ~C-c C-h~ to open the description menu 
+
+#+begin_src emacs-lisp :tangle suk.el
+
+;;;###autoload
+(with-eval-after-load 'hydra
+  (defhydra my-hydra-describe (:color blue :hint nil)
+    "
+Describe Something: (q to quit)
+_a_ all help for everything screen
+_b_ bindings
+_c_ char
+_C_ coding system
+_f_ function
+_i_ input method
+_k_ key briefly
+_K_ key
+_l_ language environment
+_m_ major mode
+_M_ minor mode
+_n_ current coding system briefly
+_N_ current coding system full
+_o_ lighter indicator
+_O_ lighter symbol
+_p_ package
+_P_ text properties
+_s_ symbol
+_t_ theme
+_v_ variable
+_w_ where is something defined
+"
+	("b" describe-bindings)
+	("C" describe-categories)
+	("c" describe-char)
+	("C" describe-coding-system)
+	("f" describe-function)
+	("i" describe-input-method)
+	("K" describe-key)
+	("k" describe-key-briefly)
+	("l" describe-language-environment)
+	("M" describe-minor-mode)
+	("m" describe-mode)
+	("N" describe-current-coding-system)
+	("n" describe-current-coding-system-briefly)
+	("o" describe-minor-mode-from-indicator)
+	("O" describe-minor-mode-from-symbol)
+	("p" describe-package)
+	("P" describe-text-properties)
+	("q" nil)
+	("a" help)
+	("s" describe-symbol)
+	("t" describe-theme)
+	("v" describe-variable)
+	("w" where-is))
+  (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
+#+end_src
+** CRUX
+一啲方便嘅函数。使用
+: (use-package crux)
+或者
+: (package-install crux)
+来安装依赖。
+
+我已经使用咗其他一啲类似功能嘅函数，咁就冇必要再使用呢个工具包啦。
+
+Add shortcuts.
+#+begin_src emacs-lisp :tangle suk-unload.el
+  ;; (use-package crux)
+  (lazy-load-global-keys
+   '(
+     ;;文件操作:
+     ;;("C-c r" . crux-rename-file) ; 重命名当前文件或目录。
+     ("C-c k" . crux-rename-file-and-buffer)
+     ;;("C-c r" . crux-recentf-find-file)
+     ("C-c D"  . crux-delete-file-and-buffer) ;  删除当前文件并关闭相关缓冲区。
+     ;; 行/区域操作:
+     ;;crux-move-beginning-of-line: 将光标移动到行的开头。
+     ;;crux-move-end-of-line: 将光标移动到行的末尾。
+     ;;crux-top-join-line: 将当前行与上一行合并。
+
+     ("C-S-k" . crux-kill-whole-line) ;; 剪切整行。
+     ;;("C-J" .crux-kill-and-join-forward) ;;除当前行尾的空白字符，并与下一行合并。
+     ;;复制/剪切/粘贴操作:
+     ;;("C-l" . crux-smart-copy-line-above); 在当前行上方复制当前行。
+     ;;("C-o" . crux-smart-copy-line-below);  在当前行下方复制当前行。
+     ;;   缩进操作:
+
+     ("C-c TAB" . crux-indent-defun) ;; 对当前函数或代码块重新缩进。
+     ;; crux-cleanup-buffer-or-region ;; 清理缓冲区中选定区域或整个缓冲区中的尾随空格和空行。
+     ;; 查找/替换操作:
+     ;; crux-find-user-init-file ;; 快速打开 Emacs 用户配置文件。
+     ;; crux-view-url ;; 在浏览器中查看当前 URL。
+     ;; 其他实用功能:
+
+     ("C-c ;" . crux-kill-other-buffers) ;;关闭所有除当前缓冲区外的其他缓冲区。
+     ("C-M-k" . crux-kill-line-backwards) ;;向后删除整行内容（包括行尾换行符）。
+     ;; crux-reopen-as-root-mode: 以 root 身份重新打开当前文件。
+
+     )
+   "crux"
+   )
+
+#+end_src
+** Rectangle
+- =C-x r k=  Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
+- =C-x r M-w= Save the text of the region-rectangle as the last killed rectangle (copy-rectangle-as-kill).
+- =C-x r d= Delete the text of the region-rectangle (delete-rectangle).
+- =C-x r y= Yank the last killed rectangle with its upper left corner at point (yank-rectangle).
+- =C-x r o= Insert blank space to fill the space of the region-rectangle (open-rectangle). This pushes the previous contents of the region-rectangle to the right.
+- =C-x r N= Insert line numbers along the left edge of the region-rectangle (rectangle-number-lines). This pushes the previous contents of the region-rectangle to the right.
+- =C-x r c= Clear the region-rectangle by replacing all of its contents with spaces (clear-rectangle).
+- =M-x delete-whitespace-rectangle= Delete whitespace in each of the lines on the specified rectangle, starting from the left edge column of the rectangle.
+- =C-x r t string <RET>=  Replace rectangle contents with string on each line (string-rectangle).
+-  =M-x string-insert-rectangle <RET> string <RET>= Insert string on each line of the rectangle.
+-  =C-x <SPC>= Toggle Rectangle Mark mode (rectangle-mark-mode). When
+  this mode is active, the region-rectangle is highlighted and can be
+  shrunk/grown, and the standard kill and yank commands operate on it.
+  The rectangle operations fall into two classes: commands to erase or
+  insert rectangles, and comm
+
+** Expand region
+#+begin_src emacs-lisp :tangle suk.el
+    ;; expand-region
+    (run-with-idle-timer
+     2 nil
+     #'(lambda()
+         (use-package expand-region ; I prefer stable version
+            :load-path "~/.emacs.d/extensions/expand-region"
+         )
+         (with-eval-after-load 'expand-region
+            (defun treesit-mark-bigger-node ()
+               "Use tree-sitter to mark regions."
+               (let* ((root (treesit-buffer-root-node))
+                      (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
+                      (node-start (treesit-node-start node))
+                      (node-end (treesit-node-end node)))
+                 ;; Node fits the region exactly. Try its parent node instead.
+                 (when (and (= (region-beginning) node-start) (= (region-end) node-end))
+                   (when-let ((node (treesit-node-parent node)))
+                     (setq node-start (treesit-node-start node)
+                           node-end (treesit-node-end node))))
+                 (set-mark node-end)
+                 (goto-char node-start)))
+            )))
+
+#+end_src
+Add shortcut.
+#+begin_src emacs-lisp :tangle etc/init-key.el
+ (lazy-load-global-keys
+        '(("M-=" . er/expand-region)
+          ("M--" . er/contract-region)
+          )
+        "expand-region")
+#+end_src
+** Undo
+#+begin_src emacs-lisp :tangle suk.el
+  ;; Treat undo history as a tree, ^x u
+  (run-with-idle-timer
+   2 nil
+   #'(lambda()
+         (if emacs/>=28p
+             (progn
+               ;; vundo :load-path "~/.emacs.d/extensions/vundo"
+               (with-eval-after-load 'vundo
+                 (setq vundo-glyph-alist vundo-unicode-symbols)))
+           (progn
+             ;; use undo-tree
+             ;; (unless emacs/>=28p
+             ;;   (require-package 'undo-tree))
+             (setq undo-tree-visualizer-timestamps t
+                   undo-tree-visualizer-diff t
+                   undo-tree-enable-undo-in-region nil
+                   undo-tree-auto-save-history nil)
+             ;; HACK: keep the diff window
+             (with-no-warnings
+               (make-variable-buffer-local 'undo-tree-visualizer-diff)
+               (setq-default undo-tree-visualizer-diff t))
+             (with-eval-after-load 'undo-tree
+               (add-hook 'after-init-hook #'global-undo-tree-mode))
+             ))
+         ))
+#+end_src
+Add shortcuts.
+#+begin_src emacs-lisp :tangle etc/init-key.el
+  (if emacs/>=28p
+      (lazy-load-global-keys
+       '(("C-x u" . vundo)
+         ("C-/" . vundo)
+         )
+       "vundo")
+    (lazy-load-global-keys
+     '(("C-x u" . undo-trees)
+       ("C-/"   . undo-tree-undo)
+       ("C-?  " . undo-tree-redo)
+       )
+     "undo-tree")
+    )
+#+end_src
+** Yank
+#+begin_src emacs-lisp :tangle suk.el
+  ;;; ### Advice ###
+  ;;; --- 各种emacs行为建议
+  ;; 在特定地模式下粘贴时自动缩进
+  (defadvice yank (after indent-region activate)
+    "To make yank content indent automatically."
+    (if (member major-mode
+                '(emacs-lisp-mode
+                  java-mode
+                  web-mode
+                  c-mode
+                  c++-mode
+                  js-mode
+                  latex-mode
+                  plain-tex-mode))
+        (indent-region (region-beginning) (region-end) nil)))
+#+end_src
+** Spell
+#+begin_src emacs-lisp :tangle suk.el
+  (require-package 'flyspell)
+  (require-package 'langtool)
+  ;; my own patched version is better an open-source grammar, spelling,
+  ;; and style checker, directly into Emacs. LanguageTool supports
+  ;; multiple languages, including English, Spanish, French, German, and
+  ;; many others, making it a versatile tool for checking the quality of
+  ;; your writing.
+#+end_src
+** Macros
+#+begin_src emacs-lisp :tangle suk-unload.el
+  ;; kèitá bongding
+  ;; f3 start macro(kmacro-start-macro-or-insert-counter),
+  ;; f4 done macro or run marcro (kmacro-end-or-call-macro).
+  ;; C-x ( start macro (kmacro-start-macro),
+  ;; C-x ) end done marco,
+  ;; C-x e run marco(kmacro-end-macro)
+  ;; 先定义一个宏
+  ;; 然后 name-last-kbd-macro
+  ;; 然后 insert-kbd-macro
+  ;; 等到如下类似的配置
+  ;; (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
+  ;;
+  ;;; ### Keyboard Macro ###
+  ;;; --- 键盘宏
+  (lazy-load-global-keys
+   '(
+     ("M-s-s" . kmacro-start-macro-or-insert-counter) ;开始键盘宏或插入 F3
+     ("M-s-d" . kmacro-end-or-call-macro)    ;结束键盘宏或调用 F4
+     ("M-s-c" . kmacro-delete-ring-head)     ;删除当前的键盘宏
+     ("M-s-w" . kmacro-cycle-ring-next)      ;下一个键盘宏
+     ("M-s-e" . kmacro-cycle-ring-previous)  ;上一个键盘宏
+     ("M-s-a" . kmacro-edit-macro)           ;编辑键盘宏
+     ("M-s-v" . name-last-kbd-macro)         ;命令当前键盘宏
+     ("M-s-f" . insert-kbd-macro)            ;插入键盘宏
+     ("M-s-q" . apply-macro-to-region-lines) ;应用键盘宏到选择的区域
+     )
+   "macros+")
+#+end_src
+** Misc packages
+#+begin_src emacs-lisp :tangle suk.el
+  (run-with-idle-timer
+   2 nil
+   #'(lambda()
+       (require-package 'paredit) ;; useful for lisp
+       (require-package 'tagedit) ;; useful for html
+       (require-package 'cliphist)
+       (require-package 'iedit)
+       (require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
+       ;;(require-package 'textile-mode)
+       ;;(require-package 'vimrc-mode)
+       ;;(require-package 'qrencode)
+       (use-package writeroom-mode)
+
+       ))
+
+#+end_src
+** Misc
+#+begin_src emacs-lisp :tangle suk.el
+  (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
+
+  (define-prefix-command 'leader-key)
+  (global-set-key (kbd "M-s-SPC") 'leader-key)
+  (global-set-key (kbd "C-c C-j") #'yas-expand)
+  ;;; ### Toolkit ###
+  ;;; --- 工具函数
+  (lazy-load-set-keys
+   '(
+     ("C-," . bury-buffer)                ;隐藏当前buffer
+     ("C-." . unbury-buffer)              ;反隐藏当前buffer
+     ("s-[" . eval-expression)            ;执行表达式
+     ("s-1" . sort-lines)                 ;排序
+     ("s-2" . hanconvert-region)          ;转换简体或繁体中文
+     ("s-3" . uniquify-all-lines-buffer)  ;删除重复的行
+     ("s-<f12>" . calendar)
+     ("C-<f12>" . lazycat-theme-toggle)
+     ;;([c-t] . transpose-chars)
+     ([S-f5] . toggle-truncate-lines)
+     ("C-x M-a" . align-regexp)
+     )
+   )
+
+  ;; C-c TAB indent-region
+  ;; C-u C-c TAB => (un)indent-region
+
+  ;;(global-set-key (kbd "C-(") 'backward-sexp)
+  ;;(global-set-key (kbd "C-)") 'forward-sexp)
+  ;;(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
+  ;;(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
+  ;;(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
+  ;;(global-set-key (kbd "C-x R") 'recentf)
+  ;; M-x global-set-key RET 交互式的绑定你的键。
+  ;; C-x Esc Esc 调出上一条“复杂命令”
+
+  ;;Emacs 自动排版
+  ;;很简单：C-x h C-M-\
+  ;;其中C-x h 是全选
+  ;;C-M-\ 是排版
+
+  ;; C-x C-q set/unset readonly
+  ;; 大小写转换： M-u, M-l, M-c
+
+  ;; M-x align-regexp 可以方便的对齐一些文字
+#+end_src
+
+
 * User Interface
 :PROPERTIES:
 :CUSTOM_ID: setup-ui
@@ -1742,657 +2442,6 @@ I want to persist the scratch buffer, so I can  test continuely.
          ))
     )
   #+end_src
-* Shortcuts
-** Bindkeys examples
-#+begin_src emacs-elisp :tangle achrives-and-examples.el
-global-set-key examples:
-(global-set-key (kbd "C-x C-\\") 'next-line)
-(global-set-key [?\C-x ?\C-\\] 'next-line)
-(global-set-key [(control ?x) (control ?\\)] 'next-line)
-
-(define-prefix-command 'my-leader) ;设定leader
-(define-key keymap "keystrok" 'command-name)   ;将快捷键绑定到 leader按键后，即和键位图绑定。
-(global-set-key "keystroke" 'command-name) ; 定义全局快捷键
-(local-set-key  "keystroke" 'command-name) ; 定义局部快捷键
-;;注意：keystroke中的Control 和 Alternative使用\C, \M表示。
-;;如果是kbd函数，可以使用C和M表示
-
-;; 方式一：
-(define-prefix-command 'SPC-map)
-(global-set-key (kbd "SPC") 'SPC-map)
-(global-set-key (kbd "SPC f") 'find-file)
-
-;; 方式二：
-(define-prefix-command 'SPC-map)
-(global-set-key (kbd "SPC") #'SPC-map)
-(define-key SPC-map (kbd "f") #'find-file)
-
-
-;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
-(define-prefix-command 'comma-map)
-(global-set-key (kbd ",") 'comma-map)
-(global-set-key [(meta c)] 'meta-c-map)
-;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键.
-;; 退出isearch-mode, 所有按键失效.
-(add-hook
-  'isearch-mode-hook
-  '(lambda ()
-    ;; 搜索下一个结果
-    (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
-    ;; 搜索前一个结果
-    (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
-    ;; 替换
-    (define-key isearch-mode-map [(control r)] 'isearch-query-replace)
-    ;; 正则替换
-    (define-key isearch-mode-map [(meta 5)] 'isearch-query-replace-regexp)
-    (define-key isearch-mode-map [(meta f)] 'isearch-yank-word-or-char)
-    ;; 剪切板作为搜索内容
-    (define-key isearch-mode-map [(meta y)] 'isearch-yank-kill)
-    ;; 将光标到行尾作为搜索内容
-    (define-key isearch-mode-map [(meta k)] 'isearch-yank-line)
-    (define-key isearch-mode-map [(hyper l)] 'isearch-yank-char)
-    ;; 向左或向右(选择/取消)单个字符作为搜索内容
-    (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
-    ;; 显示occur视图
-    (define-key isearch-mode-map [(meta o)] 'isearch-occur)
-    ;; 单词搜索
-    (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
-    (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
-    ))
-
-#+END_SRC
-** Global keys
-#+begin_src emacs-lisp :tangle suk.el
-  ;; 一啲方便嘅函数
-  (global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
-  (global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp
-  (global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
-  (global-set-key (kbd "C-x t T") 'suk/toggle-transparency)  ;; 快捷键 C-x t T 用于切换透明度
-  (global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)  ;; 快捷键 C-x t p 用于切换代理
-  (global-set-key (kbd "C-x t f") 'global-flycheck-mode)     ;; 快捷键 C-x t f 用于开启全局语法检查
-  (global-set-key (kbd "C-x R") 'recentf-open)   ;; 快捷键 C-x R 用于打开最近文件
-  (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)  ;; 快捷键 C-<f11> 用于切换全屏模式
-  (global-set-key (kbd "M-S-<return>") 'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
-  (global-set-key (kbd "RET") 'newline-and-indent)  ;; 回车键 RET 用于创建新行并对齐
-  (global-set-key (kbd "S-<return>") 'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
-
-#+end_src
-** bind-keys
-是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个
-键。虽然bind-keys 可以独立于 use-package 使用，但它通常与 use-package
-结合使用，以提供更清晰和模块化的键绑定配置。
-#+begin_src emacs-lisp :tangle suk.el
-  (use-package bind-key)
-  ;;(bind-key "C-c x" #'some-function some-package-mode-map)
-  ;;(bind-key "C-c y" #'another-function)
-
-  ;; Toggle fullscreen <F11> also bind to fullscreen
-  (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
-             ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
-             ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
-             )
-#+end_src
-
-** Move cursor
-
-#+begin_src emacs-lisp :tangle suk.el
-     ;;; ### goto-line-preview ###
-     (lazy-load-global-keys
-      '(
-        ("M-g p" . goto-line-preview))
-      "goto-line-preview")
-
-     ;;; ### Ace jump ###
-     (lazy-load-global-keys
-      '(
-        ("C-c w" . ace-jump-word-mode)
-        ("C-c c" . ace-jump-char-mode)
-        ("C-c l" . ace-jump-line-mode)
-        )
-      "ace-jump-mode"
-      "C-z"
-      )
-
-     ;; Jump to Chinese characters
-     (run-with-idle-timer
-      1
-      nil
-      #'(lambda()     
-          (use-package ace-pinyin
-            :diminish
-            :hook (after-init . ace-pinyin-global-mode))
-          (require 'goto-chg)
-          ))
-
-
-#+end_src
-** Move text
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;; ### move text ###
-  (lazy-load-global-keys
-   '(
-     ("M-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
-     ("M-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
-     ("M-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
-     ("M-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
-     )
-   "move-text")
-#+end_src
-
-** Open new line
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;;; ### open new line ###
-  (lazy-load-global-keys
-   '(
-     ("C-o" . open-newline-above) ;在上面一行新建一行
-     ("C-l" . open-newline-below) ;在下面一行新建一行
-     )
-   "open-newline")
-#+end_src
-** Duplicate line
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;; ### duplicate-line ###
-  (lazy-load-global-keys
-   '(
-     ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
-     ("C-S-l" . duplicate-line-or-region-below) ;向下复制当前行或区域
-     ("C-S-s-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
-     ("C-S-s-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
-     ("C-:" . comment-or-uncomment-region+)     ;注释当前行
-
-     )
-   "duplicate-line")
-#+end_src
-** Delete block
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;;; ### Delete block ###
-  ;;; --- 快速删除光标左右的内容
-  (lazy-load-global-keys
-   '(
-     ("M-," . delete-block-backward)
-     ("M-." . delete-block-forward))
-   "delete-block")
-#+end_src
-** Hungry delete
-#+begin_src emacs-lisp :tangle suk-unload.el
-  ;; hungry-delete
-  (run-with-idle-timer
-   2 nil
-   #'(lambda()
-       (require-package 'hungry-delete)
-       (require 'hungry-delete)
-       (with-eval-after-load 'hungry-delete
-         (setq hungry-delete-chars-to-skip " \t\f\v"
-               hungry-delete-except-modes
-               '(help-mode
-                 minibuffer-mode
-                 minibuffer-inactive-mode
-                 calc-mode))
-         ;; Delete
-         (global-set-key (kbd "C-c <backspace>") #'hungry-delete-backward)
-         (global-set-key (kbd "C-c <delete>") #'hungry-delete-forward)
-         )))
-#+end_src
-** Word styles
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;; ### String Inflection ###
-  ;; --- 单词语法风格快速转换
-  (lazy-load-global-keys
-   '(
-     ("C-c C-u" . string-inflection-hydra/body)
-     )
-   "init-string-inflection")
-#+end_src
-** Thing edit
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;;; ### Thing-edit ###
-  ;;; --- 增强式编辑当前光标的对象
-  (lazy-load-global-keys
-   '(
-     ("C-c w" . thing-copy-word)
-     ("C-c s" . thing-copy-symbol)
-     ("C-c m" . thing-copy-email)
-     ("C-c f" . thing-copy-filename)
-     ("C-c u" . thing-copy-url)
-     ("C-c x" . thing-copy-sexp)
-     ("C-c g" . thing-copy-page)
-     ("C-c t" . thing-copy-sentence)
-     ("C-c o" . thing-copy-witespace)
-     ("C-c i" . thing-copy-list)
-     ("C-c c" . thing-copy-comment)
-     ("C-c h" . thing-copy-defun)
-     ("C-c p" . thing-copy-parentheses)
-     ("C-c l" . thing-copy-line)
-     ("C-c a" . thing-copy-to-line-begining)
-     ("C-c e" . thing-copy-to-line-end)
-     ("C-c W" . thing-cut-word)
-     ("C-c S" . thing-cut-symbol)
-     ("C-c M" . thing-cut-email)
-     ("C-c F" . thing-cut-filename)
-     ("C-c G" . thing-cut-page)
-     ("C-c T" . thing-cut-sentence)
-     ("C-c O" . thing-cut-whitespace)
-     ("C-c I" . thing-cut-list)
-     ("C-c C" . thing-cut-comment)
-     ("C-c H" . thing-cut-defun)
-     ("C-c P" . thing-cut-parentheses)
-     ("C-c L" . thing-cut-line)
-     ("C-c A" . thing-cut-to-line-beginning)
-     ("C-c E" . thing-cut-to-line-end)
-     )
-   "thing-edit"
-   "C-z"
-   )
-#+end_src
-
-** Buffer Edit
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;; ### Buffer Edit ###
-  ;; --- 缓存编辑
-    (lazy-load-set-keys
-     '(
-       ("C-x C-x" . exchange-point-and-mark)   ;交换当前点和标记点
-       ("M-o" . backward-delete-char-untabify) ;向前删除字符
-       ("C-M-S-h" . mark-paragraph)            ;选中段落
-       ("M-SPC" . just-one-space)              ;只有一个空格在光标处
-       ))
-#+end_src
-** Basic Toolkit
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;;; ### basic-toolkit ###
-  (lazy-load-global-keys
-   '(
-     ("M-s-n" . comment-part-move-down)   ;向下移动注释
-     ("M-s-p" . comment-part-move-up)     ;向上移动注释
-     ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
-     ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
-     ("M-2" . indent-buffer)              ;自动格式化当前Buffer
-     ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
-     ;;("C-x u" . mark-line)              ;选中整行
-     ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
-     ("M-G" . goto-column)                ;到指定列
-     ("C->" . remember-init)              ;记忆初始函数
-     ("C-<" . remember-jump)              ;记忆跳转函数
-     ("M-s-," . point-stack-pop)          ;buffer索引跳转
-     ("M-s-." . point-stack-push)         ;buffer索引标记
-     ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
-     ("M-I" . backward-indent)            ;向后移动4个字符
-                                          ;   ("s-J" . scroll-up-one-line)         ;向上滚动一行
-                                          ;   ("s-K" . scroll-down-one-line)       ;向下滚动一行
-     ("<f2>" . refresh-file)              ;自动刷新文件
-     ("s-f" . find-file-root)             ;用root打开文件
-     ("s-r" . find-file-smb)              ;访问sambao
-     ("C-S-j" . join-lines)               ;连接下行
-     ("M-j"   . join-line)                ;连接上行
-     ("M-c" . endless/capitalize)
-     ("M-l" . endless/downcase)
-     ("M-u" . endless/upcase)
-     )
-   "basic-toolkit")
-#+end_src
-** Insert translated name
-#+begin_src emacs-lisp :tangle suk-unload.el
-  ;;; ### Insert translated name ###
-  ;; youdao / google
-  (setq insert-translated-name-translate-engine "google")
-  (lazy-load-global-keys
-   '(
-     ("," . insert-translated-name-insert-with-underline)
-     ("." . insert-translated-name-insert-with-camel)
-     ("/" . insert-translated-name-insert)
-     )
-   "insert-translated-name"
-   "C-z"
-   )
-#+end_src
-** Sudo
-#+begin_src emacs-lisp :tangle suk.el
-  ;;; ### sudo ###
-  (when sys/linuxp
-    (lazy-load-global-keys
-     '(("C-z C-s" . suk/sudo/body))
-     "my-sudo"
-     ))
-#+end_src
-** 有啲人钟意VI嘅绑定
-#+begin_src emacs-lisp :tangle suk.el
-  ;; vi like key binds
-  ;; (require-package 'evil)
-  ;; (require-package 'evil-escape)
-  ;; (require-package 'evil-exchange)
-  ;; (require-package 'evil-find-char-pinyin)
-  ;; (require-package 'evil-mark-replace)
-  ;; (require-package 'evil-matchit)
-  ;; (require-package 'evil-nerd-commenter)
-  ;; (require-package 'evil-surround)
-  ;; (require-package 'evil-visualstar)
-#+end_src
-** Description Keys
-=F1 + {f/k/d/i/k}= 或者  =C-h {f/k/d/i}= 可以打开相关帮助
-Use ~C-c C-h~ to open the description menu 
-
-#+begin_src emacs-lisp :tangle suk.el
-
-;;;###autoload
-(with-eval-after-load 'hydra
-  (defhydra my-hydra-describe (:color blue :hint nil)
-    "
-Describe Something: (q to quit)
-_a_ all help for everything screen
-_b_ bindings
-_c_ char
-_C_ coding system
-_f_ function
-_i_ input method
-_k_ key briefly
-_K_ key
-_l_ language environment
-_m_ major mode
-_M_ minor mode
-_n_ current coding system briefly
-_N_ current coding system full
-_o_ lighter indicator
-_O_ lighter symbol
-_p_ package
-_P_ text properties
-_s_ symbol
-_t_ theme
-_v_ variable
-_w_ where is something defined
-"
-	("b" describe-bindings)
-	("C" describe-categories)
-	("c" describe-char)
-	("C" describe-coding-system)
-	("f" describe-function)
-	("i" describe-input-method)
-	("K" describe-key)
-	("k" describe-key-briefly)
-	("l" describe-language-environment)
-	("M" describe-minor-mode)
-	("m" describe-mode)
-	("N" describe-current-coding-system)
-	("n" describe-current-coding-system-briefly)
-	("o" describe-minor-mode-from-indicator)
-	("O" describe-minor-mode-from-symbol)
-	("p" describe-package)
-	("P" describe-text-properties)
-	("q" nil)
-	("a" help)
-	("s" describe-symbol)
-	("t" describe-theme)
-	("v" describe-variable)
-	("w" where-is))
-  (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
-#+end_src
-** CRUX
-一啲方便嘅函数。使用
-: (use-package crux)
-或者
-: (package-install crux)
-来安装依赖。
-
-我已经使用咗其他一啲类似功能嘅函数，咁就冇必要再使用呢个工具包啦。
-
-Add shortcuts.
-#+begin_src emacs-lisp :tangle suk-unload.el
-  ;; (use-package crux)
-  (lazy-load-global-keys
-   '(
-     ;;文件操作:
-     ;;("C-c r" . crux-rename-file) ; 重命名当前文件或目录。
-     ("C-c k" . crux-rename-file-and-buffer)
-     ;;("C-c r" . crux-recentf-find-file)
-     ("C-c D"  . crux-delete-file-and-buffer) ;  删除当前文件并关闭相关缓冲区。
-     ;; 行/区域操作:
-     ;;crux-move-beginning-of-line: 将光标移动到行的开头。
-     ;;crux-move-end-of-line: 将光标移动到行的末尾。
-     ;;crux-top-join-line: 将当前行与上一行合并。
-
-     ("C-S-k" . crux-kill-whole-line) ;; 剪切整行。
-     ;;("C-J" .crux-kill-and-join-forward) ;;除当前行尾的空白字符，并与下一行合并。
-     ;;复制/剪切/粘贴操作:
-     ;;("C-l" . crux-smart-copy-line-above); 在当前行上方复制当前行。
-     ;;("C-o" . crux-smart-copy-line-below);  在当前行下方复制当前行。
-     ;;   缩进操作:
-
-     ("C-c TAB" . crux-indent-defun) ;; 对当前函数或代码块重新缩进。
-     ;; crux-cleanup-buffer-or-region ;; 清理缓冲区中选定区域或整个缓冲区中的尾随空格和空行。
-     ;; 查找/替换操作:
-     ;; crux-find-user-init-file ;; 快速打开 Emacs 用户配置文件。
-     ;; crux-view-url ;; 在浏览器中查看当前 URL。
-     ;; 其他实用功能:
-
-     ("C-c ;" . crux-kill-other-buffers) ;;关闭所有除当前缓冲区外的其他缓冲区。
-     ("C-M-k" . crux-kill-line-backwards) ;;向后删除整行内容（包括行尾换行符）。
-     ;; crux-reopen-as-root-mode: 以 root 身份重新打开当前文件。
-
-     )
-   "crux"
-   )
-
-#+end_src
-** Rectangle
-- =C-x r k=  Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
-- =C-x r M-w= Save the text of the region-rectangle as the last killed rectangle (copy-rectangle-as-kill).
-- =C-x r d= Delete the text of the region-rectangle (delete-rectangle).
-- =C-x r y= Yank the last killed rectangle with its upper left corner at point (yank-rectangle).
-- =C-x r o= Insert blank space to fill the space of the region-rectangle (open-rectangle). This pushes the previous contents of the region-rectangle to the right.
-- =C-x r N= Insert line numbers along the left edge of the region-rectangle (rectangle-number-lines). This pushes the previous contents of the region-rectangle to the right.
-- =C-x r c= Clear the region-rectangle by replacing all of its contents with spaces (clear-rectangle).
-- =M-x delete-whitespace-rectangle= Delete whitespace in each of the lines on the specified rectangle, starting from the left edge column of the rectangle.
-- =C-x r t string <RET>=  Replace rectangle contents with string on each line (string-rectangle).
--  =M-x string-insert-rectangle <RET> string <RET>= Insert string on each line of the rectangle.
--  =C-x <SPC>= Toggle Rectangle Mark mode (rectangle-mark-mode). When
-  this mode is active, the region-rectangle is highlighted and can be
-  shrunk/grown, and the standard kill and yank commands operate on it.
-  The rectangle operations fall into two classes: commands to erase or
-  insert rectangles, and comm
-
-** Expand region
-#+begin_src emacs-lisp :tangle suk.el
-  ;; expand-region
-  (run-with-idle-timer
-   2 nil
-   #'(lambda()
-       ;; (use-package expand-region ; I prefer stable version
-       ;;   :load-path "~/.emacs.d/extensions/expand-region"
-       ;;   )
-       (with-eval-after-load 'expand-region
-         (when (suk-treesit-available-p)
-           (defun treesit-mark-bigger-node ()
-             "Use tree-sitter to mark regions."
-             (let* ((root (treesit-buffer-root-node))
-                    (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
-                    (node-start (treesit-node-start node))
-                    (node-end (treesit-node-end node)))
-               ;; Node fits the region exactly. Try its parent node instead.
-               (when (and (= (region-beginning) node-start) (= (region-end) node-end))
-                 (when-let ((node (treesit-node-parent node)))
-                   (setq node-start (treesit-node-start node)
-                         node-end (treesit-node-end node))))
-               (set-mark node-end)
-               (goto-char node-start)))
-           ))))
-
-#+end_src
-Add shortcut.
-#+begin_src emacs-lisp :tangle etc/init-key.el
- (lazy-load-global-keys
-        '(("M-=" . er/expand-region)
-          ("M--" . er/contract-region)
-          )
-        "expand-region")
-#+end_src
-** Undo
-#+begin_src emacs-lisp :tangle suk.el
-  ;; Treat undo history as a tree, ^x u
-  (run-with-idle-timer
-   2 nil
-   #'(lambda()
-         (if emacs/>=28p
-             (progn
-               ;; vundo :load-path "~/.emacs.d/extensions/vundo"
-               (with-eval-after-load 'vundo
-                 (setq vundo-glyph-alist vundo-unicode-symbols)))
-           (progn
-             ;; use undo-tree
-             ;; (unless emacs/>=28p
-             ;;   (require-package 'undo-tree))
-             (setq undo-tree-visualizer-timestamps t
-                   undo-tree-visualizer-diff t
-                   undo-tree-enable-undo-in-region nil
-                   undo-tree-auto-save-history nil)
-             ;; HACK: keep the diff window
-             (with-no-warnings
-               (make-variable-buffer-local 'undo-tree-visualizer-diff)
-               (setq-default undo-tree-visualizer-diff t))
-             (with-eval-after-load 'undo-tree
-               (add-hook 'after-init-hook #'global-undo-tree-mode))
-             ))
-         ))
-#+end_src
-Add shortcuts.
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  (if emacs/>=28p
-      (lazy-load-global-keys
-       '(("C-x u" . vundo)
-         ("C-/" . vundo)
-         )
-       "vundo")
-    (lazy-load-global-keys
-     '(("C-x u" . undo-trees)
-       ("C-/"   . undo-tree-undo)
-       ("C-?  " . undo-tree-redo)
-       )
-     "undo-tree")
-    )
-#+end_src
-** Yank
-#+begin_src emacs-lisp :tangle suk.el
-  ;;; ### Advice ###
-  ;;; --- 各种emacs行为建议
-  ;; 在特定地模式下粘贴时自动缩进
-  (defadvice yank (after indent-region activate)
-    "To make yank content indent automatically."
-    (if (member major-mode
-                '(emacs-lisp-mode
-                  java-mode
-                  web-mode
-                  c-mode
-                  c++-mode
-                  js-mode
-                  latex-mode
-                  plain-tex-mode))
-        (indent-region (region-beginning) (region-end) nil)))
-#+end_src
-** Spell
-#+begin_src emacs-lisp :tangle suk.el
-  (require-package 'flyspell)
-  (require-package 'langtool)
-  ;; my own patched version is better an open-source grammar, spelling,
-  ;; and style checker, directly into Emacs. LanguageTool supports
-  ;; multiple languages, including English, Spanish, French, German, and
-  ;; many others, making it a versatile tool for checking the quality of
-  ;; your writing.
-#+end_src
-** Macros
-#+begin_src emacs-lisp :tangle suk-unload.el
-  ;; kèitá bongding
-  ;; f3 start macro(kmacro-start-macro-or-insert-counter),
-  ;; f4 done macro or run marcro (kmacro-end-or-call-macro).
-  ;; C-x ( start macro (kmacro-start-macro),
-  ;; C-x ) end done marco,
-  ;; C-x e run marco(kmacro-end-macro)
-  ;; 先定义一个宏
-  ;; 然后 name-last-kbd-macro
-  ;; 然后 insert-kbd-macro
-  ;; 等到如下类似的配置
-  ;; (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
-  ;;
-  ;;; ### Keyboard Macro ###
-  ;;; --- 键盘宏
-  (lazy-load-global-keys
-   '(
-     ("M-s-s" . kmacro-start-macro-or-insert-counter) ;开始键盘宏或插入 F3
-     ("M-s-d" . kmacro-end-or-call-macro)    ;结束键盘宏或调用 F4
-     ("M-s-c" . kmacro-delete-ring-head)     ;删除当前的键盘宏
-     ("M-s-w" . kmacro-cycle-ring-next)      ;下一个键盘宏
-     ("M-s-e" . kmacro-cycle-ring-previous)  ;上一个键盘宏
-     ("M-s-a" . kmacro-edit-macro)           ;编辑键盘宏
-     ("M-s-v" . name-last-kbd-macro)         ;命令当前键盘宏
-     ("M-s-f" . insert-kbd-macro)            ;插入键盘宏
-     ("M-s-q" . apply-macro-to-region-lines) ;应用键盘宏到选择的区域
-     )
-   "macros+")
-#+end_src
-** Misc packages
-#+begin_src emacs-lisp :tangle suk.el
-  (run-with-idle-timer
-   2 nil
-   #'(lambda()
-       (require-package 'paredit) ;; useful for lisp
-       (require-package 'tagedit) ;; useful for html
-       (require-package 'cliphist)
-       (require-package 'iedit)
-       (require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
-       ;;(require-package 'textile-mode)
-       ;;(require-package 'vimrc-mode)
-       ;;(require-package 'qrencode)
-       (use-package writeroom-mode)
-
-       ))
-
-#+end_src
-** Misc
-#+begin_src emacs-lisp :tangle suk.el
-  (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
-
-  (define-prefix-command 'leader-key)
-  (global-set-key (kbd "M-s-SPC") 'leader-key)
-  (global-set-key (kbd "C-c C-j") #'yas-expand)
-  ;;; ### Toolkit ###
-  ;;; --- 工具函数
-  (lazy-load-set-keys
-   '(
-     ("C-," . bury-buffer)                ;隐藏当前buffer
-     ("C-." . unbury-buffer)              ;反隐藏当前buffer
-     ("s-[" . eval-expression)            ;执行表达式
-     ("s-1" . sort-lines)                 ;排序
-     ("s-2" . hanconvert-region)          ;转换简体或繁体中文
-     ("s-3" . uniquify-all-lines-buffer)  ;删除重复的行
-     ("s-<f12>" . calendar)
-     ("C-<f12>" . lazycat-theme-toggle)
-     ;;([c-t] . transpose-chars)
-     ([S-f5] . toggle-truncate-lines)
-     ("C-x M-a" . align-regexp)
-     )
-   )
-
-  ;; C-c TAB indent-region
-  ;; C-u C-c TAB => (un)indent-region
-
-  ;;(global-set-key (kbd "C-(") 'backward-sexp)
-  ;;(global-set-key (kbd "C-)") 'forward-sexp)
-  ;;(global-set-key (kbd "C-x t T") 'suk/toggle-transparency)
-  ;;(global-set-key (kbd "C-x t p") 'suk/toggle-toggle-proxy)
-  ;;(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
-  ;;(global-set-key (kbd "C-x R") 'recentf)
-  ;; M-x global-set-key RET 交互式的绑定你的键。
-  ;; C-x Esc Esc 调出上一条“复杂命令”
-
-  ;;Emacs 自动排版
-  ;;很简单：C-x h C-M-\
-  ;;其中C-x h 是全选
-  ;;C-M-\ 是排版
-
-  ;; C-x C-q set/unset readonly
-  ;; 大小写转换： M-u, M-l, M-c
-
-  ;; M-x align-regexp 可以方便的对齐一些文字
-#+end_src
-
-
 * Bookmark
 #+begin_src emacs-lisp :tangle suk.el
 
@@ -2906,6 +2955,7 @@ Add shortcuts.
         '(("CANCELLED" ("CANCELLED" . t))
           ("WAIT⚑" ("WAITTING" . t))
           ("HOLD" ("WAITTING") ("HOLD" . t))
+          (done ("WAITING") ("HOLD"))
           ("DONE" ("WAITTING") ("CANCELLED") ("HOLD"))
           ("ABORT" ("WAITTING") ("CANCELLED") ("HOLD"))
           ("TODO" ("WAITTING") ("CANCELLED") ("HOLD"))
@@ -2939,6 +2989,7 @@ Add shortcuts.
           ))
 
 #+end_src
+
 ** Capture
 #+begin_src emacs-lisp :tangle suk.el
   ;; capture template
@@ -2950,21 +3001,17 @@ Add shortcuts.
         '(
           ("t" "Todo"
            entry (file+headline (expand-file-name "gtd.org" org-files-directory) "Tasks")
-           "* TODO %?\n%U\n%a\n"
-           :immediate-finishe t)
+           "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
           ("n" "Note"
            entry (file (expand-file-name "notes.org" org-files-directory))
-           "* %? :NOTE:\n%U\n%a\n"
-           :immediate-finishe t)
-          ("r" "respond"
+           "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+          ("r" "Respond"
            entry (file (expand-file-name "gtd.org" org-files-directory))
            "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n"
-           :clock-in t
-           :clock-resume t
-           :immediate-finish t)
+           :clock-in t :clock-resume t :immediate-finish t)
           ("j" "Journal"
            entry (file+datetree (expand-file-name "journal.org" org-files-directory))
-           "* %?\nEntered on %U\n  %i\n  %a")
+           "* %?\nEntered on %U\n  %i\n  %a" :clock-in t :clock-resume t)
           ("w" "Review"
            entry (file (expand-file-name "gtd.org" org-files-directory))
            "* TODO Review %c\n%U\n"
@@ -2972,13 +3019,11 @@ Add shortcuts.
           ("m" "Meeting"
            entry (file (expand-file-name "gtd.org" org-files-directory))
            "* MEETING with %? :MEETING:\n%U"
-           :clock-in t
-           :clock-resume t)
+           :clock-in t :clock-resume t)
           ("p" "Phone call"
            entry (file (expand-file-name "gtd.org" org-files-directory))
            "* PHONE %? :PHONE:\n%U"
-           :clock-in t
-           :clock-resume t)
+           :clock-in t :clock-resume t)
           ("h" "Habit"
            entry (file (expand-file-name "gtd.org" org-files-directory))
            "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
@@ -4107,31 +4152,18 @@ install
 鬼知係边，呢个系elisp乞人憎嘅地方。
 暂时不使用。
 #+begin_src emacs-lisp :tangle suk-unload.el
-  (use-package eglot
-    :hook ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
-    :bind (("C-c e f" . #'eglot-format)
-           ("C-c e i" . #'eglot-code-action-organize-imports)
-           ("C-c e q" . #'eglot-code-action-quickfix))
-    :config
-    ;; (setq eglot-ignored-server-capabilities '(:documentHighlightProvider))
-    (defun eglot-actions-before-save()
-      (add-hook 'before-save-hook (lambda ()
-                                    (call-interactively #'eglot-format)
-                                    (call-interactively #'eglot-code-action-organize-imports))))
-    (add-to-list 'eglot-server-programs '(web-mode "vls"))
-    (add-hook 'eglot--managed-mode-hook #'eglot-actions-before-save)
-    ;; Java
-    (defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
-    (defun my-eglot-eclipse-jdt-contact (interactive)
-      "Contact with the jdt server input INTERACTIVE."
-      (let ((cp (getenv "CLASSPATH")))
-        (setenv "CLASSPATH" (concat cp ":" my-eclipse-jdt-home))
-        (unwind-protect (eglot--eclipse-jdt-contact nil)
-          (setenv "CLASSPATH" cp))))
-    (setcdr (assq 'java-mode eglot-server-programs) #'my-eglot-eclipse-jdt-contact)
-    (add-hook 'java-mode-hook 'eglot-ensure)
-    )
-
+  (require 'eglot)
+  ;; Java
+  (defconst my-eclipse-jdt-home "/home/suk/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar")
+  (add-hook 'java-mode-hook 'eglot-java-mode)
+  (use-package eglot-java)
+  (with-eval-after-load 'eglot-java
+    (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
+    (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
+    (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
+    (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
+    (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
+    (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh))
 #+end_src
 
 ** Show function arglist or varibale docstring
@@ -4199,101 +4231,12 @@ install
 #+begin_src emacs-lisp :tangle suk-unload.el
   ;; Tree-sitter support
   (when sys/linuxp
-   (when (suk-treesit-available-p)
-     (require-package 'treesit-auto)
-     (use-package treesit-auto
+    (require-package 'treesit-auto)
+    (use-package treesit-auto
        :ensure t
        :hook (after-init . global-treesit-auto-mode)
        :init (setq treesit-auto-install 'prompt))
-     (global-treesit-auto-mode)
-     )
-  (require 'fingertip) ;; M-x treesit-install-language-grammar RET
-  (dolist (hook (list
-                 'c-mode-common-hook
-                 'c-mode-hook
-                 'c++-mode-hook
-                 'java-mode-hook
-                 'haskell-mode-hook
-                 'emacs-lisp-mode-hook
-                 'lisp-interaction-mode-hook
-                 'lisp-mode-hook
-                 'maxima-mode-hook
-                 'ielm-mode-hook
-                 'sh-mode-hook
-                 'makefile-gmake-mode-hook
-                 'php-mode-hook
-                 'python-mode-hook
-                 'js-mode-hook
-                 'go-mode-hook
-                 'qml-mode-hook
-                 'jade-mode-hook
-                 'css-mode-hook
-                 'ruby-mode-hook
-                 'coffee-mode-hook
-                 'rust-mode-hook
-                 'rust-ts-mode-hook
-                 'qmake-mode-hook
-                 'lua-mode-hook
-                 'swift-mode-hook
-                 'web-mode-hook
-                 'markdown-mode-hook
-                 'llvm-mode-hook
-                 'conf-toml-mode-hook
-                 'nim-mode-hook
-                 'typescript-mode-hook
-                 'c-ts-mode-hook
-                 'c++-ts-mode-hook
-                 'cmake-ts-mode-hook
-                 'toml-ts-mode-hook
-                 'css-ts-mode-hook
-                 'js-ts-mode-hook
-                 'json-ts-mode-hook
-                 'python-ts-mode-hook
-                 'bash-ts-mode-hook
-                 'typescript-ts-mode-hook
-                 ))
-    (add-hook hook #'(lambda () (fingertip-mode 1))))
-
-  (define-key fingertip-mode-map (kbd "(") 'fingertip-open-round)
-  (define-key fingertip-mode-map (kbd "[") 'fingertip-open-bracket)
-  (define-key fingertip-mode-map (kbd "{") 'fingertip-open-curly)
-  (define-key fingertip-mode-map (kbd ")") 'fingertip-close-round)
-  (define-key fingertip-mode-map (kbd "]") 'fingertip-close-bracket)
-  (define-key fingertip-mode-map (kbd "}") 'fingertip-close-curly)
-  (define-key fingertip-mode-map (kbd "=") 'fingertip-equal)
-  (define-key fingertip-mode-map (kbd "（") 'fingertip-open-chinese-round)
-  (define-key fingertip-mode-map (kbd "「") 'fingertip-open-chinese-bracket)
-  (define-key fingertip-mode-map (kbd "【") 'fingertip-open-chinese-curly)
-  (define-key fingertip-mode-map (kbd "）") 'fingertip-close-chinese-round)
-  (define-key fingertip-mode-map (kbd "」") 'fingertip-close-chinese-bracket)
-  (define-key fingertip-mode-map (kbd "】") 'fingertip-close-chinese-curly)
-
-  (define-key fingertip-mode-map (kbd "%") 'fingertip-match-paren)
-  (define-key fingertip-mode-map (kbd "\"") 'fingertip-double-quote)
-  (define-key fingertip-mode-map (kbd "'") 'fingertip-single-quote)
-
-  ;;(define-key fingertip-mode-map (kbd "SPC") 'fingertip-space)
-  ;;(define-key fingertip-mode-map (kbd "RET") 'fingertip-newline)
-
-  (define-key fingertip-mode-map (kbd "M-o") 'fingertip-backward-delete)
-  (define-key fingertip-mode-map (kbd "C-d") 'fingertip-forward-delete)
-  (define-key fingertip-mode-map (kbd "C-k") 'fingertip-kill)
-
-  (define-key fingertip-mode-map (kbd "M-\"") 'fingertip-wrap-double-quote)
-  (define-key fingertip-mode-map (kbd "M-'") 'fingertip-wrap-single-quote)
-  (define-key fingertip-mode-map (kbd "M-[") 'fingertip-wrap-bracket)
-  (define-key fingertip-mode-map (kbd "M-{") 'fingertip-wrap-curly)
-  (define-key fingertip-mode-map (kbd "M-(") 'fingertip-wrap-round)
-  (define-key fingertip-mode-map (kbd "M-)") 'fingertip-unwrap)
-
-  (define-key fingertip-mode-map (kbd "M-p") 'fingertip-jump-right)
-  (define-key fingertip-mode-map (kbd "M-n") 'fingertip-jump-left)
-  (define-key fingertip-mode-map (kbd "M-:") 'fingertip-jump-out-pair-and-newline)
-
-  (define-key fingertip-mode-map (kbd "C-j") 'fingertip-jump-up)
-
-
-  )
+    (global-treesit-auto-mode)
 #+end_src
 ** copilot
 #+begin_src emacs-lisp :tangle suk.el
@@ -4567,7 +4510,7 @@ install
 
   ;; Adds node_modules/.bin directory to `exec_path'
   (use-package add-node-modules-path
-    :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
+     :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
 
   (setq-default js2-use-font-lock-faces t
                 js2-mode-must-byte-compile nil
