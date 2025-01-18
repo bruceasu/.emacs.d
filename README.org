@@ -4185,7 +4185,7 @@ install
        :ensure t
        :hook (after-init . global-treesit-auto-mode)
        :init (setq treesit-auto-install 'prompt))
-    (global-treesit-auto-mode)
+    (global-treesit-auto-mode))
 #+end_src
 ** copilot
 #+begin_src emacs-lisp :tangle suk.el
