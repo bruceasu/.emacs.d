@@ -20,11 +20,11 @@
 ;; blink search
 (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
 
-;; History
+;; 历史
 (setq savehist-file (concat suk-emacs-var-dir "/history"))
 ;; Amx
 (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
-;; Auto save
+;; 自动保存
 (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
 ;; Eshell
 (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
@@ -92,17 +92,15 @@
         ;; geieuuk daigwai sausok ji mukluk.
         (add-subdirs-to-load-path subdir-path nil)))))
 
-;; gaazoi tsiding ge mukluk.
+;; 加载定义的目录
 (add-subdirs-to-load-path suk-emacs-config-dir t)
 (add-subdirs-to-load-path suk-emacs-extension-dir t)
 (add-subdirs-to-load-path suk-emacs-themes-dir t)
-
 
 ;; (add-to-list 'load-path "/usr/local/share/emacs/site-lisp")
 ;; (add-to-list 'load-path "~/vendor/org-mode/lisp")
 ;; (add-to-list 'load-path "~/vendor/org-mode/contrib/lisp")
 ;; (setq custom-file "~/.config/emacs/custom-settings.el")
-;; (setq use-package-always-ensure t)
 ;; (load custom-file t)
 
 (setq gc-cons-threshold most-positive-fixnum)
@@ -110,24 +108,20 @@
 ;; Reset the GC setting
 (add-hook 'emacs-startup-hook
           (lambda ()
-             ;; makying zik wai 0.8MB
-             ;;(setq gc-cons-threshold 80000000)
-             (message "Emacs ready in %s with %d garbage collections."
-                      (format "%.2f seconds"
-                              (float-time
-                               (time-subtract after-init-time before-init-time)))
-                      gcs-done)
-             (add-hook 'focus-out-hook 'garbage-collect)))
-
-  ;; @see https://www.reddit.com/r/emacs/comments/55ork0/is_emacs_251_noticeably_slower_than_245_on_windows/
-  ;; Emacs 25 does gc too frequently
-  ;; (setq garbage-collection-messages t) ; for debug
-  (defun my-cleanup-gc ()
-    "Clean up gc."
-    (setq gc-cons-threshold  67108864) ; 64M
-    (setq gc-cons-percentage 0.1) ; original value
-    (garbage-collect))
-  (run-with-idle-timer 4 nil #'my-cleanup-gc)
+            ;; 默认係 0.8MB
+            ;;(setq gc-cons-threshold 80000000)
+            (message "Emacs ready in %s with %d garbage collections."
+                     (format "%.2f seconds"
+                             (float-time
+                              (time-subtract after-init-time before-init-time)))
+                     gcs-done)
+            (defun my-cleanup-gc ()
+              "Clean up gc."
+              (setq gc-cons-threshold  67108864) ; 64M
+              (setq gc-cons-percentage 0.1) ; original value
+              (garbage-collect))
+            (run-with-idle-timer 4 nil #'my-cleanup-gc)
+            (add-hook 'focus-out-hook 'garbage-collect)))
 
 (defconst sys/win32p
   (eq system-type 'windows-nt)
@@ -197,18 +191,6 @@
 (advice-add 'package--save-selected-packages :override #'my-save-selected-packages)
 
 (require 'package)
-;; gnu：
-;; http://elpa.gnu.org/packages/
-;; https://elpa.emacs-china.org/gnu/ http://1.15.88.122/gnu/
-;; https://mirrors.163.com/elpa/gnu/
-;; https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/
-;; melpa:
-;; http://melpa.org/packages/
-;; https://www.mirrorservice.org/sites/melpa.org/packages/
-;; https://elpa.emacs-china.org/melpa/ http://1.15.88.122/melpa/
-;; https://mirrors.163.com/elpa/melpa/
-;; https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/
-
 ;;(setq package-archives '(("melpa" . "http://melpa.org/packages/")
 ;;                         ("gnu" . "http://elpa.gnu.org/packages/")
 ;;                         ("nongnu" . "https://elpa.nongnu.org/nongnu/"))
@@ -224,23 +206,19 @@
 (add-to-list 'package-archives
              '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
 
-;; Un-comment below line if you follow "Install stable version in easiest way"
-(setq package-archives '(("myelpa" . "~/myelpa/")))
+
+;; 若遵循「大道至简策安裝穩定版」，請消注下行。
+;; (setq package-archives '(("myelpa" . "~/myelpa/"))) 
 
 (setq package-check-signature nil) ; 个别时候会出现签名校验失败
 
-;; Initialize packages
+;; 初置包官
 ;; (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
 ;;   (setq package-enable-at-startup nil)          ; To prevent initializing twice
 ;;   (package-initialize))
 
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
-
-;; Setup `use-package'
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
 
 ;; Should set before loading `use-package'
 ;; make use-package default behavior better
@@ -251,8 +229,19 @@
       use-package-enable-imenu-support t
       use-package-expand-minimally t)
 
+;; Setup `use-package'
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package)
+  )
+
 (require 'use-package)
 
+
+(defun load-if-exists (f)
+"load the elisp file only if it exists and is readable"
+(if (file-readable-p f)
+    (load-file f)))
 
     ;;;###autoload
 (defun my-ensure (feature)
@@ -275,7 +264,7 @@
 ;; Compatibility
 (use-package compat :demand t)
 
-(load-file (expand-file-name "suk.el" suk-emacs-root-dir))
+(load-if-exists (expand-file-name "suk.el" suk-emacs-root-dir))
 
 (unless (server-running-p) (server-start))
 
@@ -292,8 +281,8 @@
 ;; Hanlde minified code
    (if emacs/>=27p (add-hook 'after-init-hook #'global-so-long-mode))
 (when sys/linuxp
-  (load-file (expand-file-name "linux.el" suk-emacs-root-dir)))
+  (load-if-exists (expand-file-name "linux.el" suk-emacs-root-dir)))
 (when sys/win32p
-   (load-file (expand-file-name "windows.el" suk-emacs-root-dir)))
+   (load-if-exists (expand-file-name "windows.el" suk-emacs-root-dir)))
  (when sys/macp
-     (load-file (expand-file-name "mac.el" suk-emacs-root-dir)))
+     (load-if-exists (expand-file-name "mac.el" suk-emacs-root-dir)))
