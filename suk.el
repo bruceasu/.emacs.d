@@ -1332,8 +1332,8 @@ _w_ where is something defined
    ("C-x C-f" . counsel-find-file)
    ("M-x"     . counsel-M-x)
    ("C-s"     . swiper-isearch)
-       ("C-r"     . swiper-isearch)
-       ("C-c C-r" . ivy-resume)
+   ("C-r"     . swiper-isearch)
+   ("C-c C-r" . ivy-resume)
    )
   :config
   (progn
@@ -2598,7 +2598,7 @@ and `optipng' to reduce the file size if the program is present."
      :ensure t
      :hook (after-init . global-treesit-auto-mode)
      :init (setq treesit-auto-install 'prompt))
-  (global-treesit-auto-mode)
+  (global-treesit-auto-mode))
 
 ;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
 ;;(add-to-list 'load-path "C:\\green\\emacs-suk\\.emacs.d\\extensions\\copilot\\copilot.el")
