@@ -8,8 +8,10 @@
 ;;; Code:
 
 ;; 设置 Python 可执行文件路径
-(setq python-shell-interpreter "c:/green/Python311/python.exe")
-(setq treemacs-python-executable "c:/green/Python311/python.exe")
+(when sys/win32p
+  (setq python-shell-interpreter "c:/green/Python311/python.exe")
+  (setq treemacs-python-executable "c:/green/Python311/python.exe")
+  )
 
 ;; A tree layout file explorer
 (use-package treemacs
@@ -44,7 +46,7 @@
        (treemacs-git-mode 'deferred))
       (`(t . _)
        (treemacs-git-mode 'simple)))
-  )
+    )
   (unless sys/win32p
     (pcase (cons (not (null (executable-find "git")))
                  (not (null (executable-find "python3"))))
@@ -55,23 +57,23 @@
     )
 
   (with-eval-after-load 'nerd-icons
-	  (use-package treemacs-nerd-icons
-	    :demand t
-	    :when (icons-displayable-p)
-	    :custom-face
-	    (treemacs-nerd-icons-root-face ((t (:inherit nerd-icons-green :height 1.3))))
-	    (treemacs-nerd-icons-file-face ((t (:inherit nerd-icons-dsilver))))
-	    :config (treemacs-load-theme "nerd-icons"))
-  )
+	(use-package treemacs-nerd-icons
+	  :demand t
+	  :when (icons-displayable-p)
+	  :custom-face
+	  (treemacs-nerd-icons-root-face ((t (:inherit nerd-icons-green :height 1.3))))
+	  (treemacs-nerd-icons-file-face ((t (:inherit nerd-icons-dsilver))))
+	  :config (treemacs-load-theme "nerd-icons"))
+    )
 
   (with-eval-after-load 'magit
-	  (use-package treemacs-magit
-	    :hook ((magit-post-commit
-	            git-commit-post-finish
-	            magit-post-stage
-	            magit-post-unstage)
-	           . treemacs-magit--schedule-update))
-  )
+	(use-package treemacs-magit
+	  :hook ((magit-post-commit
+	          git-commit-post-finish
+	          magit-post-stage
+	          magit-post-unstage)
+	         . treemacs-magit--schedule-update))
+    )
 
 
   (use-package treemacs-tab-bar
