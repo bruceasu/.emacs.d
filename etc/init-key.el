@@ -16,6 +16,16 @@
    )
  "move-text")
 
+ ;;; ### basic-toolkit ###
+(lazy-load-global-keys
+ '(
+   ("M-s-n" . comment-part-move-down)   ;向下移动注释
+   ("M-s-p" . comment-part-move-up)     ;向上移动注释
+   ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
+   ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
+   )
+ "basic-toolkit")
+
 ;;; ### open new line ###
 (lazy-load-global-keys
  '(
@@ -51,9 +61,18 @@
    ("C-c C-u" . string-inflection-hydra/body)
    )
  "init-string-inflection")
+ ;;; ### basic-toolkit ###
+(lazy-load-global-keys
+ '(
+   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
+   ("M-c" . endless/capitalize)
+   ("M-l" . endless/downcase)
+   ("M-u" . endless/upcase)
+   )
+ "basic-toolkit")
 
 ;;; ### Thing-edit ###
-;;; --- 增强式编辑当前光标的对象
+;;; --- 增强式编辑当前光标的对象 
 (lazy-load-global-keys
  '(
    ("C-c w" . thing-copy-word)
@@ -72,6 +91,7 @@
    ("C-c l" . thing-copy-line)
    ("C-c a" . thing-copy-to-line-begining)
    ("C-c e" . thing-copy-to-line-end)
+
    ("C-c W" . thing-cut-word)
    ("C-c S" . thing-cut-symbol)
    ("C-c M" . thing-cut-email)
@@ -93,42 +113,26 @@
 
 ;; ### Buffer Edit ###
 ;; --- 缓存编辑
-  (lazy-load-set-keys
-   '(
-     ("C-x C-x" . exchange-point-and-mark)   ;交换当前点和标记点
-     ("M-o" . backward-delete-char-untabify) ;向前删除字符
-     ("C-M-S-h" . mark-paragraph)            ;选中段落
-     ("M-SPC" . just-one-space)              ;只有一个空格在光标处
-     ))
-
+(lazy-load-set-keys
+ '(
+   ("C-x C-x" . exchange-point-and-mark)   ;交换当前点和标记点
+   ("M-o" . backward-delete-char-untabify) ;向前删除字符
+   ("C-M-S-h" . mark-paragraph)            ;选中段落
+   ("M-SPC" . just-one-space)              ;只有一个空格在光标处
+   ))
 ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
-   ("M-s-n" . comment-part-move-down)   ;向下移动注释
-   ("M-s-p" . comment-part-move-up)     ;向上移动注释
-   ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
-   ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
    ("M-2" . indent-buffer)              ;自动格式化当前Buffer
    ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
    ;;("C-x u" . mark-line)              ;选中整行
    ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
-   ("M-G" . goto-column)                ;到指定列
-   ("C->" . remember-init)              ;记忆初始函数
-   ("C-<" . remember-jump)              ;记忆跳转函数
-   ("M-s-," . point-stack-pop)          ;buffer索引跳转
-   ("M-s-." . point-stack-push)         ;buffer索引标记
-   ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
    ("M-I" . backward-indent)            ;向后移动4个字符
-                                        ;   ("s-J" . scroll-up-one-line)         ;向上滚动一行
-                                        ;   ("s-K" . scroll-down-one-line)       ;向下滚动一行
+
    ("<f2>" . refresh-file)              ;自动刷新文件
    ("s-f" . find-file-root)             ;用root打开文件
    ("s-r" . find-file-smb)              ;访问sambao
    ("C-S-j" . join-lines)               ;连接下行
-   ("M-j"   . join-line)                ;连接上行
-   ("M-c" . endless/capitalize)
-   ("M-l" . endless/downcase)
-   ("M-u" . endless/upcase)
    )
  "basic-toolkit")
 
@@ -186,9 +190,9 @@
 
 (lazy-load-global-keys
  '(
-   ("<C-S-up>" . buf-move-up)   
-   ("<C-S-down>" . buf-move-down)
-   ("<C-S-left>" . buf-move-left)  
+   ("<C-S-up>"    . buf-move-up)   
+   ("<C-S-down>"  . buf-move-down)
+   ("<C-S-left>"  . buf-move-left)  
    ("<C-S-right>" . buf-move-right)   
    )
  "buffer-move")
@@ -219,11 +223,3 @@
 
   ;; C-',  C-, is org-cycle-agenda-files keys
   ;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。
-
-(lazy-load-set-keys
-  '(
-    ([S-f6] . hs-minor-mode)
-    ("C-c ." . hs-toggle-hiding)
-    ("C-c ," . hs-show-all)
-    )
-  )

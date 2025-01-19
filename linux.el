@@ -38,11 +38,11 @@
  #'(lambda()
      ;; run "M-x pdf-tools-install" at debian and open pdf in GUI Emacs
      (use-package pdf-tools
-        :ensure t
-        :config (pdf-tools-install))
+       :ensure t
+       :config (pdf-tools-install))
 
-     (require 'init-im)
-
+     ;; (require 'init-im)
+     (require 'rain)
      (when (display-graphic-p)
        ;; only graphic packages
        (require-package 'vterm))
@@ -50,3 +50,10 @@
        ;; only conole packages
        )  
      ))
+
+(when (display-graphic-p)
+  ;; only graphic packages
+  )
+(unless (display-graphic-p)
+  ;; only conole packages
+  )

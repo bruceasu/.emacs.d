@@ -1,7 +1,19 @@
-global-set-key examples:
+;; global-set-key examples:
 (global-set-key (kbd "C-x C-\\") 'next-line)
 (global-set-key [?\C-x ?\C-\\] 'next-line)
 (global-set-key [(control ?x) (control ?\\)] 'next-line)
+
+;; remove a keybinding
+
+;; for emacs 29 or after
+(keymap-global-set "C-t" nil)
+;; or use
+(keymap-global-unset "C-t")
+;; before emacs 28 or before
+(global-set-key (kbd "C-t") nil)
+;; or
+(global-unset-key (kbd "C-t"))
+
 
 (define-prefix-command 'my-leader) ;设定leader
 (define-key keymap "keystrok" 'command-name)   ;将快捷键绑定到 leader按键后，即和键位图绑定。

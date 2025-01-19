@@ -1,5 +1,18 @@
 ;; Your windows specific settings
 
+;; For example, (w32-register-hot-key [M-tab]) lets you use M-TAB normally in Emacs;
+
+;; make PC keyboard's Win key or other to type Super or Hyper, for emacs running on Windows.
+(setq w32-pass-lwindow-to-system nil)
+(setq w32-lwindow-modifier 'super) ; Left Windows key
+
+(setq w32-pass-rwindow-to-system nil)
+(setq w32-rwindow-modifier 'super) ; Right Windows key
+
+(setq w32-pass-apps-to-system nil)
+(setq w32-apps-modifier 'hyper) ; Menu key
+
+
 ;; on windows, make pwsh the default shell
 ;; 2023-09-09
 (setq
@@ -18,12 +31,6 @@
  2
  nil
  #'(lambda()
-     ;; Key Modifiers
-     ;; make PC keyboard's Win key or other to type Super or Hyper
-     ;; (setq w32-pass-lwindow-to-system nil)
-     (setq w32-lwindow-modifier 'super)    ; Left Windows key
-     (setq w32-apps-modifier 'hyper)       ; Menu/App key
-
      ;; Optimization
      (setq w32-get-true-file-attributes nil   ; decrease file IO workload
            w32-use-native-image-API t         ; use native w32 API
@@ -37,10 +44,3 @@
 
 
  )
-
-(when (display-graphic-p)
-  ;; only graphic packages
-  )
-(unless (display-graphic-p)
-  ;; only conole packages
-  )
