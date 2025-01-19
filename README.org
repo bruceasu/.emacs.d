@@ -120,6 +120,11 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
    ;; Don't pass case-insensitive to `auto-mode-alist'
    (setq auto-mode-case-fold nil)
 
+
+   (unless (file-exists-p suk-emacs-var-dir)
+    (make-directory cache-dir t))
+   (setq projectile-cache-file (expand-file-name "projectile.cache" suk-emacs-var-dir))
+
 #+END_SRC
 
 *** 加载目录函数：递归  Emacs 同埋插件嘅设定目录到 `load-path`
@@ -4822,3 +4827,5 @@ install
   ;; =========================================================
   ;; async-shell-command
 #+end_src
+
+

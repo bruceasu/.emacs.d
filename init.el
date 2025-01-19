@@ -45,6 +45,10 @@
 ;; Don't pass case-insensitive to `auto-mode-alist'
 (setq auto-mode-case-fold nil)
 
+(unless (file-exists-p suk-emacs-var-dir)
+    (make-directory cache-dir t))
+   (setq projectile-cache-file (expand-file-name "projectile.cache" suk-emacs-var-dir))
+
 ;; Ignore `cl` expiration warnings
 (setq byte-compile-warnings '(cl-function))
 
