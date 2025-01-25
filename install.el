@@ -1,3 +1,9 @@
+(require-package 'paredit) ;; useful for lisp
+(require-package 'tagedit) ;; useful for html
+(require-package 'cliphist)
+(require-package 'iedit)
+(require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
+
 ;; UI
 (require-package 'doom-themes)
 (require-package 'doom-modeline)

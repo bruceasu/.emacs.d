@@ -41,8 +41,8 @@
        :ensure t
        :config (pdf-tools-install))
 
-     ;; (require 'init-im)
-     (require 'rain)
+     (require 'init-rime)
+     ;; (require 'rain)
      (when (display-graphic-p)
        ;; only graphic packages
        (require-package 'vterm))

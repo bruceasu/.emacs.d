@@ -11,8 +11,8 @@
  '(
    ("M-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
    ("M-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
-   ("M-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
-   ("M-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
+   ("M-S-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
+   ("M-S-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
 
@@ -46,13 +46,24 @@
    )
  "duplicate-line")
 
-;;; ### Delete block ###
-;;; --- 快速删除光标左右的内容
-(lazy-load-global-keys
- '(
-   ("M-," . delete-block-backward)
-   ("M-." . delete-block-forward))
- "delete-block")
+;; 自定义删除到字符函数
+(defun my/delete-to-char (char)
+  "删除光标位置到下一个出现的字符 CHAR 之间的所有内容（不包括 CHAR 本身）。"
+  (interactive "cDelete to char: ")
+  (let ((start (point))
+        (end (progn
+               (search-forward (char-to-string char) (line-end-position) t))))
+    (if end
+        (progn
+          (goto-char end)
+          (delete-region start (- end 1))
+          (message "Deleted from %d to %d" start (- end 1)))
+      (progn
+        (delete-region start (line-end-position))
+        (message "Character '%c' not found. Deleted to end of line." char)))))
+
+;; 绑定快捷键 C-c d 到 my/delete-to-char 函数
+(global-set-key (kbd "C-c d") 'my/delete-to-char)
 
 ;; ### String Inflection ###
 ;; --- 单词语法风格快速转换
@@ -75,43 +86,44 @@
 ;;; --- 增强式编辑当前光标的对象 
 (lazy-load-global-keys
  '(
-   ("C-c w" . thing-copy-word)
-   ("C-c s" . thing-copy-symbol)
-   ("C-c m" . thing-copy-email)
-   ("C-c f" . thing-copy-filename)
-   ("C-c u" . thing-copy-url)
-   ("C-c x" . thing-copy-sexp)
-   ("C-c g" . thing-copy-page)
-   ("C-c t" . thing-copy-sentence)
-   ("C-c o" . thing-copy-witespace)
-   ("C-c i" . thing-copy-list)
-   ("C-c c" . thing-copy-comment)
-   ("C-c h" . thing-copy-defun)
-   ("C-c p" . thing-copy-parentheses)
-   ("C-c l" . thing-copy-line)
-   ("C-c a" . thing-copy-to-line-begining)
-   ("C-c e" . thing-copy-to-line-end)
+   ;; ("C-c w" . thing-copy-word)
+   ;; ("C-c s" . thing-copy-symbol)
+   ;; ("C-c m" . thing-copy-email)
+   ;; ("C-c f" . thing-copy-filename)
+   ;; ("C-c u" . thing-copy-url)
+   ;; ("C-c x" . thing-copy-sexp)
+   ;; ("C-c g" . thing-copy-page)
+   ;; ("C-c t" . thing-copy-sentence)
+   ;; ("C-c o" . thing-copy-witespace)
+   ;; ("C-c i" . thing-copy-list)
+   ;; ("C-c c" . thing-copy-comment)
+   ;; ("C-c h" . thing-copy-defun)
+   ;; ("C-c p" . thing-copy-parentheses)
+   ;; ("C-c l" . thing-copy-line)
+   ;; ("C-c a" . thing-copy-to-line-begining)
+   ;; ("C-c e" . thing-copy-to-line-end)
 
-   ("C-c W" . thing-cut-word)
-   ("C-c S" . thing-cut-symbol)
-   ("C-c M" . thing-cut-email)
-   ("C-c F" . thing-cut-filename)
-   ("C-c G" . thing-cut-page)
-   ("C-c T" . thing-cut-sentence)
-   ("C-c O" . thing-cut-whitespace)
-   ("C-c I" . thing-cut-list)
-   ("C-c C" . thing-cut-comment)
-   ("C-c H" . thing-cut-defun)
-   ("C-c P" . thing-cut-parentheses)
-   ("C-c L" . thing-cut-line)
-   ("C-c A" . thing-cut-to-line-beginning)
-   ("C-c E" . thing-cut-to-line-end)
+   ;; ("C-c W" . thing-cut-word)
+   ;; ("C-c S" . thing-cut-symbol)
+   ;; ("C-c M" . thing-cut-email)
+   ;; ("C-c F" . thing-cut-filename)
+   ;; ("C-c G" . thing-cut-page)
+   ;; ("C-c T" . thing-cut-sentence)
+   ;; ("C-c O" . thing-cut-whitespace)
+   ;; ("C-c I" . thing-cut-list)
+   ;; ("C-c C" . thing-cut-comment)
+   ;; ("C-c H" . thing-cut-defun)
+   ;; ("C-c P" . thing-cut-parentheses)
+   ;; ("C-c L" . thing-cut-line)
+   ;; ("C-c A" . thing-cut-to-line-beginning)
+   ;; ("C-c E" . thing-cut-to-line-end)
+
+   ("C-c e" . hydra-thing-edit/body)
    )
- "thing-edit"
- "C-z"
+ "init-thing-edit"
  )
 
-;; ### Buffer Edit ###
+;; ### Buffer Edit ### 
 ;; --- 缓存编辑
 (lazy-load-set-keys
  '(

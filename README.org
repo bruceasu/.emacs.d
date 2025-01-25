@@ -15,6 +15,7 @@
 :END:
 <<babel-init>>
 
+
 呢个係我个人嘅配置。其实好长，但部分原因系我有时会将博客文章留返喺度做
 注释，仲有因为我有好多细节嘅自定义，可能我自己都唔记得晒。 如果你啱啱
 接触 Emacs Lisp，你可能唔想直接复制粘贴咁多代码块。相反，你可以复制啲
@@ -35,39 +36,34 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 <<starting-up>>
 
 #+begin_src emacs-lisp :tangle early-init.el :eval never-export
-    ;;; early-init.el --- Early Init File -*- lexical-binding: t; no-byte-compile: t -*-
-    ;; NOTE: early-init.el is now generated from readme.org.  Please edit that file instead
+  ;;; early-init.el --- Early Init File -*- lexical-binding: t; no-byte-compile: t -*-
+  ;; NOTE: early-init.el is now generated from readme.org.  Please edit that file instead
 
-    ;; 将垃圾收集推迟到启动过程中的更后面。
-    (setq gc-cons-threshold most-positive-fixnum
-          gc-cons-percentage 0.8)
+  ;; 将垃圾收集推迟到启动过程中的更后面。
+  (setq gc-cons-threshold most-positive-fixnum gc-cons-percentage 0.8)
+  (setq inhibit-startup-message t)
 
+  ;; 喺 Emacs 27 及之后版本，软件包初始化会喺 `user-init-file` 加载之
+  ;; 前进行，但系会喺 `early-init-file` 之后进行。我哋必须阻止 Emacs
+  ;; 提前做呢个操作！
+  (setq package-enable-at-startup nil)
+  ;;唔好允许从软件包缓存加载（原因一样）。
+  (setq package-quickstart nil)
+  ;; `use-package` 喺 29 版本开始内置。它必须喺加载 `use-package` 之
+  ;; 前设置。
+  (setq use-package-enable-imenu-support t)
+  ;; 系统默认编码
+  (set-language-environment 'utf-8)
+  ;; 更干净嘅 GUI
+  ;; 通过尽早禁用呢啲 UI 元素，避免出现未加样式嘅 Emacs 瞬间显示。
+  (push '(menu-bar-lines . 0) default-frame-alist)
+  (push '(tool-bar-lines . 0) default-frame-alist)
+  (push '(vertical-scroll-bars) default-frame-alist)
 
-    (setq inhibit-startup-message t)
-
-    ;; 喺 Emacs 27 及之后版本，软件包初始化会喺 `user-init-file` 加载之
-    ;; 前进行，但系会喺 `early-init-file` 之后进行。我哋必须阻止 Emacs
-    ;; 提前做呢个操作！
-    (setq package-enable-at-startup nil)
-    ;;唔好允许从软件包缓存加载（原因一样）。
-    (setq package-quickstart nil)
-    ;; `use-package` 喺 29 版本开始内置。它必须喺加载 `use-package` 之
-    ;; 前设置。
-    (setq use-package-enable-imenu-support t)
-
-
-    ;; 系统默认编码
-    (set-language-environment 'utf-8)
-    ;; 更干净嘅 GUI
-    ;; 通过尽早禁用呢啲 UI 元素，避免出现未加样式嘅 Emacs 瞬间显示。
-    (push '(menu-bar-lines . 0) default-frame-alist)
-    (push '(tool-bar-lines . 0) default-frame-alist)
-    (push '(vertical-scroll-bars) default-frame-alist)
-
-    ;; 调整 Emacs 窗口大小可能系更改字体时非常昂贵嘅操作。
-    ;; 通过禁用呢个操作，当字体大过系统默认字体时，我哋可以轻松将启动时间减少一半。
-    (setq frame-inhibit-implied-resize t)
-    (setq default-frame-alist
+  ;; 调整 Emacs 窗口大小可能系更改字体时非常昂贵嘅操作。
+  ;; 通过禁用呢个操作，当字体大过系统默认字体时，我哋可以轻松将启动时间减少一半。
+  (setq frame-inhibit-implied-resize t)
+  (setq default-frame-alist
         (append '((width                . 140)  ; Frame幅
                   (height               . 40 )  ; Frame高
                   (left                 . 170 ) ; 配置左位置
@@ -82,18 +78,18 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
                 default-frame-alist))
   (setq initial-frame-alist default-frame-alist)
 
+  ;; 元素一部分禁用
+  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1)) ; keep the menu is better.
+  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+  (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+  (toggle-frame-maximized)
+  ;; 緩衝區，无令立殺之。
+  (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions))
+  (setq find-file-visit-truename t)
+  (provide 'early-init)
+  ;;(global-unset-key (kbd "C-SPC"))
 
-    ;; 元素一部分禁用
-    ;; (menu-bar-mode -1) ; keep the menu is better.
-    (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-    (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-    (toggle-frame-maximized)
-     ;; 緩衝區，无令立殺之。
-    (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions))
-    (setq find-file-visit-truename t)
-    (provide 'early-init)
-    ;;(global-unset-key (kbd "C-SPC"))
-    ;;; early-init.el ends here
+  ;;; early-init.el ends here
 #+end_src
 
 ** 呢个係我嘅 init.el :
@@ -102,53 +98,49 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 :END:
 <<init>>
 
+
 #+BEGIN_SRC emacs-lisp :tangle init.el :eval never-export
-   (provide 'init)
+  (provide 'init);; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
+  ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
+  ;; 变量。
+  (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
+  (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
+  (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
+  (defvar suk-emacs-share-dir     (expand-file-name "share" suk-emacs-root-dir))
+  (defvar suk-emacs-themes-dir    (expand-file-name "themes" suk-emacs-share-dir))
+  (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
+  (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
+  (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
 
-   ;; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
-   ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
-   ;; 变量。
-   (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
-   (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
-   (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
-   (defvar suk-emacs-share-dir     (expand-file-name "share" suk-emacs-root-dir))
-   (defvar suk-emacs-themes-dir    (expand-file-name "themes" suk-emacs-share-dir))
-   (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
-   (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
-   (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
+  ;; OS 嘅 HOME 目录。
+  (defvar user-home-dir (getenv "HOME"))
+  (if (eq system-type 'windows-nt) (defvar user-home-dir (getenv "USERPROFILE")))
+  ;; blink search
+  (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
+  ;; 历史
+  (setq savehist-file (concat suk-emacs-var-dir "/history"))
+  ;; Amx
+  (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
+  ;; 自动保存
+  (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
+  ;; Eshell
+  (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
+  (setq eshell-history-file-name (concat eshell-directory-name "/history"))
+  ;; projectitle-bookmarks
+  (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
+  (setq backup-directory-alist `(("" . ,suk-emacs-tmp-dir)))
+  ;; Bookmark
+  (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
+  ;; Diary
+  (setq diary-file (concat user-home-dir "/diary"))
+  ;; server 无效
+  (require 'server)
+  ;;(setq server-socket-dir suk-emacs-var-dir)
 
-   ;; OS 嘅 HOME 目录。
-   (defvar user-home-dir (getenv "HOME"))
-
-   (if (eq system-type 'windows-nt)
-       (defvar user-home-dir (getenv "USERPROFILE")))
-   ;; blink search
-   (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
-
-   ;; 历史
-   (setq savehist-file (concat suk-emacs-var-dir "/history"))
-   ;; Amx
-   (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
-   ;; 自动保存
-   (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
-   ;; Eshell
-   (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
-   (setq eshell-history-file-name (concat eshell-directory-name "/history"))
-   ;; projectitle-bookmarks
-   (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
-   (setq backup-directory-alist `(("" . ,suk-emacs-tmp-dir)))
-   ;; Bookmark
-   (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
-   ;; Diary
-   (setq diary-file (concat user-home-dir "/diary"))
-   ;; server 无效
-   (require 'server)
-   ;;(setq server-socket-dir suk-emacs-var-dir)
-
-   ;; Clear to avoid analyzing files when loading remote files.
-   (setq file-name-handler-alist nil)
-   ;; Don't pass case-insensitive to `auto-mode-alist'
-   (setq auto-mode-case-fold nil)
+  ;; Clear to avoid analyzing files when loading remote files.
+  (setq file-name-handler-alist nil)
+  ;; Don't pass case-insensitive to `auto-mode-alist'
+  (setq auto-mode-case-fold nil)
 
 #+END_SRC
 
@@ -315,7 +307,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 :END:
 <<setup-custom>>
 
-#+begin_src emacs-lisp :tangle suk.el :eval never-export
+#+begin_src emacs-lisp :tangle init.el :eval never-export
   ;; set const
   (defconst custom-template-file
     (expand-file-name "custom-template.el" user-emacs-directory)
@@ -608,7 +600,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
                          ; TAB，使用 C-q TAB 來輸入 TAB 字符
    )
   (tooltip-mode -1)                          ;不要显示任何 tooltips
-  (delete-selection-mode 1)                  ; 选中文本后输入会覆盖
+  (delete-selection-mode 1)                  ;选中文本后输入会覆盖
   (size-indication-mode 1)
   (server-mode 1)
   (global-hl-line-mode 1)                    ;高亮当前行
@@ -649,7 +641,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq minibuffer-message-timeout 2)       ;显示消息超时的时间
   (setq auto-revert-mode 1)                 ;自动更新buffer
   (setq show-paren-style 'parentheses)      ;括号匹配显示但不是烦人的跳到另一个括号。
-  ;;(setq blink-matching-paren nil)           ;当插入右括号时不显示匹配的左括号
+  ;;(setq blink-matching-paren nil)         ;当插入右括号时不显示匹配的左括号
   (setq message-log-max t)                  ;设置message记录全部消息, 而不用截去
   (setq require-final-newline nil)          ;不自动添加换行符到末尾, 有些情况会出现错误
   (setq ediff-window-setup-function
@@ -776,9 +768,10 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 <<setup-coommon-functions>>
 
 #+begin_src emacs-lisp :tangle suk.el :eval never-export
-      ;; -*- coding: utf-8; lexical-binding: t; -*-
-      (defun suk/wait-for-modules (callback &rest modules)
-        "Wait for MODULES to be loaded and then call CALLBACK.
+  ;; -*- coding: utf-8; lexical-binding: t; -*-
+
+  (defun suk/wait-for-modules (callback &rest modules)
+    "Wait for MODULES to be loaded and then call CALLBACK.
   使用示例
   (wait-for-modules
    'my-callback-function
@@ -786,116 +779,115 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
    'module2
    'module3)
   "
-        (let ((all-loaded nil))
-          (dolist (module modules)
-            (with-eval-after-load module
-              (setq all-loaded t)))
-          (if all-loaded
-              (funcall callback)
-            (add-hook 'after-load-functions
-                      (lambda ()
-                        (when (cl-every #'featurep modules)
-                          (funcall callback)))))))
+    (let ((all-loaded nil))
+      (dolist (module modules)
+        (with-eval-after-load module
+          (setq all-loaded t)))
+      (if all-loaded
+          (funcall callback)
+        (add-hook 'after-load-functions
+                  (lambda ()
+                    (when (cl-every #'featurep modules)
+                      (funcall callback)))))))
 
-      ;;;###autoload
-      (defun run-cmd-and-replace-region (cmd)
-        "Run CMD in shell on selected region or current buffer.
+  ;;;###autoload
+  (defun run-cmd-and-replace-region (cmd)
+    "Run CMD in shell on selected region or current buffer.
       Then replace the region or buffer with cli output."
-        (let* ((orig-point (point))
-               (b (if (region-active-p) (region-beginning) (point-min)))
-               (e (if (region-active-p) (region-end) (point-max))))
-          (shell-command-on-region b e cmd nil t)
-          (goto-char orig-point)))
+    (let* ((orig-point (point))
+           (b (if (region-active-p) (region-beginning) (point-min)))
+           (e (if (region-active-p) (region-end) (point-max))))
+      (shell-command-on-region b e cmd nil t)
+      (goto-char orig-point)))
 
 
-      ;;;###autoload
-      (defun my-buffer-str ()
-        (buffer-substring-no-properties (point-min) (point-max)))
+  ;;;###autoload
+  (defun my-buffer-str ()
+    (buffer-substring-no-properties (point-min) (point-max)))
 
 
 
-      (defmacro suk/timer (&rest body)
-        "Measure the time of code BODY running."
-        `(let ((time (current-time)))
-           ,@body
-           (float-time (time-since time))))
+  (defmacro suk/timer (&rest body)
+    "Measure the time of code BODY running."
+    `(let ((time (current-time)))
+       ,@body
+       (float-time (time-since time))))
 
-      ;;;###autoload
-      (defun icons-displayable-p ()
-        "Return non-nil if icons are displayable."
-        (and suk-icon
-             (or (featurep 'nerd-icons)
-                 (require 'nerd-icons nil t))))
-      ;;;###autoload
-      (defun suk-treesit-available-p ()
-        "Check whether tree-sitter is available.
+  ;;;###autoload
+  (defun icons-displayable-p ()
+    "Return non-nil if icons are displayable."
+    (and suk-icon
+         (or (featurep 'nerd-icons)
+             (require 'nerd-icons nil t))))
+  ;;;###autoload
+  (defun suk-treesit-available-p ()
+    "Check whether tree-sitter is available.
       Native tree-sitter is introduced since 29.1."
-        (and (fboundp 'treesit-available-p)
-             (treesit-available-p)))
-      ;;;###autoload
-      (defun too-long-file-p ()
-        "Check whether the file is too long."
-        (or (> (buffer-size) 100000)
-            (and (fboundp 'buffer-line-statistics)
-                 (> (car (buffer-line-statistics)) 10000))))
+    (and (fboundp 'treesit-available-p)
+         (treesit-available-p)))
+  ;;;###autoload
+  (defun too-long-file-p ()
+    "Check whether the file is too long."
+    (or (> (buffer-size) 100000)
+        (and (fboundp 'buffer-line-statistics)
+             (> (car (buffer-line-statistics)) 10000))))
 
-      ;; {{ copied from http://ergoemacs.org/emacs/elisp_read_file_content.html
+  ;; {{ copied from http://ergoemacs.org/emacs/elisp_read_file_content.html
       ;;;###autoload
-      (defun my-get-string-from-file (file)
-        "Return FILE's content."
-        (with-temp-buffer
-          (insert-file-contents file)
-          (buffer-string)))
-  
-      ;;;###autoload
-      (defun my-read-lines (file)
-        "Return a list of lines of FILE."
-        (split-string (my-get-string-from-file file) "\n" t))
-      ;; }}
+  (defun my-get-string-from-file (file)
+    "Return FILE's content."
+    (with-temp-buffer
+      (insert-file-contents file)
+      (buffer-string)))
 
-      ;;;###autoload
-      (defun path-in-directory-p (file directory)
-        "FILE is in DIRECTORY."
-        (let* ((pattern (concat "^" (file-name-as-directory directory))))
-          (if (string-match pattern file) file)))
+  ;;;###autoload
+  (defun my-read-lines (file)
+    "Return a list of lines of FILE."
+    (split-string (my-get-string-from-file file) "\n" t))
+  ;; }}
+
+  ;;;###autoload
+  (defun path-in-directory-p (file directory)
+    "FILE is in DIRECTORY."
+    (let* ((pattern (concat "^" (file-name-as-directory directory))))
+      (if (string-match pattern file) file)))
 
 
-      ;;;###autoload
-      (defun my-send-string-to-cli-stdin (string program)
-        "Send STRING to cli PROGRAM's stdin."
-        (with-temp-buffer
-          (insert string)
-          (call-process-region (point-min) (point-max) program)))
+  ;;;###autoload
+  (defun my-send-string-to-cli-stdin (string program)
+    "Send STRING to cli PROGRAM's stdin."
+    (with-temp-buffer
+      (insert string)
+      (call-process-region (point-min) (point-max) program)))
 
-      ;;;###autoload
-      (defun my-write-string-to-file (string file)
-        "Write STRING to FILE."
-        (with-temp-buffer
-          (insert string)
-          (write-region (point-min) (point-max) file)))
+  ;;;###autoload
+  (defun my-write-string-to-file (string file)
+    "Write STRING to FILE."
+    (with-temp-buffer
+      (insert string)
+      (write-region (point-min) (point-max) file)))
 
-      ;;;###autoload
-      (defun my-async-shell-command (command)
-        "Execute string COMMAND asynchronously."
-        (let* ((proc (start-process "Shell"
-                                    nil
-                                    shell-file-name
-                                    shell-command-switch command)))
-          (set-process-sentinel proc `(lambda (process signal)
-                                        (let* ((status (process-status process)))
-                                          (when (memq status '(exit signal))
-                                            (unless (string= (substring signal 0 -1) "finished")
-                                              (message "Failed to run \"%s\"." ,command))))))))
+  ;;;###autoload
+  (defun my-async-shell-command (command)
+    "Execute string COMMAND asynchronously."
+    (let* ((proc (start-process "Shell" nil shell-file-name shell-command-switch command)))
+      (set-process-sentinel proc
+                            `(lambda (process signal)
+                               (let* ((status (process-status process)))
+                                 (when (memq status '(exit signal))
+                                   (unless (string= (substring signal 0 -1) "finished")
+                                     (message "Failed to run \"%s\"." ,command))))))))
 
-      (defvar my-disable-idle-timer (daemonp)
-        "Function passed to `my-run-with-idle-timer' is run immediately.")
-      (defun my-run-with-idle-timer (seconds func)
-        "After SECONDS, run function FUNC once."
-        (cond
-         (my-disable-idle-timer
-          (funcall func))
-         (t
-          (run-with-idle-timer seconds nil func))))
+  (defvar my-disable-idle-timer (daemonp)
+    "Function passed to `my-run-with-idle-timer' is run immediately.")
+
+  (defun my-run-with-idle-timer (seconds func)
+    "After SECONDS, run function FUNC once."
+    (cond
+     (my-disable-idle-timer
+      (funcall func))
+     (t
+      (run-with-idle-timer seconds nil func))))
 
 #+end_src
 
@@ -1092,69 +1084,73 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 
 **** Global keys
 #+begin_src emacs-lisp :tangle suk.el
-  ;; 一啲方便嘅函数
-  (global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
-  (global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp
-  (global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
-  (global-set-key (kbd "C-x R") 'recentf-open)   ;; 快捷键 C-x R 用于打开最近文件
-
-  (when emacs/>=29p
-    ;; (keymap-global-set <key> <cmmd>)
-    (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)  ;; 快捷键 C-<f11> 用于切换全屏模式
-    (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
-    (keymap-set global-map "RET" #'newline-and-indent)  ;; 回车键 RET 用于创建新行并对齐
-    (keymap-set global-map "S-<return>" #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
-    ) 
-  (unless emacs/>=29p
-    (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)  ;; 快捷键 C-<f11> 用于切换全屏模式
-    (global-set-key (kbd "M-s<return>") 'toggle-frame-fullscreen)
-    (global-set-key (kbd "RET") #'newline-and-indent)  ;; 回车键 RET 用于创建新行并对齐
-    (global-set-key (kbd "S-<return>") #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
-    )
+    ;; 一啲方便嘅函数
+    (global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
+    (global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp
+    (global-set-key (kbd "C-)") 'forward-sexp)         ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
+    (global-set-key (kbd "C-x R") 'recentf-open)     ;; 快捷键 C-x R 用于打开最近文件
+    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  
+    (when emacs/>=29p
+      ;; (keymap-global-set <key> <cmmd>)
+      (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)            ;; 快捷键 C-<f11> 用于切换全屏模式
+      (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
+      (keymap-set global-map "RET" #'newline-and-indent)                             ;; 回车键 RET 用于创建新行并对齐
+      (keymap-set global-map "S-<return>" #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
+      ) 
+    (unless emacs/>=29p
+      (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)  ;; 快捷键 C-<f11> 用于切换全屏模式
+      (global-set-key (kbd "M-s<return>") 'toggle-frame-fullscreen)
+      (global-set-key (kbd "RET") #'newline-and-indent)  ;; 回车键 RET 用于创建新行并对齐
+      (global-set-key (kbd "S-<return>") #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
+      )
 #+end_src
 *** Move cursor
 
 #+begin_src emacs-lisp :tangle suk.el
-  ;;; ### goto-line-preview ###
-  (lazy-load-global-keys
-   '(
-     ("M-g p" . goto-line-preview))
-   "goto-line-preview")
+   ;;; ### goto-line-preview ###
+   (lazy-load-global-keys
+    '(
+      ("M-g p" . goto-line-preview))
+    "goto-line-preview")
 
-   ;;; ### basic-toolkit ###
-  (lazy-load-global-keys
-   '(
-     ("M-G" . goto-column)                ;到指定列
-     ("C->" . remember-init)              ;记忆初始函数
-     ("C-<" . remember-jump)              ;记忆跳转函数
-     ("M-s-," . point-stack-pop)          ;buffer索引跳转
-     ("M-s-." . point-stack-push)         ;buffer索引标记
-     ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
-     ("s-J" . scroll-up-one-line)         ;向上滚动一行
-     ("s-K" . scroll-down-one-line)       ;向下滚动一行
-     )
-   "basic-toolkit")
-  ;;; ### Ace jump ###
-  (lazy-load-global-keys
-   '(
-     ("C-c C-w" . ace-jump-word-mode)
-     ("C-c C-c" . ace-jump-char-mode)
-     ("C-c C-l" . ace-jump-line-mode)
-     )
-   "ace-jump-mode"
-   "C-z"
-   )
+    ;;; ### basic-toolkit ###
+   (lazy-load-global-keys
+    '(
+      ("M-G" . goto-column)                ;到指定列
+      ("C->" . remember-init)              ;记忆初始函数
+      ("C-<" . remember-jump)              ;记忆跳转函数
+      ("M-s-," . point-stack-pop)          ;buffer索引跳转
+      ("M-s-." . point-stack-push)         ;buffer索引标记
+      ("s-g" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
+      ("s-J" . scroll-up-one-line)         ;向上滚动一行
+      ("s-K" . scroll-down-one-line)       ;向下滚动一行
+      ("C-S-i" . scroll-up-one-line)       ;向上滚动一行
+      ("C-S-k" . scroll-down-one-line)     ;向下滚动一行
 
-  ;; Jump to Chinese characters
-  (run-with-idle-timer
-   1
-   nil
-   #'(lambda()     
-       (use-package ace-pinyin
-         :diminish
-         :hook (after-init . ace-pinyin-global-mode))
-       (require 'goto-chg)
-       ))
+      )
+    "basic-toolkit")
+   ;;; ### Ace jump ###
+   (lazy-load-global-keys
+    '(
+      ("C-c C-w" . ace-jump-word-mode)
+      ("C-c C-c" . ace-jump-char-mode)
+      ("C-c C-l" . ace-jump-line-mode)
+      )
+    "ace-jump-mode"
+    "C-z"
+    )
+
+   ;; Jump to Chinese characters
+   (run-with-idle-timer
+    1
+    nil
+    #'(lambda()     
+        (use-package ace-pinyin
+          :diminish
+          :hook (after-init . ace-pinyin-global-mode))
+        (require 'goto-chg)
+        ))
 
 
 #+end_src
@@ -1165,8 +1161,8 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
    '(
      ("M-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
      ("M-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
-     ("M-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
-     ("M-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
+     ("M-S-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
+     ("M-S-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
      )
    "move-text")
 
@@ -1205,17 +1201,103 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      )
    "duplicate-line")
 #+end_src
-*** Delete block
+*** Delete to character
 #+begin_src emacs-lisp :tangle etc/init-key.el
-  ;;; ### Delete block ###
-  ;;; --- 快速删除光标左右的内容
-  (lazy-load-global-keys
-   '(
-     ("M-," . delete-block-backward)
-     ("M-." . delete-block-forward))
-   "delete-block")
+;; 自定义删除到字符函数
+(defun my/delete-to-char (char)
+  "删除光标位置到下一个出现的字符 CHAR 之间的所有内容（不包括 CHAR 本身）。"
+  (interactive "cDelete to char: ")
+  (let ((start (point))
+        (end (progn
+               (search-forward (char-to-string char) (line-end-position) t))))
+    (if end
+        (progn
+          (goto-char end)
+          (delete-region start (- end 1))
+          (message "Deleted from %d to %d" start (- end 1)))
+      (progn
+        (delete-region start (line-end-position))
+        (message "Character '%c' not found. Deleted to end of line." char)))))
+
+;; 绑定快捷键 C-c d 到 my/delete-to-char 函数
+(global-set-key (kbd "C-c d") 'my/delete-to-char)
 #+end_src
-*** Word styles
+*** Insert template
+#+begin_src emacs-lisp :tangle suk.el
+  ;;;###autoload
+  (defun insert-hash-template ()
+    "插入HASH模板：
+  #=================================================
+  # <cursor>
+  #-------------------------------------------------
+  光标位于第二行的 # 后面。"
+    (interactive)
+    (insert "#=================================================\n")
+    (insert "# \n")
+    (insert "#-------------------------------------------------\n")
+    ;; 将光标移动到第二行的 # 后面
+    (forward-line -2)          ; 移动到上一行（即第二行）
+    (end-of-line)              ; 移动到行尾
+  
+    )
+
+  ;;;###autoload
+  (defun insert-slash-template ()
+    "插入Slash comment模板：
+  #=================================================
+  # <cursor>
+  #-------------------------------------------------
+  光标位于第二行的 // 后面。"
+    (interactive)
+    (insert "//=================================================\n")
+    (insert "// \n")
+    (insert "//-------------------------------------------------\n")
+    ;; 将光标移动到第二行的 # 后面
+    (forward-line -2)          ; 移动到上一行（即第二行）
+    (end-of-line)              ; 移动到行尾
+    )
+
+
+  ;;;###autoload
+  (defun insert-star-template ()
+    "插入Slash comment模板：
+  #=================================================
+  # <cursor>
+  #-------------------------------------------------
+  光标位于第二行的 # 后面。"
+    (interactive)
+    (insert "/*=================================================*/\n")
+    (insert "/*  */\n")
+    (insert "/*-------------------------------------------------*/\n")
+    (forward-line -2)         
+    (end-of-line)          
+    (backward-char 3)      
+    )
+
+  ;;;###autoload
+  (defun insert-javadoc-template ()
+    "插入Javadoc模板：
+  #=================================================
+  # <cursor>
+  #-------------------------------------------------
+  光标位于第二行的 * 后面。"
+    (interactive)
+    (insert "/**\n")
+    (insert " * \n")
+    (insert " */\n")
+    (forward-line -2)       
+    (end-of-line)         
+    )
+
+  ;; 绑定快捷键 C-c t 到插入自定义模板的函数
+  (global-set-key (kbd "C-c t h") 'insert-hash-template)
+  (global-set-key (kbd "C-c t c") 'insert-slash-template)
+  (global-set-key (kbd "C-c t s") 'insert-star-template)
+  (global-set-key (kbd "C-c t j") 'insert-javadoc-template)
+
+#+end_src
+
+*** Word Styles
 #+begin_src emacs-lisp :tangle etc/init-key.el
   ;; ### String Inflection ###
   ;; --- 单词语法风格快速转换
@@ -1234,52 +1316,55 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      )
    "basic-toolkit")
 #+end_src
-*** Thing edit
+*** Thing Edit
 #+begin_src emacs-lisp :tangle etc/init-key.el
-    ;;; ### Thing-edit ###
-    ;;; --- 增强式编辑当前光标的对象 
-    (lazy-load-global-keys
-     '(
-       ("C-c w" . thing-copy-word)
-       ("C-c s" . thing-copy-symbol)
-       ("C-c m" . thing-copy-email)
-       ("C-c f" . thing-copy-filename)
-       ("C-c u" . thing-copy-url)
-       ("C-c x" . thing-copy-sexp)
-       ("C-c g" . thing-copy-page)
-       ("C-c t" . thing-copy-sentence)
-       ("C-c o" . thing-copy-witespace)
-       ("C-c i" . thing-copy-list)
-       ("C-c c" . thing-copy-comment)
-       ("C-c h" . thing-copy-defun)
-       ("C-c p" . thing-copy-parentheses)
-       ("C-c l" . thing-copy-line)
-       ("C-c a" . thing-copy-to-line-begining)
-       ("C-c e" . thing-copy-to-line-end)
+  ;;; ### Thing-edit ###
+  ;;; --- 增强式编辑当前光标的对象 
+  (lazy-load-global-keys
+   '(
+     ;; ("C-c w" . thing-copy-word)
+     ;; ("C-c s" . thing-copy-symbol)
+     ;; ("C-c m" . thing-copy-email)
+     ;; ("C-c f" . thing-copy-filename)
+     ;; ("C-c u" . thing-copy-url)
+     ;; ("C-c x" . thing-copy-sexp)
+     ;; ("C-c g" . thing-copy-page)
+     ;; ("C-c t" . thing-copy-sentence)
+     ;; ("C-c o" . thing-copy-witespace)
+     ;; ("C-c i" . thing-copy-list)
+     ;; ("C-c c" . thing-copy-comment)
+     ;; ("C-c h" . thing-copy-defun)
+     ;; ("C-c p" . thing-copy-parentheses)
+     ;; ("C-c l" . thing-copy-line)
+     ;; ("C-c a" . thing-copy-to-line-begining)
+     ;; ("C-c e" . thing-copy-to-line-end)
 
-       ("C-c W" . thing-cut-word)
-       ("C-c S" . thing-cut-symbol)
-       ("C-c M" . thing-cut-email)
-       ("C-c F" . thing-cut-filename)
-       ("C-c G" . thing-cut-page)
-       ("C-c T" . thing-cut-sentence)
-       ("C-c O" . thing-cut-whitespace)
-       ("C-c I" . thing-cut-list)
-       ("C-c C" . thing-cut-comment)
-       ("C-c H" . thing-cut-defun)
-       ("C-c P" . thing-cut-parentheses)
-       ("C-c L" . thing-cut-line)
-       ("C-c A" . thing-cut-to-line-beginning)
-       ("C-c E" . thing-cut-to-line-end)
-       )
-     "thing-edit"
-     "C-z"
+     ;; ("C-c W" . thing-cut-word)
+     ;; ("C-c S" . thing-cut-symbol)
+     ;; ("C-c M" . thing-cut-email)
+     ;; ("C-c F" . thing-cut-filename)
+     ;; ("C-c G" . thing-cut-page)
+     ;; ("C-c T" . thing-cut-sentence)
+     ;; ("C-c O" . thing-cut-whitespace)
+     ;; ("C-c I" . thing-cut-list)
+     ;; ("C-c C" . thing-cut-comment)
+     ;; ("C-c H" . thing-cut-defun)
+     ;; ("C-c P" . thing-cut-parentheses)
+     ;; ("C-c L" . thing-cut-line)
+     ;; ("C-c A" . thing-cut-to-line-beginning)
+     ;; ("C-c E" . thing-cut-to-line-end)
+
+     ("C-c e" . hydra-thing-edit/body)
      )
+   "init-thing-edit"
+   )
+
+
 #+end_src
 
 *** Buffer Edit
 #+begin_src emacs-lisp :tangle etc/init-key.el
-  ;; ### Buffer Edit ###
+  ;; ### Buffer Edit ### 
   ;; --- 缓存编辑
   (lazy-load-set-keys
    '(
@@ -1329,125 +1414,66 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      "my-sudo"
      ))
 #+end_src
-*** 有啲人钟意VI嘅绑定
-#+begin_src emacs-lisp :tangle suk.el
-  ;; vi like key binds
-  ;; (require-package 'evil)
-  ;; (require-package 'evil-escape)
-  ;; (require-package 'evil-exchange)
-  ;; (require-package 'evil-find-char-pinyin)
-  ;; (require-package 'evil-mark-replace)
-  ;; (require-package 'evil-matchit)
-  ;; (require-package 'evil-nerd-commenter)
-  ;; (require-package 'evil-surround)
-  ;; (require-package 'evil-visualstar)
-#+end_src
 *** Description Keys
 =F1 + {f/k/d/i/k}= 或者  =C-h {f/k/d/i}= 可以打开相关帮助
 Use ~C-c C-h~ to open the description menu 
 
 #+begin_src emacs-lisp :tangle suk.el
 
-;;;###autoload
-(with-eval-after-load 'hydra
-  (defhydra my-hydra-describe (:color blue :hint nil)
-    "
-Describe Something: (q to quit)
-_a_ all help for everything screen
-_b_ bindings
-_c_ char
-_C_ coding system
-_f_ function
-_i_ input method
-_k_ key briefly
-_K_ key
-_l_ language environment
-_m_ major mode
-_M_ minor mode
-_n_ current coding system briefly
-_N_ current coding system full
-_o_ lighter indicator
-_O_ lighter symbol
-_p_ package
-_P_ text properties
-_s_ symbol
-_t_ theme
-_v_ variable
-_w_ where is something defined
-"
-	("b" describe-bindings)
-	("C" describe-categories)
-	("c" describe-char)
-	("C" describe-coding-system)
-	("f" describe-function)
-	("i" describe-input-method)
-	("K" describe-key)
-	("k" describe-key-briefly)
-	("l" describe-language-environment)
-	("M" describe-minor-mode)
-	("m" describe-mode)
-	("N" describe-current-coding-system)
-	("n" describe-current-coding-system-briefly)
-	("o" describe-minor-mode-from-indicator)
-	("O" describe-minor-mode-from-symbol)
-	("p" describe-package)
-	("P" describe-text-properties)
-	("q" nil)
-	("a" help)
-	("s" describe-symbol)
-	("t" describe-theme)
-	("v" describe-variable)
-	("w" where-is))
-  (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
-#+end_src
-*** CRUX
-一啲方便嘅函数。使用
-: (use-package crux)
-或者
-: (package-install crux)
-来安装依赖。
-
-我已经使用咗其他一啲类似功能嘅函数，咁就冇必要再使用呢个工具包啦。
-
-Add shortcuts.
-#+begin_src emacs-lisp :tangle suk-unload.el
-  ;; (use-package crux)
-  (lazy-load-global-keys
-   '(
-     ;;文件操作:
-     ;;("C-c r" . crux-rename-file) ; 重命名当前文件或目录。
-     ("C-c k" . crux-rename-file-and-buffer)
-     ;;("C-c r" . crux-recentf-find-file)
-     ("C-c D"  . crux-delete-file-and-buffer) ;  删除当前文件并关闭相关缓冲区。
-     ;; 行/区域操作:
-     ;;crux-move-beginning-of-line: 将光标移动到行的开头。
-     ;;crux-move-end-of-line: 将光标移动到行的末尾。
-     ;;crux-top-join-line: 将当前行与上一行合并。
-
-     ("C-S-k" . crux-kill-whole-line) ;; 剪切整行。
-     ;;("C-J" .crux-kill-and-join-forward) ;;除当前行尾的空白字符，并与下一行合并。
-     ;;复制/剪切/粘贴操作:
-     ;;("C-l" . crux-smart-copy-line-above); 在当前行上方复制当前行。
-     ;;("C-o" . crux-smart-copy-line-below);  在当前行下方复制当前行。
-     ;;   缩进操作:
-
-     ("C-c TAB" . crux-indent-defun) ;; 对当前函数或代码块重新缩进。
-     ;; crux-cleanup-buffer-or-region ;; 清理缓冲区中选定区域或整个缓冲区中的尾随空格和空行。
-     ;; 查找/替换操作:
-     ;; crux-find-user-init-file ;; 快速打开 Emacs 用户配置文件。
-     ;; crux-view-url ;; 在浏览器中查看当前 URL。
-     ;; 其他实用功能:
-
-     ("C-c ;" . crux-kill-other-buffers) ;;关闭所有除当前缓冲区外的其他缓冲区。
-     ("C-M-k" . crux-kill-line-backwards) ;;向后删除整行内容（包括行尾换行符）。
-     ;; crux-reopen-as-root-mode: 以 root 身份重新打开当前文件。
-
-     )
-   "crux"
-   )
-
+  ;;;###autoload
+  (with-eval-after-load 'hydra
+    (defhydra my-hydra-describe (:color blue :hint nil)
+      "
+  Describe Something: (q to quit)
+  _a_ all help for everything screen
+  _b_ bindings
+  _c_ char
+  _C_ coding system
+  _f_ function
+  _i_ input method
+  _k_ key briefly
+  _K_ key
+  _l_ language environment
+  _m_ major mode
+  _M_ minor mode
+  _n_ current coding system briefly
+  _N_ current coding system full
+  _o_ lighter indicator
+  _O_ lighter symbol
+  _p_ package
+  _P_ text properties
+  _s_ symbol
+  _t_ theme
+  _v_ variable
+  _w_ where is something defined
+  "
+      ("b" describe-bindings)
+      ("C" describe-categories)
+      ("c" describe-char)
+      ("C" describe-coding-system)
+      ("f" describe-function)
+      ("i" describe-input-method)
+      ("K" describe-key)
+      ("k" describe-key-briefly)
+      ("l" describe-language-environment)
+      ("M" describe-minor-mode)
+      ("m" describe-mode)
+      ("N" describe-current-coding-system)
+      ("n" describe-current-coding-system-briefly)
+      ("o" describe-minor-mode-from-indicator)
+      ("O" describe-minor-mode-from-symbol)
+      ("p" describe-package)
+      ("P" describe-text-properties)
+      ("q" nil)
+      ("a" help)
+      ("s" describe-symbol)
+      ("t" describe-theme)
+      ("v" describe-variable)
+      ("w" where-is))
+    (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
 #+end_src
 *** Rectangle
+记录一下使用方法。
 - =C-x r k=  Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
 - =C-x r M-w= Save the text of the region-rectangle as the last killed rectangle (copy-rectangle-as-kill).
 - =C-x r d= Delete the text of the region-rectangle (delete-rectangle).
@@ -1466,28 +1492,28 @@ Add shortcuts.
 
 *** Expand region
 #+begin_src emacs-lisp :tangle suk.el
-    ;; expand-region
-    (run-with-idle-timer
-     2 nil
-     #'(lambda()
-         (use-package expand-region ; I prefer stable version
-            :load-path "~/.emacs.d/extensions/expand-region"
-         )
-         (with-eval-after-load 'expand-region
-            (defun treesit-mark-bigger-node ()
-               "Use tree-sitter to mark regions."
-               (let* ((root (treesit-buffer-root-node))
-                      (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
-                      (node-start (treesit-node-start node))
-                      (node-end (treesit-node-end node)))
-                 ;; Node fits the region exactly. Try its parent node instead.
-                 (when (and (= (region-beginning) node-start) (= (region-end) node-end))
-                   (when-let ((node (treesit-node-parent node)))
-                     (setq node-start (treesit-node-start node)
-                           node-end (treesit-node-end node))))
-                 (set-mark node-end)
-                 (goto-char node-start)))
-            )))
+  ;; expand-region
+  (run-with-idle-timer
+   2 nil
+   #'(lambda()
+       (use-package expand-region ; I prefer stable version
+          :load-path "~/.emacs.d/extensions/expand-region"
+       )
+       (with-eval-after-load 'expand-region
+          (defun treesit-mark-bigger-node ()
+             "Use tree-sitter to mark regions."
+             (let* ((root (treesit-buffer-root-node))
+                    (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
+                    (node-start (treesit-node-start node))
+                    (node-end (treesit-node-end node)))
+               ;; Node fits the region exactly. Try its parent node instead.
+               (when (and (= (region-beginning) node-start) (= (region-end) node-end))
+                 (when-let ((node (treesit-node-parent node)))
+                   (setq node-start (treesit-node-start node)
+                         node-end (treesit-node-end node))))
+               (set-mark node-end)
+               (goto-char node-start)))
+          )))
 
 #+end_src
 Add shortcut.
@@ -1507,12 +1533,10 @@ Add shortcut.
          (if emacs/>=28p
              (progn
                ;; vundo :load-path "~/.emacs.d/extensions/vundo"
+               ;; (requir 'vundo)
                (with-eval-after-load 'vundo
                  (setq vundo-glyph-alist vundo-unicode-symbols)))
            (progn
-             ;; use undo-tree
-             ;; (unless emacs/>=28p
-             ;;   (require-package 'undo-tree))
              (setq undo-tree-visualizer-timestamps t
                    undo-tree-visualizer-diff t
                    undo-tree-enable-undo-in-region nil
@@ -1560,61 +1584,49 @@ Add shortcuts.
                   plain-tex-mode))
         (indent-region (region-beginning) (region-end) nil)))
 #+end_src
-*** Spell
-#+begin_src emacs-lisp :tangle suk.el
-  (require-package 'flyspell)
-  (require-package 'langtool)
-  ;; my own patched version is better an open-source grammar, spelling,
-  ;; and style checker, directly into Emacs. LanguageTool supports
-  ;; multiple languages, including English, Spanish, French, German, and
-  ;; many others, making it a versatile tool for checking the quality of
-  ;; your writing.
-#+end_src
 *** Macros
-#+begin_src emacs-lisp :tangle suk-unload.el
-  ;; kèitá bongding
-  ;; f3 start macro(kmacro-start-macro-or-insert-counter),
-  ;; f4 done macro or run marcro (kmacro-end-or-call-macro).
-  ;; C-x ( start macro (kmacro-start-macro),
-  ;; C-x ) end done marco,
-  ;; C-x e run marco(kmacro-end-macro)
-  ;; 先定义一个宏
-  ;; 然后 name-last-kbd-macro
-  ;; 然后 insert-kbd-macro
-  ;; 等到如下类似的配置
-  ;; (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
-  ;;
-  ;;; ### Keyboard Macro ###
-  ;;; --- 键盘宏
-  (lazy-load-global-keys
-   '(
-     ("M-s-s" . kmacro-start-macro-or-insert-counter) ;开始键盘宏或插入 F3
-     ("M-s-d" . kmacro-end-or-call-macro)    ;结束键盘宏或调用 F4
-     ("M-s-c" . kmacro-delete-ring-head)     ;删除当前的键盘宏
-     ("M-s-w" . kmacro-cycle-ring-next)      ;下一个键盘宏
-     ("M-s-e" . kmacro-cycle-ring-previous)  ;上一个键盘宏
-     ("M-s-a" . kmacro-edit-macro)           ;编辑键盘宏
-     ("M-s-v" . name-last-kbd-macro)         ;命令当前键盘宏
-     ("M-s-f" . insert-kbd-macro)            ;插入键盘宏
-     ("M-s-q" . apply-macro-to-region-lines) ;应用键盘宏到选择的区域
-     )
-   "macros+")
-#+end_src
+记录一下使用方式
+#+begin_example
+  f3 start macro(kmacro-start-macro-or-insert-counter),
+  f4 done macro or run marcro (kmacro-end-or-call-macro).
+  C-x ( start macro (kmacro-start-macro),
+  C-x ) end done marco,
+  C-x e run marco(kmacro-end-macro)
+  C-x C-k r apply-macro-to-region-lines
+  C-x C-k C-n kmacro-cycle-ring-next               ;下一个键盘宏
+  C-x C-k C-p kmacro-cycle-ring-previous           ;上一个键盘宏
+  C-x C-k RET kmacro-edit-macro                    ;编辑键盘宏
+  insert-kbd-macro
+  C-x C-k n name-last-kbd-macro is an alias for ‘kmacro-name-last-macro
+  C-x C-k C-d  kmacro-delete-ring-head
+  先定义一个宏
+  然后 name-last-kbd-macro
+  然后 insert-kbd-macro
+  等到如下类似的配置
+  (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
+#+end_example
+
 *** Misc packages
+- Install packages.
+#+begin_src emacs-lisp :tangle install.el
+  (require-package 'paredit) ;; useful for lisp
+  (require-package 'tagedit) ;; useful for html
+  (require-package 'cliphist)
+  (require-package 'iedit)
+  (require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
+
+#+end_src
+- Load packages.
 #+begin_src emacs-lisp :tangle suk.el
   (run-with-idle-timer
    2 nil
    #'(lambda()
-       (require-package 'paredit) ;; useful for lisp
-       (require-package 'tagedit) ;; useful for html
-       (require-package 'cliphist)
-       (require-package 'iedit)
-       (require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
-       ;;(require-package 'textile-mode)
-       ;;(require-package 'vimrc-mode)
-       ;;(require-package 'qrencode)
+       (use-package paredit) ;; useful for lisp
+       (use-package tagedit) ;; useful for html
+       (use-package cliphist)
+       (use-package iedit)
+       (use-package wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
        (use-package writeroom-mode)
-
        ))
 
 #+end_src
@@ -1989,7 +2001,7 @@ Add shortcuts.
   ;; Optimization
   (setq idle-update-delay 1.0)
   (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-  ;; (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
   ;; (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
   ;; GUI Environment
@@ -2437,7 +2449,7 @@ Add shortcuts.
     (require 'project)
 
     ;; 设置项目根目录识别方式（默认是 Git、Mercurial、Bazaar、Subversion、Dockerfile 等）
-    (setq project-find-functions '(project-try-vc project-try-known-dir))
+    (setq project-find-functions '(project-try-vc))
 
     ;; 可选：自定义项目根目录识别
     (defun my/project-root (args)
@@ -3011,8 +3023,8 @@ Add shortcuts.
   ;; Do not generate internal css formatting for HTML exports
   (setq org-export-htmlize-output-type 'css)
   (setq org-export-with-timestamps nil)
-  ;; _ 不转义，相当于#+OPTIONS: ^:{}
-  (setq org-export-with-sub-superscripts '{})
+  ;; _ 不转义，相当于#+OPTIONS: ^:{} ~:{}
+  (setq org-export-with-sub-superscripts "{}")
   ;; Embed inline CSS read from a file.
     ;;;###autoload
   (defun null-or-unboundp (var)
@@ -3802,7 +3814,7 @@ install
     (use-package consult-yasnippet
       :bind ("M-g y" . consult-yasnippet))
     ;; Use Consult to select xref locations with preview
-    (with-eval-afte1r-load 'xref
+    (with-eval-after-load 'xref
       (setq xref-show-xrefs-function #'consult-xref
             xref-show-definitions-function #'consult-xref))
     )
@@ -4182,28 +4194,111 @@ install
   (when sys/linuxp
     (require-package 'treesit-auto)
     (use-package treesit-auto
-       :ensure t
-       :hook (after-init . global-treesit-auto-mode)
-       :init (setq treesit-auto-install 'prompt))
+      :ensure t
+      :hook (after-init . global-treesit-auto-mode)
+      :init
+      (setq treesit-auto-install 'prompt)
+      (setq treesit-language-source-alist
+            '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
+              (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
+              (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+              (css        . ("https://github.com/tree-sitter/tree-sitter-css"))
+              (cmake      . ("https://github.com/uyha/tree-sitter-cmake"))
+              (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
+              (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+              (elisp      . ("https://github.com/Wilfred/tree-sitter-elisp"))
+              (go         . ("https://github.com/tree-sitter/tree-sitter-go"))
+              (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
+              (html       . ("https://github.com/tree-sitter/tree-sitter-html"))
+              (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
+              (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+              (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
+              (lua        . ("https://github.com/Azganoth/tree-sitter-lua"))
+              (make       . ("https://github.com/alemuller/tree-sitter-make"))
+              (markdown   . ("https://github.com/MDeiml/tree-sitter-markdown" nil "tree-sitter-markdown/src"))
+              (ocaml      . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
+              (org        . ("https://github.com/milisims/tree-sitter-org"))
+              (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
+              (php        . ("https://github.com/tree-sitter/tree-sitter-php"))
+              (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
+              (tsx        . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
+              (ruby       . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+              (rust       . ("https://github.com/tree-sitter/tree-sitter-rust"))
+              (sql        . ("https://github.com/m-novikov/tree-sitter-sql"))
+              (vue        . ("https://github.com/merico-dev/tree-sitter-vue"))
+              (yaml       . ("https://github.com/ikatyang/tree-sitter-yaml"))
+              (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))
+              (zig        . ("https://github.com/GrayJack/tree-sitter-zig"))))
+      (add-to-list 'major-mode-remap-alist '(sh-mode         . bash-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(c-mode          . c-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(c++-mode        . c++-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(c-or-c++-mode   . c-or-c++-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(css-mode        . css-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(js-mode         . js-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(java-mode       . java-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(js-json-mode    . json-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(makefile-mode   . cmake-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(python-mode     . python-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(ruby-mode       . ruby-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(conf-toml-mode  . toml-ts-mode))
+      (add-to-list 'auto-mode-alist '("\\(?:Dockerfile\\(?:\\..*\\)?\\|\\.[Dd]ockerfile\\)\\'" . dockerfile-ts-mode))
+      (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
+      (add-to-list 'auto-mode-alist '("/go\\.mod\\'" . go-mod-ts-mode))
+      (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
+      (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+      (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-ts-mode))
+      )
     (global-treesit-auto-mode))
 #+end_src
 ** copilot
 #+begin_src emacs-lisp :tangle suk.el
 
-  ;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
-  ;;(add-to-list 'load-path "C:\\green\\emacs-suk\\.emacs.d\\extensions\\copilot\\copilot.el")
-  ;;(require 'copilot)
-  ;;(add-hook 'prog-mode-hook 'copilot-mode)
-  ;;
-  ;;;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
-  ;;;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
-  ;;(define-key copilot-completion-map
-  ;;            (kbd "<tab>")
-  ;;            'copilot-accept-completion)
-  ;;(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-  ;; (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
-  ;;
-  ;;;; Login to Copilot by M-x copilot-login. You can also check the status by M-x copilot-diagnose (NotAuthorized means you don't have a valid subscription).
+
+  (when sys/win32p 
+    (setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
+    (add-to-list 'load-path "C:\\green\\emacs-suk\\.emacs.d\\extensions\\copilot\\copilot.el")
+
+    )
+  (unless sys/win32p
+    (setq copilot-node-executable "~/.nvm/versions/node/v22.13.0/bin/node")
+    (add-to-list 'load-path "~/.emacs.d/extensions/copilot/copilot.el")
+    )
+
+
+  (use-package copilot)
+  (with-eval-after-load 'copilot
+
+    ;; 全局设置 Copilot 的缩进偏移量为 4
+    (setq copilot-indent-offset 4)
+    ;; 设置 Copilot 缩进偏移量
+    (let ((copilot-offsets
+           '((python-mode . 4)
+             (c-mode . 2)
+             (js-mode . 2)
+             (bat-mode . 2))))
+      (dolist (pair copilot-offsets)
+        (let ((mode (car pair))
+              (offset (cdr pair)))
+          (add-hook mode (lambda () (setq copilot-indent-offset offset))))))
+    (add-hook 'prog-mode-hook 'copilot-mode)
+
+    ;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
+    ;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
+    (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+    (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+    (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
+
+    ;;;; 忽略 Copilot 的特定警告
+    ;;(add-to-list 'warning-suppress-types '(copilot quail--infer-indentation-offset found no mode-specific indentation offset))
+    ;;;; 设置 Emacs 的最低警告级别为 warning`，忽略 `emergency 级别以下的警告
+    ;; (setq warning-minimum-level :warning)
+    ;; 闭嘴
+    (setq copilot-indent-offset-warning-disable t)
+    )
+
+  ;; Login to Copilot by M-x copilot-login. You can also check the
+  ;; status by M-x copilot-diagnose (NotAuthorized means you don't have
+  ;; a valid subscription).
 
 #+end_src
 ** Web
@@ -4684,8 +4779,8 @@ install
          :ensure t
          :config (pdf-tools-install))
 
-       ;; (require 'init-im)
-       (require 'rain)
+       (require 'init-rime)
+       ;; (require 'rain)
        (when (display-graphic-p)
          ;; only graphic packages
          (require-package 'vterm))
