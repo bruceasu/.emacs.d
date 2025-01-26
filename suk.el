@@ -1,118 +1,3 @@
-;; set const
-(defconst custom-template-file
-  (expand-file-name "custom-template.el" user-emacs-directory)
-  "Custom template file of Suk's Emacs.")
-
-(defconst suk-homepage
-  "https://github.com/bruceasu/.emacs.d"
-  "The Github page of this Emacs config.")
-
-
-(defgroup suk nil
-  "suk Emacs customizations."
-  :group 'convenience
-  :link '(url-link :tag "Homepage" "https://github.com/bruceasu/.emacs.d"))
-
-(defcustom suk-icon t
-  "Display icons or not."
-  :group 'suk
-  :type 'boolean)
-
-(defcustom org-roam-directory (expand-file-name "RoamNotes" user-home-dir)
-  "The org roam directory."
-  :group 'suk
-  :type 'string)
-
-(defcustom org-files-directory (expand-file-name "org" user-home-dir)
-  "The org roam directory."
-  :group 'suk
-  :type 'string)
-
-(defcustom my-org-inline-css-file "~/.emacs.d/share/my-org-style-min.css"
-  "The org css style file."
-  :group 'suk
-  :type 'string)
-
-
-
-(defcustom suk-prettify-symbols-alist
-  '(("lambda" . ?λ)
-    ("<-"     . ?←)
-    ("->"     . ?→)
-    ("->>"    . ?↠)
-    ("=>"     . ?⇒)
-    ("map"    . ?↦)
-    ("/="     . ?≠)
-    ("!="     . ?≠)
-    ("=="     . ?≡)
-    ("<="     . ?≤)
-    (">="     . ?≥)
-    ("=<<"    . (?= (Br . Bl) ?≪))
-    (">>="    . (?≫ (Br . Bl) ?=))
-    ("<=<"    . ?↢)
-    (">=>"    . ?↣)
-    ("&&"     . ?∧)
-    ("||"     . ?∨)
-    ("not"    . ?¬))
-  "A list of symbol prettifications. Nil to use font supports ligatures."
-  :group 'suk
-  :type '(alist :key-type string :value-type (choice character sexp)))
-
-(defcustom suk-prettify-org-symbols-alist
-  '(("[ ]"            . ?)
-    ("[-]"            . ?)
-    ("[X]"            . ?)
-
-    ;; (":PROPERTIES:"   . ?)
-    ;; (":ID:"           . ?🪪)
-    ;; (":END:"          . ?🔚)
-
-    ;; ("#+ARCHIVE:"     . ?📦)
-    ;; ("#+AUTHOR:"      . ?👤)
-    ;; ("#+CREATOR:"     . ?💁)
-    ;; ("#+DATE:"        . ?📆)
-    ;; ("#+DESCRIPTION:" . ?⸙)
-    ;; ("#+EMAIL:"       . ?📧)
-    ;; ("#+HEADERS"      . ?☰)
-    ;; ("#+OPTIONS:"     . ?⚙)
-    ;; ("#+SETUPFILE:"   . ?⚒)
-    ("#+TAGS:"        . ?🏷)
-    ("#+TITLE:"       . ?📓)
-
-    ("#+BEGIN_SRC"    . ?✎)
-    ("#+END_SRC"      . ?□)
-    ("#+BEGIN_QUOTE"  . ?«)
-    ("#+END_QUOTE"    . ?»)
-    ("#+RESULTS:"     . ?💻)
-    )
-  "A list of symbol prettifications for `org-mode'."
-  :group 'suk
-  :type '(alist :key-type string :value-type (choice character sexp)))
-
-
-;; Load `custom-file'
-;; If it doesn't exist, copy from the template, then load it.
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-
-(let ((custom-template-file
-       (expand-file-name "custom-template.el" user-emacs-directory)))
-  (if (and (file-exists-p custom-template-file)
-           (not (file-exists-p custom-file)))
-      (copy-file custom-template-file custom-file)))
-
-(load-if-exists custom-file)
-;;(if (file-exists-p custom-file)
-;;    (load custom-file))
-
-;; Load `custom-post.el'
-;; Put personal configurations to override defaults here.
-(add-hook 'after-init-hook
-          (lambda ()
-            (let ((file
-                   (expand-file-name "custom-post.el" user-emacs-directory)))
-              (if (file-exists-p file)
-                  (load file)))))
-
 (setq user-full-name "Suk")
 (setq user-mail-address "bruceasu@gmail.com")
 
@@ -125,7 +10,7 @@
                        ; TAB，使用 C-q TAB 來輸入 TAB 字符
  )
 (tooltip-mode -1)                          ;不要显示任何 tooltips
-(delete-selection-mode 1)                  ; 选中文本后输入会覆盖
+(delete-selection-mode 1)                  ;选中文本后输入会覆盖
 (size-indication-mode 1)
 (server-mode 1)
 (global-hl-line-mode 1)                    ;高亮当前行
@@ -166,7 +51,7 @@
 (setq minibuffer-message-timeout 2)       ;显示消息超时的时间
 (setq auto-revert-mode 1)                 ;自动更新buffer
 (setq show-paren-style 'parentheses)      ;括号匹配显示但不是烦人的跳到另一个括号。
-;;(setq blink-matching-paren nil)           ;当插入右括号时不显示匹配的左括号
+;;(setq blink-matching-paren nil)         ;当插入右括号时不显示匹配的左括号
 (setq message-log-max t)                  ;设置message记录全部消息, 而不用截去
 (setq require-final-newline nil)          ;不自动添加换行符到末尾, 有些情况会出现错误
 (setq ediff-window-setup-function
@@ -265,8 +150,9 @@
 (prefer-coding-system 'utf-8)
 
 ;; -*- coding: utf-8; lexical-binding: t; -*-
-    (defun suk/wait-for-modules (callback &rest modules)
-      "Wait for MODULES to be loaded and then call CALLBACK.
+
+(defun suk/wait-for-modules (callback &rest modules)
+  "Wait for MODULES to be loaded and then call CALLBACK.
 使用示例
 (wait-for-modules
  'my-callback-function
@@ -274,116 +160,115 @@
  'module2
  'module3)
 "
-      (let ((all-loaded nil))
-        (dolist (module modules)
-          (with-eval-after-load module
-            (setq all-loaded t)))
-        (if all-loaded
-            (funcall callback)
-          (add-hook 'after-load-functions
-                    (lambda ()
-                      (when (cl-every #'featurep modules)
-                        (funcall callback)))))))
+  (let ((all-loaded nil))
+    (dolist (module modules)
+      (with-eval-after-load module
+        (setq all-loaded t)))
+    (if all-loaded
+        (funcall callback)
+      (add-hook 'after-load-functions
+                (lambda ()
+                  (when (cl-every #'featurep modules)
+                    (funcall callback)))))))
 
-    ;;;###autoload
-    (defun run-cmd-and-replace-region (cmd)
-      "Run CMD in shell on selected region or current buffer.
+;;;###autoload
+(defun run-cmd-and-replace-region (cmd)
+  "Run CMD in shell on selected region or current buffer.
     Then replace the region or buffer with cli output."
-      (let* ((orig-point (point))
-             (b (if (region-active-p) (region-beginning) (point-min)))
-             (e (if (region-active-p) (region-end) (point-max))))
-        (shell-command-on-region b e cmd nil t)
-        (goto-char orig-point)))
+  (let* ((orig-point (point))
+         (b (if (region-active-p) (region-beginning) (point-min)))
+         (e (if (region-active-p) (region-end) (point-max))))
+    (shell-command-on-region b e cmd nil t)
+    (goto-char orig-point)))
 
 
-    ;;;###autoload
-    (defun my-buffer-str ()
-      (buffer-substring-no-properties (point-min) (point-max)))
+;;;###autoload
+(defun my-buffer-str ()
+  (buffer-substring-no-properties (point-min) (point-max)))
 
 
 
-    (defmacro suk/timer (&rest body)
-      "Measure the time of code BODY running."
-      `(let ((time (current-time)))
-         ,@body
-         (float-time (time-since time))))
+(defmacro suk/timer (&rest body)
+  "Measure the time of code BODY running."
+  `(let ((time (current-time)))
+     ,@body
+     (float-time (time-since time))))
 
-    ;;;###autoload
-    (defun icons-displayable-p ()
-      "Return non-nil if icons are displayable."
-      (and suk-icon
-           (or (featurep 'nerd-icons)
-               (require 'nerd-icons nil t))))
-    ;;;###autoload
-    (defun suk-treesit-available-p ()
-      "Check whether tree-sitter is available.
+;;;###autoload
+(defun icons-displayable-p ()
+  "Return non-nil if icons are displayable."
+  (and suk-icon
+       (or (featurep 'nerd-icons)
+           (require 'nerd-icons nil t))))
+;;;###autoload
+(defun suk-treesit-available-p ()
+  "Check whether tree-sitter is available.
     Native tree-sitter is introduced since 29.1."
-      (and (fboundp 'treesit-available-p)
-           (treesit-available-p)))
+  (and (fboundp 'treesit-available-p)
+       (treesit-available-p)))
+;;;###autoload
+(defun too-long-file-p ()
+  "Check whether the file is too long."
+  (or (> (buffer-size) 100000)
+      (and (fboundp 'buffer-line-statistics)
+           (> (car (buffer-line-statistics)) 10000))))
+
+;; {{ copied from http://ergoemacs.org/emacs/elisp_read_file_content.html
     ;;;###autoload
-    (defun too-long-file-p ()
-      "Check whether the file is too long."
-      (or (> (buffer-size) 100000)
-          (and (fboundp 'buffer-line-statistics)
-               (> (car (buffer-line-statistics)) 10000))))
+(defun my-get-string-from-file (file)
+  "Return FILE's content."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (buffer-string)))
 
-    ;; {{ copied from http://ergoemacs.org/emacs/elisp_read_file_content.html
-    ;;;###autoload
-    (defun my-get-string-from-file (file)
-      "Return FILE's content."
-      (with-temp-buffer
-        (insert-file-contents file)
-        (buffer-string)))
+;;;###autoload
+(defun my-read-lines (file)
+  "Return a list of lines of FILE."
+  (split-string (my-get-string-from-file file) "\n" t))
+;; }}
 
-    ;;;###autoload
-    (defun my-read-lines (file)
-      "Return a list of lines of FILE."
-      (split-string (my-get-string-from-file file) "\n" t))
-    ;; }}
-
-    ;;;###autoload
-    (defun path-in-directory-p (file directory)
-      "FILE is in DIRECTORY."
-      (let* ((pattern (concat "^" (file-name-as-directory directory))))
-        (if (string-match pattern file) file)))
+;;;###autoload
+(defun path-in-directory-p (file directory)
+  "FILE is in DIRECTORY."
+  (let* ((pattern (concat "^" (file-name-as-directory directory))))
+    (if (string-match pattern file) file)))
 
 
-    ;;;###autoload
-    (defun my-send-string-to-cli-stdin (string program)
-      "Send STRING to cli PROGRAM's stdin."
-      (with-temp-buffer
-        (insert string)
-        (call-process-region (point-min) (point-max) program)))
+;;;###autoload
+(defun my-send-string-to-cli-stdin (string program)
+  "Send STRING to cli PROGRAM's stdin."
+  (with-temp-buffer
+    (insert string)
+    (call-process-region (point-min) (point-max) program)))
 
-    ;;;###autoload
-    (defun my-write-string-to-file (string file)
-      "Write STRING to FILE."
-      (with-temp-buffer
-        (insert string)
-        (write-region (point-min) (point-max) file)))
+;;;###autoload
+(defun my-write-string-to-file (string file)
+  "Write STRING to FILE."
+  (with-temp-buffer
+    (insert string)
+    (write-region (point-min) (point-max) file)))
 
-    ;;;###autoload
-    (defun my-async-shell-command (command)
-      "Execute string COMMAND asynchronously."
-      (let* ((proc (start-process "Shell"
-                                  nil
-                                  shell-file-name
-                                  shell-command-switch command)))
-        (set-process-sentinel proc `(lambda (process signal)
-                                      (let* ((status (process-status process)))
-                                        (when (memq status '(exit signal))
-                                          (unless (string= (substring signal 0 -1) "finished")
-                                            (message "Failed to run \"%s\"." ,command))))))))
+;;;###autoload
+(defun my-async-shell-command (command)
+  "Execute string COMMAND asynchronously."
+  (let* ((proc (start-process "Shell" nil shell-file-name shell-command-switch command)))
+    (set-process-sentinel proc
+                          `(lambda (process signal)
+                             (let* ((status (process-status process)))
+                               (when (memq status '(exit signal))
+                                 (unless (string= (substring signal 0 -1) "finished")
+                                   (message "Failed to run \"%s\"." ,command))))))))
 
-    (defvar my-disable-idle-timer (daemonp)
-      "Function passed to `my-run-with-idle-timer' is run immediately.")
-    (defun my-run-with-idle-timer (seconds func)
-      "After SECONDS, run function FUNC once."
-      (cond
-       (my-disable-idle-timer
-        (funcall func))
-       (t
-        (run-with-idle-timer seconds nil func))))
+(defvar my-disable-idle-timer (daemonp)
+  "Function passed to `my-run-with-idle-timer' is run immediately.")
+
+(defun my-run-with-idle-timer (seconds func)
+  "After SECONDS, run function FUNC once."
+  (cond
+   (my-disable-idle-timer
+    (funcall func))
+   (t
+    (run-with-idle-timer seconds nil func))))
 
 (require 'init-key)
 
@@ -400,14 +285,15 @@
 ;; 一啲方便嘅函数
 (global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
 (global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp
-(global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
-(global-set-key (kbd "C-x R") 'recentf-open)   ;; 快捷键 C-x R 用于打开最近文件
+(global-set-key (kbd "C-)") 'forward-sexp)         ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
+(global-set-key (kbd "C-x R") 'recentf-open)     ;; 快捷键 C-x R 用于打开最近文件
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 (when emacs/>=29p
   ;; (keymap-global-set <key> <cmmd>)
-  (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)  ;; 快捷键 C-<f11> 用于切换全屏模式
+  (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)            ;; 快捷键 C-<f11> 用于切换全屏模式
   (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
-  (keymap-set global-map "RET" #'newline-and-indent)  ;; 回车键 RET 用于创建新行并对齐
+  (keymap-set global-map "RET" #'newline-and-indent)                             ;; 回车键 RET 用于创建新行并对齐
   (keymap-set global-map "S-<return>" #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
   ) 
 (unless emacs/>=29p
@@ -431,9 +317,12 @@
    ("C-<" . remember-jump)              ;记忆跳转函数
    ("M-s-," . point-stack-pop)          ;buffer索引跳转
    ("M-s-." . point-stack-push)         ;buffer索引标记
-   ("s-g" . goto-percent) ;跳转到当前Buffer的文本百分比, 单位为字符
+   ("s-g" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
    ("s-J" . scroll-up-one-line)         ;向上滚动一行
    ("s-K" . scroll-down-one-line)       ;向下滚动一行
+   ("C-S-i" . scroll-up-one-line)       ;向上滚动一行
+   ("C-S-k" . scroll-down-one-line)     ;向下滚动一行
+
    )
  "basic-toolkit")
 ;;; ### Ace jump ###
@@ -458,23 +347,83 @@
      (require 'goto-chg)
      ))
 
+;;;###autoload
+(defun insert-hash-template ()
+  "插入HASH模板：
+#=================================================
+# <cursor>
+#-------------------------------------------------
+光标位于第二行的 # 后面。"
+  (interactive)
+  (insert "#=================================================\n")
+  (insert "# \n")
+  (insert "#-------------------------------------------------\n")
+  ;; 将光标移动到第二行的 # 后面
+  (forward-line -2)          ; 移动到上一行（即第二行）
+  (end-of-line)              ; 移动到行尾
+
+  )
+
+;;;###autoload
+(defun insert-slash-template ()
+  "插入Slash comment模板：
+#=================================================
+# <cursor>
+#-------------------------------------------------
+光标位于第二行的 // 后面。"
+  (interactive)
+  (insert "//=================================================\n")
+  (insert "// \n")
+  (insert "//-------------------------------------------------\n")
+  ;; 将光标移动到第二行的 # 后面
+  (forward-line -2)          ; 移动到上一行（即第二行）
+  (end-of-line)              ; 移动到行尾
+  )
+
+
+;;;###autoload
+(defun insert-star-template ()
+  "插入Slash comment模板：
+#=================================================
+# <cursor>
+#-------------------------------------------------
+光标位于第二行的 # 后面。"
+  (interactive)
+  (insert "/*=================================================*/\n")
+  (insert "/*  */\n")
+  (insert "/*-------------------------------------------------*/\n")
+  (forward-line -2)         
+  (end-of-line)          
+  (backward-char 3)      
+  )
+
+;;;###autoload
+(defun insert-javadoc-template ()
+  "插入Javadoc模板：
+#=================================================
+# <cursor>
+#-------------------------------------------------
+光标位于第二行的 * 后面。"
+  (interactive)
+  (insert "/**\n")
+  (insert " * \n")
+  (insert " */\n")
+  (forward-line -2)       
+  (end-of-line)         
+  )
+
+;; 绑定快捷键 C-c t 到插入自定义模板的函数
+(global-set-key (kbd "C-c t h") 'insert-hash-template)
+(global-set-key (kbd "C-c t c") 'insert-slash-template)
+(global-set-key (kbd "C-c t s") 'insert-star-template)
+(global-set-key (kbd "C-c t j") 'insert-javadoc-template)
+
 ;;; ### sudo ###
 (when sys/linuxp
   (lazy-load-global-keys
    '(("C-z C-s" . suk/sudo/body))
    "my-sudo"
    ))
-
-;; vi like key binds
-;; (require-package 'evil)
-;; (require-package 'evil-escape)
-;; (require-package 'evil-exchange)
-;; (require-package 'evil-find-char-pinyin)
-;; (require-package 'evil-mark-replace)
-;; (require-package 'evil-matchit)
-;; (require-package 'evil-nerd-commenter)
-;; (require-package 'evil-surround)
-;; (require-package 'evil-visualstar)
 
 ;;;###autoload
 (with-eval-after-load 'hydra
@@ -503,29 +452,29 @@ _t_ theme
 _v_ variable
 _w_ where is something defined
 "
-	("b" describe-bindings)
-	("C" describe-categories)
-	("c" describe-char)
-	("C" describe-coding-system)
-	("f" describe-function)
-	("i" describe-input-method)
-	("K" describe-key)
-	("k" describe-key-briefly)
-	("l" describe-language-environment)
-	("M" describe-minor-mode)
-	("m" describe-mode)
-	("N" describe-current-coding-system)
-	("n" describe-current-coding-system-briefly)
-	("o" describe-minor-mode-from-indicator)
-	("O" describe-minor-mode-from-symbol)
-	("p" describe-package)
-	("P" describe-text-properties)
-	("q" nil)
-	("a" help)
-	("s" describe-symbol)
-	("t" describe-theme)
-	("v" describe-variable)
-	("w" where-is))
+    ("b" describe-bindings)
+    ("C" describe-categories)
+    ("c" describe-char)
+    ("C" describe-coding-system)
+    ("f" describe-function)
+    ("i" describe-input-method)
+    ("K" describe-key)
+    ("k" describe-key-briefly)
+    ("l" describe-language-environment)
+    ("M" describe-minor-mode)
+    ("m" describe-mode)
+    ("N" describe-current-coding-system)
+    ("n" describe-current-coding-system-briefly)
+    ("o" describe-minor-mode-from-indicator)
+    ("O" describe-minor-mode-from-symbol)
+    ("p" describe-package)
+    ("P" describe-text-properties)
+    ("q" nil)
+    ("a" help)
+    ("s" describe-symbol)
+    ("t" describe-theme)
+    ("v" describe-variable)
+    ("w" where-is))
   (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
 
 ;; expand-region
@@ -558,12 +507,10 @@ _w_ where is something defined
        (if emacs/>=28p
            (progn
              ;; vundo :load-path "~/.emacs.d/extensions/vundo"
+             ;; (requir 'vundo)
              (with-eval-after-load 'vundo
                (setq vundo-glyph-alist vundo-unicode-symbols)))
          (progn
-           ;; use undo-tree
-           ;; (unless emacs/>=28p
-           ;;   (require-package 'undo-tree))
            (setq undo-tree-visualizer-timestamps t
                  undo-tree-visualizer-diff t
                  undo-tree-enable-undo-in-region nil
@@ -593,27 +540,15 @@ _w_ where is something defined
                 plain-tex-mode))
       (indent-region (region-beginning) (region-end) nil)))
 
-(require-package 'flyspell)
-(require-package 'langtool)
-;; my own patched version is better an open-source grammar, spelling,
-;; and style checker, directly into Emacs. LanguageTool supports
-;; multiple languages, including English, Spanish, French, German, and
-;; many others, making it a versatile tool for checking the quality of
-;; your writing.
-
 (run-with-idle-timer
  2 nil
  #'(lambda()
-     (require-package 'paredit) ;; useful for lisp
-     (require-package 'tagedit) ;; useful for html
-     (require-package 'cliphist)
-     (require-package 'iedit)
-     (require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
-     ;;(require-package 'textile-mode)
-     ;;(require-package 'vimrc-mode)
-     ;;(require-package 'qrencode)
+     (use-package paredit) ;; useful for lisp
+     (use-package tagedit) ;; useful for html
+     (use-package cliphist)
+     (use-package iedit)
+     (use-package wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
      (use-package writeroom-mode)
-
      ))
 
 (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
@@ -890,7 +825,7 @@ _w_ where is something defined
 ;; Optimization
 (setq idle-update-delay 1.0)
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-;; (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+(when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 ;; (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 ;; GUI Environment
@@ -1240,7 +1175,7 @@ _w_ where is something defined
 (require 'project)
 
 ;; 设置项目根目录识别方式（默认是 Git、Mercurial、Bazaar、Subversion、Dockerfile 等）
-(setq project-find-functions '(project-try-vc project-try-known-dir))
+(setq project-find-functions '(project-try-vc))
 
 ;; 可选：自定义项目根目录识别
 (defun my/project-root (args)
@@ -1721,8 +1656,8 @@ _w_ where is something defined
 ;; Do not generate internal css formatting for HTML exports
 (setq org-export-htmlize-output-type 'css)
 (setq org-export-with-timestamps nil)
-;; _ 不转义，相当于#+OPTIONS: ^:{}
-(setq org-export-with-sub-superscripts '{})
+;; _ 不转义，相当于#+OPTIONS: ^:{} ~:{}
+(setq org-export-with-sub-superscripts "{}")
 ;; Embed inline CSS read from a file.
   ;;;###autoload
 (defun null-or-unboundp (var)
@@ -2349,7 +2284,7 @@ and `optipng' to reduce the file size if the program is present."
   (use-package consult-yasnippet
     :bind ("M-g y" . consult-yasnippet))
   ;; Use Consult to select xref locations with preview
-  (with-eval-afte1r-load 'xref
+  (with-eval-after-load 'xref
     (setq xref-show-xrefs-function #'consult-xref
           xref-show-definitions-function #'consult-xref))
   )
@@ -2595,25 +2530,107 @@ and `optipng' to reduce the file size if the program is present."
 (when sys/linuxp
   (require-package 'treesit-auto)
   (use-package treesit-auto
-     :ensure t
-     :hook (after-init . global-treesit-auto-mode)
-     :init (setq treesit-auto-install 'prompt))
+    :ensure t
+    :hook (after-init . global-treesit-auto-mode)
+    :init
+    (setq treesit-auto-install 'prompt)
+    (setq treesit-language-source-alist
+          '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
+            (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
+            (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+            (css        . ("https://github.com/tree-sitter/tree-sitter-css"))
+            (cmake      . ("https://github.com/uyha/tree-sitter-cmake"))
+            (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
+            (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+            (elisp      . ("https://github.com/Wilfred/tree-sitter-elisp"))
+            (go         . ("https://github.com/tree-sitter/tree-sitter-go"))
+            (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
+            (html       . ("https://github.com/tree-sitter/tree-sitter-html"))
+            (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
+            (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+            (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
+            (lua        . ("https://github.com/Azganoth/tree-sitter-lua"))
+            (make       . ("https://github.com/alemuller/tree-sitter-make"))
+            (markdown   . ("https://github.com/MDeiml/tree-sitter-markdown" nil "tree-sitter-markdown/src"))
+            (ocaml      . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
+            (org        . ("https://github.com/milisims/tree-sitter-org"))
+            (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
+            (php        . ("https://github.com/tree-sitter/tree-sitter-php"))
+            (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
+            (tsx        . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
+            (ruby       . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+            (rust       . ("https://github.com/tree-sitter/tree-sitter-rust"))
+            (sql        . ("https://github.com/m-novikov/tree-sitter-sql"))
+            (vue        . ("https://github.com/merico-dev/tree-sitter-vue"))
+            (yaml       . ("https://github.com/ikatyang/tree-sitter-yaml"))
+            (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))
+            (zig        . ("https://github.com/GrayJack/tree-sitter-zig"))))
+    (add-to-list 'major-mode-remap-alist '(sh-mode         . bash-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(c-mode          . c-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(c++-mode        . c++-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(c-or-c++-mode   . c-or-c++-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(css-mode        . css-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(js-mode         . js-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(java-mode       . java-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(js-json-mode    . json-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(makefile-mode   . cmake-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(python-mode     . python-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(ruby-mode       . ruby-ts-mode))
+    (add-to-list 'major-mode-remap-alist '(conf-toml-mode  . toml-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\(?:Dockerfile\\(?:\\..*\\)?\\|\\.[Dd]ockerfile\\)\\'" . dockerfile-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
+    (add-to-list 'auto-mode-alist '("/go\\.mod\\'" . go-mod-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-ts-mode))
+    )
   (global-treesit-auto-mode))
 
-;;(setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
-;;(add-to-list 'load-path "C:\\green\\emacs-suk\\.emacs.d\\extensions\\copilot\\copilot.el")
-;;(require 'copilot)
-;;(add-hook 'prog-mode-hook 'copilot-mode)
-;;
-;;;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
-;;;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
-;;(define-key copilot-completion-map
-;;            (kbd "<tab>")
-;;            'copilot-accept-completion)
-;;(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-;; (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
-;;
-;;;; Login to Copilot by M-x copilot-login. You can also check the status by M-x copilot-diagnose (NotAuthorized means you don't have a valid subscription).
+(when sys/win32p 
+  (setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
+  (add-to-list 'load-path "C:\\green\\emacs-suk\\.emacs.d\\extensions\\copilot\\copilot.el")
+
+  )
+(unless sys/win32p
+  (setq copilot-node-executable "~/.nvm/versions/node/v22.13.0/bin/node")
+  (add-to-list 'load-path "~/.emacs.d/extensions/copilot/copilot.el")
+  )
+
+
+(use-package copilot)
+(with-eval-after-load 'copilot
+
+  ;; 全局设置 Copilot 的缩进偏移量为 4
+  (setq copilot-indent-offset 4)
+  ;; 设置 Copilot 缩进偏移量
+  (let ((copilot-offsets
+         '((python-mode . 4)
+           (c-mode . 2)
+           (js-mode . 2)
+           (bat-mode . 2))))
+    (dolist (pair copilot-offsets)
+      (let ((mode (car pair))
+            (offset (cdr pair)))
+        (add-hook mode (lambda () (setq copilot-indent-offset offset))))))
+  (add-hook 'prog-mode-hook 'copilot-mode)
+
+  ;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
+  ;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
+  (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+  (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+  (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
+
+  ;;;; 忽略 Copilot 的特定警告
+  ;;(add-to-list 'warning-suppress-types '(copilot quail--infer-indentation-offset found no mode-specific indentation offset))
+  ;;;; 设置 Emacs 的最低警告级别为 warning`，忽略 `emergency 级别以下的警告
+  ;; (setq warning-minimum-level :warning)
+  ;; 闭嘴
+  (setq copilot-indent-offset-warning-disable t)
+  )
+
+;; Login to Copilot by M-x copilot-login. You can also check the
+;; status by M-x copilot-diagnose (NotAuthorized means you don't have
+;; a valid subscription).
 
 ;; {{ typescript
 (use-package typescript-mode
