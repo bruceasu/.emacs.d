@@ -17,7 +17,7 @@
   _h_ Defun                        _L_ Line
   _p_ Parentheses                  _A_ To line beginning
   _l_ Line                         _E_ To line end
-  _a_ To line beginning
+  _a_ To line beginning            _n_ Show file name
   _e_ To line end
   "
   ("w" thing-copy-word)
@@ -51,10 +51,23 @@
   ("L" thing-cut-line)
   ("A" thing-cut-to-line-beginning)
   ("E" thing-cut-to-line-end)
-
+  ("n" show-file-name)
+  
   ("q" nil "Cancel")
   )
 
 (global-set-key (kbd "C-c e") 'hydra-thing-edit/body)
+
+;; 标题显示完整路径
+(setq frame-title-format
+      (list (format "%s %%S: %%j " (system-name))
+            '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
+;; 复制当前文件绝对路径到剪贴板
+(defun show-file-name ()
+  "Show the full path file name in the minibuffer."
+  (interactive)
+  (let ((name (buffer-file-name)))
+    (kill-new name)
+    (message name)))
 
 (provide 'init-thing-edit)

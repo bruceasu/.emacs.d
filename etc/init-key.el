@@ -9,10 +9,10 @@
 ;; ### move text ###
 (lazy-load-global-keys
  '(
-   ("M-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
-   ("M-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
-   ("M-S-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
-   ("M-S-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
+   ("C-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
+   ("C-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
+   ("C-S-<down>" . move-text-down)  ;把光标所在的整行文字(或标记)下移一行
+   ("C-S-<up>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
 
@@ -202,10 +202,10 @@
 
 (lazy-load-global-keys
  '(
-   ("<C-S-up>"    . buf-move-up)   
-   ("<C-S-down>"  . buf-move-down)
-   ("<C-S-left>"  . buf-move-left)  
-   ("<C-S-right>" . buf-move-right)   
+   ("C-c C-<up>"    . buf-move-up)   
+   ("C-c C-<down>"  . buf-move-down)
+   ("C-c C-<left>"  . buf-move-left)  
+   ("C-c C-<right>" . buf-move-right)   
    )
  "buffer-move")
 

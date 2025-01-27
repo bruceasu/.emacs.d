@@ -11,19 +11,42 @@
  "C-z"
  )
 
-(when (display-graphic-p)
-  (use-package centaur-tabs
-    :demand
-    :init
-    ;; Set the style to rounded with icons
-    (setq centaur-tabs-style "bar")
-    (setq centaur-tabs-set-icons t)
-    :config
-    (centaur-tabs-mode t)
-    :bind
-    ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
-    ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
-)
+(use-package ivy
+ :ensure t
+ :diminish (ivy-mode)
+ :config
+ (ivy-mode 1)
+ (setq ivy-use-virtual-buffers t)
+ (setq enable-recursive-minibuffers t)
+ (setq ivy-count-format "%d/%d ")
+ (setq ivy-display-style 'fancy)
+
+ (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
+ (setq ivy-re-builders-alist
+       '((counsel-rg . ivy--regex-plus)
+         (swiper . ivy--regex-plus)
+         (swiper-isearch . ivy--regex-plus)
+         (t . ivy--regex-ignore-order)))
+
+ (when (display-graphic-p)    
+   (use-package ivy-posframe))
+ )
+
+(use-package swiper
+  :bind
+  (
+   ("C-x M-s" . swiper)
+   ("C-s"     . swiper-isearch)
+   ("C-r"     . swiper-isearch)
+   ("C-c C-r" . ivy-resume)
+   )
+  :config
+  (progn
+    ;;(ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    ;;(setq ivy-display-style 'fancy)
+    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
+  )
 
 ;;; ### Sdcv ###
 ;;; --- 星际译王命令行

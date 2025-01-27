@@ -400,6 +400,10 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
     :type '(alist :key-type string :value-type (choice character sexp)))
 
 
+   (defcustom suk-rime t
+    "Display use emacs rime or not."
+    :group 'suk
+    :type 'boolean)
   ;; Load `custom-file'
   ;; If it doesn't exist, copy from the template, then load it.
   (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
@@ -410,7 +414,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
              (not (file-exists-p custom-file)))
         (copy-file custom-template-file custom-file)))
 
-  (load-if-exists custom-file)
+  (load-file custom-file)
   ;;(if (file-exists-p custom-file)
   ;;    (load custom-file))
 
@@ -1159,10 +1163,10 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
   ;; ### move text ###
   (lazy-load-global-keys
    '(
-     ("M-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
-     ("M-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
-     ("M-S-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
-     ("M-S-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
+     ("C-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
+     ("C-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
+     ("C-S-<down>" . move-text-down)  ;把光标所在的整行文字(或标记)下移一行
+     ("C-S-<up>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
      )
    "move-text")
 
@@ -1232,13 +1236,14 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
   #-------------------------------------------------
   光标位于第二行的 # 后面。"
     (interactive)
+    (beginning-of-line) 
     (insert "#=================================================\n")
     (insert "# \n")
     (insert "#-------------------------------------------------\n")
     ;; 将光标移动到第二行的 # 后面
     (forward-line -2)          ; 移动到上一行（即第二行）
     (end-of-line)              ; 移动到行尾
-  
+
     )
 
   ;;;###autoload
@@ -1249,6 +1254,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
   #-------------------------------------------------
   光标位于第二行的 // 后面。"
     (interactive)
+    (beginning-of-line) 
     (insert "//=================================================\n")
     (insert "// \n")
     (insert "//-------------------------------------------------\n")
@@ -1266,6 +1272,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
   #-------------------------------------------------
   光标位于第二行的 # 后面。"
     (interactive)
+    (beginning-of-line) 
     (insert "/*=================================================*/\n")
     (insert "/*  */\n")
     (insert "/*-------------------------------------------------*/\n")
@@ -1282,6 +1289,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
   #-------------------------------------------------
   光标位于第二行的 * 后面。"
     (interactive)
+    (beginning-of-line) 
     (insert "/**\n")
     (insert " * \n")
     (insert " */\n")
@@ -1473,7 +1481,7 @@ Use ~C-c C-h~ to open the description menu
     (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
 #+end_src
 *** Rectangle
-记录一下使用方法。
+记录一下使用方法
 - =C-x r k=  Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
 - =C-x r M-w= Save the text of the region-rectangle as the last killed rectangle (copy-rectangle-as-kill).
 - =C-x r d= Delete the text of the region-rectangle (delete-rectangle).
@@ -1489,7 +1497,17 @@ Use ~C-c C-h~ to open the description menu
   shrunk/grown, and the standard kill and yank commands operate on it.
   The rectangle operations fall into two classes: commands to erase or
   insert rectangles, and comm
-
+#+begin_src emacs-lisp :tangle suk.el
+   ;;; Rectangle
+  (lazy-load-global-keys
+   '(
+   
+     ("r" . hydra-rectangle/body)
+     )
+   "init-rectangle"
+   "C-z"
+   )
+#+end_src
 *** Expand region
 #+begin_src emacs-lisp :tangle suk.el
   ;; expand-region
@@ -1586,25 +1604,28 @@ Add shortcuts.
 #+end_src
 *** Macros
 记录一下使用方式
-#+begin_example
-  f3 start macro(kmacro-start-macro-or-insert-counter),
-  f4 done macro or run marcro (kmacro-end-or-call-macro).
-  C-x ( start macro (kmacro-start-macro),
-  C-x ) end done marco,
-  C-x e run marco(kmacro-end-macro)
-  C-x C-k r apply-macro-to-region-lines
-  C-x C-k C-n kmacro-cycle-ring-next               ;下一个键盘宏
-  C-x C-k C-p kmacro-cycle-ring-previous           ;上一个键盘宏
-  C-x C-k RET kmacro-edit-macro                    ;编辑键盘宏
-  insert-kbd-macro
-  C-x C-k n name-last-kbd-macro is an alias for ‘kmacro-name-last-macro
-  C-x C-k C-d  kmacro-delete-ring-head
+
+  - =f3= start macro(~kmacro-start-macro-or-insert-counter~),
+  - =f4= done macro or run marcro (~kmacro-end-or-call-macro~).
+  - =C-x (= start macro (~kmacro-start-macro~),
+  - =C-x )= end done marco(~kmacro-end-macro~),
+  - =C-x e= ~run marco(kmacro-end-macro)~
+  - =C-x C-k r= ~apply-macro-to-region-lines~
+  - =C-x C-k C-n= ~kmacro-cycle-ring-next~               ;下一个键盘宏
+  - =C-x C-k C-p= ~kmacro-cycle-ring-previous~      ;上一个键盘宏
+  - =C-x C-k RET=  ~kmacro-edit-macro~                          ;编辑键盘宏
+  - ~insert-kbd-macro~
+  - =C-x C-k n=  ~name-last-kbd-macro~ is an alias for ~kmacro-name-last-macro~
+  - =C-x C-k C-d=  ~kmacro-delete-ring-head~
+
   先定义一个宏
-  然后 name-last-kbd-macro
-  然后 insert-kbd-macro
+
+  然后 ~name-last-kbd-macro~
+
+  然后 ~insert-kbd-macro~
+
   等到如下类似的配置
-  (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
-#+end_example
+  : (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
 
 *** Misc packages
 - Install packages.
@@ -1636,7 +1657,7 @@ Add shortcuts.
 
   (define-prefix-command 'leader-key)
   (global-set-key (kbd "M-s-SPC") 'leader-key)
-  (global-set-key (kbd "C-c C-j") #'yas-expand)
+  
   ;;; ### Toolkit ###
   ;;; --- 工具函数
   (lazy-load-set-keys
@@ -1682,23 +1703,7 @@ Add shortcuts.
 :CUSTOM_ID: setup-ui
 :END:
 <<setup-ui>>
-** 安装UI包
-#+begin_src emacs-lisp :tangle install.el
-  ;; UI
-  (require-package 'doom-themes)
-  (require-package 'doom-modeline)
-  (require-package 'hide-mode-line)
-  (require-package 'minions)
-  (require-package 'centaur-tabs)
-  (require-package 'all-the-icons)
-  (require-package 'nerd-icons)
-  (require-package 'page-break-lines)
-  (require-package 'hl-line)
-  (require-package 'beacon)
-  (require-package 'hydra)
-  (require-package 'pretty-hydra)
-  (require-package 'ivy-hydra)
-#+end_src
+
 ** 主题
 :PROPERTIES:
 :CUSTOM_ID: setup-theme
@@ -1784,7 +1789,7 @@ Add shortcuts.
 :END:
 <<setup-tabs>>
 
-#+begin_src emacs-lisp :tangle suk-unload.el
+#+begin_src emacs-lisp :tangle suk.el
   (when (display-graphic-p)
     (use-package centaur-tabs
       :demand
@@ -1834,14 +1839,6 @@ Add shortcuts.
          :hook ((after-init . global-hl-line-mode)
                 ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
                  (lambda () (setq-local global-hl-line-mode nil)))))
-
-
-
-       (use-package rainbow-mode
-         :diminish
-         :hook ((prog-mode html-mode) . rainbow-mode)
-         )
-
        ))
 #+end_src
 ** 设定 hydra
@@ -1947,38 +1944,6 @@ Add shortcuts.
 
 
 #+end_src
-*** Setup ivy-hydra
-#+begin_src emacs-lisp :tangle suk.el
-
-    ;; @see https://github.com/abo-abo/hydra
-    ;; color could: red, blue, amaranth, pink, teal
-  (use-package ivy-hydra
-    :after (hydra ivy))
-#+end_src
-** 设定 vertico
-:PROPERTIES:
-:CUSTOM_ID: setup-vertico
-:END:
-<<setup-vertico>>
-
-#+begin_src emacs-lisp :tangle suk.el
-  (when (display-graphic-p)
-    (use-package vertico
-      :bind (:map vertico-map
-                  ("RET"   . vertico-directory-enter)
-                  ("DEL"   . vertico-directory-delete-char)
-                  ("M-DEL" . vertico-directory-delete-word))
-      :hook ((after-init . vertico-mode)
-             (rfn-eshadow-update-overlay . vertico-directory-tidy))
-      )
-     (use-package vertico-posframe
-        :ensure t
-        :after (posframe vertico)
-        :hook (vertico-mode . vertico-posframe-mode)
-        :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
-        )
-    )
-#+end_src
 ** 设定 posframe
 #+begin_src emacs-lisp :tangle suk.el
   (when (display-graphic-p)
@@ -2016,6 +1981,10 @@ Add shortcuts.
     )
 #+end_src
 * 缓存区 Buffer
+** 安装插件
+#+begin_src emacs-lisp :tangle suk.el
+  (require-package 'buffer-move)
+#+end_src
 ** 使用 ibuffer.
 #+begin_src emacs-lisp :tangle suk.el
 
@@ -2132,10 +2101,10 @@ Add shortcuts.
 #+begin_src emacs-lisp :tangle etc/init-key.el
   (lazy-load-global-keys
    '(
-     ("<C-S-up>"    . buf-move-up)   
-     ("<C-S-down>"  . buf-move-down)
-     ("<C-S-left>"  . buf-move-left)  
-     ("<C-S-right>" . buf-move-right)   
+     ("C-c C-<up>"    . buf-move-up)   
+     ("C-c C-<down>"  . buf-move-down)
+     ("C-c C-<left>"  . buf-move-left)  
+     ("C-c C-<right>" . buf-move-right)   
      )
    "buffer-move")
 #+end_src
@@ -2144,14 +2113,13 @@ Add shortcuts.
   ;; Toggle two most recent buffers
   (fset 'quick-switch-buffer [?\C-x ?b return])
   (global-set-key (kbd "s-b") 'quick-switch-buffer)
+  (global-set-key (kbd "C-z b") 'quick-switch-buffer)
 #+end_src
 * 窗口管理
-** 安装窗口包
+** 安装插件
 #+begin_src emacs-lisp :tangle install.el
   (require-package 'windmove)
   (require-package 'transwin)
-  (require-package 'buffer-move)
-  (require-package 'winner)
   (require-package 'ace-window)
   (require-package 'popper)
 #+end_src
@@ -2419,26 +2387,27 @@ Add shortcuts.
   ;;; --- 滚动其他窗口
   (lazy-load-global-keys
    '(
-     ("C-S-n" . other-window-move-up)       ;向下滚动其他窗口
-     ("C-S-p" . other-window-move-down) ;向上滚动其他窗口
-     ("M-n" . window-move-up)         ;向下滚动当前窗口
-     ("M-p" . window-move-down)           ;向上滚动当前窗口
+     ("M-S-n" . other-window-move-up)   ;向下滚动其他窗口
+     ("M-S-p" . other-window-move-down) ;向上滚动其他窗口
+     ("M-n"   . window-move-up)         ;向下滚动当前窗口
+     ("M-p"   . window-move-down)       ;向上滚动当前窗口
      )
    "win-move")
+
   (lazy-load-set-keys
    '(
      ;;("C-c :" . split-window-vertically)   ;纵向分割窗口
      ;;("C-c |" . split-window-horizontally) ;横向分割窗口
-
      ;;("C-x ;" . delete-other-windows)      ;关闭其它窗口
      ))
+  
   (lazy-load-global-keys
    '(
-     ("C-c V" . delete-other-windows-vertically+) ;关闭上下的其他窗口
+     ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
      ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
-     ("C-'" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
-     ("C-\"" . delete-current-buffer-window) ;删除当前buffer的窗口
-     ("M-s-o" . toggle-one-window)           ;切换一个窗口
+     ("C-'" . delete-current-buffer-and-window)     ;关闭当前buffer, 并关闭窗口
+     ("C-\"" . delete-current-buffer-window)        ;删除当前buffer的窗口
+     ("M-s-o" . toggle-one-window)                  ;切换一个窗口
      ("C-x O" . toggle-window-split)
      )
    "window-extension")
@@ -2514,7 +2483,7 @@ Add shortcuts.
 
 #+end_src
 ** Search tools
-*** Install
+*** 安装插件
 #+begin_src emacs-lisp :tangle install.el
 
   ;;(require-package 'git-timemachine)
@@ -2543,31 +2512,28 @@ Add shortcuts.
 
 #+end_src
 *** ivy
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle suk-unload.el
 
-  (use-package ivy
-    :ensure t
-    :diminish (ivy-mode)
-    :bind (("C-x b" . ivy-switch-buffer))
-    :config
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq enable-recursive-minibuffers t)
-    (setq ivy-count-format "%d/%d ")
-    (setq ivy-display-style 'fancy)
+ (use-package ivy
+  :ensure t
+  :diminish (ivy-mode)
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq enable-recursive-minibuffers t)
+  (setq ivy-count-format "%d/%d ")
+  (setq ivy-display-style 'fancy)
 
-    (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
-    (setq ivy-re-builders-alist
-          '((counsel-rg . ivy--regex-plus)
-            (swiper . ivy--regex-plus)
-            (swiper-isearch . ivy--regex-plus)
-            (t . ivy--regex-ignore-order)))
+  (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
+  (setq ivy-re-builders-alist
+        '((counsel-rg . ivy--regex-plus)
+          (swiper . ivy--regex-plus)
+          (swiper-isearch . ivy--regex-plus)
+          (t . ivy--regex-ignore-order)))
   
-    (when (display-graphic-p)    
-      (use-package ivy-posframe))
-    )
-  
-
+  (when (display-graphic-p)    
+    (use-package ivy-posframe))
+  )
 #+end_src
 *** counsel
 #+begin_src emacs-lisp :tangle suk.el
@@ -2575,29 +2541,31 @@ Add shortcuts.
     :ensure t
     :bind
     (("M-y" . counsel-yank-pop)
+     ("M-x"     . counsel-M-x)
+     ;;("C-x C-f" . counsel-find-file)
      :map ivy-minibuffer-map
      ("M-y" . ivy-next-line)))
 #+end_src
 *** swiper
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle suk-unload.el
 
   (use-package swiper
     :bind
     (
      ("C-x M-s" . swiper)
-     ("C-x C-f" . counsel-find-file)
-     ("M-x"     . counsel-M-x)
      ("C-s"     . swiper-isearch)
-	 ("C-r"     . swiper-isearch)
-	 ("C-c C-r" . ivy-resume)
+     ("C-r"     . swiper-isearch)
+     ("C-c C-r" . ivy-resume)
      )
     :config
     (progn
-      (ivy-mode 1)
+      ;;(ivy-mode 1)
       (setq ivy-use-virtual-buffers t)
-      (setq ivy-display-style 'fancy)
+      ;;(setq ivy-display-style 'fancy)
       (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
     )
+
+
 #+end_src
 *** avy
 #+begin_src emacs-lisp :tangle suk.el
@@ -3026,13 +2994,13 @@ Add shortcuts.
   ;; _ 不转义，相当于#+OPTIONS: ^:{} ~:{}
   (setq org-export-with-sub-superscripts "{}")
   ;; Embed inline CSS read from a file.
-    ;;;###autoload
+  ;;;###autoload
   (defun null-or-unboundp (var)
     "Return t if VAR is either unbound or nil, otherwise return nil."
     (or (not (boundp var))
         (null (symbol-value var))))
 
-      ;;;###autoload
+  ;;;###autoload
   (defun my-org-inline-css-hook (exporter)
     "Insert custom inline css"
     (when (eq exporter 'html)
@@ -3086,6 +3054,37 @@ Add shortcuts.
               (turn-on-font-lock)
               (load-org-font)
               ))
+  (defun my-execute-function-and-shell-command-async ()
+    "执行自定义函数逻辑，然后异步调用外部 shell 命令，传递当前文件名的扩展名替换为 .html 的路径作为参数。"
+    (interactive)
+    ;; 检查当前缓冲区是否关联有文件
+    (if (buffer-file-name)
+        (let* ((current-file (buffer-file-name))
+               ;; 使用 file-name-sans-extension 获取不带扩展名的文件名
+               (base-name (file-name-sans-extension current-file))
+               ;; 构建新的文件名，替换扩展名为 .html
+               (html-file (concat base-name ".html"))
+               ;; 定义要执行的外部命令，这里以 ls -l 为例
+               (command (format "htm-cleanup.sh %s" (shell-quote-argument html-file)))
+               ;; 定义输出缓冲区名称
+               (output-buffer "*Shell Command Output*"))
+          (my-org-publish-buffer)
+          ;; 执行自定义函数逻辑
+          (message "正在处理文件: %s" current-file)
+        
+          ;; 异步调用外部 shell 命令
+          (async-shell-command command output-buffer)
+        
+          ;; 显示提示信息
+          (message "已启动异步命令: %s" command))
+      (message "当前缓冲区没有关联的文件。")))
+
+
+
+  ;; 绑定快捷键 C-c e 到上述函数
+  (global-set-key (kbd "C-S-e") #'my-execute-function-and-shell-command-async)
+
+  ;;(global-set-key (kbd "C-S-e") #'my-org-publish-buffer)
 
   ;; covert to html
   (use-package htmlize :defer 2)
@@ -3653,6 +3652,91 @@ install
   (require-package 'company)
   (require-package 'company-box)
 #+end_src
+
+** Vertico
+:PROPERTIES:
+:CUSTOM_ID: setup-vertico
+:END:
+<<setup-vertico>>
+
+Vertico 是 Emacs 中的一款用于增强 minibuffer 输入体验的插件，特别是在
+逐步改进 completion（自动补全）和选择候选项时的界面表现。
+
+主要特点
+
+   + 垂直选择界面：
+
+       Vertico 提供了一种垂直的候选项显示方式，与默认的 minibuffer 不
+     同，它通过在屏幕上垂直列出候选项，并允许你快速浏览、选择候选项。
+     它不仅仅是补全，还是一个直观的选择界面。
+
+   * 快速和轻量：
+
+      它的设计理念是简单、轻量并且快速。它不会像其他一些补全框架那样带
+     有过多复杂的功能，而是专注于提供流畅的、响应迅速的候选项显示。
+
+   * 兼容性强：
+
+      Vertico 是与 completion 和 minibuffer 的默认系统紧密集成的，并且
+     它支持与其他补全框架如 company-mode 和 corfu 一起使用，帮助你在选
+     择候选项时提供更好的体验。
+
+   * 适配性：
+
+     它能够与很多流行的插件（如 Consult, Orderless, Embark）无缝配合，
+     扩展候选项选择的功能。
+        
+#+begin_src emacs-lisp :tangle suk.el
+  (when (display-graphic-p)
+    (use-package vertico
+      :bind (:map vertico-map
+                  ("RET"   . vertico-directory-enter)
+                  ("DEL"   . vertico-directory-delete-char)
+                  ("M-DEL" . vertico-directory-delete-word))
+      :hook ((after-init . vertico-mode)
+             (rfn-eshadow-update-overlay . vertico-directory-tidy))
+      )
+     (use-package vertico-posframe
+        :ensure t
+        :after (posframe vertico)
+        :hook (vertico-mode . vertico-posframe-mode)
+        :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
+        )
+    )
+#+end_src
+** corfu
+#+begin_src emacs-lisp :tangle suk.el
+  (use-package corfu
+    :custom
+    (corfu-cycle t)
+    (corfu-auto t)
+    (corfu-auto-prefix 2)
+    (corfu-auto-delay 1)
+    (corfu-popupinfo-delay '(0.5 . 0.2))
+    (corfu-preview-current 'insert)
+    (corfu-preselect 'prompt)
+    (corfu-on-exeact-match nil)
+    :bind (:map corfu-map
+                ("TAB" . corfu-next)
+                ([tab] . corfu-next)
+                ("C-n" . corfu-next)
+                ("S-TAB" . corfu-previous)
+                ([backtab] . corfu-previous)
+                ("C-p" . corfu-previous)
+                ("S-<return>" . corfu-insert)
+                ("RET" . corfu-insert)
+                ("C-y" . corfu-yank)
+                ("C-g" . corfu-abort)
+                ("C-SPC" . corfu-complete))
+    :init
+    (global-corfu-mode)
+    (corfu-history-mode))
+
+  (use-package nerd-icons-corfu
+    :after corfu
+    :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+#+end_src
 ** Company
 #+begin_src emacs-lisp :tangle suk.el
   
@@ -3933,6 +4017,12 @@ install
     :defer 3
     :hook ((css-mode web-mode typescript-mode js-mode json-mode js2-mode) . prettier-js-mode))
 
+
+  (use-package apheleia
+    :hook (prog-mode . apheleia-mode)
+    :config
+    (setf (alist-get 'prettier apheleia-formatters)
+          '("prettier" "--stdin-filepath" filepath)))
 #+end_src
 ** Hideshow
 #+begin_src emacs-lisp :tangle suk.el
@@ -4287,7 +4377,10 @@ install
     (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
     (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
     (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
-
+    ;; Increase the maximum character limit for Copilot
+    (setq copilot-max-char 200000) ;; Adjust the value as needed
+    ;; Disable Copilot file size warnings
+    (setq copilot-disable-size-check t) ;; Hypothetical variable
     ;;;; 忽略 Copilot 的特定警告
     ;;(add-to-list 'warning-suppress-types '(copilot quail--infer-indentation-offset found no mode-specific indentation offset))
     ;;;; 设置 Emacs 的最低警告级别为 warning`，忽略 `emergency 级别以下的警告
@@ -4778,9 +4871,11 @@ install
        (use-package pdf-tools
          :ensure t
          :config (pdf-tools-install))
+  
+       (if suk-rime
+           (require 'init-rime)
+         (require 'rain))
 
-       (require 'init-rime)
-       ;; (require 'rain)
        (when (display-graphic-p)
          ;; only graphic packages
          (require-package 'vterm))
