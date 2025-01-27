@@ -4,25 +4,8 @@
 (require-package 'iedit)
 (require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
 
-;; UI
-(require-package 'doom-themes)
-(require-package 'doom-modeline)
-(require-package 'hide-mode-line)
-(require-package 'minions)
-(require-package 'centaur-tabs)
-(require-package 'all-the-icons)
-(require-package 'nerd-icons)
-(require-package 'page-break-lines)
-(require-package 'hl-line)
-(require-package 'beacon)
-(require-package 'hydra)
-(require-package 'pretty-hydra)
-(require-package 'ivy-hydra)
-
 (require-package 'windmove)
 (require-package 'transwin)
-(require-package 'buffer-move)
-(require-package 'winner)
 (require-package 'ace-window)
 (require-package 'popper)
 

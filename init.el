@@ -262,6 +262,10 @@
   :type '(alist :key-type string :value-type (choice character sexp)))
 
 
+ (defcustom suk-rime t
+  "Display use emacs rime or not."
+  :group 'suk
+  :type 'boolean)
 ;; Load `custom-file'
 ;; If it doesn't exist, copy from the template, then load it.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
@@ -272,7 +276,7 @@
            (not (file-exists-p custom-file)))
       (copy-file custom-template-file custom-file)))
 
-(load-if-exists custom-file)
+(load-file custom-file)
 ;;(if (file-exists-p custom-file)
 ;;    (load custom-file))
 

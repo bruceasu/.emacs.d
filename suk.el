@@ -355,6 +355,7 @@
 #-------------------------------------------------
 光标位于第二行的 # 后面。"
   (interactive)
+  (beginning-of-line) 
   (insert "#=================================================\n")
   (insert "# \n")
   (insert "#-------------------------------------------------\n")
@@ -372,6 +373,7 @@
 #-------------------------------------------------
 光标位于第二行的 // 后面。"
   (interactive)
+  (beginning-of-line) 
   (insert "//=================================================\n")
   (insert "// \n")
   (insert "//-------------------------------------------------\n")
@@ -389,6 +391,7 @@
 #-------------------------------------------------
 光标位于第二行的 # 后面。"
   (interactive)
+  (beginning-of-line) 
   (insert "/*=================================================*/\n")
   (insert "/*  */\n")
   (insert "/*-------------------------------------------------*/\n")
@@ -405,6 +408,7 @@
 #-------------------------------------------------
 光标位于第二行的 * 后面。"
   (interactive)
+  (beginning-of-line) 
   (insert "/**\n")
   (insert " * \n")
   (insert " */\n")
@@ -476,6 +480,16 @@ _w_ where is something defined
     ("v" describe-variable)
     ("w" where-is))
   (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
+
+;;; Rectangle
+(lazy-load-global-keys
+ '(
+
+   ("r" . hydra-rectangle/body)
+   )
+ "init-rectangle"
+ "C-z"
+ )
 
 ;; expand-region
 (run-with-idle-timer
@@ -555,7 +569,7 @@ _w_ where is something defined
 
 (define-prefix-command 'leader-key)
 (global-set-key (kbd "M-s-SPC") 'leader-key)
-(global-set-key (kbd "C-c C-j") #'yas-expand)
+
 ;;; ### Toolkit ###
 ;;; --- 工具函数
 (lazy-load-set-keys
@@ -659,6 +673,20 @@ _w_ where is something defined
 (require 'load-set-font)
 
 (when (display-graphic-p)
+  (use-package centaur-tabs
+    :demand
+    :init
+    ;; Set the style to rounded with icons
+    (setq centaur-tabs-style "bar")
+    (setq centaur-tabs-set-icons t)
+    :config
+    (centaur-tabs-mode t)
+    :bind
+    ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
+    ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
+)
+
+(when (display-graphic-p)
    ;; Icons
   (use-package nerd-icons
     :config
@@ -684,14 +712,6 @@ _w_ where is something defined
        :hook ((after-init . global-hl-line-mode)
               ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
                (lambda () (setq-local global-hl-line-mode nil)))))
-
-
-
-     (use-package rainbow-mode
-       :diminish
-       :hook ((prog-mode html-mode) . rainbow-mode)
-       )
-
      ))
 
 ;; setup hydra
@@ -785,28 +805,6 @@ _w_ where is something defined
         ("D" diff-hl-dired-mode "dired gutter" :toggle t))
        ))))
 
-;; @see https://github.com/abo-abo/hydra
-  ;; color could: red, blue, amaranth, pink, teal
-(use-package ivy-hydra
-  :after (hydra ivy))
-
-(when (display-graphic-p)
-  (use-package vertico
-    :bind (:map vertico-map
-                ("RET"   . vertico-directory-enter)
-                ("DEL"   . vertico-directory-delete-char)
-                ("M-DEL" . vertico-directory-delete-word))
-    :hook ((after-init . vertico-mode)
-           (rfn-eshadow-update-overlay . vertico-directory-tidy))
-    )
-   (use-package vertico-posframe
-      :ensure t
-      :after (posframe vertico)
-      :hook (vertico-mode . vertico-posframe-mode)
-      :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
-      )
-  )
-
 (when (display-graphic-p)
   (use-package posframe
     :hook (after-load-theme . posframe-delete-all)
@@ -838,6 +836,8 @@ _w_ where is something defined
   ;; 隐藏垂直滚动条。
   ;;(modify-all-frames-parameters '((vertical-scroll-bars)))
   )
+
+(require-package 'buffer-move)
 
 (use-package ibuffer
   :ensure nil
@@ -903,6 +903,7 @@ _w_ where is something defined
 ;; Toggle two most recent buffers
 (fset 'quick-switch-buffer [?\C-x ?b return])
 (global-set-key (kbd "s-b") 'quick-switch-buffer)
+(global-set-key (kbd "C-z b") 'quick-switch-buffer)
 
 ;; Directional window-selection routines
 (lazy-load-global-keys
@@ -1147,26 +1148,27 @@ _w_ where is something defined
 ;;; --- 滚动其他窗口
 (lazy-load-global-keys
  '(
-   ("C-S-n" . other-window-move-up)       ;向下滚动其他窗口
-   ("C-S-p" . other-window-move-down) ;向上滚动其他窗口
-   ("M-n" . window-move-up)         ;向下滚动当前窗口
-   ("M-p" . window-move-down)           ;向上滚动当前窗口
+   ("M-S-n" . other-window-move-up)   ;向下滚动其他窗口
+   ("M-S-p" . other-window-move-down) ;向上滚动其他窗口
+   ("M-n"   . window-move-up)         ;向下滚动当前窗口
+   ("M-p"   . window-move-down)       ;向上滚动当前窗口
    )
  "win-move")
+
 (lazy-load-set-keys
  '(
    ;;("C-c :" . split-window-vertically)   ;纵向分割窗口
    ;;("C-c |" . split-window-horizontally) ;横向分割窗口
-
    ;;("C-x ;" . delete-other-windows)      ;关闭其它窗口
    ))
+
 (lazy-load-global-keys
  '(
-   ("C-c V" . delete-other-windows-vertically+) ;关闭上下的其他窗口
+   ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
    ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
-   ("C-'" . delete-current-buffer-and-window) ;关闭当前buffer, 并关闭窗口
-   ("C-\"" . delete-current-buffer-window) ;删除当前buffer的窗口
-   ("M-s-o" . toggle-one-window)           ;切换一个窗口
+   ("C-'" . delete-current-buffer-and-window)     ;关闭当前buffer, 并关闭窗口
+   ("C-\"" . delete-current-buffer-window)        ;删除当前buffer的窗口
+   ("M-s-o" . toggle-one-window)                  ;切换一个窗口
    ("C-x O" . toggle-window-split)
    )
  "window-extension")
@@ -1231,52 +1233,14 @@ _w_ where is something defined
  isearch-mode-map
  )
 
-(use-package ivy
-  :ensure t
-  :diminish (ivy-mode)
-  :bind (("C-x b" . ivy-switch-buffer))
-  :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t)
-  (setq ivy-count-format "%d/%d ")
-  (setq ivy-display-style 'fancy)
-
-  (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
-  (setq ivy-re-builders-alist
-        '((counsel-rg . ivy--regex-plus)
-          (swiper . ivy--regex-plus)
-          (swiper-isearch . ivy--regex-plus)
-          (t . ivy--regex-ignore-order)))
-
-  (when (display-graphic-p)    
-    (use-package ivy-posframe))
-  )
-
 (use-package counsel
   :ensure t
   :bind
   (("M-y" . counsel-yank-pop)
+   ("M-x"     . counsel-M-x)
+   ;;("C-x C-f" . counsel-find-file)
    :map ivy-minibuffer-map
    ("M-y" . ivy-next-line)))
-
-(use-package swiper
-  :bind
-  (
-   ("C-x M-s" . swiper)
-   ("C-x C-f" . counsel-find-file)
-   ("M-x"     . counsel-M-x)
-   ("C-s"     . swiper-isearch)
-   ("C-r"     . swiper-isearch)
-   ("C-c C-r" . ivy-resume)
-   )
-  :config
-  (progn
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-display-style 'fancy)
-    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
-  )
 
 (lazy-load-global-keys
  ' (("C-:"   . avy-goto-char)
@@ -1659,13 +1623,13 @@ _w_ where is something defined
 ;; _ 不转义，相当于#+OPTIONS: ^:{} ~:{}
 (setq org-export-with-sub-superscripts "{}")
 ;; Embed inline CSS read from a file.
-  ;;;###autoload
+;;;###autoload
 (defun null-or-unboundp (var)
   "Return t if VAR is either unbound or nil, otherwise return nil."
   (or (not (boundp var))
       (null (symbol-value var))))
 
-    ;;;###autoload
+;;;###autoload
 (defun my-org-inline-css-hook (exporter)
   "Insert custom inline css"
   (when (eq exporter 'html)
@@ -1719,6 +1683,37 @@ _w_ where is something defined
             (turn-on-font-lock)
             (load-org-font)
             ))
+(defun my-execute-function-and-shell-command-async ()
+  "执行自定义函数逻辑，然后异步调用外部 shell 命令，传递当前文件名的扩展名替换为 .html 的路径作为参数。"
+  (interactive)
+  ;; 检查当前缓冲区是否关联有文件
+  (if (buffer-file-name)
+      (let* ((current-file (buffer-file-name))
+             ;; 使用 file-name-sans-extension 获取不带扩展名的文件名
+             (base-name (file-name-sans-extension current-file))
+             ;; 构建新的文件名，替换扩展名为 .html
+             (html-file (concat base-name ".html"))
+             ;; 定义要执行的外部命令，这里以 ls -l 为例
+             (command (format "htm-cleanup.sh %s" (shell-quote-argument html-file)))
+             ;; 定义输出缓冲区名称
+             (output-buffer "*Shell Command Output*"))
+        (my-org-publish-buffer)
+        ;; 执行自定义函数逻辑
+        (message "正在处理文件: %s" current-file)
+
+        ;; 异步调用外部 shell 命令
+        (async-shell-command command output-buffer)
+
+        ;; 显示提示信息
+        (message "已启动异步命令: %s" command))
+    (message "当前缓冲区没有关联的文件。")))
+
+
+
+;; 绑定快捷键 C-c e 到上述函数
+(global-set-key (kbd "C-S-e") #'my-execute-function-and-shell-command-async)
+
+;;(global-set-key (kbd "C-S-e") #'my-org-publish-buffer)
 
 ;; covert to html
 (use-package htmlize :defer 2)
@@ -2131,6 +2126,53 @@ and `optipng' to reduce the file size if the program is present."
 
 (emacs-session-restore)
 
+(when (display-graphic-p)
+  (use-package vertico
+    :bind (:map vertico-map
+                ("RET"   . vertico-directory-enter)
+                ("DEL"   . vertico-directory-delete-char)
+                ("M-DEL" . vertico-directory-delete-word))
+    :hook ((after-init . vertico-mode)
+           (rfn-eshadow-update-overlay . vertico-directory-tidy))
+    )
+   (use-package vertico-posframe
+      :ensure t
+      :after (posframe vertico)
+      :hook (vertico-mode . vertico-posframe-mode)
+      :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
+      )
+  )
+
+(use-package corfu
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 2)
+  (corfu-auto-delay 1)
+  (corfu-popupinfo-delay '(0.5 . 0.2))
+  (corfu-preview-current 'insert)
+  (corfu-preselect 'prompt)
+  (corfu-on-exeact-match nil)
+  :bind (:map corfu-map
+              ("TAB" . corfu-next)
+              ([tab] . corfu-next)
+              ("C-n" . corfu-next)
+              ("S-TAB" . corfu-previous)
+              ([backtab] . corfu-previous)
+              ("C-p" . corfu-previous)
+              ("S-<return>" . corfu-insert)
+              ("RET" . corfu-insert)
+              ("C-y" . corfu-yank)
+              ("C-g" . corfu-abort)
+              ("C-SPC" . corfu-complete))
+  :init
+  (global-corfu-mode)
+  (corfu-history-mode))
+
+(use-package nerd-icons-corfu
+  :after corfu
+  :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
 ;;据说跟 lsp-bridge 冲突
 
 
@@ -2345,6 +2387,13 @@ and `optipng' to reduce the file size if the program is present."
   :ensure t
   :defer 3
   :hook ((css-mode web-mode typescript-mode js-mode json-mode js2-mode) . prettier-js-mode))
+
+
+(use-package apheleia
+  :hook (prog-mode . apheleia-mode)
+  :config
+  (setf (alist-get 'prettier apheleia-formatters)
+        '("prettier" "--stdin-filepath" filepath)))
 
 ;; 折叠和收缩代码
 ;; builtin
@@ -2619,7 +2668,10 @@ and `optipng' to reduce the file size if the program is present."
   (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
   (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
   (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
-
+  ;; Increase the maximum character limit for Copilot
+  (setq copilot-max-char 200000) ;; Adjust the value as needed
+  ;; Disable Copilot file size warnings
+  (setq copilot-disable-size-check t) ;; Hypothetical variable
   ;;;; 忽略 Copilot 的特定警告
   ;;(add-to-list 'warning-suppress-types '(copilot quail--infer-indentation-offset found no mode-specific indentation offset))
   ;;;; 设置 Emacs 的最低警告级别为 warning`，忽略 `emergency 级别以下的警告
