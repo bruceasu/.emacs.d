@@ -65,6 +65,26 @@
     (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
     ))
 
+;;; ### Sdcv ###
+;;; --- 星际译王命令行
+(when  (eq system-type 'gnu/linux)
+    (lazy-load-global-keys
+     '(("p" . sdcv-search-pointer)           ;光标处的单词, buffer显示
+       ("P" . sdcv-search-pointer+)          ;光标处的单词, tooltip显示
+       ("i" . sdcv-search-input)             ;输入的单词, buffer显示
+       (";" . sdcv-search-input+)
+       ("y" . my-youdao-dictionary-search-at-point)
+       ("Y" . youdao-dictionary-search-at-point)
+       ("g" . google-translate-at-point)
+       ("G" . google-translate-query-translate)
+       ("s" . google-translate-smooth-translate)
+       ("f" . fanyi-dwim)
+       ("d" . fanyi-dwim2)
+       ("h" . fanyi-from-history)
+       )
+     "init-translate"
+     "C-z"))
+
 ;; =========================================================
 ;; 通过编辑配置文件使其可以调用外部程序，来为其添加功能。
 ;; 增加命令

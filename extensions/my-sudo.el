@@ -7,55 +7,67 @@
 ;;; Code:
 
 ;; 普通用户调用root权限写文件
-;;;###autoload
 (defun suk/sudo-edit (&optional arg)
   (interactive "P")
-  (if (or arg (not buffer-file-name))
-      (find-file (concat "/sudo:root@localhost:"
-                         (ido-read-file-name "Find file(as root): ")))
-    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))
+  (if (or arg (not buffer-file-name))  ;; 如果传递了 arg，或者当前没有文件
+      (find-file (concat "/sudo::"
+                         (ido-read-file-name "Find file (as root): ")))
+    (find-alternate-file (concat "/sudo::" buffer-file-name))  ;; 如果当前已有文件，则用 sudo 打开
     )
   )
 
- ;;;###autoload
-(defadvice ido-find-file (after suk/sudo-find-file activate)
-  "Find file as root if necessary."
-  (unless (and buffer-file-name
-               (file-writable-p buffer-file-name))
-    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
 
-;;;###autoload
 (defun suk/sudo-find-file (file-name)
-  "Like find file, but opens the file as root."
-  (interactive "Find File for sudo-edit: ")
-  (let ((tramp-file-name
-         (concat "/sudo::"
-                 (expand-file-name file-name)
-                 )
-         )
-        )
-    (find-file tramp-file-name)
-    )
-  )
- ;;;###autoload
+  "像 find-file 一样打开文件，但以 root 权限打开文件（即 sudo）。"
+  (interactive "fFind File as sudo: ")
+  (let ((tramp-file-name (concat "/sudo::" (expand-file-name file-name))))
+    (find-file tramp-file-name)))
+
+(defun suk/ido-find-file-with-sudo (file-name)
+  "尝试用 sudo 权限打开文件，如果没有写权限的话。"
+  (interactive "Find File: ")
+  (let ((file-name (ido-read-file-name "Find file: ")))  ;; 使用 ido-mode 选择文件
+    (if (and (file-exists-p file-name)
+             (not (file-writable-p file-name)))
+        (progn
+          (message "文件不可写，使用 sudo 打开")
+          (suk/sudo-find-file file-name))  ;; 使用 sudo 打开
+      (find-file file-name))))  ;; 正常打开文件
+
+;; 给 ido-find-file 添加 advice
+(advice-add 'ido-find-file :after 'suk/ido-find-file-with-sudo)
+
+
 (defun suk/sudo-save ()
   (interactive)
-  (if (not buffer-file-name)
-                                        ; true condition
-      (write-file (concat "/sudo:root@localhost:"
-                          (ido-read-file-name "File:")
-                          )
-                  )
-                                        ; false condition
-    (write-file (concat "/sudo:root@localhost:" buffer-file-name))
-    )
-  )
+  (if (not buffer-file-name)  ;; 如果没有文件关联
+      (write-file (concat "/sudo::"  ;; 使用 /sudo:: 路径
+                          (ido-read-file-name "Save file as root: ")))
+    (if (not (file-writable-p buffer-file-name))  ;; 如果当前文件不可写
+        (progn
+          (message "文件不可写，正在用 root 权限保存...")
+          (write-file (concat "/sudo::" buffer-file-name)))  ;; 用 root 权限保存当前文件
+      (save-buffer))))  ;; 如果文件可写，直接保存
+
 
 ;; Just hook on `find-file-hook', don't hook `dired-mode-hook', it's unnecessary.
 (add-hook 'find-file-hook
           #'(lambda ()
               (require 'auto-sudoedit)
               (auto-sudoedit)))         ;默认打开忽略模式
+
+
+(defun find-file-root (file)
+  "Find file with root."
+  (interactive "fFind file as sudo: ")
+  (require 'tramp)
+  (tramp-cleanup-all-connections)
+  (find-file (concat "/sudo::" file)))
+
+(defun find-file-smb(file)
+  "Access file through samba protocol."
+  (interactive "fFind file as samba: ")
+  (find-file (concat "/smb:" file)))
 
 (with-eval-after-load 'hydra
   (defhydra suk/sudo (:color blue)
@@ -71,7 +83,7 @@
     ("e" suk/sudo-edit)
     ("s" suk/sudo-save)
     ("q" nil :color red))
-  ;; (global-set-key (kbd "C-c C-y") 'suk/bookmark-launcher/body)
+  ;; (global-set-key (kbd "C-c C-y") 'suk/sudo/body)
   )
 
 

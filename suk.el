@@ -1,3 +1,5 @@
+(require 'basic-function)
+
 (setq user-full-name "Suk")
 (setq user-mail-address "bruceasu@gmail.com")
 
@@ -37,8 +39,7 @@
 (setq suggest-key-bindings 1)             ;当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
 (setq browse-kill-ring-quit-action        ;设置退出动作
       (quote save-and-restore))           ;保存还原窗口设置
-(setq max-lisp-eval-depth 40000)          ;lisp最大执行深度
-(setq max-specpdl-size 10000)             ;最大容量
+(setq max-lisp-eval-depth 4096)           ;lisp最大执行深度
 (setq kill-ring-max 1024)                 ;用一个很大的 kill ring. 这样防止我不小心删掉重要的东西
 (setq mark-ring-max 1024)                 ;设置的mark ring容量
 (setq eval-expression-print-length nil)   ;设置执行表达式的长度没有限制
@@ -92,19 +93,6 @@
 (setq kept-new-version 100)  ; 保留最近的100个备份文件
 (setq delete-old-versions t) ; 自动删除旧的备份文件
 
-;;saveplace
-(setq save-place-file (expand-file-name "saveplace" suk-emacs-var-dir)) ; "~/.emacs.d/var/saveplace"
-(save-place-mode 1)
-;;If emacs is slow to exit after enabling saveplace, you may be
-;;running afoul of save-place-forget-unreadable-files. On exit,
-;;it checks that every loaded file is readable before saving its
-;;buffer position - potentially very slow if you use NFS.
-(setq save-place-forget-unreadable-files nil)
-
-(use-package saveplace
-  :ensure nil
-  :hook (after-init . save-place-mode))
-
 (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
       history-length 1000
       savehist-additional-variables '(mark-ring
@@ -149,132 +137,21 @@
 ;; (prefer-coding-system 'utf-8-dos)
 (prefer-coding-system 'utf-8)
 
-;; -*- coding: utf-8; lexical-binding: t; -*-
-
-(defun suk/wait-for-modules (callback &rest modules)
-  "Wait for MODULES to be loaded and then call CALLBACK.
-使用示例
-(wait-for-modules
- 'my-callback-function
- 'module1
- 'module2
- 'module3)
-"
-  (let ((all-loaded nil))
-    (dolist (module modules)
-      (with-eval-after-load module
-        (setq all-loaded t)))
-    (if all-loaded
-        (funcall callback)
-      (add-hook 'after-load-functions
-                (lambda ()
-                  (when (cl-every #'featurep modules)
-                    (funcall callback)))))))
-
-;;;###autoload
-(defun run-cmd-and-replace-region (cmd)
-  "Run CMD in shell on selected region or current buffer.
-    Then replace the region or buffer with cli output."
-  (let* ((orig-point (point))
-         (b (if (region-active-p) (region-beginning) (point-min)))
-         (e (if (region-active-p) (region-end) (point-max))))
-    (shell-command-on-region b e cmd nil t)
-    (goto-char orig-point)))
-
-
-;;;###autoload
-(defun my-buffer-str ()
-  (buffer-substring-no-properties (point-min) (point-max)))
-
-
-
-(defmacro suk/timer (&rest body)
-  "Measure the time of code BODY running."
-  `(let ((time (current-time)))
-     ,@body
-     (float-time (time-since time))))
-
-;;;###autoload
-(defun icons-displayable-p ()
-  "Return non-nil if icons are displayable."
-  (and suk-icon
-       (or (featurep 'nerd-icons)
-           (require 'nerd-icons nil t))))
-;;;###autoload
-(defun suk-treesit-available-p ()
-  "Check whether tree-sitter is available.
-    Native tree-sitter is introduced since 29.1."
-  (and (fboundp 'treesit-available-p)
-       (treesit-available-p)))
-;;;###autoload
-(defun too-long-file-p ()
-  "Check whether the file is too long."
-  (or (> (buffer-size) 100000)
-      (and (fboundp 'buffer-line-statistics)
-           (> (car (buffer-line-statistics)) 10000))))
-
-;; {{ copied from http://ergoemacs.org/emacs/elisp_read_file_content.html
-    ;;;###autoload
-(defun my-get-string-from-file (file)
-  "Return FILE's content."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (buffer-string)))
-
-;;;###autoload
-(defun my-read-lines (file)
-  "Return a list of lines of FILE."
-  (split-string (my-get-string-from-file file) "\n" t))
-;; }}
-
-;;;###autoload
-(defun path-in-directory-p (file directory)
-  "FILE is in DIRECTORY."
-  (let* ((pattern (concat "^" (file-name-as-directory directory))))
-    (if (string-match pattern file) file)))
-
-
-;;;###autoload
-(defun my-send-string-to-cli-stdin (string program)
-  "Send STRING to cli PROGRAM's stdin."
-  (with-temp-buffer
-    (insert string)
-    (call-process-region (point-min) (point-max) program)))
-
-;;;###autoload
-(defun my-write-string-to-file (string file)
-  "Write STRING to FILE."
-  (with-temp-buffer
-    (insert string)
-    (write-region (point-min) (point-max) file)))
-
-;;;###autoload
-(defun my-async-shell-command (command)
-  "Execute string COMMAND asynchronously."
-  (let* ((proc (start-process "Shell" nil shell-file-name shell-command-switch command)))
-    (set-process-sentinel proc
-                          `(lambda (process signal)
-                             (let* ((status (process-status process)))
-                               (when (memq status '(exit signal))
-                                 (unless (string= (substring signal 0 -1) "finished")
-                                   (message "Failed to run \"%s\"." ,command))))))))
-
-(defvar my-disable-idle-timer (daemonp)
-  "Function passed to `my-run-with-idle-timer' is run immediately.")
-
-(defun my-run-with-idle-timer (seconds func)
-  "After SECONDS, run function FUNC once."
-  (cond
-   (my-disable-idle-timer
-    (funcall func))
-   (t
-    (run-with-idle-timer seconds nil func))))
-
 (require 'init-key)
 
 (use-package bind-key)
 ;;(bind-key "C-c x" #'some-function some-package-mode-map)
 ;;(bind-key "C-c y" #'another-function)
+
+;; (bind-keys
+;;  ("C-x C-c" . save-buffers-kill-terminal)
+;;  ("C-x C-f" . find-file)
+;;  ("C-x C-s" . save-buffer))
+
+;; (bind-keys :map python-mode-map
+;;            ("C-c C-c" . python-shell-send-buffer)
+;;            ("C-c C-r" . python-shell-send-region))
+
 
 ;; Toggle fullscreen <F11> also bind to fullscreen
 (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
@@ -303,6 +180,57 @@
   (global-set-key (kbd "S-<return>") #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
   )
 
+(with-eval-after-load 'pretty-hydra
+  ;; Global toggles
+  (with-no-warnings
+    (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
+      ("Basic"
+       (("n" (cond ((fboundp 'display-line-numbers-mode)
+                    (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
+                   ((fboundp 'gblobal-linum-mode)
+                    (global-linum-mode (if global-linum-mode -1 1))))
+         "line number"
+         :toggle (or (bound-and-true-p display-line-numbers-mode)
+                     (bound-and-true-p global-linum-mode)))
+        ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
+        ("d" global-hungry-delete-mode "hungry delete" :toggle t)
+        ("e" electric-pair-mode "electric pair" :toggle t)
+        ("c" flyspell-mode "spell check" :toggle t)
+        ("s" prettify-symbols-mode "pretty symbol" :toggle t)
+        ("l" global-page-break-lines-mode "page break lines" :toggle t)
+        ("B" display-battery-mode "battery" :toggle t)
+        ("T" display-time-mode "time" :toggle t)
+        ("a" abbrev-mode "abrev" :toggle t)
+        ("F" auto-fill-mode "auto fill" :toggle t)
+        ("m" doom-modeline-mode "modern mode-line" :toggle t)
+        ("t" toggle-truncate-lines "truncate lines" :toggle t)
+        ("u" toggle-company-ispell "Company Ispell" :toggle t))
+       "Highlight"
+       (("h l" global-hl-line-mode "line" :toggle t)
+        ("h p" show-paren-mode "paren" :toggle t)
+        ("h s" symbol-overlay-mode "symbol" :toggle t)
+        ("h r" rainbow-mode "rainbow" :toggle t)
+        ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
+         "whitespace" :toggle show-trailing-whitespace)
+        ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
+        ("h i" highlight-indent-guides-mode "indent" :toggle t)
+        ("h t" global-hl-todo-mode "todo" :toggle t))
+       "Program"
+       (("f" flymake-mode "flymake" :toggle t)
+        ("O" hs-minor-mode "hideshow" :toggle t)
+        ("U" subword-mode "subword" :toggle t)
+        ("w" whitespace-mode "whitespace" :toggle t)
+        ("W" which-function-mode "which function" :toggle t)
+        ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
+        ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
+        ("v" global-diff-hl-mode "gutter" :toggle t)
+        ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
+        ("M" diff-hl-margin-mode "margin gutter" :toggle t)
+        ("D" diff-hl-dired-mode "dired gutter" :toggle t))
+       ))
+    (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
+))
+
 ;;; ### goto-line-preview ###
 (lazy-load-global-keys
  '(
@@ -325,16 +253,16 @@
 
    )
  "basic-toolkit")
-;;; ### Ace jump ###
-(lazy-load-global-keys
- '(
-   ("C-c C-w" . ace-jump-word-mode)
-   ("C-c C-c" . ace-jump-char-mode)
-   ("C-c C-l" . ace-jump-line-mode)
-   )
- "ace-jump-mode"
- "C-z"
- )
+;; ;;; ### Ace jump ### 比较旧了。使用avy替代
+;; (lazy-load-global-keys
+;;  '(
+;;    ("C-w" . ace-jump-word-mode)
+;;    ("C-c" . ace-jump-char-mode)
+;;    ("C-l" . ace-jump-line-mode)
+;;    )
+;;  "ace-jump-mode"
+;;  "C-z"
+;;  )
 
 ;; Jump to Chinese characters
 (run-with-idle-timer
@@ -421,13 +349,6 @@
 (global-set-key (kbd "C-c t c") 'insert-slash-template)
 (global-set-key (kbd "C-c t s") 'insert-star-template)
 (global-set-key (kbd "C-c t j") 'insert-javadoc-template)
-
-;;; ### sudo ###
-(when sys/linuxp
-  (lazy-load-global-keys
-   '(("C-z C-s" . suk/sudo/body))
-   "my-sudo"
-   ))
 
 ;;;###autoload
 (with-eval-after-load 'hydra
@@ -608,235 +529,6 @@ _w_ where is something defined
 
 ;; M-x align-regexp 可以方便的对齐一些文字
 
-;;(require 'lazycat-theme)
-;;(lazycat-theme-load-dark)
-(use-package doom-themes
-  :ensure t
-  :custom
-  (doom-themes-enable-bold t)
-  (doom-themes-enable-italic t)
-  ;; 加载一个主题，DOOM One 是 DOOM Emacs 的默认主题，非常美观
-  :init
-  (load-theme 'doom-one t)
-  )
-
-
-(use-package doom-modeline
-  :hook (after-init . doom-modeline-mode)
-  :init
-  (setq doom-modeline-icon suk-icon
-        doom-modeline-minor-modes t)
-  :config
-  (column-number-mode 1)
-  :custom
-  (doom-modeline-height 30)
-  (doom-modeline-window-width-limit nil)
-  (doom-modeline-buffer-file-name-style 'truncate-with-project)
-  (doom-modeline-icon t)
-  (doom-modeline-time t)
-  (doom-modeline-vcs-max-leghth 50)
-  ;; Windows下记得加上
-  (if sys/win32p (setq inhibit-compacting-font-caches t))
-  )
-
-(use-package hide-mode-line
-  :hook (((treemacs-mode
-           eshell-mode shell-mode
-           term-mode vterm-mode
-           embark-collect-mode
-           lsp-ui-imenu-mode
-           pdf-annot-list-mode) . turn-on-hide-mode-line-mode)
-         (dired-mode . (lambda()
-                         (and (bound-and-true-p hide-mode-line-mode)
-                              (turn-off-hide-mode-line-mode))))))
-
-;; A minor-mode menu for mode-line
-(use-package minions
-  :hook (doom-modeline-mode . minions-mode))
-
-;; 字体
-  (lazy-load-set-keys
-   '(
-     ("C--" . text-scale-decrease)        ;减小字体大小
-     ("C-=" . text-scale-increase)        ;增加字体大小
-     ("C-x C-0" . text-scale-adjust)
-     ))
-
-
-  (defun font-installed-p (font-name)
-    "Check if font with FONT-NAME is available."
-    (find-font (font-spec :name font-name)))
-
-
-;; Use fixed pitch where it's sensible
-;;  (use-package mixed-pitch :diminish)
-(require 'load-set-font)
-
-(when (display-graphic-p)
-  (use-package centaur-tabs
-    :demand
-    :init
-    ;; Set the style to rounded with icons
-    (setq centaur-tabs-style "bar")
-    (setq centaur-tabs-set-icons t)
-    :config
-    (centaur-tabs-mode t)
-    :bind
-    ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
-    ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
-)
-
-(when (display-graphic-p)
-   ;; Icons
-  (use-package nerd-icons
-    :config
-    (when (and (display-graphic-p)
-               (not (font-installed-p nerd-icons-font-family)))
-      (nerd-icons-install-fonts t)))
-
-  ;; 图标支持
-  (use-package all-the-icons
-    ;; :ensure t
-    :load-path "~/.emacs.d/extensions/all-the-icons"
-    :if (display-graphic-p))
-  )
-
-(run-with-idle-timer
- 9
- nil
- #'(lambda()
-     ;;(require-package 'highlight-symbol)
-     ;; Highlight the current line
-     (use-package hl-line
-       :ensure nil
-       :hook ((after-init . global-hl-line-mode)
-              ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
-               (lambda () (setq-local global-hl-line-mode nil)))))
-     ))
-
-;; setup hydra
-(use-package hydra
-  :hook (emacs-lisp-mode . hydra-add-imenu)
-  :config
-  (with-eval-after-load 'posframe
-    (setq hydra-hint-display-type 'posframe)
-    (defun hydra-set-posframe-show-params ()
-      "Set hydra-posframe style."
-      (setq hydra-posframe-show-params
-            `(
-              :left-fringe 8
-              :right-fringe 8
-              :internal-border-width 2
-              :internal-border-color ,(face-background 'posframe-border nil t)
-              :background-color ,(face-background 'tooltip nil t)
-              :foreground-color ,(face-foreground 'tooltip nil t)
-              :lines-truncate t
-              )))
-    (hydra-set-posframe-show-params)
-    (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))
-  )
-
-(use-package pretty-hydra
-  :requires hydra
-  :custom (pretty-hydra-default-title-body-format-spec " %s%s")
-  :bind ("<f6>" . toggles-hydra/body)
-  :hook (emacs-lisp-mode . (lambda ()
-                             (add-to-list
-                              'imenu-generic-expression
-                              '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
-  :init
-  (cl-defun pretty-hydra-title (title &optional icon-type icon-name &key face height v-adjust)
-    "Add an icon in the hydra title."
-    (let ((face (or face `(:inherit highlight :reverse-video t)))
-          (height (or height 1.2))
-          (v-adjust (or v-adjust 0.0)))
-      (concat
-       (when (and (icons-displayable-p) icon-type icon-name)
-         (let ((f (intern (format "nerd-icons-%s" icon-type))))
-           (when (fboundp f)
-             (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
-       (propertize title 'face face))))
-
-  ;; Global toggles
-  (with-no-warnings
-    (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
-      ("Basic"
-       (("n" (cond ((fboundp 'display-line-numbers-mode)
-                    (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
-                   ((fboundp 'gblobal-linum-mode)
-                    (global-linum-mode (if global-linum-mode -1 1))))
-         "line number"
-         :toggle (or (bound-and-true-p display-line-numbers-mode)
-                     (bound-and-true-p global-linum-mode)))
-        ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
-        ("d" global-hungry-delete-mode "hungry delete" :toggle t)
-        ("e" electric-pair-mode "electric pair" :toggle t)
-        ("c" flyspell-mode "spell check" :toggle t)
-        ("s" prettify-symbols-mode "pretty symbol" :toggle t)
-        ("l" global-page-break-lines-mode "page break lines" :toggle t)
-        ("B" display-battery-mode "battery" :toggle t)
-        ("T" display-time-mode "time" :toggle t)
-        ("a" abbrev-mode "abrev" :toggle t)
-        ("F" auto-fill-mode "auto fill" :toggle t)
-        ("m" doom-modeline-mode "modern mode-line" :toggle t)
-        ("t" toggle-truncate-lines "truncate lines" :toggle t)
-        ("u" toggle-company-ispell "Company Ispell" :toggle t))
-       "Highlight"
-       (("h l" global-hl-line-mode "line" :toggle t)
-        ("h p" show-paren-mode "paren" :toggle t)
-        ("h s" symbol-overlay-mode "symbol" :toggle t)
-        ("h r" rainbow-mode "rainbow" :toggle t)
-        ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
-         "whitespace" :toggle show-trailing-whitespace)
-        ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
-        ("h i" highlight-indent-guides-mode "indent" :toggle t)
-        ("h t" global-hl-todo-mode "todo" :toggle t))
-       "Program"
-       (("f" flymake-mode "flymake" :toggle t)
-        ("O" hs-minor-mode "hideshow" :toggle t)
-        ("U" subword-mode "subword" :toggle t)
-        ("w" whitespace-mode "whitespace" :toggle t)
-        ("W" which-function-mode "which function" :toggle t)
-        ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
-        ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
-        ("v" global-diff-hl-mode "gutter" :toggle t)
-        ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
-        ("M" diff-hl-margin-mode "margin gutter" :toggle t)
-        ("D" diff-hl-dired-mode "dired gutter" :toggle t))
-       ))))
-
-(when (display-graphic-p)
-  (use-package posframe
-    :hook (after-load-theme . posframe-delete-all)
-    :init
-    (defface posframe-border `((t (:inherit region)))
-      "Face used by the `posframe' border."
-      :group 'posframe)
-    (defvar posframe-border-width 2
-      "Default posframe border width.")
-    )
-
-  :config
-  (posframe-delete-all)
-  )
-
-;; Optimization
-(setq idle-update-delay 1.0)
-(when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-(when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
-;; (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-
-;; GUI Environment
-(when (display-graphic-p)
-  ;; Don't use GTK+ tooltip
-  (when (boundp 'x-gtk-use-system-tooltips)
-    (setq x-gtk-use-system-tooltips nil))
-  ;; scroll-bar
-  (set-scroll-bar-mode 'right)
-  ;; 隐藏垂直滚动条。
-  ;;(modify-all-frames-parameters '((vertical-scroll-bars)))
-  )
-
 (require-package 'buffer-move)
 
 (use-package ibuffer
@@ -947,53 +639,55 @@ _w_ where is something defined
 
 ;; Quickly switch windows
 (use-package ace-window
-  :pretty-hydra
-  ((:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
-           :foreign-keys warn :quit-key ("q" "C-g"))
-   ("Actions"
-    (("TAB" other-window "switch")
-     ("x" ace-delete-window "delete")
-     ("X" ace-delete-other-windows "delete other" :exit t)
-     ("s" ace-swap-window "swap")
-     ("a" ace-select-window "select" :exit t)
-     ("m" toggle-frame-maximized "maximize" :exit t)
-     ("u" toggle-frame-fullscreen "fullscreen" :exit t))
-    "Movement"
-    (("i" windmove-up "move ↑")
-     ("k" windmove-down "move ↓")
-     ("j" windmove-left "move ←")
-     ("l" windmove-right "move →")
-     ("f" follow-mode "follow"))
-    "Resize"
-    (("<left>" shrink-window-horizontally "shrink H")
-     ("<right>" enlarge-window-horizontally "enlarge H")
-     ("<up>" shrink-window "shrink V")
-     ("<down>" enlarge-window "enlarge V")
-     ("n" balance-windows "balance"))
-    "Split"
-    (("r" split-window-right "horizontally")
-     ("R" split-window-horizontally-instead "horizontally instead")
-     ("v" split-window-below "vertically")
-     ("V" split-window-vertically-instead "vertically instead")
-     ("t" toggle-window-split "toggle")
-     ("o" delete-other-windows "only this")
-     )
-    "Zoom"
-    (("+" text-scale-increase "in")
-     ("=" text-scale-increase "in")
-     ("-" text-scale-decrease "out")
-     ("0" (text-scale-increase 0) "reset"))
-    "Misc"
-    (("o" set-frame-font "frame font")
-     ("f" make-frame-command "new frame")
-     ("d" delete-frame "delete frame")
-     ("z" winner-undo "winner undo")
-     ("Z" winner-redo "winner redo"))
-    ))
   :bind (([remap other-window] . ace-window)
          ("C-c w" . ace-window-hydra/body))
   :hook (emacs-startup . ace-window-display-mode)
   :config
+  (with-eval-after-load 'pretty-hydra
+    (pretty-hydra-define+ ace-window-hydra
+      (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
+              :foreign-keys warn :quit-key ("q" "C-g"))
+      ("Actions"
+       (("TAB" other-window "switch")
+        ("x" ace-delete-window "delete")
+        ("X" ace-delete-other-windows "delete other" :exit t)
+        ("s" ace-swap-window "swap")
+        ("a" ace-select-window "select" :exit t)
+        ("m" toggle-frame-maximized "maximize" :exit t)
+        ("u" toggle-frame-fullscreen "fullscreen" :exit t))
+       "Movement"
+       (("i" windmove-up "move ↑")
+        ("k" windmove-down "move ↓")
+        ("j" windmove-left "move ←")
+        ("l" windmove-right "move →")
+        ("f" follow-mode "follow"))
+       "Resize"
+       (("<left>" shrink-window-horizontally "shrink H")
+        ("<right>" enlarge-window-horizontally "enlarge H")
+        ("<up>" shrink-window "shrink V")
+        ("<down>" enlarge-window "enlarge V")
+        ("n" balance-windows "balance"))
+       "Split"
+       (("r" split-window-right "horizontally")
+        ("R" split-window-horizontally-instead "horizontally instead")
+        ("v" split-window-below "vertically")
+        ("V" split-window-vertically-instead "vertically instead")
+        ("t" toggle-window-split "toggle")
+        ("o" delete-other-windows "only this"))
+       "Zoom"
+       (("+" text-scale-increase "in")
+        ("=" text-scale-increase "in")
+        ("-" text-scale-decrease "out")
+        ("0" (text-scale-increase 0) "reset"))
+       "Misc"
+       (("o" set-frame-font "frame font")
+        ("f" make-frame-command "new frame")
+        ("d" delete-frame "delete frame")
+        ("z" winner-undo "winner undo")
+        ("Z" winner-redo "winner redo")))
+      )
+    (global-set-key (kbd "C-c w") #'ace-window-hydra/body)
+    )
   (defun toggle-window-split ()
     (interactive)
     (if (= (count-windows) 2)
@@ -1155,12 +849,12 @@ _w_ where is something defined
    )
  "win-move")
 
-(lazy-load-set-keys
- '(
-   ;;("C-c :" . split-window-vertically)   ;纵向分割窗口
-   ;;("C-c |" . split-window-horizontally) ;横向分割窗口
-   ;;("C-x ;" . delete-other-windows)      ;关闭其它窗口
-   ))
+;; (lazy-load-set-keys
+;;  '(
+;;    ("C-c :" . split-window-vertically)   ;纵向分割窗口
+;;    ("C-c |" . split-window-horizontally) ;横向分割窗口
+;;    ("C-x ;" . delete-other-windows)      ;关闭其它窗口
+;;    ))
 
 (lazy-load-global-keys
  '(
@@ -1173,782 +867,17 @@ _w_ where is something defined
    )
  "window-extension")
 
-;; 使用 built-in project library
-(require 'project)
-
-;; 设置项目根目录识别方式（默认是 Git、Mercurial、Bazaar、Subversion、Dockerfile 等）
-(setq project-find-functions '(project-try-vc))
-
-;; 可选：自定义项目根目录识别
-(defun my/project-root (args)
-  "Define additional ways to recognize project root."
-  (or (locate-dominating-file default-directory "package.json")
-      (locate-dominating-file default-directory "pom.xml")
-      (locate-dominating-file default-directory "setup.py"))
-  )
-
-(add-to-list 'project-find-functions #'my/project-root)
-
-;;(global-set-key  [C-f7] 'suk/point-to-register)
-;;(global-set-key  [f7] 'suk/jump-to-register)
-
-;; has set to f7, c-f7
-;;(global-set-key (kbd "<C-f6>") '(lambda () (interactive) (bookmark-set "SAVED")))
-;;(global-set-key (kbd "<f6>") '(lambda () (interactive) (bookmark-jump "SAVED")))
-
 (lazy-load-global-keys
  '(
    ("C-<f7>"   . suk/bookmark-launcher/body)
    )
- "my-bookmark")
+ "my-bookmark") ;; 有的函数跟basic-toolkit重复
 
 ;; C-x r l to list bookmarks
 
-;;; ### Isearch ###
-;;; ---
-(lazy-load-set-keys
- '(
-   ("TAB" . isearch-complete)               ;isearch补全
-   ("C-s" . isearch-repeat-forward)         ;重复向前搜索, 第一次可以用来搜索上一次的历史哟
-   ("C-r" . isearch-repeat-backward)        ;重复向后搜索
-   ("C-g" . isearch-abort)                  ;中止搜索
-   ("C-w" . isearch-yank-word-or-char)      ;粘帖光标后的词或字符作为搜索对象
-   ("C-y" . isearch-yank-line)              ;粘帖光标后的行作为搜索对象
-   ("M-o" . isearch-delete-char)            ;删除
-   ("M-p" . isearch-ring-retreat)           ;搜索历史向后
-   ("M-n" . isearch-ring-adjust)            ;搜索历史向前
-   ("M-y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
-   ("M-h" . isearch-yank-char)              ;粘帖光标后的字符到搜索对象
-   ("M-e" . isearch-edit-string)            ;编辑搜索对象
-   ("M-c" . isearch-toggle-case-fold)       ;切换大小写
-   ("M-r" . isearch-toggle-regexp)          ;切换正则表达式
-   ("M-w" . isearch-toggle-word)            ;切换词
-   ("M->" . isearch-beginning-of-buffer)    ;跳转到buffer开头并重新搜索, 搜索最前面一个
-   ("M-<" . isearch-end-of-buffer)          ;跳转到buffer末尾并重新搜索, 搜索最后面一个
-   ("M-%" . isearch-query-replace)          ;替换
-   ("M-d" . isearch-find-duplicate-word)    ;查找重复的单词
-   ("M-z" . isearch-find-duplicate-line)    ;查找重复的行
-   ("C-M-%" . isearch-query-replace-regexp) ;正则表达式替换
-   )
- isearch-mode-map
- )
+(require 'init-search)
 
-(use-package counsel
-  :ensure t
-  :bind
-  (("M-y" . counsel-yank-pop)
-   ("M-x"     . counsel-M-x)
-   ;;("C-x C-f" . counsel-find-file)
-   :map ivy-minibuffer-map
-   ("M-y" . ivy-next-line)))
-
-(lazy-load-global-keys
- ' (("C-:"   . avy-goto-char)
-    ("C-M-;" . avy-goto-char-2)
-    ("M-g l" . avy-goto-line)
-    ("M-g w" . avy-goto-word-1)
-    ("M-g W" . avy-goto-word-0))
- "avy")
-(with-eval-after-load 'avy
-  (setq avy-all-windows nil
-        avy-all-windows-alt t
-        avy-background t
-        avy-style 'pre)
-  (add-hook 'after-init-hook #'avy-setup-default)
-
-
-  )
-
-(with-eval-after-load 'avy-zap
-  ;; Kill text between the point and the character CHAR
-  (lazy-load-global-keys
-   '(("M-z" . avy-zap-to-char-dwim)
-     ("M-Z" . avy-zap-up-to-char-dwim))
-   "avy-zap"
-   "C-z")
-  )
-
-;; Writable `grep' buffer
-(use-package wgrep
-  :init
-  (setq wgrep-auto-save-buffer t
-        wgrep-change-readonly-file t))
-
-;; Search tool
-(use-package grep
-  :ensure nil
-  :autoload grep-apply-setting
-  :init
-  (when (executable-find "rg")
-    (grep-apply-setting
-     'grep-command "rg --color=auto --null -nH --no-heading -e ")
-    (grep-apply-setting
-     'grep-template "rg --color=auto --null --no-heading -g '!*/' -e <R> <D>")
-    (grep-apply-setting
-     'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 38))
-    (grep-apply-setting
-     'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>")))
-
-
-;; Fast search tool `ripgrep'
-(use-package rg
-  :hook (after-init . rg-enable-default-bindings)
-  :bind (:map rg-global-map
-              ("c" . rg-dwim-current-dir)
-              ("f" . rg-dwim-current-file)
-              ("m" . rg-menu))
-  :init (setq rg-group-result t
-              rg-show-columns t)
-  :config
-  (cl-pushnew '("tmpl" . "*.tmpl") rg-custom-type-aliases))
-
-;;(message org-files-directory)
-;; 创建 var 文件夹
-(make-directory (expand-file-name "var" user-emacs-directory) t)
-
-;; 设置 org-persist 目录
-(setq org-persist-directory (expand-file-name "var/org-persist" user-emacs-directory))
-;; 创建新的 org-persist 目录（如果不存在）
-(unless (file-exists-p org-persist-directory)
-  (make-directory org-persist-directory t))
-(require 'org)
-;; To speed up startup, don't put to init section
-(setq org-modules nil)
-;;(setq org-startup-indented t)
-(setq org-startup-folded nil)
-(setq org-ellipsis  "... → ")
-(setq org-pretty-entities t)
-(setq org-hide-emphasis-markers t)
-(setq org-hide-leading-stars nil)
-(setq org-blank-before-new-entry '((heading) (plain-list-item . auto)))
-(setq org-insert-heading-respect-content t)
-(setq org-yank-adjusted-subtrees t)
-;; Use the current window for C-c ' source editing
-(setq org-src-window-setup 'current-window)
-;; Use the current window for indirect buffer display
-(setq org-indirect-buffer-display 'current-window)
-(add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\)$" . org-mode))
-
-(setq org-tags-column -80)
-
-(setq org-catch-invisible-edits 'smart)
-
-;; 设置打开某种文件类型
-(setq org-file-apps
-      '((auto-mode . emacs)
-        ("\\.mm\\'" . system)
-        ("\\.x?html?\\'" . system)
-        ("\\.pdf\\'" . system)))
-
-  ;; 运行 Org Babel Tangle 命令：`M-x org-babel-tangle`。
-  ;; 从 org 文件中生成 el 配置文件
-  ;; 保存 user-emacs-directory(~/.emacs.d/) 文件下的 org 时，
-  ;; 导出文件中 elisp 代码到文件中。
-  (defun suk/org-babel-tangle-config ()
-    (when (string-equal (file-name-directory (buffer-file-name))
-                        (expand-file-name user-emacs-directory)) ; ~/.emacs.d
-      (let ((org-confirm-babel-evaluate nil))
-        (org-babel-tangle))))
-
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (add-hook 'after-save-hook #'suk/org-babel-tangle-config)))
-
-
-  ;;;###autoload
-  (defun suk/load-theme-org()
-    (interactive)
-    (load-theme 'doom-solarized-light)
-    )
-
-  ;;;###autoload
-  (defun suk/load-theme-default()
-    (interactive)
-    (load-theme 'doom-one)
-    )
-
-;; Registers allow you to jump to a file or other location quickly.
-;; To jump to a register, use C-x r j followed by the letter of the register.
-;; Using registers for all these file shortcuts is probably a bit of
-;; a waste since I can easily define my own keymap, but since I rarely
-;; go beyond register A anyway. Also, I might as well add shortcuts for refiling.
-(require 'bookmark)
-(defvar my-refile-map (make-sparse-keymap))
-(defmacro my-defshortcut (key file)
-  `(progn
-     (set-register ,key (cons 'file ,file))
-     (bookmark-store ,file (list (cons 'filename ,file)
-                                 (cons 'position 1)
-                                 (cons 'front-context-string "")) nil)
-     (define-key my-refile-map
-                 (char-to-string ,key)
-                 (lambda (prefix)
-                   (interactive "p")
-                   (let ((org-refile-targets '(((,file) :maxlevel . 6)))
-                         (current-prefix-arg (or current-prefix-arg '(4))))
-                     (call-interactively 'org-refile))))))
-
-(defvar my-org-last-refile-marker nil "Marker for last refile")
-(defun my-org-refile-in-file (&optional prefix)
-  "Refile to a target within the current file."
-  (interactive)
-  (let ((org-refile-targets (list (cons (list (buffer-file-name)) '(:maxlevel . 5)))))
-    (call-interactively 'org-refile)
-    (setq my-org-last-refile-marker (plist-get org-bookmark-names-plist :last-refile))))
-
-(defun my-org-refile-to-previous ()
-  "Refile subtree to last position from `my-org-refile-in-file'."
-  (interactive)
-  (save-selected-window
-    (when (eq major-mode 'org-agenda-mode)
-      (org-agenda-switch-to))
-    (org-cut-subtree)
-    (save-window-excursion
-      (save-excursion
-        (bookmark-jump (plist-get org-bookmark-names-plist :last-refile))
-        (let ((level (org-current-level)))
-          (org-end-of-subtree t t)
-          (org-paste-subtree))))))
-
-
-(define-key my-refile-map "," 'my-org-refile-to-previous)
-(define-key my-refile-map "." 'my-org-refile-in-file)
-;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
-;; (my-defshortcut ?o "~/cloud/orgzly/organizer.org")
-;; (my-defshortcut ?s "~/personal/sewing.org")
-;; (my-defshortcut ?b "~/personal/business.org")
-;; (my-defshortcut ?p "~/personal/google-inbox.org")
-;; (my-defshortcut ?P "~/personal/google-ideas.org")
-;; (my-defshortcut ?B "~/Dropbox/books")
-;; (my-defshortcut ?n "~/notes")
-;; (my-defshortcut ?N "~/sync/notes/QuickNote.md")
-;; (my-defshortcut ?w "~/Dropbox/public/sharing/index.org")
-;; (my-defshortcut ?W "~/Dropbox/public/sharing/blog.org")
-;; (my-defshortcut ?j "~/personal/journal.org")
-;; (my-defshortcut ?J "~/cloud/a/Journal.csv")
-;; (my-defshortcut ?I "~/Dropbox/Inbox")
-;; (my-defshortcut ?g "~/sachac.github.io/evil-plans/index.org")
-;; (my-defshortcut ?c "~/code/dev/elisp-course.org")
-;; (my-defshortcut ?C "~/personal/calendar.org")
-;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
-;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
-;; (my-defshortcut ?Q "~/personal/questions.org")
-
-(defmacro defshortcuts (name body &optional docstring &rest heads)
-  (declare (indent defun) (doc-string 3))
-  (cond ((stringp docstring))
-        (t
-         (setq heads (cons docstring heads))
-         (setq docstring "")))
-  (list
-   'progn
-   (append `(defhydra ,name (:exit t))
-           (mapcar (lambda (h)
-                     (list (elt h 0) (list 'find-file (elt h 1)) (elt h 2)))
-                   heads))
-   (cons 'progn
-         (mapcar (lambda (h) (list 'my-defshortcut (string-to-char (elt h 0)) (elt h 1)))
-                 heads))))
-
-(defmacro defshortcuts+ (name body &optional docstring &rest heads)
-  (declare (indent defun) (doc-string 3))
-  (cond ((stringp docstring))
-        (t
-         (setq heads (cons docstring heads))
-         (setq docstring "")))
-  (list
-   'progn
-   (append `(defhydra+ ,name (:exit t))
-           (mapcar (lambda (h)
-                     (list (elt h 0) (list 'find-file (elt h 1)) (elt h 2)))
-                   heads))
-   (cons 'progn
-         (mapcar (lambda (h) (list 'my-defshortcut (string-to-char (elt h 0)) (elt h 1)))
-                 heads))))
-
-;; GTD
-(setq org-use-fast-todo-selection t)
-;; ! 的含义是记录某项更改为状态的时间。我不把这个添加到完成的状态，是因为它们已
-;; 经被记录了。
-
-;; @ 符号表示带理由的提示，所以当切换到 WAITTING 时，Org 模式会问我为什么，并将
-;; 这个添加到笔记中。
-(setq org-todo-keywords
-      '((sequence "TODO(t)" "NEXT(n!)"  "|" "DONE✔(d!)" "CANCELLED✘(c@/!)")
-        (sequence "WAIT⚑(w@/!)" "HOLD(h@/!)" "|" "ABORT" "SOME" "PHONE" "MEETING")))
-(setq org-todo-keyword-faces
-      '(("TODO" :foreground "red" :weight bold)
-        ("NEXT" :foreground "blue" :weight bold)
-        ("DONE✔" :foreground "forest green" :weight bold)
-        ("WAIT⚑" :foreground "orange" :weight bold)
-        ("HOLD" :foreground "magenta" :weight bold)
-        ;;("CANCELLED" :foreground "forest grey" :weight bold)
-        ("ABORT" :foreground "yellow" :weight bold)
-        ("SOME" :foreground "lightgreen" :weight bold)
-        ("MEETING" :foreground "lightblue" :weight bold)
-        ("PHONE" :foreground "pink" :weight bold) ))
-
-
-(setq org-priority-faces
-      '((?A . error)
-        (?B . warning)
-        (?C . success)))
-
-(setq org-tag-alist '((:startgroup . nil)
-                    ("urgent-important" . ?u) ;; 第一象限：紧急且重要
-                    ("not-urgent-important" . ?n) ;; 第二象限：不紧急但重要
-                    ("urgent-not-important" . ?i) ;; 第三象限：紧急但不重要
-                    ("not-urgent-not-important" . ?t) ;; 第四象限：不紧急且不重要
-                    (:endgroup . nil)))
-
-;; 可以使用 org-tags-view 来过滤和查看不同象限的任务
-;; 例如：M-x org-tags-view RET +urgent-important
-;; The triggers break down to the following rules:
-;;   Moving a task to CANCELLED adds a CANCELLED tag
-;;   Moving a task to WAITTING adds a WAITTING tag
-;;   Moving a task to HOLD adds WAITTING and HOLD tags
-;;   Moving a task to a done state removes WAITTING and HOLD tags
-;;   Moving a task to TODO removes WAITTING, CANCELLED, and HOLD tags
-;;   Moving a task to NEXT removes WAITTING, CANCELLED, and HOLD tags
-;;   Moving a task to DONE removes WAITTING, CANCELLED, and HOLD tags
-(setq org-todo-state-tags-triggers
-      '(("CANCELLED" ("CANCELLED" . t))
-        ("WAIT⚑" ("WAITTING" . t))
-        ("HOLD" ("WAITTING") ("HOLD" . t))
-        (done ("WAITING") ("HOLD"))
-        ("DONE" ("WAITTING") ("CANCELLED") ("HOLD"))
-        ("ABORT" ("WAITTING") ("CANCELLED") ("HOLD"))
-        ("TODO" ("WAITTING") ("CANCELLED") ("HOLD"))
-        ("NEXT" ("WAITTING") ("CANCELLED") ("HOLD"))
-        ("SOME" ("WAITTING") ("CANCELLED") ("HOLD"))))
-(setq org-log-done 'time)
-
-;; Start the weekly agenda on Monday
-(setq org-agenda-start-on-weekday 1)
-(setq org-agenda-diary-file (expand-file-name "diary.org" org-files-directory))
-(setq org-agenda-block-separator ?─)
-(setq org-agenda-time-grid
-      '((daily today require-timed)
-        (800 1000 1200 1400 1600 1800 2000)
-        " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"))
-(setq org-agenda-current-time-string
-      "⭠ now ─────────────────────────────────────────────────")
-(setq org-agenda-diary-file (expand-file-name "diary.org" org-files-directory))
-;; setup agenda files
-;; org-mode manages the org-agenda-files variable automatically
-;; using C-c [ and C-c ] to add and remove files respectively.
-;; They can be files or directories.
-(setq org-agenda-files
-      `(,(expand-file-name "gtd.org" org-files-directory)
-        ,(expand-file-name "work.org" org-files-directory)
-        ,(expand-file-name "finished.org" org-files-directory)
-        ,(expand-file-name "cancel.org" org-files-directory)
-        ,(expand-file-name "journal.org" org-files-directory)
-        ,(expand-file-name "trash.org" org-files-directory)
-        ;;,(expand-file-name "folder" org-files-directory)
-        ))
-
-;; capture template
-(setq org-default-notes-file (expand-file-name "notes.org" org-files-directory))
-;; Capture templates for: TODO tasks, Notes,
-;; appointments, phone calls, meetings, and (setq
-;; org-protocol)
-(setq org-capture-templates
-      '(
-        ("t" "Todo"
-         entry (file+headline (expand-file-name "gtd.org" org-files-directory) "Tasks")
-         "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-        ("n" "Note"
-         entry (file (expand-file-name "notes.org" org-files-directory))
-         "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-        ("r" "Respond"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
-         "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n"
-         :clock-in t :clock-resume t :immediate-finish t)
-        ("j" "Journal"
-         entry (file+datetree (expand-file-name "journal.org" org-files-directory))
-         "* %?\nEntered on %U\n  %i\n  %a" :clock-in t :clock-resume t)
-        ("w" "Review"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
-         "* TODO Review %c\n%U\n"
-         :immediate-finish t)
-        ("m" "Meeting"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
-         "* MEETING with %? :MEETING:\n%U"
-         :clock-in t :clock-resume t)
-        ("p" "Phone call"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
-         "* PHONE %? :PHONE:\n%U"
-         :clock-in t :clock-resume t)
-        ("h" "Habit"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
-         "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
-        ))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Refile settings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Exclude DONE state tasks from refile targets
-    ;;;###autoload
-(defun suk/verify-refile-target ()
-  "Exclude todo keywords with a done state from refile targets."
-  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
-
-;; Targets include this file and any file contributing to the agenda - up to 9 levels deep
-(setq org-refile-targets (quote ((nil :maxlevel . 9) (org-agenda-files :maxlevel . 9))))
-;; Use full outline paths for refile targets
-(setq org-refile-use-outline-path t)
-(setq org-refile-target-verify-function 'suk/verify-refile-target)
-;; Allow refile to create parent tasks with confirmation
-(setq org-refile-allow-creating-parent-nodes 'confirm)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; EXPORTER
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq default-process-coding-system '(utf-8-unix . utf-8-unix))
-;; Inline images in HTML instead of producting links to the image
-(setq org-html-inline-images t)
-;; Use (setq org-manual.css from the norang website for export document stylesheets)
-;; (setq org-html-head-extra "<link rel=\"stylesheet\" href=\"org-manual.css\" type=\"text/css\" />")
-(setq org-html-head-include-default-style nil)
-;; Do not generate internal css formatting for HTML exports
-(setq org-export-htmlize-output-type (quote css))
-;; Increase default number of headings to export
-(setq org-export-headline-levels 6)
-(setq org-export-coding-system 'utf-8)
-(setq org-table-export-default-format "orgtbl-to-csv")
-;; Do not generate internal css formatting for HTML exports
-(setq org-export-htmlize-output-type 'css)
-(setq org-export-with-timestamps nil)
-;; _ 不转义，相当于#+OPTIONS: ^:{} ~:{}
-(setq org-export-with-sub-superscripts "{}")
-;; Embed inline CSS read from a file.
-;;;###autoload
-(defun null-or-unboundp (var)
-  "Return t if VAR is either unbound or nil, otherwise return nil."
-  (or (not (boundp var))
-      (null (symbol-value var))))
-
-;;;###autoload
-(defun my-org-inline-css-hook (exporter)
-  "Insert custom inline css"
-  (when (eq exporter 'html)
-    (let* ((dir (ignore-errors (file-name-directory (buffer-file-name))))
-           (path (concat dir "style.css"))
-           ;;(path  org-css-file)
-           (homestyle (and (or (null dir) (null (file-exists-p path)))
-                           (not (null-or-unboundp 'my-org-inline-css-file))))
-           (final (if homestyle my-org-inline-css-file path)))
-      (if (file-exists-p final)
-          (progn
-            (setq-local org-html-head-include-default-style nil)
-            (setq-local org-html-head
-                        (concat
-                         "<style type=\"text/css\">\n"
-                         "<!--/*--><![CDATA[/*><!--*/\n"
-                         (with-temp-buffer
-                           (insert-file-contents final)
-                           (buffer-string))
-                         "/*]]>*/-->\n"
-                         "</style>\n")))))))
-
-(add-hook 'org-export-before-processing-hook #'my-org-inline-css-hook)
-
-;; https://github.com/marsmining/ox-twbs
-;; M-x package-install [RET] ox-twbs [RET]
-;; If the installation doesn’t work try refreshing the package list:
-;; M-x package-refresh-contents [RET]
-;; usage: org-twbs-export-to-html
-
-(use-package ox-twbs)
-(add-hook 'org-mode-hook
-          (lambda ()
-            (local-set-key (kbd "s-\\") 'my-org-publish-buffer)))
-
-(defun my-org-publish-buffer ()
-  (interactive)
-  (save-buffer)
-  (org-twbs-export-to-html))
-(add-hook 'org-mode-hook
-          (lambda ()
-            "Beautify org symbols."
-            (when suk-prettify-org-symbols-alist
-              (if prettify-symbols-alist
-                  (push suk-prettify-org-symbols-alist prettify-symbols-alist)
-                (setq prettify-symbols-alist suk-prettify-org-symbols-alist)))
-            (prettify-symbols-mode 1)
-            (abbrev-mode 1)
-            (setq truncate-lines nil)
-            (set-fill-column 70)
-            (turn-on-font-lock)
-            (load-org-font)
-            ))
-(defun my-execute-function-and-shell-command-async ()
-  "执行自定义函数逻辑，然后异步调用外部 shell 命令，传递当前文件名的扩展名替换为 .html 的路径作为参数。"
-  (interactive)
-  ;; 检查当前缓冲区是否关联有文件
-  (if (buffer-file-name)
-      (let* ((current-file (buffer-file-name))
-             ;; 使用 file-name-sans-extension 获取不带扩展名的文件名
-             (base-name (file-name-sans-extension current-file))
-             ;; 构建新的文件名，替换扩展名为 .html
-             (html-file (concat base-name ".html"))
-             ;; 定义要执行的外部命令，这里以 ls -l 为例
-             (command (format "htm-cleanup.sh %s" (shell-quote-argument html-file)))
-             ;; 定义输出缓冲区名称
-             (output-buffer "*Shell Command Output*"))
-        (my-org-publish-buffer)
-        ;; 执行自定义函数逻辑
-        (message "正在处理文件: %s" current-file)
-
-        ;; 异步调用外部 shell 命令
-        (async-shell-command command output-buffer)
-
-        ;; 显示提示信息
-        (message "已启动异步命令: %s" command))
-    (message "当前缓冲区没有关联的文件。")))
-
-
-
-;; 绑定快捷键 C-c e 到上述函数
-(global-set-key (kbd "C-S-e") #'my-execute-function-and-shell-command-async)
-
-;;(global-set-key (kbd "C-S-e") #'my-org-publish-buffer)
-
-;; covert to html
-(use-package htmlize :defer 2)
-;;(require-package 'ob-sagemath)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;; Attachments
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq org-id-method (quote uuidgen))
-;; Say you want to attach a file x.sql to your current task. Create
-;; the file data in /tmp/x.sql and save it.
-;;
-;; Attach the file with C-c C-a a and enter the filename: x.sql.
-;; This generates a unique ID for the task and adds the file in the
-;; attachment directory.
-;;
-;; * Attachments                                     :ATTACH:
-;;   :PROPERTIES:
-;;   :Attachments: x.sql
-;;   :ID:       f1d38e9a-ff70-4cc4-ab50-e8b58b2aaa7b
-;;   :END:
-;;
-;; The attached file is saved in
-;; data/f1/d38e9a-ff70-4cc4-ab50-e8b58b2aaa7b/. Where it goes
-;; exactly isn't important for me 鈥?as long as it is saved and
-;; retrievable easily. Org-mode copies the original file /tmp/x.sql
-;; into the appropriate attachment directory.
-;;
-;; Tasks with attachments automatically get an ATTACH tag so you can
-;; easily find tasks with attachments with a tag search.
-;;
-;; To open the attachment for a task use C-c C-a o. This prompts for
-;; the attachment to open and TAB completion works here.
-
-;;(setq plantuml-default-exec-mode 'server) ;default
-;; ;; Sample jar configuration
-;; (setq plantuml-jar-path "/path/to/your/copy/of/plantuml.jar")
-;; (setq plantuml-default-exec-mode 'jar)
-
-;; ;; Sample executable configuration
-;; (setq plantuml-executable-path "/path/to/your/copy/of/plantuml.bin")
-;; (setq plantuml-default-exec-mode 'executable)
-(setq plantuml-default-exec-mode 'jar)
-(setq org-plantuml-jar-path
-      (expand-file-name "C:/green/plantuml-1.2024.3.jar"))
-(setq org-plantuml-jar-args (list "-charset" "UTF-8"))
-;; plantuml-java-args
-;; plantuml-jar-args
-(defun my-org-plantuml-execute (orig-fun &rest args)
-  (let (
-        (plantuml-java-args (list
-                             "-Djava.awt.headless=true"
-                             "-Dfile.encoding=UTT-8"
-                             "-jar"
-                             "--illegal-access=deny"
-                             ))
-        (plantuml-jar-args (list  "-charset" "UTF-8")) ;default value
-        )
-    (apply orig-fun args)))
-
-(advice-add 'org-plantuml-execute :around #'my-org-plantuml-execute)
-(add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((plantuml . t)
-   (dot . t)
-   ))
-;;(setq process-environment (cons "PATH=D:/green/plantUML/bin;%PATH%" process-environment))
-
-;; (defun my-org-export-before-processing-hook (backend)
-;;   (let ((process-environment (cons "PATH=%PATH%" process-environment)))
-;;     (org-babel-execute-src-block)
-;;     (org-babel-execute-buffer)))
-
-;; (add-hook 'org-export-before-processing-hook 'my-org-export-before-processing-hook)
-
-
-(defun my-org-mode-refresh-images ()
-  (when (derived-mode-p 'org-mode) ; 确保当前模式是 Org-mode
-    (org-redisplay-inline-images))) ; 刷新内嵌图片
-
-(add-hook 'org-babel-after-execute-hook 'my-org-mode-refresh-images)
-
-;; org-mode
-(require-package 'toc-org)
-
-;; org => ppt
-;;(require-package 'org-re-reveal)
-
-;;;; Run commands in a popup frame
-(defun prot-window-delete-popup-frame (&rest _)
-  "Kill selected selected frame if it has parameter `prot-window-popup-frame'.
-    Use this function via a hook."
-  (when (frame-parameter nil 'prot-window-popup-frame)
-    (delete-frame)))
-(defmacro prot-window-define-with-popup-frame (command)
-  "Define interactive function which calls COMMAND in a new frame.
-    Make the new frame have the `prot-window-popup-frame' parameter."
-  `(defun ,(intern (format "prot-window-popup-%s" command)) ()
-     ,(format "Run `%s' in a popup frame with `prot-window-popup-frame' parameter.
-    Also see `prot-window-delete-popup-frame'." command)
-     (interactive)
-     (let ((frame (make-frame '((prot-window-popup-frame . t)))))
-       (select-frame frame)
-       (switch-to-buffer " prot-window-hidden-buffer-for-popup-frame")
-       (condition-case nil
-           (call-interactively ',command)
-         ((quit error user-error)
-          (delete-frame frame))))))
-(declare-function org-capture "org-capture" (&optional goto keys))
-(defvar org-capture-after-finalize-hook)
-    ;;;###autoload (autoload 'prot-window-popup-org-capture "prot-window")
-(prot-window-define-with-popup-frame org-capture)
-(add-hook 'org-capture-after-finalize-hook #'prot-window-delete-popup-frame)
-(require-package 'tmr)
-(declare-function tmr "tmr" (time &optional description acknowledgep))
-(defvar tmr-timer-created-functions)
-    ;;;###autoload (autoload 'prot-window-popup-tmr "prot-window")
-(prot-window-define-with-popup-frame tmr)
-(add-hook 'tmr-timer-created-functions #'prot-window-delete-popup-frame)
-
-;;;; The emacsclient calls that need ot be bound to system-wide keys
-;; emacsclient -e '(prot-window-popup-org-capture)'
-;; emacsclient -e '(prot-window-popup-tmr)'
-
-(defun insert-screenshot (file-name)
-  "Save screenshot to FILE-NAME and insert an Org link at point.
-
-This calls the `import' from ImageMagick to take the screenshot,
-and `optipng' to reduce the file size if the program is present."
-  (interactive "FSave to file: ")
-  ;; Get absolute path
-  (let ((file (expand-file-name file-name)))
-    ;; Create the directory if necessary
-    (make-directory (file-name-directory file) 'parents)
-    ;; Still, make sure to signal if the screenshot was in fact not created
-    (unless (= 0 (call-process "import" nil nil nil file))
-      (user-error "`import' failed to create screenshot %s" file))
-    (if (executable-find "optipng")
-        (start-process "optipng" nil "optipng" file))
-    (insert
-     ;; A link relative to the buffer where it is inserted is more portable
-     (format "[[file:%s]]"
-             (file-relative-name file
-                                 (file-name-directory buffer-file-name))))
-    (when (eq major-mode 'org-mode)
-      (org-redisplay-inline-images))))
-
-(with-eval-after-load 'hydra
-  (defshortcuts suk/file-shortcuts ()
-    ("C" "~/proj/emacs-calendar/README.org" "Emacs calendar")
-    ("e" "~/sync/emacs/Sacha.org" "Config")
-    ("E" "~/sync/emacs-news/index.org" "Emacs News")
-    ("f" "~/proj/font/README.org" "Font")
-    ("I" "~/sync/orgzly/computer-inbox.org" "Computer inbox")
-    ("i" "~/sync/orgzly/Inbox.org" "Phone inbox")
-    ("o" "~/sync/orgzly/organizer.org" "Main org file")
-    ("s" "~/proj/stream/notes.org" "Public Emacs notes")
-    ("b" "~/sync/orgzly/business.org" "Business")
-    ("p" "/scp:web:/mnt/prev/home/sacha/planet/en.ini" "Planet Emacsen")
-    ("P" "~/sync/orgzly/posts.org" "Posts")
-    ;;("B" "/ssh:web|sudo::/etc/nginx/sites-available" "Nginx sites")
-    ("w" "~/Dropbox/public/sharing/index.org" "Sharing index")
-    ("W" "~/Dropbox/public/sharing/blog.org" "Blog index")
-    ("1" "~/proj/static-blog/" "Static blog")
-    ("r" "~/sync/orgzly/reference.org" "Reference")
-    ("R" "~/personal/reviews.org" "Reviews")
-    ("g" "~/proj/sachac.github.io/evil-plans/index.org" "Evil plans"))
-
- (defhydra hydra-global-org (:color blue)
-     "Org"
-     ("t" org-timer-start "Start Timer")
-     ("s" org-timer-stop "Stop Timer")
-     ("r" org-timer-set-timer "Set Timer") ; This one requires you be in an orgmode doc, as it sets the timer for the header
-     ("p" org-timer "Print Timer") ; output timer value to buffer
-     ("w" (org-clock-in '(4)) "Clock-In") ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t)
-     ("o" org-clock-out "Clock-Out") ; you might also want (setq org-log-note-clock-out t)
-     ("j" org-clock-goto "Clock Goto") ; global visit the clocked task
-     ("c" org-capture "Capture") ; Don't forget to define the captures you want http://orgmode.org/manual/Capture.html
-	   ("l" (or )rg-capture-goto-last-stored "Last Capture"))
-
-  )
-;; ("C-c f" . #'suk/file-shortcuts/body)
-
-;;Prettify UI
-(use-package org-modern
-  :custom
-  ;;  (org-modern-table nil)
-  (prettify-symbols-alist nil)
-  :config
-  ;; Disable Prettify Symbols mode globally or locally as needed
-  ;;(global-prettify-symbols-mode -1)
-  :hook ((org-mode . org-modern-mode)
-         (org-agenda-finalize . org-modern-agenda)
-         ))
-
-(use-package org-roam
-  :ensure t
-  :init
-  (setq org-roam-v2-ack t)
-  (setq org-roam-db-location "~/.emacs.d/var/org-roam.db")
-  :custom
-  ;; (org-roam-directory (file-truename "~/RoadNotes"))
-  ;; The file-truename function is only necessary when you use
-  ;; symbolic links inside org-roam-directory: Org-roam does not
-  ;; resolve symbolic links.
-  (make-directory (expand-file-name "daily" org-roam-directory) t)
-  (org-roam-completion-everywhere t)
-  (org-roam-dailies-capture-templates
-   '(("d" "default" entry "* %<%I:%M %p>: %?"
-      :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
-         :map org-mode-map
-         ("C-M-i" . completion-at-point)
-         :map org-roam-dailies-map
-         ("Y" . org-roam-dailies-capture-yesterday)
-         ("n" . org-roam-dailies-capture-today)
-         ("T" . org-roam-dailies-capture-tomorrow)
-         ("v" . org-roam-dailies-capture-date)
-         ("d" . org-roam-dailies-goto-today)
-         ("t" . org-roam-dailies-goto-tomorrow)
-         ("y" . org-roam-dailies-goto-yesterday)
-         ("c" . org-roam-dailies-goto-date)
-         ("b" . org-roam-dailies-goto-next-note)
-         ("f" . org-roam-dailies-goto-previous-note)
-         )
-  :bind-keymap
-  ("C-c n d" . org-roam-dailies-map)
-  :config
-  (require 'org-roam-dailies) ;; Ensure the keymap is available
-  (org-roam-db-autosync-mode)
-
-  )
+(require 'init-org)
 
 ;; Recentf
 (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
@@ -1984,109 +913,9 @@ and `optipng' to reduce the file size if the program is present."
   (add-to-list 'recentf-exclude #'suk/recentf-exclude-p)
   )
 
-;;; ### Company en words ###
-;;; --- 英文助手
-(lazy-load-global-keys
- '(
-   ("M-r" . toggle-company-english-helper) ;英文助手
-   )
- "company-english-helper")
-
-(lazy-load-global-keys
- '(
-   ("<f8>" . treemacs)
-  )
-"init-treemacs")
-
-;; 设置打开 NeoTree 树形列表展示
-;;(require-package 'neotree)
-;;(use-package neotree
-;;  :commands (projectile-switch-project neotree-dir)
-;;  :config
-;;  (setq neo-theme 'ascii           ; NeoTree 图标的样式
-;;        neo-window-width 35
-;;        neo-window-fixed-size nil) ; 设置 NeoTree 窗口的宽度可以使用鼠标调整
-;;  :bind ("C-c o" . projectile-switch-project))
-
-;; Minor mode to aggressively keep your code always indented
-(use-package aggressive-indent
-  :diminish
-  :defer 2
-  :hook ((after-init . global-aggressive-indent-mode)
-         ;; NOTE: Disable in large files due to the performance issues
-         ;; https://github.com/Malabarba/aggressive-indent-mode/issues/73
-         (find-file . (lambda ()
-                        (when (too-long-file-p)
-                          (aggressive-indent-mode -1)))))
-  :config
-  ;; Disable in some modes
-  (dolist (mode '(gitconfig-mode
-                  asm-mode web-mode html-mode css-mode go-mode
-                  scala-mode shell-mode term-mode vterm-mode
-                  prolog-inferior-mode))
-    (add-to-list 'aggressive-indent-excluded-modes mode))
-
-  ;; Disable in some commands
-  (add-to-list 'aggressive-indent-protected-commands
-               #'delete-trailing-whitespace t)
-
-  ;; Be slightly less aggressive in C/C++/C#/Java/Go/Swift
-  (add-to-list 'aggressive-indent-dont-indent-if
-               '(and (derived-mode-p
-                      'c-mode 'c++-mode 'csharp-mode
-                      'java-mode 'go-mode 'swift-mode)
-                     (null (string-match "\\([;{}]\\|\\b\\(if\\|for\\|while\\)\\b\\)"
-                                         )))))
-
-(require-package 'markdown-mode)
-
-;; Display available keybindings in popup
-
-(use-package which-key
-  :diminish
-  :bind (("C-h M-m" . which-key-show-major-mode)
-         (:map help-map ("C-h" . which-key-C-h-dispatch)))
-
-  :hook (after-init . which-key-mode)
-  ;;:custom
-  ;; 弹出方式，底部弹出
-  ;;(which-key-popup-type 'side-window)
-  :init (setq which-key-max-description-length 30
-              which-key-lighter nil
-              which-key-show-remaining-keys t)
-  :config
-  (which-key-mode))
-
-(use-package which-key-posframe
-  :after (which-key posframe)
-  :config
-  (which-key-posframe-mode 1))
-
-;; Music
-;;(require-package 'emms)
-;;(require-package 'pulseaudio-control)
-
-(require-package 'pomodoro) ;; notify you to take a break for a long time work. pomodoro-start, pomodoro-pause, pomodoro-stop
-
-(require-package 'regex-tool)
-
-;;;; The emacsclient call depends on the daemon or `server-mode' (I use the latter)
-(use-package server
-  :ensure nil
-  :defer 1
-  :config
-  (unless (server-running-p)
-    (server-start)))
-
-(use-package keyfreq
-  :ensure t
-  :config
-  (keyfreq-mode 1)
-  (keyfreq-autosave-mode 1))
-;; M-x keyfreq-show
-
-(require-package 'session)
+(use-package session)
 (require 'auto-save)
+;; todo dont load
 (require 'basic-toolkit)
 
 (setq desktop-load-locked-desktop t) ; don't popup dialog ask user, load anyway
@@ -2126,970 +955,29 @@ and `optipng' to reduce the file size if the program is present."
 
 (emacs-session-restore)
 
-(when (display-graphic-p)
-  (use-package vertico
-    :bind (:map vertico-map
-                ("RET"   . vertico-directory-enter)
-                ("DEL"   . vertico-directory-delete-char)
-                ("M-DEL" . vertico-directory-delete-word))
-    :hook ((after-init . vertico-mode)
-           (rfn-eshadow-update-overlay . vertico-directory-tidy))
-    )
-   (use-package vertico-posframe
-      :ensure t
-      :after (posframe vertico)
-      :hook (vertico-mode . vertico-posframe-mode)
-      :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
-      )
-  )
+(require 'init-ui)
 
-(use-package corfu
-  :custom
-  (corfu-cycle t)
-  (corfu-auto t)
-  (corfu-auto-prefix 2)
-  (corfu-auto-delay 1)
-  (corfu-popupinfo-delay '(0.5 . 0.2))
-  (corfu-preview-current 'insert)
-  (corfu-preselect 'prompt)
-  (corfu-on-exeact-match nil)
-  :bind (:map corfu-map
-              ("TAB" . corfu-next)
-              ([tab] . corfu-next)
-              ("C-n" . corfu-next)
-              ("S-TAB" . corfu-previous)
-              ([backtab] . corfu-previous)
-              ("C-p" . corfu-previous)
-              ("S-<return>" . corfu-insert)
-              ("RET" . corfu-insert)
-              ("C-y" . corfu-yank)
-              ("C-g" . corfu-abort)
-              ("C-SPC" . corfu-complete))
-  :init
-  (global-corfu-mode)
-  (corfu-history-mode))
+(require 'init-completion)
 
-(use-package nerd-icons-corfu
-  :after corfu
-  :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+(require 'init-tools)
 
-;;据说跟 lsp-bridge 冲突
+;; 空闲时加载
+(run-with-idle-timer
+ 1
+ nil
+ #'(lambda()
+     (require 'load-abbrev)
+     ;; chmod +x
+     ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
+     (add-hook 'after-save-hook'executable-make-buffer-file-executable-if-script-p)
+     (autoload 'calendar "init-calendar" "Config Chinese calendar " t)
+     ))
 
-
-(use-package company
- :defer 2
- :diminish
- :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
- :hook (after-init . global-company-mode)
- :init (setq company-tooltip-align-annotations t
-             company-idle-delay 0 company-echo-delay 0
-             company-minimum-prefix-length 1
-             company-require-match nil
-             company-dabbrev-ignore-case nil
-             company-dabbrev-downcase nil
-             company-show-numbers t)
- :config
- (setq switch-window-input-style 'minibuffer)
- (setq switch-window-increase 4)
- (setq switch-window-threshold 2)
- (setq switch-window-shortcut-sytle 'querty)
- (setq switch-window-qwerty-shortcuts
-       '("a" "s" "d" "f" "j" "k" "l"))
- (setq company-minimum-prefix-length 1)
- (setq company-show-quick-access t)
- :bind (:map company-active-map
-             ("C-n" . #'company-select-next)
-             ("C-p" . #'company-select-previous)
-             ("TAB" . company-complete-selection)
-             ("M-h" . company-complete-selection)
-             ("M-H" . company-complete-common)
-             ("M-s" . company-search-candidates)
-             ("M-S" . company-filter-candidates)
-             ("M-n" . company-select-next)
-             ("M-p" . company-select-previous))
- (:map leader-key
-       ("c s" . #'company-yasnippet
-        ))
- )
-(use-package company-box
- :ensure nil)
-
-;; Optionally use the `orderless' completion style.
-(require-package 'orderless)
-(use-package orderless
-  :custom
-  (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion))))
-  (orderless-component-separator #'orderless-escapable-split-on-space))
-;; Support Pinyin
-(use-package pinyinlib
-  :after orderless
-  :autoload pinyinlib-build-regexp-string
-  :init
-  (defun completion--regex-pinyin (str)
-    (orderless-regexp (pinyinlib-build-regexp-string str)))
-  (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
-
-(use-package consult
-  :bind (;; C-c bindings in `mode-specific-map'
-         ("C-c M-x" . consult-mode-command)
-         ("C-c h"   . consult-history)
-         ("C-c k"   . consult-kmacro)
-         ("C-c m"   . consult-man)
-         ("C-c i"   . consult-info)
-         ("C-c r"   . consult-ripgrep)
-         ("C-c T"   . consult-theme)
-         ("C-."     . consult-imenu)
-
-         ;;("C-c c e" . consult-colors-emacs)
-         ;;("C-c c w" . consult-colors-web)
-         ;;("C-c c f" . describe-face)
-         ;;("C-c c t" . consult-theme)
-
-         ([remap Info-search]        . consult-info)
-         ([remap isearch-forward]    . consult-line)
-         ([remap recentf-open-files] . consult-recent-file)
-
-         ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ("C-x b"   . consult-buffer)              ;; orig. switch-to-buffer
-         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-         ;; Custom M-# bindings for fast register access
-         ("M-#"     . consult-register-load)
-         ("M-'"     . consult-register-store)      ;; orig. abbrev-prefix-mark (unrelated)
-         ("C-M-#"   . consult-register)
-         ;; Other custom bindings
-         ("M-y"     . consult-yank-pop)            ;; orig. yank-pop
-         ;; M-g bindings in `goto-map'
-         ("M-g e"   . consult-compile-error)
-         ("M-g g"   . consult-goto-line)           ;; orig. goto-line
-         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-         ("M-g o"   . consult-outline)             ;; Alternative: consult-org-heading
-         ("M-g m"   . consult-mark)
-         ("M-g k"   . consult-global-mark)
-         ("M-g i"   . consult-imenu)
-         ("M-g I"   . consult-imenu-multi)
-         ;; M-s bindings in `search-map'
-         ("M-s d"   . consult-find)
-         ("M-s D"   . consult-locate)
-         ("M-s g"   . consult-grep)
-         ("M-s G"   . consult-git-grep)
-         ("M-s r"   . consult-ripgrep)
-         ("M-s l"   . consult-line)
-         ("M-s L"   . consult-line-multi)
-         ("M-s k"   . consult-keep-lines)
-         ("M-s u"   . consult-focus-lines)
-         ;; Isearch integration
-         ("M-s e"   . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-e"     . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s e"   . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l"   . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L"   . consult-line-multi)            ;; needed by consult-line to detect isearch
-
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("C-s" . (lambda ()
-                    "Insert the selected region or current symbol at point."
-                    (interactive)
-                    (insert (with-current-buffer
-                                (window-buffer (minibuffer-selected-window))
-                              (or (and transient-mark-mode mark-active (/= (point) (mark))
-                                       (buffer-substring-no-properties (point) (mark)))
-                                  (thing-at-point 'symbol t)
-                                  "")))))
-         ("M-s" . consult-history)    ;;orig. next-matching-history-element
-         ("M-r" . consult-history))   ;; orig. previous-matching-history-element
-
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-
-  ;; The :init configuration is always executed (Not lazy)
-  :init
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
-
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
-  :config
-  (use-package consult-flyspell
-    :bind ("M-g s" . consult-flyspell))
-
-  (use-package consult-yasnippet
-    :bind ("M-g y" . consult-yasnippet))
-  ;; Use Consult to select xref locations with preview
-  (with-eval-after-load 'xref
-    (setq xref-show-xrefs-function #'consult-xref
-          xref-show-definitions-function #'consult-xref))
-  )
-
-(use-package nerd-icons-completion
-  :when (icons-displayable-p)
-  :hook (vertico-mode . nerd-icons-completion-mode))
-
-(use-package emacs
-  :init
-  ;; TAB cycle if there are only few candidates
-  (setq completion-cycle-threshold 3)
-
-  ;; Only list the commands of the current modes
-  (when (boundp 'read-extended-command-predicate)
-    (setq read-extended-command-predicate
-          #'command-completion-default-include-p))
-
-  ;; Enable indentation+completion using the TAB key.
-  ;; `completion-at-point' is often bound to M-TAB.
-  (setq tab-always-indent 'complete))
-
-;; More utils
-(use-package shackle)
-
-(unless (display-graphic-p)
-  ;; only conole packages
-  )
-
-;; Misc. programming modes
-(use-package csv-mode)
-(use-package yaml-mode)
-(use-package web-mode)
-(use-package yaml-mode)
-(use-package js2-mode)
-(use-package rjsx-mode)
-(use-package csv-mode)
-(use-package typescript-mode)
-(use-package nvm)
-
-;; format all, formatter for almost languages
-;; great for programmers
-(require-package 'format-all)
-(use-package format-all
-  :ensure t
-  :hook (prog-mode . format-all-ensure-formatter)
-  :bind ("C-c f" . #'format-all-buffer))
-
-;; Format HTML, CSS and JavaScript/JSON
-;; Install: npm -g install prettier
-(when (executable-find "prettier")
-  (use-package prettier
-    :diminish
-    :hook ((js-mode js2-mode css-mode sgml-mode web-mode) . prettier-mode)
-    :init (setq prettier-pre-warm 'none)))
-
-(use-package prettier-js
-  :ensure t
-  :defer 3
-  :hook ((css-mode web-mode typescript-mode js-mode json-mode js2-mode) . prettier-js-mode))
-
-
-(use-package apheleia
-  :hook (prog-mode . apheleia-mode)
-  :config
-  (setf (alist-get 'prettier apheleia-formatters)
-        '("prettier" "--stdin-filepath" filepath)))
-
-;; 折叠和收缩代码
-;; builtin
-(use-package hideshow
-  :diminish hs-minor-mode
-  :pretty-hydra
-  ((:title (pretty-hydra-title "HideShow" 'octicon "nf-oct-fold")
-           :color amaranth :quit-key ("q" "C-g"))
-   ("Fold"
-    (("t" hs-toggle-all "toggle all")
-     ("a" hs-show-all "show all")
-     ("i" hs-hide-all "hide all")
-     ("g" hs-toggle-hiding "toggle hiding")
-     ("c" hs-cycle "cycle block")
-     ("s" hs-show-block "show block")
-     ("h" hs-hide-block "hide block")
-     ("l" hs-hide-level "hide level"))
-    "Move"
-    (("C-a" mwim-beginning-of-code-or-line "⭰")
-     ("C-e" mwim-end-of-code-or-line "⭲")
-     ("C-b" backward-char "←")
-     ("C-n" next-line "↓")
-     ("C-p" previous-line "↑")
-     ("C-f" forward-char "→")
-     ("C-v" pager-page-down "↘")
-     ("M-v" pager-page-up "↖")
-     ("M-<" beginning-of-buffer "⭶")
-     ("M->" end-of-buffer "⭸"))))
-  :bind
-  (:map hs-minor-mode-map
-        ("C-~" . hideshow-hydra/body)
-        ("C-S-<escape>" . hideshow-hydra/body)
-        ("C-c ." . hs-toggle-hiding)
-        ("C-c ," . hs-show-all)
-        )
-  :hook (prog-mode . hs-minor-mode)
-  :config
-  ;; Display line counts
-  (defun hs-display-code-line-counts (ov)
-    "Display line counts when hiding codes."
-    (when (eq 'code (overlay-get ov 'hs))
-      (overlay-put ov 'display
-                   (concat
-                    " "
-                    (propertize
-                     (if (char-displayable-p ?⏷) "⏷" "...")
-                     'face 'shadow)
-                    (propertize
-                     (format " (%d lines)"
-                             (count-lines (overlay-start ov)
-                                          (overlay-end ov)))
-                     'face '(:inherit shadow :height 0.8))
-                    " "))))
-  (setq hs-set-up-overlay #'hs-display-code-line-counts)
-  (lazy-load-set-keys
-   '(
-     ([S-f6] . hs-minor-mode)
-     )
-   )
-  )
-
-;; 设置行号
-;; builtin
-(require 'display-line-numbers)
-;;(global-display-line-numbers-mode 1)
-;; Alternatively, to use it only in programming modes:
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
-
-;; Line numbers are not displayed when large files are used.
-(setq line-number-display-limit large-file-warning-threshold)
-(setq line-number-display-limit-width 1000)
-
-(dolist (hook (list
-               'c-mode-common-hook
-               'c-mode-hook
-               'emacs-lisp-mode-hook
-               'lisp-interaction-mode-hook
-               'lisp-mode-hook
-               'java-mode-hook
-               'asm-mode-hook
-               'haskell-mode-hook
-               'rcirc-mode-hook
-               'erc-mode-hook
-               'sh-mode-hook
-               'makefile-gmake-mode-hook
-               'python-mode-hook
-               'js-mode-hook
-               'html-mode-hook
-               'css-mode-hook
-               'tuareg-mode-hook
-               'go-mode-hook
-               'coffee-mode-hook
-               'qml-mode-hook
-               'markdown-mode-hook
-               'slime-repl-mode-hook
-               'package-menu-mode-hook
-               'cmake-mode-hook
-               'php-mode-hook
-               'web-mode-hook
-               'coffee-mode-hook
-               'sws-mode-hook
-               'jade-mode-hook
-               'vala-mode-hook
-               'rust-mode-hook
-               'ruby-mode-hook
-               'qmake-mode-hook
-               'lua-mode-hook
-               'swift-mode-hook
-               'llvm-mode-hook
-               'conf-toml-mode-hook
-               'nxml-mode-hook
-               'nim-mode-hook
-               'typescript-mode-hook
-               'elixir-mode-hook
-               'clojure-mode-hook
-               'dart-mode-hook
-               'zig-mode-hook
-
-               'c-ts-mode-hook
-               'c++-ts-mode-hook
-               'cmake-ts-mode-hook
-               'toml-ts-mode-hook
-               'css-ts-mode-hook
-               'js-ts-mode-hook
-               'json-ts-mode-hook
-               'python-ts-mode-hook
-               'bash-ts-mode-hook
-               'typescript-ts-mode-hook
-               'rust-ts-mode-hook
-               'java-ts-mode-hook
-               'kotlin-mode-hook
-               'prog-mode-hook
-               'yaml-mode-hook
-               'conf-mode-hook
-               ))
-  (add-hook hook (lambda () (display-line-numbers-mode))))
-
-
-;;;###autoload
-(defun my-use-tags-as-imenu-function-p ()
-  "Can use tags file to build imenu function"
-  (my-ensure 'counsel-etags)
-  (and (locate-dominating-file default-directory "TAGS")
-       ;; latest universal ctags has built in parser for javascript/typescript
-       (counsel-etags-universal-ctags-p "ctags")
-       (memq major-mode '(typescript-mode js-mode javascript-mode))))
-
-;; }}
-
-;; Cross-referencing commands
-(use-package xref
-  :bind (("M-g ." . xref-find-definitions)
-         ("M-g ," . xref-go-back))
-  :init
-  ;; Use faster search tool
-  (when (executable-find "rg")
-    (setq xref-search-program 'ripgrep))
-
-  ;; Select from xref candidates in minibuffer
-  (setq xref-show-definitions-function #'xref-show-definitions-completing-read
-        xref-show-xrefs-function #'xref-show-definitions-completing-read))
-
-;; Jump to definition
-(use-package dumb-jump
-  :pretty-hydra
-  ((:title (pretty-hydra-title "Dump Jump" 'faicon "nf-fa-anchor")
-           :color blue :quit-key ("q" "C-g"))
-   ("Jump"
-    (("j" dumb-jump-go "Go")
-     ("o" dumb-jump-go-other-window "Go other window")
-     ("e" dumb-jump-go-prefer-external "Go external")
-     ("x" dumb-jump-go-prefer-external-other-window "Go external other window"))
-    "Other"
-    (("i" dumb-jump-go-prompt "Prompt")
-     ("l" dumb-jump-quick-look "Quick look")
-     ("b" dumb-jump-back "Back"))))
-  :bind (("C-M-j" . dumb-jump-hydra/body))
-  :init
-  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-  (setq dumb-jump-selector 'completing-read))
-
-;; Tree-sitter support
+;; Hanlde minified code
+(if emacs/>=27p (add-hook 'after-init-hook #'global-so-long-mode))
 (when sys/linuxp
-  (require-package 'treesit-auto)
-  (use-package treesit-auto
-    :ensure t
-    :hook (after-init . global-treesit-auto-mode)
-    :init
-    (setq treesit-auto-install 'prompt)
-    (setq treesit-language-source-alist
-          '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
-            (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
-            (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-            (css        . ("https://github.com/tree-sitter/tree-sitter-css"))
-            (cmake      . ("https://github.com/uyha/tree-sitter-cmake"))
-            (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
-            (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
-            (elisp      . ("https://github.com/Wilfred/tree-sitter-elisp"))
-            (go         . ("https://github.com/tree-sitter/tree-sitter-go"))
-            (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
-            (html       . ("https://github.com/tree-sitter/tree-sitter-html"))
-            (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
-            (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
-            (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
-            (lua        . ("https://github.com/Azganoth/tree-sitter-lua"))
-            (make       . ("https://github.com/alemuller/tree-sitter-make"))
-            (markdown   . ("https://github.com/MDeiml/tree-sitter-markdown" nil "tree-sitter-markdown/src"))
-            (ocaml      . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
-            (org        . ("https://github.com/milisims/tree-sitter-org"))
-            (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
-            (php        . ("https://github.com/tree-sitter/tree-sitter-php"))
-            (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
-            (tsx        . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
-            (ruby       . ("https://github.com/tree-sitter/tree-sitter-ruby"))
-            (rust       . ("https://github.com/tree-sitter/tree-sitter-rust"))
-            (sql        . ("https://github.com/m-novikov/tree-sitter-sql"))
-            (vue        . ("https://github.com/merico-dev/tree-sitter-vue"))
-            (yaml       . ("https://github.com/ikatyang/tree-sitter-yaml"))
-            (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))
-            (zig        . ("https://github.com/GrayJack/tree-sitter-zig"))))
-    (add-to-list 'major-mode-remap-alist '(sh-mode         . bash-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(c-mode          . c-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(c++-mode        . c++-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(c-or-c++-mode   . c-or-c++-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(css-mode        . css-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(js-mode         . js-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(java-mode       . java-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(js-json-mode    . json-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(makefile-mode   . cmake-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(python-mode     . python-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(ruby-mode       . ruby-ts-mode))
-    (add-to-list 'major-mode-remap-alist '(conf-toml-mode  . toml-ts-mode))
-    (add-to-list 'auto-mode-alist '("\\(?:Dockerfile\\(?:\\..*\\)?\\|\\.[Dd]ockerfile\\)\\'" . dockerfile-ts-mode))
-    (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
-    (add-to-list 'auto-mode-alist '("/go\\.mod\\'" . go-mod-ts-mode))
-    (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
-    (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
-    (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-ts-mode))
-    )
-  (global-treesit-auto-mode))
-
-(when sys/win32p 
-  (setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
-  (add-to-list 'load-path "C:\\green\\emacs-suk\\.emacs.d\\extensions\\copilot\\copilot.el")
-
-  )
-(unless sys/win32p
-  (setq copilot-node-executable "~/.nvm/versions/node/v22.13.0/bin/node")
-  (add-to-list 'load-path "~/.emacs.d/extensions/copilot/copilot.el")
-  )
-
-
-(use-package copilot)
-(with-eval-after-load 'copilot
-
-  ;; 全局设置 Copilot 的缩进偏移量为 4
-  (setq copilot-indent-offset 4)
-  ;; 设置 Copilot 缩进偏移量
-  (let ((copilot-offsets
-         '((python-mode . 4)
-           (c-mode . 2)
-           (js-mode . 2)
-           (bat-mode . 2))))
-    (dolist (pair copilot-offsets)
-      (let ((mode (car pair))
-            (offset (cdr pair)))
-        (add-hook mode (lambda () (setq copilot-indent-offset offset))))))
-  (add-hook 'prog-mode-hook 'copilot-mode)
-
-  ;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
-  ;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
-  (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-  (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-  (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
-  ;; Increase the maximum character limit for Copilot
-  (setq copilot-max-char 200000) ;; Adjust the value as needed
-  ;; Disable Copilot file size warnings
-  (setq copilot-disable-size-check t) ;; Hypothetical variable
-  ;;;; 忽略 Copilot 的特定警告
-  ;;(add-to-list 'warning-suppress-types '(copilot quail--infer-indentation-offset found no mode-specific indentation offset))
-  ;;;; 设置 Emacs 的最低警告级别为 warning`，忽略 `emergency 级别以下的警告
-  ;; (setq warning-minimum-level :warning)
-  ;; 闭嘴
-  (setq copilot-indent-offset-warning-disable t)
-  )
-
-;; Login to Copilot by M-x copilot-login. You can also check the
-;; status by M-x copilot-diagnose (NotAuthorized means you don't have
-;; a valid subscription).
-
-;; {{ typescript
-(use-package typescript-mode
-  :load-path "~/.emacs.d/extensions/typescript"
-  :hook ((typescript-mode . (typescript-mode-hook-setup)))
-  :config
-  (defun typescript-mode-hook-setup ()
-    "Set up `typescript-mode'."
-    (when (my-use-tags-as-imenu-function-p)
-      ;; use ctags to calculate imenu items
-      (setq imenu-create-index-function
-            'counsel-etags-imenu-default-create-index-function)))
-
-  (defun my-typescript-beginning-of-defun-hack (orig-func &rest args)
-    "Overwrite typescript beginning detection."
-    (ignore orig-func)
-    (ignore args)
-    (when (my-use-tags-as-imenu-function-p)
-      (let* ((closest (my-closest-imenu-item)))
-        (when closest
-          (imenu closest)))))
-  (advice-add 'typescript-beginning-of-defun
-              :around #'my-typescript-beginning-of-defun-hack)
-  )
-
-;; CSS
-(use-package css-mode
-  :init (setq css-indent-offset 2))
-
-;; SCSS
-(use-package scss-mode
-  :init (setq scss-compile-at-save nil))
-
-;; LESS
-(unless (fboundp 'less-css-mode)
-  (use-package less-css-mode))
-
-;; JSON
-(unless (fboundp 'js-json-mode)
-  (use-package json-mode
-    :load-path "~/.emacs.d/extensions/json-mode"))
-
-;; JavaScript
-(use-package js
-  :init (setq js-indent-level 2))
-
-(with-eval-after-load 'js-mode
-  ;; '$' is part of variable name like '$item'
-  (modify-syntax-entry ?$ "w" js-mode-syntax-table))
-
-(use-package js2-mode
-  :mode (("\\.js\\'" . js2-minor-mode)
-         ("\\.jsx\\'" . js2-minor-jsx-mode))
-  :interpreter (("node" . js2-minor-mode)
-                ("node" . js2-minor-jsx-mode))
-  :hook ((js2-minor-mode . (lambda()  (js2-imenu-extras-mode)
-                             (js2-highlight-unused-variables-mode)
-
-                             )))
-  :config
-  (defun my-validate-json-or-js-expression (&optional not-json-p)
-    "Validate buffer or select region as JSON.
-If NOT-JSON-P is not nil, validate as Javascript expression instead of JSON."
-    (interactive "P")
-    (let* ((json-exp (if (region-active-p) (my-selected-str)
-                       (my-buffer-str)))
-           (jsbuf-offet (if not-json-p 0 (length "var a=")))
-           errs
-           first-err
-           (first-err-pos (if (region-active-p) (region-beginning) 0)))
-      (unless not-json-p
-        (setq json-exp (format "var a=%s;"  json-exp)))
-      (with-temp-buffer
-        (insert json-exp)
-        (my-ensure 'js2-mode)
-        (js2-parse)
-        (setq errs (js2-errors))
-        (cond
-         ((not errs)
-          (message "NO error found. Good job!"))
-         (t
-          ;; yes, first error in buffer is the last element in errs
-          (setq first-err (car (last errs)))
-          (setq first-err-pos (+ first-err-pos (- (cadr first-err) jsbuf-offet)))
-          (message "%d error(s), first at buffer position %d: %s"
-                   (length errs)
-                   first-err-pos
-                   (js2-get-msg (caar first-err))))))
-      (if first-err (goto-char first-err-pos))))
-
-  (defun my-print-json-path (&optional hardcoded-array-index)
-    "Print the path to the JSON value under point, and save it in the kill ring.
-If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it."
-    (interactive "P")
-    (cond
-     ((memq major-mode '(js2-mode))
-      (js2-print-json-path hardcoded-array-index))
-     (t
-      (let* ((cur-pos (point))
-             (str (my-buffer-str)))
-        (when (string= "json" (file-name-extension buffer-file-name))
-          (setq str (format "var a=%s;" str))
-          (setq cur-pos (+ cur-pos (length "var a="))))
-        (my-ensure 'js2-mode)
-        (with-temp-buffer
-          (insert str)
-          (js2-init-scanner)
-          (js2-do-parse)
-          (goto-char cur-pos)
-          (js2-print-json-path))))))
-  (defun my-print-json-path (&optional hardcoded-array-index)
-    "Print the path to the JSON value under point, and save it in the kill ring.
-If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it."
-    (interactive "P")
-    (cond
-     ((memq major-mode '(js2-mode))
-      (js2-print-json-path hardcoded-array-index))
-     (t
-      (let* ((cur-pos (point))
-             (str (my-buffer-str)))
-        (when (string= "json" (file-name-extension buffer-file-name))
-          (setq str (format "var a=%s;" str))
-          (setq cur-pos (+ cur-pos (length "var a="))))
-        (my-ensure 'js2-mode)
-        (with-temp-buffer
-          (insert str)
-          (js2-init-scanner)
-          (js2-do-parse)
-          (goto-char cur-pos)
-          (js2-print-json-path))))))
-
-
-  ;;Latest rjsx-mode does not have indentation issue
-  ;;@see https://emacs.stackexchange.com/questions/33536/how-to-edit-jsx-react-files-in-emacs
-  (setq-default js2-additional-externs
-                '("$"
-                  "$A" ; salesforce lightning component
-                  "$LightningApp" ; salesforce
-                  "AccessifyHTML5"
-                  "Blob"
-                  "FormData"
-                  "KeyEvent"
-                  "Raphael"
-                  "React"
-                  "URLSearchParams"
-                  "__dirname" ; Node
-                  "_content" ; Keysnail
-                  "after"
-                  "afterEach"
-                  "angular"
-                  "app"
-                  "assert"
-                  "assign"
-                  "before"
-                  "beforeEach"
-                  "browser"
-                  "by"
-                  "clearInterval"
-                  "clearTimeout"
-                  "command" ; Keysnail
-                  "content" ; Keysnail
-                  "decodeURI"
-                  "define"
-                  "describe"
-                  "display" ; Keysnail
-                  "documentRef"
-                  "element"
-                  "encodeURI"
-                  "expect"
-                  "ext" ; Keysnail
-                  "fetch"
-                  "gBrowser" ; Keysnail
-                  "global"
-                  "goDoCommand" ; Keysnail
-                  "hook" ; Keysnail
-                  "inject"
-                  "isDev"
-                  "it"
-                  "jest"
-                  "jQuery"
-                  "jasmine"
-                  "key" ; Keysnail
-                  "ko"
-                  "log"
-                  "mockStore"
-                  "module"
-                  "mountWithTheme"
-                  "plugins" ; Keysnail
-                  "process"
-                  "require"
-                  "setInterval"
-                  "setTimeout"
-                  "shell" ; Keysnail
-                  "tileTabs" ; Firefox addon
-                  "util" ; Keysnail
-                  "utag") )
-  )
-
-(use-package rjsx-mode
-  :load-path "~/.emacs.d/extensions/rjsx-mode"
-  :mode ("\\.js\\'")
-  :hook ((rjsx-mode .  (lambda()
-                         (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
-                         (flycheck-select-checker 'javascript-eslint))))
-  ;;:config
-  ;;(add-hook 'rjsx-mode-hook 'setup)
-
-  )
-
-;; @see https://github.com/felipeochoa/rjsx-mode/issues/33
-(with-eval-after-load 'rjsx-mode
-  (define-key rjsx-mode-map "<" nil))
-
-
-(require-package 'emmet-mode)
-(use-package emmet-mode
-  :defer 3
-  :init (setq emmet-expand-jsx-className? t)
-  :hook (web-mode typescript-mode js-mode js2-mode rjsx-mode css-mode scss-mode sgml-mode))
-
-
-;; Major mode for editing web templates
-(use-package web-mode
-  :mode "\\.\\(phtml\\|php\\|[gj]sp\\|as[cp]x\\|erb\\|djhtml\\|html?\\|hbs\\|ejs\\|jade\\|swig\\|tm?pl\\|vue\\)$"
-  :config
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-enable-auto-closing t) ; enable auto close tag in text-mode
-  (setq web-mode-enable-auto-pairing t)
-  (setq web-mode-auto-close-style 2)
-  (setq web-mode-enable-css-colorization t)
-  (setq web-mode-imenu-regexp-list
-        '(("<\\(h[1-9]\\)\\([^>]*\\)>\\([^<]*\\)" 1 3 ">" nil)
-          ("^[ \t]*<\\([@a-z]+\\)[^>]*>? *$" 1 " id=\"\\([a-zA-Z0-9_]+\\)\"" "#" ">")
-          ("^[ \t]*<\\(@[a-z.]+\\)[^>]*>? *$" 1 " contentId=\"\\([a-zA-Z0-9_]+\\)\"" "=" ">")
-          ;; angular imenu
-          (" \\(ng-[a-z]*\\)=\"\\([^\"]+\\)" 1 2 "="))))
-
-
-;; Adds node_modules/.bin directory to `exec_path'
-(use-package add-node-modules-path
-   :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
-
-(setq-default js2-use-font-lock-faces t
-              js2-mode-must-byte-compile nil
-              ;; {{ comment indention in modern frontend development
-              javascript-indent-level 2
-              js-indent-level 2
-              css-indent-offset 2
-              typescript-indent-level 2
-              ;; }}
-              js2-strict-trailing-comma-warning nil ; it's encouraged to use trailing comma in ES6
-              js2-idle-timer-delay 0.5 ; NOT too big for real time syntax check
-              js2-auto-indent-p nil
-              js2-indent-on-enter-key nil ; annoying instead useful
-              js2-skip-preprocessor-directives t
-              js2-strict-inconsistent-return-warning nil ; return <=> return null
-              js2-enter-indents-newline nil
-              js2-bounce-indent-p t)
-
-(with-eval-after-load 'js-mode
-  ;; '$' is part of variable name like '$item'
-  (modify-syntax-entry ?$ "w" js-mode-syntax-table))
-
-(defun my-validate-json-or-js-expression (&optional not-json-p)
-  "Validate buffer or select region as JSON.
-If NOT-JSON-P is not nil, validate as Javascript expression instead of JSON."
-  (interactive "P")
-  (let* ((json-exp (if (region-active-p) (my-selected-str)
-                     (my-buffer-str)))
-         (jsbuf-offet (if not-json-p 0 (length "var a=")))
-         errs
-         first-err
-         (first-err-pos (if (region-active-p) (region-beginning) 0)))
-    (unless not-json-p
-      (setq json-exp (format "var a=%s;"  json-exp)))
-    (with-temp-buffer
-      (insert json-exp)
-      (my-ensure 'js2-mode)
-      (js2-parse)
-      (setq errs (js2-errors))
-      (cond
-       ((not errs)
-        (message "NO error found. Good job!"))
-       (t
-        ;; yes, first error in buffer is the last element in errs
-        (setq first-err (car (last errs)))
-        (setq first-err-pos (+ first-err-pos (- (cadr first-err) jsbuf-offet)))
-        (message "%d error(s), first at buffer position %d: %s"
-                 (length errs)
-                 first-err-pos
-                 (js2-get-msg (caar first-err))))))
-    (if first-err (goto-char first-err-pos))))
-
-(defun my-print-json-path (&optional hardcoded-array-index)
-  "Print the path to the JSON value under point, and save it in the kill ring.
-If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it."
-  (interactive "P")
-  (cond
-   ((memq major-mode '(js2-mode))
-    (js2-print-json-path hardcoded-array-index))
-   (t
-    (let* ((cur-pos (point))
-           (str (my-buffer-str)))
-      (when (string= "json" (file-name-extension buffer-file-name))
-        (setq str (format "var a=%s;" str))
-        (setq cur-pos (+ cur-pos (length "var a="))))
-      (my-ensure 'js2-mode)
-      (with-temp-buffer
-        (insert str)
-        (js2-init-scanner)
-        (js2-do-parse)
-        (goto-char cur-pos)
-        (js2-print-json-path))))))
-
-(with-eval-after-load 'js2-mode
-  ;; I hate the hotkeys to hide things
-  (define-key js2-mode-map (kbd "C-c C-e") nil)
-  (define-key js2-mode-map (kbd "C-c C-s") nil)
-  (define-key js2-mode-map (kbd "C-c C-f") nil)
-  (define-key js2-mode-map (kbd "C-c C-t") nil)
-  (define-key js2-mode-map (kbd "C-c C-o") nil)
-  (define-key js2-mode-map (kbd "C-c C-w") nil))
-;; }}
-
-(defun my-js2-mode-setup()
-  "Set up javascript."
-  ;; if use node.js we need nice output
-  (js2-imenu-extras-mode)
-  (setq mode-name "JS2")
-  ;; counsel/ivy is more generic and powerful for refactoring
-  ;; js2-mode has its own syntax linter
-
-  ;; call js-doc commands through `counsel-M-x'!
-
-  ;; @see https://github.com/mooz/js2-mode/issues/350
-  (setq forward-sexp-function nil))
-
-(add-hook 'js2-mode-hook 'my-js2-mode-setup)
-
-;; @see https://github.com/felipeochoa/rjsx-mode/issues/33
-(with-eval-after-load 'rjsx-mode
-  (define-key rjsx-mode-map "<" nil))
-
-
-;; Latest rjsx-mode does not have indentation issue
-;; @see https://emacs.stackexchange.com/questions/33536/how-to-edit-jsx-react-files-in-emacs
-(setq-default js2-additional-externs
-              '("$"
-                "$A" ; salesforce lightning component
-                "$LightningApp" ; salesforce
-                "AccessifyHTML5"
-                "Blob"
-                "FormData"
-                "KeyEvent"
-                "Raphael"
-                "React"
-                "URLSearchParams"
-                "__dirname" ; Node
-                "_content" ; Keysnail
-                "after"
-                "afterEach"
-                "angular"
-                "app"
-                "assert"
-                "assign"
-                "before"
-                "beforeEach"
-                "browser"
-                "by"
-                "clearInterval"
-                "clearTimeout"
-                "command" ; Keysnail
-                "content" ; Keysnail
-                "decodeURI"
-                "define"
-                "describe"
-                "display" ; Keysnail
-                "documentRef"
-                "element"
-                "encodeURI"
-                "expect"
-                "ext" ; Keysnail
-                "fetch"
-                "gBrowser" ; Keysnail
-                "global"
-                "goDoCommand" ; Keysnail
-                "hook" ; Keysnail
-                "inject"
-                "isDev"
-                "it"
-                "jest"
-                "jQuery"
-                "jasmine"
-                "key" ; Keysnail
-                "ko"
-                "log"
-                "mockStore"
-                "module"
-                "mountWithTheme"
-                "plugins" ; Keysnail
-                "process"
-                "require"
-                "setInterval"
-                "setTimeout"
-                "shell" ; Keysnail
-                "tileTabs" ; Firefox addon
-                "util" ; Keysnail
-                "utag"))
+  (load-if-exists (expand-file-name "linux.el" suk-emacs-root-dir)))
+(when sys/win32p
+  (load-if-exists (expand-file-name "windows.el" suk-emacs-root-dir)))
+(when sys/macp
+  (load-if-exists (expand-file-name "mac.el" suk-emacs-root-dir)))
