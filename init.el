@@ -266,6 +266,17 @@
   "Display use emacs rime or not."
   :group 'suk
   :type 'boolean)
+
+ (defcustom suk-copilot-enable nil
+   "Enable copilot mode"
+   :group 'suk
+   :type 'boolean)
+
+(defcustom  suk-eglot-enable nil
+  "Enable eglot mode"
+  :group 'suk
+  :type 'boolean)
+
 ;; Load `custom-file'
 ;; If it doesn't exist, copy from the template, then load it.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
@@ -379,24 +390,4 @@
 (use-package compat :demand t)
 
 (load-if-exists (expand-file-name "suk.el" suk-emacs-root-dir))
-
 (unless (server-running-p) (server-start))
-
-(run-with-idle-timer
- 1
- nil
- #'(lambda()
-   (require 'load-abbrev)
-   ))
-;; chmod +x
-;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
-(add-hook 'after-save-hook'executable-make-buffer-file-executable-if-script-p)
-(autoload 'calendar "init-calendar" "Config Chinese calendar " t)
-;; Hanlde minified code
-   (if emacs/>=27p (add-hook 'after-init-hook #'global-so-long-mode))
-(when sys/linuxp
-  (load-if-exists (expand-file-name "linux.el" suk-emacs-root-dir)))
-(when sys/win32p
-   (load-if-exists (expand-file-name "windows.el" suk-emacs-root-dir)))
- (when sys/macp
-     (load-if-exists (expand-file-name "mac.el" suk-emacs-root-dir)))

@@ -2,6 +2,13 @@
 
 ;; (setenv "JAVA_HOME" "/usr/lib/jvm/java-14-openjdk-amd64")
 
+;; 开发工具
+(run-with-idle-timer
+ 1 nil
+ #'(lambda()
+     (require 'init-devtools)
+     ))
+
 ;; Open files as another user
 (run-with-idle-timer
  2
@@ -9,6 +16,10 @@
  #'(lambda()
      (require 'my-sudo)
      (use-package sudo-edit)
+     (lazy-load-global-keys
+      '(("C-z C-s" . suk/sudo/body))
+      "my-sudo"
+      )
      ))
 
 ;; On-the-fly spell checker
@@ -32,6 +43,7 @@
        (setq ispell-program-name "aspell")
        (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together")))))
 
+;; 特有工具
 (run-with-idle-timer
  2
  nil
@@ -40,22 +52,37 @@
      (use-package pdf-tools
        :ensure t
        :config (pdf-tools-install))
+     ))
 
+;; 加载输入法
+(run-with-idle-timer
+ 1
+ nil
+ #'(lambda()
      (if suk-rime
          (require 'init-rime)
        (require 'rain))
+     ))
 
+;; 其他
+(run-with-idle-timer
+ 1
+ nil
+ #'(lambda()
      (when (display-graphic-p)
        ;; only graphic packages
-       (require-package 'vterm))
+       )
      (unless (display-graphic-p)
        ;; only conole packages
-       )  
+       )
      ))
 
 (when (display-graphic-p)
   ;; only graphic packages
-  )
-(unless (display-graphic-p)
-  ;; only conole packages
+  (lazy-load-global-keys
+   '(
+     ("C-x C-t" . toggle-vterm))
+   "init-vterm"
+   )
+
   )

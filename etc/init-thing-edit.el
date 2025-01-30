@@ -17,7 +17,7 @@
   _h_ Defun                        _L_ Line
   _p_ Parentheses                  _A_ To line beginning
   _l_ Line                         _E_ To line end
-  _a_ To line beginning            _n_ Show file name
+  _a_ To line beginning           _b_ Copy buffer file name
   _e_ To line end
   "
   ("w" thing-copy-word)
@@ -51,7 +51,7 @@
   ("L" thing-cut-line)
   ("A" thing-cut-to-line-beginning)
   ("E" thing-cut-to-line-end)
-  ("n" show-file-name)
+  ("b" show-file-name)
   
   ("q" nil "Cancel")
   )
