@@ -2349,7 +2349,7 @@ and `optipng' to reduce the file size if the program is present."
   (use-package consult-yasnippet
     :bind ("M-g y" . consult-yasnippet))
   ;; Use Consult to select xref locations with preview
-  (with-eval-afte1r-load 'xref
+  (with-eval-after-load 'xref
     (setq xref-show-xrefs-function #'consult-xref
           xref-show-definitions-function #'consult-xref))
   )
