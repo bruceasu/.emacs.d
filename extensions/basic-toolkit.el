@@ -41,93 +41,6 @@ If not select any area, then strip current buffer"
                   (re-search-backward regular-expression nil t)) ;and find string that match regular expression
         (replace-match "" t t)))))    ;replace target string with null
 
-(defun comment-part-move-up (n)
-  "Move comment part up."
-  (interactive "p")
-  (comment-part-move (or (- n) -1)))
-
-(defun comment-part-move-down (n)
-  "Move comment part down."
-  (interactive "p")
-  (comment-part-move (or n 1)))
-
-(defun comment-part-move (&optional n)
-  "Move comment part."
-  (or n (setq n 1))
-  (let (cmt-current cmt-another cs-current cs-another)
-    ;; If current line have comment, paste it.
-    (setq cmt-current (comment-paste))
-    (when cmt-current
-      (setq cs-current (current-column)))
-    ;; If another line have comment, paste it.
-    (forward-line n)
-    (setq cmt-another (comment-paste))
-    (when cmt-another
-      (setq cs-another (current-column)))
-    ;; Paste another comment in current line.
-    (forward-line (- n))
-    (when cmt-another
-      (if cs-current
-          (move-to-column cs-current t)
-        (end-of-line))
-      (insert cmt-another))
-    ;; Paste current comment in another line.
-    (forward-line n)
-    (when cmt-current
-      (if cs-another
-          (move-to-column cs-another t)
-        (end-of-line))
-      (insert cmt-current))
-    ;; Indent comment, from up to down.
-    (if (> n 0)
-        (progn                          ;comment move down
-          (forward-line (- n))
-          (if cmt-another (comment-indent))
-          (forward-line n)
-          (if cmt-current (comment-indent)))
-      (if cmt-current (comment-indent)) ;comment move up
-      (save-excursion
-        (forward-line (- n))
-        (if cmt-another (comment-indent))))))
-
-(defun comment-paste ()
-  "Paste comment part of current line.
-If have return comment, otherwise return nil."
-  (let (cs ce cmt)
-    (setq cs (comment-on-line-p))
-    (if cs                             ;If have comment start position
-        (progn
-          (goto-char cs)
-          (skip-syntax-backward " ")
-          (setq cs (point))
-          (comment-forward)
-          (setq ce (if (bolp) (1- (point)) (point))) ;get comment end position
-          (setq cmt (buffer-substring cs ce))        ;get comment
-          (kill-region cs ce) ;kill region between comment start and end
-          (goto-char cs)      ;revert position
-          cmt)
-      nil)))
-
-(defun comment-on-line-p ()
-  "Whether have comment part on current line.
-If have comment return COMMENT-START, otherwise return nil."
-  (save-excursion
-    (beginning-of-line)
-    (comment-search-forward (line-end-position) t)))
-
-(defun comment-dwim-next-line (&optional reversed)
-  "Move to next line and comment dwim.
-Optional argument REVERSED default is move next line, if reversed is non-nil move previous line."
-  (interactive)
-  (if reversed
-      (call-interactively 'previous-line)
-    (call-interactively 'next-line))
-  (call-interactively 'comment-dwim))
-
-(defun comment-dwim-prev-line ()
-  "Move to previous line and comment dwim."
-  (interactive)
-  (comment-dwim-next-line 't))
 
 (defun indent-buffer ()
   "Automatic format current buffer."
@@ -153,17 +66,6 @@ Optional argument REVERSED default is move next line, if reversed is non-nil mov
           (comment-indent)
         (goto-char end)))))
 
-(defun upcase-char (arg)
-  "Uppercase for character."
-  (interactive "P")
-  (upcase-region (point) (+ (point) (or arg 1)))
-  (forward-char (or arg 1)))
-
-(defun downcase-char (arg)
-  "Downcase for character."
-  (interactive "P")
-  (downcase-region (point) (+ (point) (or arg 1)))
-  (forward-char (or arg 1)))
 
 (defun mark-line ()
   "Mark one whole line, similar to `mark-paragraph'."
@@ -189,6 +91,7 @@ Optional argument REVERSED default is move next line, if reversed is non-nil mov
 (defun delete-chars-hungry-forward (&optional reverse)
   "Delete chars forward use `hungry' style.
 Optional argument REVERSE default is delete forward, if reverse is non-nil delete backward."
+  (interactive)
   (delete-region
    (point)
    (progn
@@ -199,6 +102,7 @@ Optional argument REVERSE default is delete forward, if reverse is non-nil delet
 
 (defun delete-chars-hungry-backward ()
   "Delete chars backward use `hungry' style."
+  (interactive)
   (delete-chars-hungry-forward t))
 
 (defun reverse-chars-in-region (start end)
@@ -259,54 +163,17 @@ Argument STRING the string that need pretty."
   (interactive "nColumn number: ")
   (move-to-column number t))
 
-(defun only-comment-p ()
-  "Return t if only comment in current line.
-Otherwise return nil."
-  (interactive)
-  (save-excursion
-    (beginning-of-line)
-    (if (search-forward comment-start (line-end-position) t)
-        (progn
-          (backward-char (length comment-start))
-          (equal (point)
-                 (progn
-                   (back-to-indentation)
-                   (point))))
-      nil)))
+
+(defun goto-percent (percent)
+  "Goto PERCENT of buffer."
+  (interactive "nGoto percent: ")
+  (goto-char (/ (* percent (point-max)) 100)))
 
 (defun current-line-move-to-top()
   "Move current line to top of buffer."
   (interactive)
   (recenter 0))
 
-(defun remember-init ()
-  "Remember current position and setup."
-  (interactive)
-  (point-to-register 8)
-  (message "Have remember one position"))
-
-(defun remember-jump ()
-  "Jump to latest position and setup."
-  (interactive)
-  (let ((tmp (point-marker)))
-    (jump-to-register 8)
-    (set-register 8 tmp))
-  (message "Have back to remember position"))
-
-(defun point-stack-push ()
-  "Push current point in stack."
-  (interactive)
-  (message "Location marked.")
-  (setq point-stack (cons (list (current-buffer) (point)) point-stack)))
-
-(defun point-stack-pop ()
-  "Pop point from stack."
-  (interactive)
-  (if (null point-stack)
-      (message "Stack is empty.")
-    (switch-to-buffer (caar point-stack))
-    (goto-char (cadar point-stack))
-    (setq point-stack (cdr point-stack))))
 
 (defun count-words ()
   "Count the number of word in buffer, include Chinese."
@@ -332,35 +199,11 @@ Otherwise return nil."
     (message (format "Total: %d (CN: %d, EN: %d) words, %d bytes."
                      total-word cn-word en-word total-byte))))
 
-(defun goto-percent (percent)
-  "Goto PERCENT of buffer."
-  (interactive "nGoto percent: ")
-  (goto-char (/ (* percent (point-max)) 100)))
 
 (defun replace-match+ (object match-str replace-str)
   "Replace `MATCH-STR' of `OBJECT' with `REPLACE-STR'."
   (string-match match-str object)
   (replace-match replace-str nil nil object 0))
-
-(defun forward-indent ()
-  "Backward indent."
-  (interactive)
-  (insert-string "    "))
-
-(defun backward-indent ()
-  "Backward indent."
-  (interactive)
-  (goto-column (- (current-column) 4)))
-
-(defun scroll-up-one-line()
-  "Scroll up one line."
-  (interactive)
-  (scroll-up 1))
-
-(defun scroll-down-one-line()
-  "Scroll down one line."
-  (interactive)
-  (scroll-down 1))
 
 (defun refresh-file ()
   "Automatic reload current file."
@@ -391,17 +234,6 @@ Otherwise return nil."
         (when (derived-mode-p special-mode)
           (throw 'done (switch-to-buffer buffer)))))))
 
-(defun find-file-root (file)
-  "Find file with root."
-  (interactive "fFind file as sudo: ")
-  (require 'tramp)
-  (tramp-cleanup-all-connections)
-  (find-file (concat "/sudo:root@localhost:" file)))
-
-(defun find-file-smb(file)
-  "Access file through samba protocol."
-  (interactive "fFind file as samba: ")
-  (find-file (concat "/smb:" file)))
 
 (defun kill-unused-buffers ()
   (interactive)
@@ -423,17 +255,7 @@ Otherwise return nil."
       (delete-indentation (natnump n)))))
 (global-set-key (kbd "C-S-j") #'join-lines)
 
-;; =========================================================
-;;;###autoload
-(defun suk/indent-buffer ()
-  "Indent the whole buffer."
-  (interactive)
-  (save-excursion
-    (indent-region (point-min) (point-max) nil)))
-;;(global-set-key (kbd "C-S-f")  #'suk/indent-buffer)
-;;(global-set-key [S-f7] 'indent-buffer)
 
-;;;###autoload
 (defun suk/xah-narrow-to-region ()
   "Same as `narrow-to-region', but if no selection, narrow to the current block.
 Version 2022-01-22"
@@ -455,20 +277,9 @@ Version 2022-01-22"
         (narrow-to-region $p1 $p2)))))
 (global-set-key (kbd "C-x n N") #'suk/xah-narrow-to-region)
 
-;;;###autoload
-(defun suk/unfill-paragraph (&optional region)
-  "Takes a multi-line paragraph (or REGION) and make it into a single line of text."
-  (interactive (progn
-                 (barf-if-buffer-read-only)
-                 (list t)))
-  (let ((fill-column (point-max)))
-    (fill-paragraph nil region)))
-
-;;(global-set-key (kbd "M-Q" ) #'suk/unfill-paragraph)
 
 ;; M-q will fill the paragraph normally, and C-u M-q will unfill it.
 ;; --------------------------------------------------------------
-;;;###autoload
 (defun suk/fill-or-unfill-paragraph (&optional unfill region)
   "Fill paragraph (or REGION).
 With the prefix argument UNFILL, unfill it instead."
@@ -477,63 +288,9 @@ With the prefix argument UNFILL, unfill it instead."
                  (list (if current-prefix-arg 'unfill) t)))
   (let ((fill-column (if unfill (point-max) fill-column)))
     (fill-paragraph nil region)))
-;;(global-set-key (kbd "M-q") #'suk/fill-or-unfill-paragraph)
+(global-set-key (kbd "M-q") #'suk/fill-or-unfill-paragraph)
 
 
-;; @see http://endlessparentheses.com/super-smart-capitalization.html
-;;;###autoload
-(defun endless/convert-punctuation (rg rp)
-  "Look for regexp RG around point, and replace with RP.
-   Only applies to text-mode."
-  (let* ((f "\\(%s\\)\\(%s\\)")
-         (space "?:[[:blank:]\n\r]*"))
-    ;; We obviously don't want to do this in prog-mode.
-    (if (and (derived-mode-p 'text-mode)
-             (or (looking-at (format f space rg))
-                 (looking-back (format f rg space) (point-min))))
-        (replace-match rp nil nil nil 1))))
-        
-
-;;;###autoload
-(defun endless/call-subword-cmd (fn)
-  (my-ensure 'subword)
-  (call-interactively fn))
-
-;;;###autoload
-(defun endless/capitalize ()
-  "Capitalize region or word.
-   Also converts commas to full stops, and kills
-   extraneous space at beginning of line."
-  (interactive)
-  (endless/convert-punctuation "," ".")
-  (if (use-region-p)
-      (call-interactively 'capitalize-region)
-    ;; A single space at the start of a line:
-    (when (looking-at "^\\s-\\b")
-      ;; get rid of it!
-      (delete-char 1))
-    (endless/call-subword-cmd 'subword-capitalize)))
-;;;###autoload
-(defun endless/downcase ()
-  "Downcase region or word.
-   Also converts full stops to commas."
-  (interactive)
-  (endless/convert-punctuation "\\." ",")
-  (if (use-region-p)
-      (call-interactively 'downcase-region)
-    (endless/call-subword-cmd 'subword-downcase)))
-;;;###autoload
-(defun endless/upcase ()
-  "Upcase region or word."
-  (interactive)
-  (if (use-region-p)
-      (call-interactively 'upcase-region)
-    (endless/call-subword-cmd 'subword-upcase)))
-
-;; these bindings are fine
-(global-set-key (kbd "M-c") 'endless/capitalize)
-(global-set-key (kbd "M-l") 'endless/downcase)
-(global-set-key (kbd "M-u") 'endless/upcase)
 (provide 'basic-toolkit)
 
 ;;; basic-toolkit.el ends here

@@ -11,113 +11,74 @@
 ;; 或者退出时保存
 (setq bookmark-save-flag 1)
 
-;;;###autoload
-(defun suk/my-bookmark-set ()
-  "Set and save bookmark.
-If bookmark with same file name already exists, override it quietly."
-  (interactive)
-  (my-ensure 'bookmark)
-  (bookmark-maybe-load-default-file)
-
-  (let* ((filename (cond
-                    ((eq major-mode 'eww-mode)
-                     (eww-current-url))
-                    (t
-                     buffer-file-name)))
-         existing-bookmark)
-    (when (setq existing-bookmark
-                (cl-find-if (lambda (b)
-                              (let* ((f (cdr (assoc 'filename (cdr b)))))
-                                (when (and f (file-exists-p f))
-                                  (setq f (file-truename f)))
-                                (string= f filename)))
-                            bookmark-alist))
-      ;; extract name of existing bookmark
-      (setq existing-bookmark (car existing-bookmark)))
-    (bookmark-set existing-bookmark)
-
-    ;; save bookmark now
-    (bookmark-save)
-
-    (when existing-bookmark
-      (message "Saved into existing bookmark \"%s\"" existing-bookmark))))
-
-;;;###autoload
-(defun suk/my-bookmark-goto ()
-  "Open ANY bookmark."
-  (interactive)
-  (my-ensure 'bookmark)
-  (bookmark-maybe-load-default-file)
-  ;; do the real thing
-  (let* ((cands (delq nil (mapcar #'my-build-bookmark-candidate
-                                  (and (boundp 'bookmark-alist)
-                                       bookmark-alist))))
-         (selected (completing-read "bookmarks:" cands)))
-    (when selected
-      (bookmark-jump (cdr (assoc selected cands))))))
-
 (with-eval-after-load 'bookmark
-  (defun my-build-bookmark-candidate (bookmark)
-    "Re-shape BOOKMARK."
-    (let* ((key (cond
-                 ((and (assoc 'filename bookmark) (cdr (assoc 'filename bookmark)))
-                  (format "%s (%s)" (car bookmark) (cdr (assoc 'filename bookmark))))
-                 ((and (assoc 'location bookmark) (cdr (assoc 'location bookmark)))
-                  (format "%s (%s)" (car bookmark) (cdr (assoc 'location bookmark))))
-                 (t
-                  (car bookmark)))))
-      ;; key will be displayed
-      ;; re-shape the data so full bookmark be passed to ivy-read
-      (cons key bookmark)))
-
   ;; use my own bookmark if it exists
   (let ((file "~/var/.emacs.bmk"))
     (when (file-exists-p file)
       (setq bookmark-default-file file))))
 
-;; =========================================================
-;; faaicuk tiu dou bookmark
-;; ---------------------------------------------------------
-;;;###autoload
-(defun suk/point-to-register()
-  "Store cursorposition _fast_ in a register. Use ska-jump-to-register to jump back to the stored position."
+
+(defun remember-init ()
+  "Remember current position and setup."
   (interactive)
-  (setq zmacs-region-stays t)
-  (point-to-register 8))
-;; ---------------------------------------------------------
-;;;###autoload
-(defun suk/jump-to-register()
-  "Switch between current cursorposition and position that was stored with ska-point-to-register."
+  (point-to-register 8)
+  (message "Have remember one position"))
+
+(defun remember-jump ()
+  "Jump to latest position and setup."
   (interactive)
-  (setq zmacs-region-stays t)
   (let ((tmp (point-marker)))
     (jump-to-register 8)
-    (set-register 8 tmp)))
+    (set-register 8 tmp))
+  (message "Have back to remember position"))
+
+(defvar point-stack nil
+  "A stack to store (buffer . point) pairs.")
+
+(defun point-stack-push ()
+  "Push current point in stack."
+  (interactive)
+  (message "Location marked.")
+  (setq point-stack (cons (list (current-buffer) (point)) point-stack)))
+
+(defun point-stack-pop ()
+  "Pop point from stack."
+  (interactive)
+  (if (null point-stack)
+      (message "Stack is empty.")
+    (switch-to-buffer (caar point-stack))
+    (goto-char (cadar point-stack))
+    (setq point-stack (cdr point-stack))))
 
 ;; use init-key.el to load and bind the functions.
 ;;(global-set-key  [C-f7] 'suk/point-to-register)
 ;;(global-set-key  [f7] 'suk/jump-to-register)
 
 
- (with-eval-after-load 'hydra
-(defhydra suk/bookmark-launcher (:color blue)
-  "
+(with-eval-after-load 'hydra
+  (defhydra suk/bookmark-launcher (:color blue)
+    "
 ^Bookmark^
 -------------------------------------------------------------------
-[_b_] New bookmark
-[_m_] Goto bookmark
-[_s_] Quick bookmark
-[_j_] Goto bookmark
-[_q_] Quit
+[_b_] New bookmark     [_s_] Store bookmark
+[_m_] Goto bookmark    [_l_] Load bookmark
+[_i_] Quick bookmark   [_r_] Register bookmark
+[_j_] Goto bookmark    [_,_] Pop bookmark
+[_q_] Quit             [_._] Push bookmark
 "
-  ("b" suk/bookmark-set)
-  ("m" suk/bookmark-goto)
-  ("s" suk/point-to-register)
-  ("j" suk/jump-to-register)
-  
-  ("q" nil :color red))
-;; (global-set-key (kbd "C-c C-y") 'suk/bookmark-launcher/body)
- )
+    ("b" bookmark-set)
+    ("m" bookmark-jump)
+    ("l" consult-register-load)
+    ("s" consult-register-store)      ;; orig. abbrev-prefix-mark (unrelated)
+    ("r" consult-register)
+    ("i" remember-init)      ;记忆初始函数
+    ("j" remember-jump)      ;记忆跳转函数
+    ("J" bookmark-jump)
+    ("," point-stack-pop)    ;buffer索引跳转
+    ("." point-stack-push)   ;buffer索引标记
+    ("q" nil :color red))
+  ;; (global-set-key (kbd "C-c C-y") 'suk/bookmark-launcher/body)
+  )
 
 ;; bookmark
 

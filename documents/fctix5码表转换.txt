@@ -1,0 +1,7 @@
+fctix5码表转换
+
+1、从码表dict转换到码表文本
+: libime_tabledict -d wbx.main.dict 1.txt
+
+2、从码表文本转换到码表dict：
+: libime_tabledict 1.txt nwb.main.dict

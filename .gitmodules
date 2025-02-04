@@ -13,9 +13,6 @@
 [submodule "extensions/hydra-posframe"]
 	path = extensions/hydra-posframe
 	url = git@github.com:Ladicle/hydra-posframe.git
-[submodule "extensions/copilot"]
-	path = extensions/copilot
-	url = git@github.com:zerolfx/copilot.el.git
 [submodule "extensions/move-text"]
 	path = extensions/move-text
 	url = git@github.com:manateelazycat/move-text.git

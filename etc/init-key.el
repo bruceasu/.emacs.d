@@ -9,14 +9,14 @@
 ;; ### move text ###
 (lazy-load-global-keys
  '(
-   ("M-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
-   ("M-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
-   ("M-<DOWN>" . move-text-down)    ;把光标所在的整行文字(或标记)下移一行
-   ("M-<UP>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
+   ("C-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
+   ("C-S-p" . move-text-up)   ;把光标所在的整行文字(或标记)上移一行
+   ("C-S-<down>" . move-text-down)  ;把光标所在的整行文字(或标记)下移一行
+   ("C-S-<up>"   . move-text-up)    ;把光标所在的整行文字(或标记)上移一行
    )
  "move-text")
 
- ;;; ### basic-toolkit ###
+ ;;; ### move comment ###
 (lazy-load-global-keys
  '(
    ("M-s-n" . comment-part-move-down)   ;向下移动注释
@@ -24,7 +24,7 @@
    ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
    ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
    )
- "basic-toolkit")
+ "move-comment")
 
 ;;; ### open new line ###
 (lazy-load-global-keys
@@ -46,13 +46,24 @@
    )
  "duplicate-line")
 
-;;; ### Delete block ###
-;;; --- 快速删除光标左右的内容
-(lazy-load-global-keys
- '(
-   ("M-," . delete-block-backward)
-   ("M-." . delete-block-forward))
- "delete-block")
+;; 自定义删除到字符函数
+(defun my/delete-to-char (char)
+  "删除光标位置到下一个出现的字符 CHAR 之间的所有内容（不包括 CHAR 本身）。"
+  (interactive "cDelete to char: ")
+  (let ((start (point))
+        (end (progn
+               (search-forward (char-to-string char) (line-end-position) t))))
+    (if end
+        (progn
+          (goto-char end)
+          (delete-region start (- end 1))
+          (message "Deleted from %d to %d" start (- end 1)))
+      (progn
+        (delete-region start (line-end-position))
+        (message "Character '%c' not found. Deleted to end of line." char)))))
+
+;; 绑定快捷键 C-c d 到 my/delete-to-char 函数
+(global-set-key (kbd "C-c d") 'my/delete-to-char)
 
 ;; ### String Inflection ###
 ;; --- 单词语法风格快速转换
@@ -64,54 +75,53 @@
  ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
-   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
-   ("M-c" . endless/capitalize)
-   ("M-l" . endless/downcase)
-   ("M-u" . endless/upcase)
+   ("M-l" . downcase-char)
+   ("M-u" . upcase-char)
    )
- "basic-toolkit")
+ "cases")
 
 ;;; ### Thing-edit ###
 ;;; --- 增强式编辑当前光标的对象 
 (lazy-load-global-keys
  '(
-   ("C-c w" . thing-copy-word)
-   ("C-c s" . thing-copy-symbol)
-   ("C-c m" . thing-copy-email)
-   ("C-c f" . thing-copy-filename)
-   ("C-c u" . thing-copy-url)
-   ("C-c x" . thing-copy-sexp)
-   ("C-c g" . thing-copy-page)
-   ("C-c t" . thing-copy-sentence)
-   ("C-c o" . thing-copy-witespace)
-   ("C-c i" . thing-copy-list)
-   ("C-c c" . thing-copy-comment)
-   ("C-c h" . thing-copy-defun)
-   ("C-c p" . thing-copy-parentheses)
-   ("C-c l" . thing-copy-line)
-   ("C-c a" . thing-copy-to-line-begining)
-   ("C-c e" . thing-copy-to-line-end)
+   ;; ("C-c w" . thing-copy-word)
+   ;; ("C-c s" . thing-copy-symbol)
+   ;; ("C-c m" . thing-copy-email)
+   ;; ("C-c f" . thing-copy-filename)
+   ;; ("C-c u" . thing-copy-url)
+   ;; ("C-c x" . thing-copy-sexp)
+   ;; ("C-c g" . thing-copy-page)
+   ;; ("C-c t" . thing-copy-sentence)
+   ;; ("C-c o" . thing-copy-witespace)
+   ;; ("C-c i" . thing-copy-list)
+   ;; ("C-c c" . thing-copy-comment)
+   ;; ("C-c h" . thing-copy-defun)
+   ;; ("C-c p" . thing-copy-parentheses)
+   ;; ("C-c l" . thing-copy-line)
+   ;; ("C-c a" . thing-copy-to-line-begining)
+   ;; ("C-c e" . thing-copy-to-line-end)
 
-   ("C-c W" . thing-cut-word)
-   ("C-c S" . thing-cut-symbol)
-   ("C-c M" . thing-cut-email)
-   ("C-c F" . thing-cut-filename)
-   ("C-c G" . thing-cut-page)
-   ("C-c T" . thing-cut-sentence)
-   ("C-c O" . thing-cut-whitespace)
-   ("C-c I" . thing-cut-list)
-   ("C-c C" . thing-cut-comment)
-   ("C-c H" . thing-cut-defun)
-   ("C-c P" . thing-cut-parentheses)
-   ("C-c L" . thing-cut-line)
-   ("C-c A" . thing-cut-to-line-beginning)
-   ("C-c E" . thing-cut-to-line-end)
+   ;; ("C-c W" . thing-cut-word)
+   ;; ("C-c S" . thing-cut-symbol)
+   ;; ("C-c M" . thing-cut-email)
+   ;; ("C-c F" . thing-cut-filename)
+   ;; ("C-c G" . thing-cut-page)
+   ;; ("C-c T" . thing-cut-sentence)
+   ;; ("C-c O" . thing-cut-whitespace)
+   ;; ("C-c I" . thing-cut-list)
+   ;; ("C-c C" . thing-cut-comment)
+   ;; ("C-c H" . thing-cut-defun)
+   ;; ("C-c P" . thing-cut-parentheses)
+   ;; ("C-c L" . thing-cut-line)
+   ;; ("C-c A" . thing-cut-to-line-beginning)
+   ;; ("C-c E" . thing-cut-to-line-end)
+
+   ("C-c e" . hydra-thing-edit/body)
    )
- "thing-edit"
- "C-z"
+ "init-thing-edit"
  )
 
-;; ### Buffer Edit ###
+;; ### Buffer Edit ### 
 ;; --- 缓存编辑
 (lazy-load-set-keys
  '(
@@ -123,16 +133,20 @@
 ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
-   ("M-2" . indent-buffer)              ;自动格式化当前Buffer
-   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
+   ;;("M-2" . indent-buffer)              ;自动格式化当前Buffer
+   ;; indent-comment-buffer
    ;;("C-x u" . mark-line)              ;选中整行
    ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
-   ("M-I" . backward-indent)            ;向后移动4个字符
-
+   ;;("" . strip-blank-lines)             ; 删除空行
+   ;; strip-line-number
+   ;; delete-chars-hungry-forward
+   ;; delete-chars-hungry-backward
+   ;; underline-line-with
+   ;; current-line-move-to-top
    ("<f2>" . refresh-file)              ;自动刷新文件
-   ("s-f" . find-file-root)             ;用root打开文件
-   ("s-r" . find-file-smb)              ;访问sambao
    ("C-S-j" . join-lines)               ;连接下行
+   ("M-q" . suk/fill-or-unfill-paragraph)
+   ("C-x n N" . suk/xah-narrow-to-region)
    )
  "basic-toolkit")
 
@@ -190,10 +204,10 @@
 
 (lazy-load-global-keys
  '(
-   ("<C-S-up>"    . buf-move-up)   
-   ("<C-S-down>"  . buf-move-down)
-   ("<C-S-left>"  . buf-move-left)  
-   ("<C-S-right>" . buf-move-right)   
+   ("C-c C-<up>"    . buf-move-up)   
+   ("C-c C-<down>"  . buf-move-down)
+   ("C-c C-<left>"  . buf-move-left)  
+   ("C-c C-<right>" . buf-move-right)   
    )
  "buffer-move")
 
