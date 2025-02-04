@@ -1,10 +1,3 @@
-(require-package 'paredit) ;; useful for lisp
-(require-package 'tagedit) ;; useful for html
-(require-package 'cliphist)
-(require-package 'iedit)
-(require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
-
-(require-package 'windmove)
 (require-package 'transwin)
 (require-package 'ace-window)
 (require-package 'popper)
@@ -15,10 +8,10 @@
 (require-package 'find-by-pinyin-dired)
 (require-package 'jump)
 
-(require-package 'counsel) ; counsel => swiper => ivy
-(require-package 'counsel-bbdb)
-(require-package 'counsel-gtags)
-(require-package 'counsel-css)
+;; (require-package 'counsel) ; counsel => swiper => ivy
+;; (require-package 'counsel-bbdb)
+;; (require-package 'counsel-gtags)
+;; (require-package 'counsel-css)
 (require-package 'bbdb)
 
 

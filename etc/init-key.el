@@ -16,7 +16,7 @@
    )
  "move-text")
 
- ;;; ### basic-toolkit ###
+ ;;; ### move comment ###
 (lazy-load-global-keys
  '(
    ("M-s-n" . comment-part-move-down)   ;向下移动注释
@@ -24,7 +24,7 @@
    ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
    ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
    )
- "basic-toolkit")
+ "move-comment")
 
 ;;; ### open new line ###
 (lazy-load-global-keys
@@ -75,12 +75,10 @@
  ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
-   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
-   ("M-c" . endless/capitalize)
-   ("M-l" . endless/downcase)
-   ("M-u" . endless/upcase)
+   ("M-l" . downcase-char)
+   ("M-u" . upcase-char)
    )
- "basic-toolkit")
+ "cases")
 
 ;;; ### Thing-edit ###
 ;;; --- 增强式编辑当前光标的对象 
@@ -135,16 +133,20 @@
 ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
-   ("M-2" . indent-buffer)              ;自动格式化当前Buffer
-   ("M-z" . upcase-char)                ;Upcase char handly with capitalize-word
+   ;;("M-2" . indent-buffer)              ;自动格式化当前Buffer
+   ;; indent-comment-buffer
    ;;("C-x u" . mark-line)              ;选中整行
    ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
-   ("M-I" . backward-indent)            ;向后移动4个字符
-
+   ;;("" . strip-blank-lines)             ; 删除空行
+   ;; strip-line-number
+   ;; delete-chars-hungry-forward
+   ;; delete-chars-hungry-backward
+   ;; underline-line-with
+   ;; current-line-move-to-top
    ("<f2>" . refresh-file)              ;自动刷新文件
-   ("s-f" . find-file-root)             ;用root打开文件
-   ("s-r" . find-file-smb)              ;访问sambao
    ("C-S-j" . join-lines)               ;连接下行
+   ("M-q" . suk/fill-or-unfill-paragraph)
+   ("C-x n N" . suk/xah-narrow-to-region)
    )
  "basic-toolkit")
 

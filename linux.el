@@ -15,7 +15,7 @@
  nil
  #'(lambda()
      (require 'my-sudo)
-     (use-package sudo-edit)
+     ;; (use-package sudo-edit)
      (lazy-load-global-keys
       '(("C-z C-s" . suk/sudo/body))
       "my-sudo"
