@@ -161,24 +161,61 @@
 
 ;; 一啲方便嘅函数
 (global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
-(global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp
-(global-set-key (kbd "C-)") 'forward-sexp)         ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
-(global-set-key (kbd "C-x R") 'recentf-open)     ;; 快捷键 C-x R 用于打开最近文件
+;;(global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp C-M-<left> ESC C-<left>
+;;(global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp C-M-<right> ESC C-<right>
+(global-set-key (kbd "C-x R") 'recentf-open)    ;; 快捷键 C-x R 用于打开最近文件
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 (when emacs/>=29p
   ;; (keymap-global-set <key> <cmmd>)
-  (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)            ;; 快捷键 C-<f11> 用于切换全屏模式
+  (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)       ;; 快捷键 C-<f11> 用于切换全屏模式
   (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
-  (keymap-set global-map "RET" #'newline-and-indent)                             ;; 回车键 RET 用于创建新行并对齐
-  (keymap-set global-map "S-<return>" #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
+  (keymap-set global-map "RET" #'newline-and-indent)                ;; 回车键 RET 用于创建新行并对齐
+  (keymap-set global-map "S-<return>" #'comment-indent-new-line)    ;; Shift + 回车键用于取消对齐创建的新行
   ) 
 (unless emacs/>=29p
-  (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)  ;; 快捷键 C-<f11> 用于切换全屏模式
+  (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
   (global-set-key (kbd "M-s<return>") 'toggle-frame-fullscreen)
-  (global-set-key (kbd "RET") #'newline-and-indent)  ;; 回车键 RET 用于创建新行并对齐
+  (global-set-key (kbd "RET") #'newline-and-indent)              ;; 回车键 RET 用于创建新行并对齐
   (global-set-key (kbd "S-<return>") #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
   )
+
+(global-set-key  (kbd "C-S-SPC") 'set-mark-command)
+
+(define-prefix-command 'leader-key)
+(global-set-key (kbd "S-SPC") 'leader-key)
+(keymap-set leader-key "f" #'toggle-frame-fullscreen) ;; full screen
+;;; ### Toolkit ###
+;;; --- 工具函数
+(lazy-load-set-keys
+ '(
+   ("C-," . bury-buffer)                ;隐藏当前buffer
+   ("C-." . unbury-buffer)              ;反隐藏当前buffer
+   ;; ("s-[" . eval-expression)            ;执行表达式 M-: M-ESC :
+   ;;("s-1" . sort-lines)                 ;排序
+   ;;("s-<f12>" . calendar)
+   ("C-<f12>" . lazycat-theme-toggle)
+   ;;([c-t] . transpose-chars)
+   ;; ([S-f5] . toggle-truncate-lines) ; C-x x t
+   ;; ("C-x M-a" . align-regexp)
+   )
+ )
+
+;; C-c TAB indent-region
+;; C-u C-c TAB => (un)indent-region
+
+;; M-x global-set-key RET 交互式的绑定你的键。
+;; C-x Esc Esc 调出上一条“复杂命令”
+
+;;Emacs 自动排版
+;;很简单：C-x h C-M-\
+;;其中C-x h 是全选
+;;C-M-\ 是排版
+
+;; C-x C-q set/unset readonly
+;; 大小写转换： M-u, M-l, M-c
+
+;; M-x align-regexp 可以方便的对齐一些文字
 
 (with-eval-after-load 'pretty-hydra
   ;; Global toggles
@@ -228,7 +265,8 @@
         ("M" diff-hl-margin-mode "margin gutter" :toggle t)
         ("D" diff-hl-dired-mode "dired gutter" :toggle t))
        ))
-    (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
+    ;; (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
+    (keymap-set leader-key "t" #'toggles-hydra/body)
 ))
 
 ;;; ### goto-line-preview ###
@@ -237,32 +275,40 @@
    ("M-g p" . goto-line-preview))
  "goto-line-preview")
 
- ;;; ### basic-toolkit ###
-(lazy-load-global-keys
+   ;;; ### basic-toolkit ###
+  (lazy-load-global-keys
  '(
    ("M-G" . goto-column)                ;到指定列
-   ("C->" . remember-init)              ;记忆初始函数
-   ("C-<" . remember-jump)              ;记忆跳转函数
-   ("M-s-," . point-stack-pop)          ;buffer索引跳转
-   ("M-s-." . point-stack-push)         ;buffer索引标记
    ("s-g" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
-   ("s-J" . scroll-up-one-line)         ;向上滚动一行
-   ("s-K" . scroll-down-one-line)       ;向下滚动一行
-   ("C-S-i" . scroll-up-one-line)       ;向上滚动一行
-   ("C-S-k" . scroll-down-one-line)     ;向下滚动一行
-
    )
  "basic-toolkit")
-;; ;;; ### Ace jump ### 比较旧了。使用avy替代
-;; (lazy-load-global-keys
-;;  '(
-;;    ("C-w" . ace-jump-word-mode)
-;;    ("C-c" . ace-jump-char-mode)
-;;    ("C-l" . ace-jump-line-mode)
-;;    )
-;;  "ace-jump-mode"
-;;  "C-z"
-;;  )
+
+(lazy-load-global-keys
+ '(
+   ("C-x r ,"   . remember-init)      ;记忆初始函数
+   ("C-x r ."   . remember-jump)      ;记忆跳转函数
+   ("C-x r <" . point-stack-pop)    ;buffer索引跳转
+   ("C-x r >" . point-stack-push)   ;buffer索引标记
+   )
+ "my-bookmak")
+
+;;; --- 滚动其他窗口
+
+;; 下面这两个键模拟Vi的光标不动屏幕动效果, 我很喜欢, 几乎总在使用.
+;;(global-set-key [(meta N)] 'window-move-up)        
+;;(global-set-key [(meta P)] 'window-move-DOWN)
+
+;; 同上, 但是是另一个buffer窗口上下移动. 常常查看帮助用这个.
+;;(global-set-key [(control N)] 'other-window-move-up)
+;;(global-set-key [(control P)] 'other-window-move-down) 
+(lazy-load-global-keys
+ '(
+   ("M-N" . other-window-move-up)   ;向下滚动其他窗口  scroll-other-window-up
+   ("M-P" . other-window-move-down) ;向上滚动其他窗口  scroll-other-window-down
+   ("M-n" . window-move-up)         ;向下滚动当前窗口  scroll-up
+   ("M-p" . window-move-down)       ;向上滚动当前窗口  scroll-down
+   )
+ "win-move")
 
 ;; Jump to Chinese characters
 (run-with-idle-timer
@@ -416,9 +462,9 @@ _w_ where is something defined
 (run-with-idle-timer
  2 nil
  #'(lambda()
-     (use-package expand-region ; I prefer stable version
-        :load-path "~/.emacs.d/extensions/expand-region"
-     )
+     ;; (use-package expand-region ; I prefer stable version
+     ;;    :load-path "~/.emacs.d/extensions/expand-region"
+     ;; )
      (with-eval-after-load 'expand-region
         (defun treesit-mark-bigger-node ()
            "Use tree-sitter to mark regions."
@@ -479,55 +525,11 @@ _w_ where is something defined
  2 nil
  #'(lambda()
      (use-package paredit) ;; useful for lisp
-     (use-package tagedit) ;; useful for html
-     (use-package cliphist)
-     (use-package iedit)
      (use-package wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
      (use-package writeroom-mode)
      ))
 
-(global-set-key  (kbd "C-S-SPC") 'set-mark-command)
 
-(define-prefix-command 'leader-key)
-(global-set-key (kbd "M-s-SPC") 'leader-key)
-
-;;; ### Toolkit ###
-;;; --- 工具函数
-(lazy-load-set-keys
- '(
-   ("C-," . bury-buffer)                ;隐藏当前buffer
-   ("C-." . unbury-buffer)              ;反隐藏当前buffer
-   ("s-[" . eval-expression)            ;执行表达式
-   ("s-1" . sort-lines)                 ;排序
-   ("s-2" . hanconvert-region)          ;转换简体或繁体中文
-   ("s-3" . uniquify-all-lines-buffer)  ;删除重复的行
-   ("s-<f12>" . calendar)
-   ("C-<f12>" . lazycat-theme-toggle)
-   ;;([c-t] . transpose-chars)
-   ([S-f5] . toggle-truncate-lines)
-   ("C-x M-a" . align-regexp)
-   )
- )
-
-;; C-c TAB indent-region
-;; C-u C-c TAB => (un)indent-region
-
-;;(global-set-key (kbd "C-(") 'backward-sexp)
-;;(global-set-key (kbd "C-)") 'forward-sexp)
-;;(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
-;;(global-set-key (kbd "C-x R") 'recentf)
-;; M-x global-set-key RET 交互式的绑定你的键。
-;; C-x Esc Esc 调出上一条“复杂命令”
-
-;;Emacs 自动排版
-;;很简单：C-x h C-M-\
-;;其中C-x h 是全选
-;;C-M-\ 是排版
-
-;; C-x C-q set/unset readonly
-;; 大小写转换： M-u, M-l, M-c
-
-;; M-x align-regexp 可以方便的对齐一些文字
 
 (require-package 'buffer-move)
 
@@ -597,16 +599,6 @@ _w_ where is something defined
 (global-set-key (kbd "s-b") 'quick-switch-buffer)
 (global-set-key (kbd "C-z b") 'quick-switch-buffer)
 
-;; Directional window-selection routines
-(lazy-load-global-keys
- '(
-   ("<M-up>"    .  windmove-up)   
-   ("<M-down>"  .  windmove-down)
-   ("<M-left>"  .  windmove-left)
-   ("<M-right>" .  windmove-right)
-   )
- "windmove")
-
 ;; Frame transparence
 (lazy-load-global-keys
  '(
@@ -638,56 +630,12 @@ _w_ where is something defined
   )
 
 ;; Quickly switch windows
+
 (use-package ace-window
   :bind (([remap other-window] . ace-window)
-         ("C-c w" . ace-window-hydra/body))
+         (:map leader-key ("w" . ace-window-hydra/body)))
   :hook (emacs-startup . ace-window-display-mode)
   :config
-  (with-eval-after-load 'pretty-hydra
-    (pretty-hydra-define+ ace-window-hydra
-      (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
-              :foreign-keys warn :quit-key ("q" "C-g"))
-      ("Actions"
-       (("TAB" other-window "switch")
-        ("x" ace-delete-window "delete")
-        ("X" ace-delete-other-windows "delete other" :exit t)
-        ("s" ace-swap-window "swap")
-        ("a" ace-select-window "select" :exit t)
-        ("m" toggle-frame-maximized "maximize" :exit t)
-        ("u" toggle-frame-fullscreen "fullscreen" :exit t))
-       "Movement"
-       (("i" windmove-up "move ↑")
-        ("k" windmove-down "move ↓")
-        ("j" windmove-left "move ←")
-        ("l" windmove-right "move →")
-        ("f" follow-mode "follow"))
-       "Resize"
-       (("<left>" shrink-window-horizontally "shrink H")
-        ("<right>" enlarge-window-horizontally "enlarge H")
-        ("<up>" shrink-window "shrink V")
-        ("<down>" enlarge-window "enlarge V")
-        ("n" balance-windows "balance"))
-       "Split"
-       (("r" split-window-right "horizontally")
-        ("R" split-window-horizontally-instead "horizontally instead")
-        ("v" split-window-below "vertically")
-        ("V" split-window-vertically-instead "vertically instead")
-        ("t" toggle-window-split "toggle")
-        ("o" delete-other-windows "only this"))
-       "Zoom"
-       (("+" text-scale-increase "in")
-        ("=" text-scale-increase "in")
-        ("-" text-scale-decrease "out")
-        ("0" (text-scale-increase 0) "reset"))
-       "Misc"
-       (("o" set-frame-font "frame font")
-        ("f" make-frame-command "new frame")
-        ("d" delete-frame "delete frame")
-        ("z" winner-undo "winner undo")
-        ("Z" winner-redo "winner redo")))
-      )
-    (global-set-key (kbd "C-c w") #'ace-window-hydra/body)
-    )
   (defun toggle-window-split ()
     (interactive)
     (if (= (count-windows) 2)
@@ -838,40 +786,71 @@ _w_ where is something defined
             (delete-window window)))))
     (advice-add #'keyboard-quit :before #'popper-close-window-hack)))
 
-;;; ### watch other window ###
-;;; --- 滚动其他窗口
-(lazy-load-global-keys
- '(
-   ("M-S-n" . other-window-move-up)   ;向下滚动其他窗口
-   ("M-S-p" . other-window-move-down) ;向上滚动其他窗口
-   ("M-n"   . window-move-up)         ;向下滚动当前窗口
-   ("M-p"   . window-move-down)       ;向上滚动当前窗口
-   )
- "win-move")
-
-;; (lazy-load-set-keys
-;;  '(
-;;    ("C-c :" . split-window-vertically)   ;纵向分割窗口
-;;    ("C-c |" . split-window-horizontally) ;横向分割窗口
-;;    ("C-x ;" . delete-other-windows)      ;关闭其它窗口
-;;    ))
+(suk/wait-for-modules
+ (lambda()
+   (with-eval-after-load 'pretty-hydra
+     (pretty-hydra-define+ ace-window-hydra
+       (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
+               :foreign-keys warn
+               :quit-key ("q" "C-g"))
+       ("Actions"
+        (;;("TAB" other-window "switch")
+         ("x" ace-delete-window "delete")
+         ("X" ace-delete-other-windows "delete other" :exit t)
+         ("s" ace-swap-window "swap")
+         ("a" ace-select-window "select" :exit t)
+         ("m" toggle-frame-maximized "maximize" :exit t)
+         ("u" toggle-frame-fullscreen "fullscreen" :exit t))
+        "Resize"
+        (("<left>" shrink-window-horizontally "shrink H")
+         ("<right>" enlarge-window-horizontally "enlarge H")
+         ("<up>" shrink-window "shrink V")
+         ("<down>" enlarge-window "enlarge V")
+         ("n" balance-windows "balance"))
+        "Split"
+        (("r" split-window-right "horizontally")
+         ("R" split-window-horizontally-instead "horizontally instead")
+         ("v" split-window-below "vertically")
+         ("V" split-window-vertically-instead "vertically instead")
+         ("t" toggle-window-split "toggle")
+         ("o" delete-other-windows "only this"))
+        "Zoom"
+        (("+" text-scale-increase "in")
+         ("=" text-scale-increase "in")
+         ("-" text-scale-decrease "out")
+         ("0" (text-scale-increase 0) "reset"))
+        "Misc"
+        (("o" set-frame-font "frame font")
+         ("f" make-frame-command "new frame")
+         ("d" delete-frame "delete frame")
+         ("z" winner-undo "winner undo")
+         ("Z" winner-redo "winner redo"))
+        )
+       )
+     (bind-key "w" #'ace-window-hydra/body leader-key)
+     ))
+ 'ace-window
+ 'winner
+ )
 
 (lazy-load-global-keys
  '(
    ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
    ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
-   ("C-'" . delete-current-buffer-and-window)     ;关闭当前buffer, 并关闭窗口
-   ("C-\"" . delete-current-buffer-window)        ;删除当前buffer的窗口
+   ("C-'"   . delete-current-buffer-and-window)   ;关闭当前buffer, 并关闭窗口
+   ("C-\""  . delete-current-buffer-window)       ;删除当前buffer的窗口
    ("M-s-o" . toggle-one-window)                  ;切换一个窗口
    ("C-x O" . toggle-window-split)
    )
  "window-extension")
 
-(lazy-load-global-keys
+(lazy-load-local-keys
  '(
-   ("C-<f7>"   . suk/bookmark-launcher/body)
+   ("b" . suk/bookmark-launcher/body)
    )
- "my-bookmark") ;; 有的函数跟basic-toolkit重复
+ leader-key
+ "my-bookmark"
+ ) ;; 有的函数跟basic-toolkit重复
 
 ;; C-x r l to list bookmarks
 

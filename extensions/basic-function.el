@@ -4,23 +4,31 @@
 ;;;###autoload
 (defun suk/wait-for-modules (callback &rest modules)
   "Wait for MODULES to be loaded and then call CALLBACK.
-  使用示例
-  (wait-for-modules
+   使用示例
+  (suk/wait-for-modules
    'my-callback-function
    'module1
    'module2
-   'module3)
-  "
-  (let ((all-loaded nil))
+   'module3)"
+  (let ((pending-modules modules))  ;; 记录未加载的模块
+    ;; 定义一个检查所有模块是否已加载的函数
+    (defun check-all-loaded ()
+      (when (cl-every #'featurep pending-modules)  ;; 检查是否所有模块都加载完毕
+        (funcall callback)  ;; 调用回调
+        (setq pending-modules nil)))  ;; 清除待处理的模块
+
+    ;; 对每个模块进行处理
     (dolist (module modules)
-      (with-eval-after-load module
-        (setq all-loaded t)))
-    (if all-loaded
-        (funcall callback)
-      (add-hook 'after-load-functions
-                (lambda ()
-                  (when (cl-every #'featurep modules)
-                    (funcall callback)))))))
+      (if (featurep module)
+          (setq pending-modules (delete module pending-modules))  ;; 如果模块已经加载，就从 pending-modules 删除
+        (with-eval-after-load module
+          (check-all-loaded))))  ;; 在模块加载后检查是否所有模块都加载完毕
+
+    ;; 如果在处理时所有模块都已加载，则直接调用回调
+    (when (not pending-modules)
+      (funcall callback))))
+
+
 
 ;;;###autoload
 (defun run-cmd-and-replace-region (cmd)
@@ -35,7 +43,7 @@
 
 
 ;;;###autoload
-(defun my-buffer-str ()
+(defun suk/buffer-str ()
   (buffer-substring-no-properties (point-min) (point-max)))
 
 ;;;###autoload
@@ -68,14 +76,14 @@
 
 ;; {{ copied from http://ergoemacs.org/emacs/elisp_read_file_content.html
 ;;;###autoload
-(defun my-get-string-from-file (file)
+(defun suk/get-string-from-file (file)
   "Return FILE's content."
   (with-temp-buffer
     (insert-file-contents file)
     (buffer-string)))
 
 ;;;###autoload
-(defun my-read-lines (file)
+(defun suk/read-lines (file)
   "Return a list of lines of FILE."
   (split-string (my-get-string-from-file file) "\n" t))
 ;; }}
@@ -90,7 +98,7 @@
 
 
 ;;;###autoload
-(defun my-send-string-to-cli-stdin (string program)
+(defun suk/send-string-to-cli-stdin (string program)
   "Send STRING to cli PROGRAM's stdin."
   (with-temp-buffer
     (insert string)
@@ -98,7 +106,7 @@
 
 
 ;;;###autoload
-(defun my-write-string-to-file (string file)
+(defun suk/write-string-to-file (string file)
   "Write STRING to FILE."
   (with-temp-buffer
     (insert string)
@@ -106,7 +114,7 @@
 
 
 ;;;###autoload
-(defun my-async-shell-command (command)
+(defun suk/async-shell-command (command)
   "Execute string COMMAND asynchronously."
   (let* ((proc (start-process "Shell" nil shell-file-name shell-command-switch command)))
     (set-process-sentinel proc

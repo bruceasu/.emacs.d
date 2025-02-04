@@ -35,10 +35,10 @@
               ([backtab] . corfu-previous)
               ("C-p" . corfu-previous)
               ("S-<return>" . corfu-insert)
-              ("RET" . corfu-insert)
+              ("RET" . nil)
+              ("<return>" . corfu-mode)
               ("C-y" . corfu-yank)
-              ("C-g" . corfu-abort)
-              ("C-SPC" . corfu-complete))
+              ("C-g" . corfu-abort))
   :init
   (global-corfu-mode)
   (corfu-history-mode))
@@ -48,45 +48,17 @@
   :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 ;;据说跟 lsp-bridge 冲突
+(setq company-idle-delay nil) 
+;; (global-set-key (kbd "M-/") 'company-complete)  ;; 绑定 M-/ 为 company-complete
+;; (global-set-key (kbd "M-?") 'dabbrev-expand)    ;; 绑定 M-? 为 dabbrev-expand
+(lazy-load-global-keys
+ '(
+   ("M-/" . company-complete)
+   ("M-?" . dabbrev-expand)
 
-
-(use-package company
- :defer 2
- :diminish
- :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
- :hook (after-init . global-company-mode)
- :init (setq company-tooltip-align-annotations t
-             company-idle-delay 0 company-echo-delay 0
-             company-minimum-prefix-length 1
-             company-require-match nil
-             company-dabbrev-ignore-case nil
-             company-dabbrev-downcase nil
-             company-show-numbers t)
- :config
- (setq switch-window-input-style 'minibuffer)
- (setq switch-window-increase 4)
- (setq switch-window-threshold 2)
- (setq switch-window-shortcut-sytle 'querty)
- (setq switch-window-qwerty-shortcuts
-       '("a" "s" "d" "f" "j" "k" "l"))
- (setq company-minimum-prefix-length 1)
- (setq company-show-quick-access t)
- :bind (:map company-active-map
-             ("C-n" . #'company-select-next)
-             ("C-p" . #'company-select-previous)
-             ("TAB" . company-complete-selection)
-             ("M-h" . company-complete-selection)
-             ("M-H" . company-complete-common)
-             ("M-s" . company-search-candidates)
-             ("M-S" . company-filter-candidates)
-             ("M-n" . company-select-next)
-             ("M-p" . company-select-previous))
- (:map leader-key
-       ("c s" . #'company-yasnippet
-        ))
+   )
+ "init-completion-company"
  )
-(use-package company-box
- :ensure nil)
 
 ;; Optionally use the `orderless' completion style.
 (require-package 'orderless)
@@ -107,19 +79,6 @@
 (use-package consult
   :bind (;; C-c bindings in `mode-specific-map'
          ("C-c M-x" . consult-mode-command)
-         ("C-c h"   . consult-history)
-         ("C-c k"   . consult-kmacro)
-         ("C-c m"   . consult-man)
-         ("C-c i"   . consult-info)
-         ("C-c r"   . consult-ripgrep)
-         ("C-c T"   . consult-theme)
-         ("C-."     . consult-imenu)
-
-         ;;("C-c c e" . consult-colors-emacs)
-         ;;("C-c c w" . consult-colors-web)
-         ;;("C-c c f" . describe-face)
-         ;;("C-c c t" . consult-theme)
-
          ([remap Info-search]        . consult-info)
          ([remap isearch-forward]    . consult-line)
          ([remap recentf-open-files] . consult-recent-file)
@@ -146,6 +105,10 @@
          ("M-g k"   . consult-global-mark)
          ("M-g i"   . consult-imenu)
          ("M-g I"   . consult-imenu-multi)
+         ;; ("M-g M"   . consult-man)
+         ;; ("M-g I"   . consult-info)
+         ("M-g t"   . consult-theme)
+         ("M-g h"   . consult-history)
          ;; M-s bindings in `search-map'
          ("M-s d"   . consult-find)
          ("M-s D"   . consult-locate)
@@ -158,25 +121,13 @@
          ("M-s u"   . consult-focus-lines)
          ;; Isearch integration
          ("M-s e"   . consult-isearch-history)
+         ("C-r" .  consult-line)
          :map isearch-mode-map
-         ("M-e"     . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s e"   . consult-isearch-history)       ;; orig. isearch-edit-string
-         ("M-s l"   . consult-line)                  ;; needed by consult-line to detect isearch
-         ("M-s L"   . consult-line-multi)            ;; needed by consult-line to detect isearch
-
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("C-s" . (lambda ()
-                    "Insert the selected region or current symbol at point."
-                    (interactive)
-                    (insert (with-current-buffer
-                                (window-buffer (minibuffer-selected-window))
-                              (or (and transient-mark-mode mark-active (/= (point) (mark))
-                                       (buffer-substring-no-properties (point) (mark)))
-                                  (thing-at-point 'symbol t)
-                                  "")))))
-         ("M-s" . consult-history)    ;;orig. next-matching-history-element
-         ("M-r" . consult-history))   ;; orig. previous-matching-history-element
+         ("M-e"     . consult-isearch-history)
+         ("M-s e"   . consult-isearch-history)
+         ("M-s l"   . consult-line)
+         ("M-s L"   . consult-line-multi)
+         ) 
 
   ;; Enable automatic preview at point in the *Completions* buffer. This is
   ;; relevant when you use the default completion UI.

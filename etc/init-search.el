@@ -13,7 +13,7 @@
    ("M-o" . isearch-delete-char)            ;删除
    ("M-p" . isearch-ring-retreat)           ;搜索历史向后
    ("M-n" . isearch-ring-adjust)            ;搜索历史向前
-   ("M-y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
+   ("M-Y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
    ("M-h" . isearch-yank-char)              ;粘帖光标后的字符到搜索对象
    ("M-e" . isearch-edit-string)            ;编辑搜索对象
    ("M-c" . isearch-toggle-case-fold)       ;切换大小写
@@ -54,9 +54,10 @@
   :after ivy
   :ensure t
   :bind
-  (("M-y" . counsel-yank-pop)
-   ("M-x"     . counsel-M-x)
-   ;;("C-x C-f" . counsel-find-file)
+  (
+   ;; ("M-y" . counsel-yank-pop)
+   ;; ("C-x C-f" . counsel-find-file)
+   ("M-x" . counsel-M-x)
    :map ivy-minibuffer-map
    ("M-y" . ivy-next-line)))
 

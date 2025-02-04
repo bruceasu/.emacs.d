@@ -867,7 +867,7 @@ Add to suk.el
     ))
 
 #+END_SRC
-*** Set keys
+
 直接定义全局快捷键：
 :  (global-set-key (kbd "C-c n d") #'denote)
 
@@ -954,26 +954,64 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 
 *** Global keys
 #+begin_src emacs-lisp :tangle suk.el
-    ;; 一啲方便嘅函数
-    (global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
-    (global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp
-    (global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp
-    (global-set-key (kbd "C-x R") 'recentf-open)    ;; 快捷键 C-x R 用于打开最近文件
-    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-  
-    (when emacs/>=29p
-      ;; (keymap-global-set <key> <cmmd>)
-      (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)       ;; 快捷键 C-<f11> 用于切换全屏模式
-      (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
-      (keymap-set global-map "RET" #'newline-and-indent)                ;; 回车键 RET 用于创建新行并对齐
-      (keymap-set global-map "S-<return>" #'comment-indent-new-line)    ;; Shift + 回车键用于取消对齐创建的新行
-      ) 
-    (unless emacs/>=29p
-      (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
-      (global-set-key (kbd "M-s<return>") 'toggle-frame-fullscreen)
-      (global-set-key (kbd "RET") #'newline-and-indent)              ;; 回车键 RET 用于创建新行并对齐
-      (global-set-key (kbd "S-<return>") #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
-      )
+  ;; 一啲方便嘅函数
+  (global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
+  ;;(global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp C-M-<left> ESC C-<left>
+  ;;(global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp C-M-<right> ESC C-<right>
+  (global-set-key (kbd "C-x R") 'recentf-open)    ;; 快捷键 C-x R 用于打开最近文件
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+  (when emacs/>=29p
+    ;; (keymap-global-set <key> <cmmd>)
+    (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)       ;; 快捷键 C-<f11> 用于切换全屏模式
+    (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
+    (keymap-set global-map "RET" #'newline-and-indent)                ;; 回车键 RET 用于创建新行并对齐
+    (keymap-set global-map "S-<return>" #'comment-indent-new-line)    ;; Shift + 回车键用于取消对齐创建的新行
+    ) 
+  (unless emacs/>=29p
+    (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
+    (global-set-key (kbd "M-s<return>") 'toggle-frame-fullscreen)
+    (global-set-key (kbd "RET") #'newline-and-indent)              ;; 回车键 RET 用于创建新行并对齐
+    (global-set-key (kbd "S-<return>") #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
+    )
+
+  (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
+
+  (define-prefix-command 'leader-key)
+  (global-set-key (kbd "S-SPC") 'leader-key)
+  (keymap-set leader-key "f" #'toggle-frame-fullscreen) ;; full screen
+  ;;; ### Toolkit ###
+  ;;; --- 工具函数
+  (lazy-load-set-keys
+   '(
+     ("C-," . bury-buffer)                ;隐藏当前buffer
+     ("C-." . unbury-buffer)              ;反隐藏当前buffer
+     ;; ("s-[" . eval-expression)            ;执行表达式 M-: M-ESC :
+     ;;("s-1" . sort-lines)                 ;排序
+     ;;("s-<f12>" . calendar)
+     ("C-<f12>" . lazycat-theme-toggle)
+     ;;([c-t] . transpose-chars)
+     ;; ([S-f5] . toggle-truncate-lines) ; C-x x t
+     ;; ("C-x M-a" . align-regexp)
+     )
+   )
+
+  ;; C-c TAB indent-region
+  ;; C-u C-c TAB => (un)indent-region
+
+  ;; M-x global-set-key RET 交互式的绑定你的键。
+  ;; C-x Esc Esc 调出上一条“复杂命令”
+
+  ;;Emacs 自动排版
+  ;;很简单：C-x h C-M-\
+  ;;其中C-x h 是全选
+  ;;C-M-\ 是排版
+
+  ;; C-x C-q set/unset readonly
+  ;; 大小写转换： M-u, M-l, M-c
+
+  ;; M-x align-regexp 可以方便的对齐一些文字
+
 #+end_src
 
 ** Toggles
@@ -1026,7 +1064,8 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
           ("M" diff-hl-margin-mode "margin gutter" :toggle t)
           ("D" diff-hl-dired-mode "dired gutter" :toggle t))
          ))
-      (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
+      ;; (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
+      (keymap-set leader-key "t" #'toggles-hydra/body)
   ))
 
 #+end_src
@@ -1046,15 +1085,15 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      ("s-g" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
      )
    "basic-toolkit")
-  
+
   (lazy-load-global-keys
    '(
-     ("C->"   . remember-init)      ;记忆初始函数
-     ("C-<"   . remember-jump)      ;记忆跳转函数
-     ("M-s-," . point-stack-pop)    ;buffer索引跳转
-     ("M-s-." . point-stack-push)   ;buffer索引标记
+     ("C-x r ,"   . remember-init)      ;记忆初始函数
+     ("C-x r ."   . remember-jump)      ;记忆跳转函数
+     ("C-x r <" . point-stack-pop)    ;buffer索引跳转
+     ("C-x r >" . point-stack-push)   ;buffer索引标记
      )
-   "quick-bookmak")
+   "my-bookmak")
 
   ;;; --- 滚动其他窗口
 
@@ -1067,22 +1106,12 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
   ;;(global-set-key [(control P)] 'other-window-move-down) 
   (lazy-load-global-keys
    '(
-     ("s-n" . other-window-move-up)   ;向下滚动其他窗口  scroll-other-window-up
-     ("s-p" . other-window-move-down) ;向上滚动其他窗口  scroll-other-window-down
+     ("M-N" . other-window-move-up)   ;向下滚动其他窗口  scroll-other-window-up
+     ("M-P" . other-window-move-down) ;向上滚动其他窗口  scroll-other-window-down
      ("M-n" . window-move-up)         ;向下滚动当前窗口  scroll-up
      ("M-p" . window-move-down)       ;向上滚动当前窗口  scroll-down
      )
    "win-move")
-  ;; ;;; ### Ace jump ### 比较旧了。使用avy替代
-  ;; (lazy-load-global-keys
-  ;;  '(
-  ;;    ("C-w" . ace-jump-word-mode)
-  ;;    ("C-c" . ace-jump-char-mode)
-  ;;    ("C-l" . ace-jump-line-mode)
-  ;;    )
-  ;;  "ace-jump-mode"
-  ;;  "C-z"
-  ;;  )
 
   ;; Jump to Chinese characters
   (run-with-idle-timer
@@ -1447,9 +1476,9 @@ Use ~C-c C-h~ to open the description menu
   (run-with-idle-timer
    2 nil
    #'(lambda()
-       (use-package expand-region ; I prefer stable version
-          :load-path "~/.emacs.d/extensions/expand-region"
-       )
+       ;; (use-package expand-region ; I prefer stable version
+       ;;    :load-path "~/.emacs.d/extensions/expand-region"
+       ;; )
        (with-eval-after-load 'expand-region
           (defun treesit-mark-bigger-node ()
              "Use tree-sitter to mark regions."
@@ -1561,24 +1590,11 @@ Add shortcuts.
   : (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
 
 ** Misc packages
-- Install packages.
-#+begin_src emacs-lisp :tangle install.el
-  (require-package 'paredit) ;; useful for lisp
-  (require-package 'tagedit) ;; useful for html
-  (require-package 'cliphist)
-  (require-package 'iedit)
-  (require-package 'wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
-
-#+end_src
-- Load packages.
 #+begin_src emacs-lisp :tangle suk.el
   (run-with-idle-timer
    2 nil
    #'(lambda()
        (use-package paredit) ;; useful for lisp
-       (use-package tagedit) ;; useful for html
-       (use-package cliphist)
-       (use-package iedit)
        (use-package wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
        (use-package writeroom-mode)
        ))
@@ -1586,48 +1602,6 @@ Add shortcuts.
 #+end_src
 ** Misc
 #+begin_src emacs-lisp :tangle suk.el
-  (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
-
-  (define-prefix-command 'leader-key)
-  (global-set-key (kbd "M-s-SPC") 'leader-key)
-  
-  ;;; ### Toolkit ###
-  ;;; --- 工具函数
-  (lazy-load-set-keys
-   '(
-     ("C-," . bury-buffer)                ;隐藏当前buffer
-     ("C-." . unbury-buffer)              ;反隐藏当前buffer
-     ("s-[" . eval-expression)            ;执行表达式
-     ("s-1" . sort-lines)                 ;排序
-     ("s-2" . hanconvert-region)          ;转换简体或繁体中文
-     ("s-3" . uniquify-all-lines-buffer)  ;删除重复的行
-     ("s-<f12>" . calendar)
-     ("C-<f12>" . lazycat-theme-toggle)
-     ;;([c-t] . transpose-chars)
-     ([S-f5] . toggle-truncate-lines)
-     ("C-x M-a" . align-regexp)
-     )
-   )
-
-  ;; C-c TAB indent-region
-  ;; C-u C-c TAB => (un)indent-region
-
-  ;;(global-set-key (kbd "C-(") 'backward-sexp)
-  ;;(global-set-key (kbd "C-)") 'forward-sexp)
-  ;;(global-set-key (kbd "C-x t f") 'global-flycheck-mode)
-  ;;(global-set-key (kbd "C-x R") 'recentf)
-  ;; M-x global-set-key RET 交互式的绑定你的键。
-  ;; C-x Esc Esc 调出上一条“复杂命令”
-
-  ;;Emacs 自动排版
-  ;;很简单：C-x h C-M-\
-  ;;其中C-x h 是全选
-  ;;C-M-\ 是排版
-
-  ;; C-x C-q set/unset readonly
-  ;; 大小写转换： M-u, M-l, M-c
-
-  ;; M-x align-regexp 可以方便的对齐一些文字
 #+end_src
 
 
@@ -1769,24 +1743,11 @@ Add shortcuts.
 * 窗口管理
 ** 安装插件
 #+begin_src emacs-lisp :tangle install.el
-  (require-package 'windmove)
   (require-package 'transwin)
   (require-package 'ace-window)
   (require-package 'popper)
 #+end_src
 
-** 在窗口间移动
-#+begin_src emacs-lisp :tangle suk.el
-  ;; Directional window-selection routines
-  (lazy-load-global-keys
-   '(
-     ("<M-up>"    .  windmove-up)   
-     ("<M-down>"  .  windmove-down)
-     ("<M-left>"  .  windmove-left)
-     ("<M-right>" .  windmove-right)
-     )
-   "windmove")
-#+end_src
 ** 透明窗口 Transwin
 #+begin_src emacs-lisp :tangle suk.el
   ;; Frame transparence
@@ -1828,56 +1789,12 @@ Add shortcuts.
 ** 窗口舞者 Ace-window
 #+begin_src emacs-lisp :tangle suk.el
   ;; Quickly switch windows
+
   (use-package ace-window
     :bind (([remap other-window] . ace-window)
-           ("C-c w" . ace-window-hydra/body))
+           (:map leader-key ("w" . ace-window-hydra/body)))
     :hook (emacs-startup . ace-window-display-mode)
     :config
-    (with-eval-after-load 'pretty-hydra
-      (pretty-hydra-define+ ace-window-hydra
-        (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
-                :foreign-keys warn :quit-key ("q" "C-g"))
-        ("Actions"
-         (("TAB" other-window "switch")
-          ("x" ace-delete-window "delete")
-          ("X" ace-delete-other-windows "delete other" :exit t)
-          ("s" ace-swap-window "swap")
-          ("a" ace-select-window "select" :exit t)
-          ("m" toggle-frame-maximized "maximize" :exit t)
-          ("u" toggle-frame-fullscreen "fullscreen" :exit t))
-         "Movement"
-         (("i" windmove-up "move ↑")
-          ("k" windmove-down "move ↓")
-          ("j" windmove-left "move ←")
-          ("l" windmove-right "move →")
-          ("f" follow-mode "follow"))
-         "Resize"
-         (("<left>" shrink-window-horizontally "shrink H")
-          ("<right>" enlarge-window-horizontally "enlarge H")
-          ("<up>" shrink-window "shrink V")
-          ("<down>" enlarge-window "enlarge V")
-          ("n" balance-windows "balance"))
-         "Split"
-         (("r" split-window-right "horizontally")
-          ("R" split-window-horizontally-instead "horizontally instead")
-          ("v" split-window-below "vertically")
-          ("V" split-window-vertically-instead "vertically instead")
-          ("t" toggle-window-split "toggle")
-          ("o" delete-other-windows "only this"))
-         "Zoom"
-         (("+" text-scale-increase "in")
-          ("=" text-scale-increase "in")
-          ("-" text-scale-decrease "out")
-          ("0" (text-scale-increase 0) "reset"))
-         "Misc"
-         (("o" set-frame-font "frame font")
-          ("f" make-frame-command "new frame")
-          ("d" delete-frame "delete frame")
-          ("z" winner-undo "winner undo")
-          ("Z" winner-redo "winner redo")))
-        )
-      (global-set-key (kbd "C-c w") #'ace-window-hydra/body)
-      )
     (defun toggle-window-split ()
       (interactive)
       (if (= (count-windows) 2)
@@ -2033,24 +1950,64 @@ Add shortcuts.
 
 
 #+end_src
-** 快捷键 Shortcuts
+** Menu
 #+begin_src emacs-lisp :tangle suk.el
-
- 
-
-  ;; (lazy-load-set-keys
-  ;;  '(
-  ;;    ("C-c :" . split-window-vertically)   ;纵向分割窗口
-  ;;    ("C-c |" . split-window-horizontally) ;横向分割窗口
-  ;;    ("C-x ;" . delete-other-windows)      ;关闭其它窗口
-  ;;    ))
+  (suk/wait-for-modules
+   (lambda()
+     (with-eval-after-load 'pretty-hydra
+       (pretty-hydra-define+ ace-window-hydra
+         (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
+                 :foreign-keys warn
+                 :quit-key ("q" "C-g"))
+         ("Actions"
+          (;;("TAB" other-window "switch")
+           ("x" ace-delete-window "delete")
+           ("X" ace-delete-other-windows "delete other" :exit t)
+           ("s" ace-swap-window "swap")
+           ("a" ace-select-window "select" :exit t)
+           ("m" toggle-frame-maximized "maximize" :exit t)
+           ("u" toggle-frame-fullscreen "fullscreen" :exit t))
+          "Resize"
+          (("<left>" shrink-window-horizontally "shrink H")
+           ("<right>" enlarge-window-horizontally "enlarge H")
+           ("<up>" shrink-window "shrink V")
+           ("<down>" enlarge-window "enlarge V")
+           ("n" balance-windows "balance"))
+          "Split"
+          (("r" split-window-right "horizontally")
+           ("R" split-window-horizontally-instead "horizontally instead")
+           ("v" split-window-below "vertically")
+           ("V" split-window-vertically-instead "vertically instead")
+           ("t" toggle-window-split "toggle")
+           ("o" delete-other-windows "only this"))
+          "Zoom"
+          (("+" text-scale-increase "in")
+           ("=" text-scale-increase "in")
+           ("-" text-scale-decrease "out")
+           ("0" (text-scale-increase 0) "reset"))
+          "Misc"
+          (("o" set-frame-font "frame font")
+           ("f" make-frame-command "new frame")
+           ("d" delete-frame "delete frame")
+           ("z" winner-undo "winner undo")
+           ("Z" winner-redo "winner redo"))
+          )
+         )
+       (bind-key "w" #'ace-window-hydra/body leader-key)
+       ))
+   'ace-window
+   'winner
+   )
+#+end_src
+** 快捷键
+#+begin_src emacs-lisp :tangle suk.el
 
   (lazy-load-global-keys
    '(
      ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
      ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
-     ("C-'" . delete-current-buffer-and-window)     ;关闭当前buffer, 并关闭窗口
-     ("C-\"" . delete-current-buffer-window)        ;删除当前buffer的窗口
+     ("C-'"   . delete-current-buffer-and-window)   ;关闭当前buffer, 并关闭窗口
+     ("C-\""  . delete-current-buffer-window)       ;删除当前buffer的窗口
      ("M-s-o" . toggle-one-window)                  ;切换一个窗口
      ("C-x O" . toggle-window-split)
      )
@@ -2059,14 +2016,17 @@ Add shortcuts.
 * 书签 Bookmark
 #+begin_src emacs-lisp :tangle suk.el
 
-  (lazy-load-global-keys
+  (lazy-load-local-keys
    '(
-     ("C-<f7>"   . suk/bookmark-launcher/body)
+     ("b" . suk/bookmark-launcher/body)
      )
-   "my-bookmark") ;; 有的函数跟basic-toolkit重复
+   leader-key
+   "my-bookmark"
+   ) ;; 有的函数跟basic-toolkit重复
 
   ;; C-x r l to list bookmarks
 #+end_src
+
 * 搜索
 
 ** Setup
@@ -2093,7 +2053,7 @@ Add to suk.el
      ("M-o" . isearch-delete-char)            ;删除
      ("M-p" . isearch-ring-retreat)           ;搜索历史向后
      ("M-n" . isearch-ring-adjust)            ;搜索历史向前
-     ("M-y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
+     ("M-Y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
      ("M-h" . isearch-yank-char)              ;粘帖光标后的字符到搜索对象
      ("M-e" . isearch-edit-string)            ;编辑搜索对象
      ("M-c" . isearch-toggle-case-fold)       ;切换大小写
@@ -2120,10 +2080,10 @@ Add to suk.el
   (require-package 'find-by-pinyin-dired)
   (require-package 'jump)
 
-  (require-package 'counsel) ; counsel => swiper => ivy
-  (require-package 'counsel-bbdb)
-  (require-package 'counsel-gtags)
-  (require-package 'counsel-css)
+  ;; (require-package 'counsel) ; counsel => swiper => ivy
+  ;; (require-package 'counsel-bbdb)
+  ;; (require-package 'counsel-gtags)
+  ;; (require-package 'counsel-css)
   (require-package 'bbdb)
 
 
@@ -2141,39 +2101,39 @@ Add to suk.el
 #+end_src
 *** ivy
 #+begin_src emacs-lisp :tangle etc/init-search.el
+  (use-package ivy
+   :ensure t
+   :diminish (ivy-mode)
+   :config
+   (ivy-mode 1)
+   (setq ivy-use-virtual-buffers t)
+   (setq enable-recursive-minibuffers t)
+   (setq ivy-count-format "%d/%d ")
+   (setq ivy-display-style 'fancy)
 
- (use-package ivy
-  :ensure t
-  :diminish (ivy-mode)
-  :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t)
-  (setq ivy-count-format "%d/%d ")
-  (setq ivy-display-style 'fancy)
+   (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
+   (setq ivy-re-builders-alist
+         '((counsel-rg . ivy--regex-plus)
+           (swiper . ivy--regex-plus)
+           (swiper-isearch . ivy--regex-plus)
+           (t . ivy--regex-ignore-order)))
 
-  (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
-  (setq ivy-re-builders-alist
-        '((counsel-rg . ivy--regex-plus)
-          (swiper . ivy--regex-plus)
-          (swiper-isearch . ivy--regex-plus)
-          (t . ivy--regex-ignore-order)))
-  
-  (when (display-graphic-p)    
-    (use-package ivy-posframe))
-  )
+   (when (display-graphic-p)    
+     (use-package ivy-posframe))
+   )
 #+end_src
 *** counsel
 #+begin_src emacs-lisp :tangle etc/init-search.el
-  (use-package counsel
-    :after ivy
-    :ensure t
-    :bind
-    (("M-y" . counsel-yank-pop)
-     ("M-x"     . counsel-M-x)
-     ;;("C-x C-f" . counsel-find-file)
-     :map ivy-minibuffer-map
-     ("M-y" . ivy-next-line)))
+    (use-package counsel
+      :after ivy
+      :ensure t
+      :bind
+      (
+       ;; ("M-y" . counsel-yank-pop)
+       ;; ("C-x C-f" . counsel-find-file)
+       ("M-x" . counsel-M-x)
+       :map ivy-minibuffer-map
+       ("M-y" . ivy-next-line)))
 #+end_src
 *** swiper
 #+begin_src emacs-lisp :tangle etc/init-search.el
@@ -2508,6 +2468,76 @@ Add to suk.el
   (setq org-refile-allow-creating-parent-nodes 'confirm)
 
 #+end_src
+
+*** Quick asscess
+#+begin_src emacs-lisp :tangle etc/init-org.el
+  ;; Registers allow you to jump to a file or other location quickly.
+  ;; To jump to a register, use C-x r j followed by the letter of the register.
+  ;; Using registers for all these file shortcuts is probably a bit of
+  ;; a waste since I can easily define my own keymap, but since I rarely
+  ;; go beyond register A anyway. Also, I might as well add shortcuts for refiling.
+  (require 'bookmark)
+  (defvar my-refile-map (make-sparse-keymap))
+  (defmacro my-defshortcut (key file)
+    `(progn
+       (set-register ,key (cons 'file ,file))
+       (bookmark-store ,file (list (cons 'filename ,file)
+                                   (cons 'position 1)
+                                   (cons 'front-context-string "")) nil)
+       (define-key my-refile-map
+                   (char-to-string ,key)
+                   (lambda (prefix)
+                     (interactive "p")
+                     (let ((org-refile-targets '(((,file) :maxlevel . 6)))
+                           (current-prefix-arg (or current-prefix-arg '(4))))
+                       (call-interactively 'org-refile))))))
+
+  (defvar my-org-last-refile-marker nil "Marker for last refile")
+  (defun my-org-refile-in-file (&optional prefix)
+    "Refile to a target within the current file."
+    (interactive)
+    (let ((org-refile-targets (list (cons (list (buffer-file-name)) '(:maxlevel . 5)))))
+      (call-interactively 'org-refile)
+      (setq my-org-last-refile-marker (plist-get org-bookmark-names-plist :last-refile))))
+
+  (defun my-org-refile-to-previous ()
+    "Refile subtree to last position from `my-org-refile-in-file'."
+    (interactive)
+    (save-selected-window
+      (when (eq major-mode 'org-agenda-mode)
+        (org-agenda-switch-to))
+      (org-cut-subtree)
+      (save-window-excursion
+        (save-excursion
+          (bookmark-jump (plist-get org-bookmark-names-plist :last-refile))
+          (let ((level (org-current-level)))
+            (org-end-of-subtree t t)
+            (org-paste-subtree))))))
+
+
+  (define-key my-refile-map "," 'my-org-refile-to-previous)
+  (define-key my-refile-map "." 'my-org-refile-in-file)
+  ;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
+  (my-defshortcut ?e "~/.emacs.d/README.org")
+  ;; (my-defshortcut ?s "~/personal/sewing.org")
+  ;; (my-defshortcut ?b "~/personal/business.org")
+  ;; (my-defshortcut ?p "~/personal/google-inbox.org")
+  ;; (my-defshortcut ?P "~/personal/google-ideas.org")
+  ;; (my-defshortcut ?B "~/Dropbox/books")
+  ;; (my-defshortcut ?n "~/notes")
+  ;; (my-defshortcut ?N "~/sync/notes/QuickNote.md")
+  ;; (my-defshortcut ?w "~/Dropbox/public/sharing/index.org")
+  ;; (my-defshortcut ?W "~/Dropbox/public/sharing/blog.org")
+  ;; (my-defshortcut ?j "~/personal/journal.org")
+  ;; (my-defshortcut ?J "~/cloud/a/Journal.csv")
+  ;; (my-defshortcut ?I "~/Dropbox/Inbox")
+  ;; (my-defshortcut ?g "~/sachac.github.io/evil-plans/index.org")
+  ;; (my-defshortcut ?c "~/code/dev/elisp-course.org")
+  ;; (my-defshortcut ?C "~/personal/calendar.org")
+  ;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
+  ;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
+  ;; (my-defshortcut ?Q "~/personal/questions.org")
+#+end_src
 ** Exporter
 #+begin_src emacs-lisp :tangle etc/init-org.el
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2756,145 +2786,24 @@ Add to suk.el
   ;; emacsclient -e '(prot-window-popup-tmr)'
 
 #+end_src
-** Quick asscess
-#+begin_src emacs-lisp :tangle etc/init-org.el
-  ;; Registers allow you to jump to a file or other location quickly.
-  ;; To jump to a register, use C-x r j followed by the letter of the register.
-  ;; Using registers for all these file shortcuts is probably a bit of
-  ;; a waste since I can easily define my own keymap, but since I rarely
-  ;; go beyond register A anyway. Also, I might as well add shortcuts for refiling.
-  (require 'bookmark)
-  (defvar my-refile-map (make-sparse-keymap))
-  (defmacro my-defshortcut (key file)
-    `(progn
-       (set-register ,key (cons 'file ,file))
-       (bookmark-store ,file (list (cons 'filename ,file)
-                                   (cons 'position 1)
-                                   (cons 'front-context-string "")) nil)
-       (define-key my-refile-map
-                   (char-to-string ,key)
-                   (lambda (prefix)
-                     (interactive "p")
-                     (let ((org-refile-targets '(((,file) :maxlevel . 6)))
-                           (current-prefix-arg (or current-prefix-arg '(4))))
-                       (call-interactively 'org-refile))))))
-
-  (defvar my-org-last-refile-marker nil "Marker for last refile")
-  (defun my-org-refile-in-file (&optional prefix)
-    "Refile to a target within the current file."
-    (interactive)
-    (let ((org-refile-targets (list (cons (list (buffer-file-name)) '(:maxlevel . 5)))))
-      (call-interactively 'org-refile)
-      (setq my-org-last-refile-marker (plist-get org-bookmark-names-plist :last-refile))))
-
-  (defun my-org-refile-to-previous ()
-    "Refile subtree to last position from `my-org-refile-in-file'."
-    (interactive)
-    (save-selected-window
-      (when (eq major-mode 'org-agenda-mode)
-        (org-agenda-switch-to))
-      (org-cut-subtree)
-      (save-window-excursion
-        (save-excursion
-          (bookmark-jump (plist-get org-bookmark-names-plist :last-refile))
-          (let ((level (org-current-level)))
-            (org-end-of-subtree t t)
-            (org-paste-subtree))))))
-
-
-  (define-key my-refile-map "," 'my-org-refile-to-previous)
-  (define-key my-refile-map "." 'my-org-refile-in-file)
-  ;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
-  ;; (my-defshortcut ?o "~/cloud/orgzly/organizer.org")
-  ;; (my-defshortcut ?s "~/personal/sewing.org")
-  ;; (my-defshortcut ?b "~/personal/business.org")
-  ;; (my-defshortcut ?p "~/personal/google-inbox.org")
-  ;; (my-defshortcut ?P "~/personal/google-ideas.org")
-  ;; (my-defshortcut ?B "~/Dropbox/books")
-  ;; (my-defshortcut ?n "~/notes")
-  ;; (my-defshortcut ?N "~/sync/notes/QuickNote.md")
-  ;; (my-defshortcut ?w "~/Dropbox/public/sharing/index.org")
-  ;; (my-defshortcut ?W "~/Dropbox/public/sharing/blog.org")
-  ;; (my-defshortcut ?j "~/personal/journal.org")
-  ;; (my-defshortcut ?J "~/cloud/a/Journal.csv")
-  ;; (my-defshortcut ?I "~/Dropbox/Inbox")
-  ;; (my-defshortcut ?g "~/sachac.github.io/evil-plans/index.org")
-  ;; (my-defshortcut ?c "~/code/dev/elisp-course.org")
-  ;; (my-defshortcut ?C "~/personal/calendar.org")
-  ;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
-  ;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
-  ;; (my-defshortcut ?Q "~/personal/questions.org")
-
-  (defmacro defshortcuts (name body &optional docstring &rest heads)
-    (declare (indent defun) (doc-string 3))
-    (cond ((stringp docstring))
-          (t
-           (setq heads (cons docstring heads))
-           (setq docstring "")))
-    (list
-     'progn
-     (append `(defhydra ,name (:exit t))
-             (mapcar (lambda (h)
-                       (list (elt h 0) (list 'find-file (elt h 1)) (elt h 2)))
-                     heads))
-     (cons 'progn
-           (mapcar (lambda (h) (list 'my-defshortcut (string-to-char (elt h 0)) (elt h 1)))
-                   heads))))
-
-  (defmacro defshortcuts+ (name body &optional docstring &rest heads)
-    (declare (indent defun) (doc-string 3))
-    (cond ((stringp docstring))
-          (t
-           (setq heads (cons docstring heads))
-           (setq docstring "")))
-    (list
-     'progn
-     (append `(defhydra+ ,name (:exit t))
-             (mapcar (lambda (h)
-                       (list (elt h 0) (list 'find-file (elt h 1)) (elt h 2)))
-                     heads))
-     (cons 'progn
-           (mapcar (lambda (h) (list 'my-defshortcut (string-to-char (elt h 0)) (elt h 1)))
-                   heads))))
-#+end_src
 ** Use hydra
 #+begin_src emacs-lisp :tangle etc/init-org.el
-
+ 
   (with-eval-after-load 'hydra
-    (defshortcuts suk/file-shortcuts ()
-      ("C" "~/proj/emacs-calendar/README.org" "Emacs calendar")
-      ("e" "~/sync/emacs/Sacha.org" "Config")
-      ("E" "~/sync/emacs-news/index.org" "Emacs News")
-      ("f" "~/proj/font/README.org" "Font")
-      ("I" "~/sync/orgzly/computer-inbox.org" "Computer inbox")
-      ("i" "~/sync/orgzly/Inbox.org" "Phone inbox")
-      ("o" "~/sync/orgzly/organizer.org" "Main org file")
-      ("s" "~/proj/stream/notes.org" "Public Emacs notes")
-      ("b" "~/sync/orgzly/business.org" "Business")
-      ("p" "/scp:web:/mnt/prev/home/sacha/planet/en.ini" "Planet Emacsen")
-      ("P" "~/sync/orgzly/posts.org" "Posts")
-      ;;("B" "/ssh:web|sudo::/etc/nginx/sites-available" "Nginx sites")
-      ("w" "~/Dropbox/public/sharing/index.org" "Sharing index")
-      ("W" "~/Dropbox/public/sharing/blog.org" "Blog index")
-      ("1" "~/proj/static-blog/" "Static blog")
-      ("r" "~/sync/orgzly/reference.org" "Reference")
-      ("R" "~/personal/reviews.org" "Reviews")
-      ("g" "~/proj/sachac.github.io/evil-plans/index.org" "Evil plans"))
+    (defhydra hydra-global-org (:color blue)
+        "Org"
+        ("t" org-timer-start "Start Timer")
+        ("s" org-timer-stop "Stop Timer")
+        ("r" org-timer-set-timer "Set Timer") ; This one requires you be in an orgmode doc, as it sets the timer for the header
+        ("p" org-timer "Print Timer") ; output timer value to buffer
+        ("w" (org-clock-in '(4)) "Clock-In") ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t)
+        ("o" org-clock-out "Clock-Out") ; you might also want (setq org-log-note-clock-out t)
+        ("j" org-clock-goto "Clock Goto") ; global visit the clocked task
+        ("c" org-capture "Capture") ; Don't forget to define the captures you want http://orgmode.org/manual/Capture.html
+          ("l" (or )rg-capture-goto-last-stored "Last Capture"))
 
-   (defhydra hydra-global-org (:color blue)
-       "Org"
-       ("t" org-timer-start "Start Timer")
-       ("s" org-timer-stop "Stop Timer")
-       ("r" org-timer-set-timer "Set Timer") ; This one requires you be in an orgmode doc, as it sets the timer for the header
-       ("p" org-timer "Print Timer") ; output timer value to buffer
-       ("w" (org-clock-in '(4)) "Clock-In") ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t)
-       ("o" org-clock-out "Clock-Out") ; you might also want (setq org-log-note-clock-out t)
-       ("j" org-clock-goto "Clock Goto") ; global visit the clocked task
-       ("c" org-capture "Capture") ; Don't forget to define the captures you want http://orgmode.org/manual/Capture.html
-	     ("l" (or )rg-capture-goto-last-stored "Last Capture"))
-    
-    )
-  ;; ("C-c f" . #'suk/file-shortcuts/body)
+     )
+
 
 #+end_src
 ** Use org-modern
@@ -3392,10 +3301,10 @@ Vertico 是 Emacs 中的一款用于增强 minibuffer 输入体验的插件，�
                 ([backtab] . corfu-previous)
                 ("C-p" . corfu-previous)
                 ("S-<return>" . corfu-insert)
-                ("RET" . corfu-insert)
+                ("RET" . nil)
+                ("<return>" . corfu-mode)
                 ("C-y" . corfu-yank)
-                ("C-g" . corfu-abort)
-                ("C-SPC" . corfu-complete))
+                ("C-g" . corfu-abort))
     :init
     (global-corfu-mode)
     (corfu-history-mode))
@@ -3406,49 +3315,56 @@ Vertico 是 Emacs 中的一款用于增强 minibuffer 输入体验的插件，�
 
 #+end_src
 ** Company
-#+begin_src emacs-lisp :tangle  etc/init-completion.el
-  
-  ;;据说跟 lsp-bridge 冲突
-
-
+*** Setup
+#+begin_src emacs-lisp :tangle etc/init-completion-company.el
   (use-package company
-   :defer 2
-   :diminish
-   :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
-   :hook (after-init . global-company-mode)
-   :init (setq company-tooltip-align-annotations t
-               company-idle-delay 0 company-echo-delay 0
-               company-minimum-prefix-length 1
-               company-require-match nil
-               company-dabbrev-ignore-case nil
-               company-dabbrev-downcase nil
-               company-show-numbers t)
-   :config
-   (setq switch-window-input-style 'minibuffer)
-   (setq switch-window-increase 4)
-   (setq switch-window-threshold 2)
-   (setq switch-window-shortcut-sytle 'querty)
-   (setq switch-window-qwerty-shortcuts
-         '("a" "s" "d" "f" "j" "k" "l"))
-   (setq company-minimum-prefix-length 1)
-   (setq company-show-quick-access t)
-   :bind (:map company-active-map
-               ("C-n" . #'company-select-next)
-               ("C-p" . #'company-select-previous)
-               ("TAB" . company-complete-selection)
-               ("M-h" . company-complete-selection)
-               ("M-H" . company-complete-common)
-               ("M-s" . company-search-candidates)
-               ("M-S" . company-filter-candidates)
-               ("M-n" . company-select-next)
-               ("M-p" . company-select-previous))
-   (:map leader-key
-         ("c s" . #'company-yasnippet
-          ))
-   )
+    :defer 2
+    :init
+    (setq company-idle-delay nil)  ;; 禁用自动弹出补全
+    :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
+    :hook (after-init . global-company-mode)
+    :init (setq company-tooltip-align-annotations t
+                company-minimum-prefix-length 3
+                company-require-match nil
+                company-dabbrev-ignore-case nil
+                company-dabbrev-downcase nil
+                company-show-numbers t)
+    :config
+    ;;(setq switch-window-input-style 'minibuffer)
+    (setq company-minimum-prefix-length 3)
+    (setq company-show-quick-access t)
+    :bind
+    (:map company-active-map
+          ("C-n" . #'company-select-next)
+          ("C-p" . #'company-select-previous)
+          ("TAB" . company-complete-selection)
+          ("M-h" . company-complete-selection)
+          ("M-H" . company-complete-common)
+          ("M-s" . company-search-candidates)
+          ("M-S" . company-filter-candidates)
+          ("M-n" . company-select-next)
+          ("M-p" . company-select-previous))
+    (:map leader-key
+          ("y" . #'company-yasnippet))
+    )
   (use-package company-box
-   :ensure nil)
+    :ensure nil)
+  (provide 'init-completion-company)
+#+end_src
+*** 手动触发
+#+begin_src emacs-lisp :tangle  etc/init-completion.el
+  ;;据说跟 lsp-bridge 冲突
+  (setq company-idle-delay nil) 
+  ;; (global-set-key (kbd "M-/") 'company-complete)  ;; 绑定 M-/ 为 company-complete
+  ;; (global-set-key (kbd "M-?") 'dabbrev-expand)    ;; 绑定 M-? 为 dabbrev-expand
+  (lazy-load-global-keys
+   '(
+     ("M-/" . company-complete)
+     ("M-?" . dabbrev-expand)
 
+     )
+   "init-completion-company"
+   )
 #+end_src
 ** Use orderless
 #+begin_src emacs-lisp :tangle etc/init-completion.el
@@ -3473,19 +3389,6 @@ Vertico 是 Emacs 中的一款用于增强 minibuffer 输入体验的插件，�
   (use-package consult
     :bind (;; C-c bindings in `mode-specific-map'
            ("C-c M-x" . consult-mode-command)
-           ("C-c h"   . consult-history)
-           ("C-c k"   . consult-kmacro)
-           ("C-c m"   . consult-man)
-           ("C-c i"   . consult-info)
-           ("C-c r"   . consult-ripgrep)
-           ("C-c T"   . consult-theme)
-           ("C-."     . consult-imenu)
-
-           ;;("C-c c e" . consult-colors-emacs)
-           ;;("C-c c w" . consult-colors-web)
-           ;;("C-c c f" . describe-face)
-           ;;("C-c c t" . consult-theme)
-
            ([remap Info-search]        . consult-info)
            ([remap isearch-forward]    . consult-line)
            ([remap recentf-open-files] . consult-recent-file)
@@ -3512,6 +3415,10 @@ Vertico 是 Emacs 中的一款用于增强 minibuffer 输入体验的插件，�
            ("M-g k"   . consult-global-mark)
            ("M-g i"   . consult-imenu)
            ("M-g I"   . consult-imenu-multi)
+           ;; ("M-g M"   . consult-man)
+           ;; ("M-g I"   . consult-info)
+           ("M-g t"   . consult-theme)
+           ("M-g h"   . consult-history)
            ;; M-s bindings in `search-map'
            ("M-s d"   . consult-find)
            ("M-s D"   . consult-locate)
@@ -3524,25 +3431,13 @@ Vertico 是 Emacs 中的一款用于增强 minibuffer 输入体验的插件，�
            ("M-s u"   . consult-focus-lines)
            ;; Isearch integration
            ("M-s e"   . consult-isearch-history)
+           ("C-r" .  consult-line)
            :map isearch-mode-map
-           ("M-e"     . consult-isearch-history)       ;; orig. isearch-edit-string
-           ("M-s e"   . consult-isearch-history)       ;; orig. isearch-edit-string
-           ("M-s l"   . consult-line)                  ;; needed by consult-line to detect isearch
-           ("M-s L"   . consult-line-multi)            ;; needed by consult-line to detect isearch
-
-           ;; Minibuffer history
-           :map minibuffer-local-map
-           ("C-s" . (lambda ()
-                      "Insert the selected region or current symbol at point."
-                      (interactive)
-                      (insert (with-current-buffer
-                                  (window-buffer (minibuffer-selected-window))
-                                (or (and transient-mark-mode mark-active (/= (point) (mark))
-                                         (buffer-substring-no-properties (point) (mark)))
-                                    (thing-at-point 'symbol t)
-                                    "")))))
-           ("M-s" . consult-history)    ;;orig. next-matching-history-element
-           ("M-r" . consult-history))   ;; orig. previous-matching-history-element
+           ("M-e"     . consult-isearch-history)
+           ("M-s e"   . consult-isearch-history)
+           ("M-s l"   . consult-line)
+           ("M-s L"   . consult-line-multi)
+           ) 
 
     ;; Enable automatic preview at point in the *Completions* buffer. This is
     ;; relevant when you use the default completion UI.
