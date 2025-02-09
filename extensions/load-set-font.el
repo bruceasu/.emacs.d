@@ -200,7 +200,9 @@
     (setq emacs-cjk-font cn-font)
     ;; Setup font size based on emacs-font-size-pair
     (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-    (when (fboundp 'variable-pitch-mode) (variable-pitch-mode 1))
+    ;;(when (fboundp 'variable-pitch-mode) (variable-pitch-mode 1))
+    ;; 还是等宽字体比较顺眼
+    (when (fboundp 'fixed-pitch-mode) (fixed-pitch-mode 1))
     (setq loaded-font-type 1)
     (message "Set default font")
   ))
@@ -307,50 +309,6 @@
             (lambda (frame)
               (with-selected-frame frame
                 (load-default-font)))))
-
-;; ------------------------------------------------------
-;; 设置不同操作系统使用不同的字体
-;; (defun my-set-font (&optional frame)
-;;     ;; (load-default-font)
-;;     (with-selected-frame (or frame (selected-frame))
-;;         (if (string-equal system-type "windows-nt")
-;;         ;; 下面是用于Windows的配置。
-;;         (progn
-;;             ;; 设置英文字体并指定字号。
-;;             ;; 因为不同操作系统下字体显示的大小不一样(DPI的问题)，所以分开设置。
-;;             (set-face-attribute 'default nil :font "Migu 1M Less 12")
-;;             ;; 给相应的字符集设置中文字体。
-;;             (dolist (charset '(han cjk-misc chinese-gbk))
-;;                 (set-fontset-font "fontset-default"
-;;                     charset (font-spec :family "Simsun")
-;;                 )
-;;             )
-;;         )
-;;
-;;         ;; 下面是Linux的配置，道理类似。
-;;         (set-face-attribute 'default nil :font "Migu 1M Less-12")
-;;         (dolist (charset '(kana han cjk-misc bopomofo))
-;;            (set-fontset-font "fontset-default"
-;;               charset (font-spec :name "等距更纱黑体 SC")))
-;;         )
-;;     )
-;; )
-
-;; 运行一下立即设置字体。
-;; (my-set-font)
-;; (load-default-font)
-
-;; 新版已经绑定字体缩放
-;; ;; For Linux
-;; (when sys/linuxp
-;;   (global-set-key (kbd "<C-mouse-4>") 'text-scale-increase)
-;;   (global-set-key (kbd "<C-mouse-5>") 'text-scale-decrease)
-;;   )
-;; ;; For Windows
-;; (when sys/win32p
-;;   (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
-;;   (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
-;;   )
 
 
 (when sys/win32p

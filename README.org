@@ -109,7 +109,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
   (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
   (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
-
+  
   ;; OS 嘅 HOME 目录。
   (defvar user-home-dir (getenv "HOME"))
   (if (eq system-type 'windows-nt) (defvar user-home-dir (getenv "USERPROFILE")))
@@ -376,27 +376,10 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
       ("[-]"            . ?)
       ("[X]"            . ?)
 
-      ;; (":PROPERTIES:"   . ?)
-      ;; (":ID:"           . ?🪪)
-      ;; (":END:"          . ?🔚)
-
-      ;; ("#+ARCHIVE:"     . ?📦)
-      ;; ("#+AUTHOR:"      . ?👤)
-      ;; ("#+CREATOR:"     . ?💁)
-      ;; ("#+DATE:"        . ?📆)
-      ;; ("#+DESCRIPTION:" . ?⸙)
-      ;; ("#+EMAIL:"       . ?📧)
-      ;; ("#+HEADERS"      . ?☰)
-      ;; ("#+OPTIONS:"     . ?⚙)
-      ;; ("#+SETUPFILE:"   . ?⚒)
-      ("#+TAGS:"        . ?🏷)
-      ("#+TITLE:"       . ?📓)
-
-      ("#+BEGIN_SRC"    . ?✎)
+      (":PROPERTIES:"   . ?)
       ("#+END_SRC"      . ?□)
       ("#+BEGIN_QUOTE"  . ?«)
       ("#+END_QUOTE"    . ?»)
-      ("#+RESULTS:"     . ?💻)
       )
     "A list of symbol prettifications for `org-mode'."
     :group 'suk
@@ -959,12 +942,10 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 
 *** Global keys
 #+begin_src emacs-lisp :tangle suk.el
-  ;; 一啲方便嘅函数
-  (global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
-  ;;(global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp C-M-<left> ESC C-<left>
-  ;;(global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp C-M-<right> ESC C-<right>
+
   (global-set-key (kbd "C-x R") 'recentf-open)    ;; 快捷键 C-x R 用于打开最近文件
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  (if (display-graphic-p)
+      (global-set-key (kbd "<escape>") 'keyboard-escape-quit))
 
   (when emacs/>=29p
     ;; (keymap-global-set <key> <cmmd>)
@@ -975,7 +956,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
     ) 
   (unless emacs/>=29p
     (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
-    (global-set-key (kbd "M-s<return>") 'toggle-frame-fullscreen)
+    (global-set-key (kbd "M-s-<return>") 'toggle-frame-fullscreen)
     (global-set-key (kbd "RET") #'newline-and-indent)              ;; 回车键 RET 用于创建新行并对齐
     (global-set-key (kbd "S-<return>") #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
     )
@@ -991,16 +972,17 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
    '(
      ("C-," . bury-buffer)                ;隐藏当前buffer
      ("C-." . unbury-buffer)              ;反隐藏当前buffer
-     ;; ("s-[" . eval-expression)            ;执行表达式 M-: M-ESC :
-     ;;("s-1" . sort-lines)                 ;排序
-     ;;("s-<f12>" . calendar)
      ("C-<f12>" . lazycat-theme-toggle)
-     ;;([c-t] . transpose-chars)
-     ;; ([S-f5] . toggle-truncate-lines) ; C-x x t
-     ;; ("C-x M-a" . align-regexp)
      )
    )
 
+  ;; 一啲方便嘅函数
+  ;; 用于向后跳跃到上一个 sexp C-M-<left> / ESC C-<left>
+  ;; 用于向前跳跃到下一个 sexp C-M-<right> / ESC C-<right>
+  ;; eval-expression 执行表达式 M-: M-ESC :
+  ;; sort-lines, calendar, align-regexp
+  ;; C-t transpose-char M-t tanspose-word
+  ;; toggle-truncate-lines C-x x t
   ;; C-c TAB indent-region
   ;; C-u C-c TAB => (un)indent-region
 
@@ -1093,8 +1075,8 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 
   (lazy-load-global-keys
    '(
-     ("C-x r ,"   . remember-init)      ;记忆初始函数
-     ("C-x r ."   . remember-jump)      ;记忆跳转函数
+     ("C-x r ,"   . remember-init)    ;记忆初始函数
+     ("C-x r ."   . remember-jump)    ;记忆跳转函数
      ("C-x r <" . point-stack-pop)    ;buffer索引跳转
      ("C-x r >" . point-stack-push)   ;buffer索引标记
      )
@@ -1117,20 +1099,8 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      ("M-p" . window-move-down)       ;向上滚动当前窗口  scroll-down
      )
    "win-move")
-
-  ;; Jump to Chinese characters
-  (run-with-idle-timer
-   1
-   nil
-   #'(lambda()     
-       (use-package ace-pinyin
-         :diminish
-         :hook (after-init . ace-pinyin-global-mode))
-       (require 'goto-chg)
-       ))
-
-
 #+end_src
+
 ** Move text
 #+begin_src emacs-lisp :tangle etc/init-key.el
   ;; ### move text ###
@@ -1282,11 +1252,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 #+begin_src emacs-lisp :tangle etc/init-key.el
   ;; ### String Inflection ###
   ;; --- 单词语法风格快速转换
-  (lazy-load-global-keys
-   '(
-     ("C-c C-u" . string-inflection-hydra/body)
-     )
-   "init-string-inflection")
+
    ;;; ### basic-toolkit ###
   (lazy-load-global-keys
    '(
@@ -1332,7 +1298,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      ;; ("C-c L" . thing-cut-line)
      ;; ("C-c A" . thing-cut-to-line-beginning)
      ;; ("C-c E" . thing-cut-to-line-end)
-
+     ("S-SPC e" . hydra-thing-edit/body)
      ("C-c e" . hydra-thing-edit/body)
      )
    "init-thing-edit"
@@ -1445,7 +1411,7 @@ Use ~C-c C-h~ to open the description menu
       ("t" describe-theme)
       ("v" describe-variable)
       ("w" where-is))
-    (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
+    (global-set-key (kbd "S-SPC h") 'my-hydra-describe/body))
 #+end_src
 ** Rectangle
 记录一下使用方法
@@ -1607,6 +1573,7 @@ Add shortcuts.
 #+end_src
 ** Misc
 #+begin_src emacs-lisp :tangle suk.el
+  
 #+end_src
 
 
@@ -1632,12 +1599,12 @@ Add shortcuts.
         :init (setq nerd-icons-ibuffer-icon suk-icon)))
     )
 #+end_src
-** 持久化  scratch 缓存区
+** 持久化 scratch 缓存区
 唔欲存此临时缓冲区，咁可再续前缘。
 #+begin_src emacs-lisp :tangle suk.el
   ;; Persistent the scratch buffer
   (run-with-idle-timer
-   10 nil
+   1 nil
    #'(lambda()
        (use-package persistent-scratch
          :diminish
@@ -1666,6 +1633,7 @@ Add shortcuts.
    (lazy-load-global-keys
    '(
      ("C-c b"  . my-hydra-buffers/body)
+     ("S-SPC B"  . my-hydra-buffers/body)
      ("M-<f7>" . suk-read-mode)
      ("<f7>"   . olivetti-mode)
      ("C-;"    . suk/close-current-buffer) ;关闭当前buffer
@@ -3642,29 +3610,13 @@ Another tree view component
   (require-package 'git-gutter) ; dependent to fringe-helper
   (require-package 'git-modes)
   (require-package 'web-mode)
-  ;;(require-package 'lua-mode)
   (require-package 'yaml-mode)
   (require-package 'js2-mode)
   (require-package 'rjsx-mode) ; use my package in extensions
   (require-package 'csv-mode)
-                                          ;(require-package 'emmet-mode)
-  ;;(require-package 'groovy-mode)
-  ;; magit sometime use packages which not released yet
-  ;; so we place it at the end to make sure other packages are installed first
   (require-package 'graphql-mode)
-  ;;(require-package 'auto-yasnippet)
   (require-package 'typescript-mode)
   (require-package 'nvm)
-
-  ;;(require-package 'elpy) ;; python
-  ;;(require-package 'request) ;; a http client
-  ;;(require-package 'websocket) ; for debug debugging of browsers
-  ;;(require-package 'simple-httpd)
-  ;;(require-package 'highlight-symbol)
-  ;;(require-package 'cpputils-cmake)
-  ;;(require-package 'rust-mode)
-  ;;(require-package 'cmake-mode)
-  ;;(require-package 'sage-shell-mode)
 #+end_src
 ** Setup
 #+begin_src emacs-lisp :tangle etc/init-devtools.el
@@ -4405,7 +4357,7 @@ Another tree view component
        (require 'load-abbrev)
        ;; chmod +x
        ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
-       (add-hook 'after-save-hook'executable-make-buffer-file-executable-if-script-p)
+       (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
        (autoload 'calendar "init-calendar" "Config Chinese calendar " t)
        ))
 
