@@ -90,6 +90,15 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   ;;; early-init.el ends here
 #+end_src
 
+
+** 调试贴士
+如果啲嘢壞咗，我可以用：
+
+- ~check-parens~ 嚟搵唔啱嘅括號
+- package: *bug-hunter* 將我嘅配置分成兩半
+- ~trace-function-background~ 將資訊列印到緩衝區
+- ~profiler-start~ 嚟搵多啲有關慢函數嘅資訊
+
 ** 呢个係我嘅 init.el :
 :PROPERTIES:
 :CUSTOM_ID: init
@@ -98,7 +107,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 
 
 #+BEGIN_SRC emacs-lisp :tangle init.el :eval never-export
-  (provide 'init);; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
+  (provide 'init);; 定义一啲目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
   ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
   ;; 变量。
   (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
@@ -346,8 +355,6 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
     :group 'suk
     :type 'string)
 
-
-
   (defcustom suk-prettify-symbols-alist
     '(("lambda" . ?λ)
       ("<-"     . ?←)
@@ -463,18 +470,12 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 
   (add-to-list 'package-archives
                '("melpa" . "https://melpa.org/packages/"))
-  ;; (add-to-list 'package-archives
-  ;;              '("melpa-stable" . "https://stable.melpa.org/packages/"))
   (add-to-list 'package-archives
                '("org" . "https://orgmode.org/elpa/"))
   (add-to-list 'package-archives
                '("gnu" . "https://elpa.gnu.org/packages/"))
   (add-to-list 'package-archives
                '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
-
-
-  ;; 若遵循「大道至简策安裝穩定版」，請消注下行。
-  ;; (setq package-archives '(("myelpa" . "~/myelpa/"))) 
 
   (setq package-check-signature nil) ; 个别时候会出现签名校验失败
 
@@ -502,20 +503,6 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
     )
 
   (require 'use-package)
-
-
-  (defun load-if-exists (f)
-  "load the elisp file only if it exists and is readable"
-  (if (file-readable-p f)
-      (load-file f)))
-
-      ;;;###autoload
-  (defun my-ensure (feature)
-    "Make sure FEATURE is required."
-    (unless (featurep feature)
-      (condition-case nil
-          (require feature)
-        (error nil))))
 
   ;; On-demand installation of packages
   (defun require-package (&rest packages)
@@ -551,13 +538,6 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 
 #+END_SRC
 
-** 调试贴士
-如果啲嘢壞咗，我可以用：
-
-- ~check-parens~ 嚟搵唔啱嘅括號
-- package: *bug-hunter* 將我嘅配置分成兩半
-- ~trace-function-background~ 將資訊列印到緩衝區
-- ~profiler-start~ 嚟搵多啲有關慢函數嘅資訊
 * 我嘅設定
 ** 個人信息
 :PROPERTIES:
@@ -598,12 +578,8 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (put 'narrow-to-region 'disabled nil)      ;开启变窄区域
   (auto-compression-mode 1)                  ;打开压缩文件时自动解压缩
   (show-paren-mode t)                        ;显示括号匹配
-  ;;(blink-cursor-mode -1)
   (setq inhibit-startup-message t)           ; 关闭启动欢迎界面
-  ;; (setq initial-scratch-message nil)      ; 清空 *scratch* 缓冲区信息
   (setq inhibit-startup-echo-area-message t) ; 关闭启动时回显区的提示信息
-
-
   (setq read-process-output-max #x10000)  ; 64kb.  Increase how much is read from processes in a single chunk (default is 4kb)
   (setq vc-follow-symlinks t)
   (setq font-lock-maximum-decoration t)
@@ -631,7 +607,6 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq minibuffer-message-timeout 2)       ;显示消息超时的时间
   (setq auto-revert-mode 1)                 ;自动更新buffer
   (setq show-paren-style 'parentheses)      ;括号匹配显示但不是烦人的跳到另一个括号。
-  ;;(setq blink-matching-paren nil)         ;当插入右括号时不显示匹配的左括号
   (setq message-log-max t)                  ;设置message记录全部消息, 而不用截去
   (setq require-final-newline nil)          ;不自动添加换行符到末尾, 有些情况会出现错误
   (setq ediff-window-setup-function
@@ -647,7 +622,6 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq track-eol t)                        ; Keep cursor at end of lines. Require line-move-visual is nil.
   (setq line-move-visual nil)
   (setq save-interprogram-paste-before-kill t) ; Save clipboard contents into kill-ring before replace them
-  ;;(setq auto-save-default nil)            ; Disable auto save
   (setq echo-keystrokes 0.1)                ;加快快捷键提示的速度
 
   ;; Hanlde minified code
@@ -660,11 +634,9 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
     ;; (setq uniquify-buffer-name-style 'forward)
     (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
     )
-  ;; Misc
   (if (boundp 'use-short-answers)
       (setq use-short-answers t)
     (fset 'yes-or-no-p 'y-or-n-p))
-
 
 #+end_src
 *** 備份設定
@@ -706,6 +678,15 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 :END:
 <<setup-charset>>
 #+begin_src emacs-lisp :tangle suk.el
+
+  ;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
+  ;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
+  ;; utf-16 (utf-16 ham:  utf-16le, utf-16be, utf-16le-with-signature dang)
+  ;; Unicode
+  ;; (prefer-coding-system 'utf-16le-with-signature)
+  ;; (prefer-coding-system 'utf-16)
+  ;; (prefer-coding-system 'utf-8-dos)
+  
   ;; Set UTF-8 as the default coding system
   (prefer-coding-system 'utf-8)
   (setq default-buffer-file-coding-system 'utf-8)            ;缓存文件编码
@@ -729,13 +710,6 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 
   (set-language-environment "UTF-8")
 
-  ;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
-  ;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
-  ;; utf-16 (utf-16 ham:  utf-16le, utf-16be, utf-16le-with-signature dang)
-  ;; Unicode
-  ;; (prefer-coding-system 'utf-16le-with-signature)
-  ;; (prefer-coding-system 'utf-16)
-  ;; (prefer-coding-system 'utf-8-dos)
   (prefer-coding-system 'utf-8)
 #+end_src
 ** 伺机加载 Lazy Load
@@ -760,6 +734,25 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
  ;;; --- 卸载按键
  (lazy-load-unset-keys ;全局按键的卸载
   '("C-z" "C-x"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
+
+  
+(lazy-load-global-keys
+ '(("M-g" . goto-line-preview))
+ "goto-line-preview")
+
+ 
+(lazy-load-local-keys
+ '(("C-c t" . ruby-hash-syntax-toggle))
+ ruby-mode-map
+ "ruby-extension")
+
+ (lazy-load-global-keys
+ '(("p" . sdcv-search-pointer)
+   ("y" . sdcv-search-pointer+)
+   ("i" . sdcv-search-input)
+   (";" . sdcv-search-input+))
+ "init-sdcv"
+ "C-z")
 
  ;; Mac平台下交换 Option 和 Command 键。
 
@@ -786,14 +779,16 @@ Add to suk.el
 
 ** 何以快键 How to set keys
 *** Bindkeys examples
-#+begin_src emacs-elisp :tangle achrives-and-examples.el
-;; global-set-key examples:
-(global-set-key (kbd "C-x C-\\") 'next-line)
-(global-set-key [?\C-x ?\C-\\] 'next-line)
-(global-set-key [(control ?x) (control ?\\)] 'next-line)
-
+通用定义方法
+#+begin_example
+(define-prefix-command 'my-leader)           ;设定leader
+(define-key keymap "keystrok" 'command-name) ;将快捷键绑定到 leader按键后，即和键位图绑定。
+(global-set-key "keystroke" 'command-name)   ;定义全局快捷键
+(local-set-key  "keystroke" 'command-name)   ;定义局部快捷键
+#+end_example
+通用移除定义方法
+#+begin_example
 ;; remove a keybinding
-
 ;; for emacs 29 or after
 (keymap-global-set "C-t" nil)
 ;; or use
@@ -803,13 +798,21 @@ Add to suk.el
 ;; or
 (global-unset-key (kbd "C-t"))
 
+#+end_example
+例子：
+#+begin_src emacs-elisp :tangle achrives-and-examples.el
 
-(define-prefix-command 'my-leader) ;设定leader
-(define-key keymap "keystrok" 'command-name)   ;将快捷键绑定到 leader按键后，即和键位图绑定。
-(global-set-key "keystroke" 'command-name) ; 定义全局快捷键
-(local-set-key  "keystroke" 'command-name) ; 定义局部快捷键
 ;;注意：keystroke中的Control 和 Alternative使用\C, \M表示。
 ;;如果是kbd函数，可以使用C和M表示
+
+;; global-set-key examples:
+(global-set-key (kbd "C-x C-\\") 'next-line)
+(global-set-key [?\C-x ?\C-\\] 'next-line)
+(global-set-key [(control ?x) (control ?\\)] 'next-line)
+(keymap-global-set [(control ?x) (control ?\\)] 'next-line)
+(keymap-set global-map "C-x" 'next-line)
+
+
 
 ;; 方式一：
 (define-prefix-command 'SPC-map)
@@ -823,15 +826,21 @@ Add to suk.el
 
 
 ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
-(define-prefix-command 'comma-map)
-(global-set-key (kbd ",") 'comma-map)
-(global-set-key [(meta c)] 'meta-c-map)
+(define-prefix-command 'comm-map)
+(global-set-key (kbd "M-c") 'comm-map)
+(global-set-key [(meta c)]  'comm-map)
+
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键.
 ;; 退出isearch-mode, 所有按键失效.
 (add-hook
   'isearch-mode-hook
   '(lambda ()
-    ;; 搜索下一个结果
+   
+    ;; 单词搜索
+    (local-set-key [(meta w)] 'isearch-forward-word)
+    (local-set-key [(meta s)] 'isearch-repeat-forward)
+    ))
+ ;; 搜索下一个结果
     (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
     ;; 搜索前一个结果
     (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
@@ -849,12 +858,9 @@ Add to suk.el
     (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
     ;; 显示occur视图
     (define-key isearch-mode-map [(meta o)] 'isearch-occur)
-    ;; 单词搜索
-    (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
-    (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
-    ))
-
 #+END_SRC
+
+keymap 定义
 
 直接定义全局快捷键：
 :  (global-set-key (kbd "C-c n d") #'denote)
@@ -862,18 +868,18 @@ Add to suk.el
 自己定义 keymap 其实很简单的，使用 defvar-keymap ，可以从上面的配置中
 抽取 C-c n 作为一个 prefix key ，定义如下：
 #+BEGIN_EXAMPLE
-(define-prefix-command  hsk/notetaking-map)
-(define-key  hsk/notetaking-map (kbd "d") #denote)
-
-or
-
 (defvar-keymap hsk/notetaking-map
   :doc "My notetaking keymap"
   "d" #'denote
   "t" #'denote-keywords-add
   "T" #'denote-keywords-remove)
 #+END_EXAMPLE
-
+或者使用旧方法
+#+begin_example
+(define-prefix-command hsk/notetaking-map)
+(define-key hsk/notetaking-map (kbd "d") #'denote)
+(define-key hsk/notetaking-map (kbd "t") #'isearch-repeat-forward)
+#+end_example
 然后就可以用：
 : (global-set-key (kbd "C-c n") hsk/notetaking-map)
 
@@ -908,7 +914,6 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 
 这样 org-journal-new-entry 就映射到 C-c n j n 上了，非常优雅。
 
-
 : (let ((my-keymap (make-sparse-keymap))) ; 创建一个空的 keymap
 :  (keymap-set my-keymap "C-c f" 'find-file)) ; 设置 C-c f 来执行 'find-file 命令
 : (keymap-local-set "C-p" ctl-x-map)
@@ -918,6 +923,8 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个
 键。虽然bind-keys 可以独立于 use-package 使用，但它通常与 use-package
 结合使用，以提供更清晰和模块化的键绑定配置。
+我个人是认为他比Emacs新定义的keymap-XXX 系列的实现要好。
+
 #+begin_src emacs-lisp :tangle suk.el
   (use-package bind-key)
   ;;(bind-key "C-c x" #'some-function some-package-mode-map)
@@ -940,7 +947,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
              )
 #+end_src
 
-*** Global keys
+*** Some Global keys
 #+begin_src emacs-lisp :tangle suk.el
 
   (global-set-key (kbd "C-x R") 'recentf-open)    ;; 快捷键 C-x R 用于打开最近文件
@@ -974,6 +981,8 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      ("C-." . unbury-buffer)              ;反隐藏当前buffer
      ("C-<f12>" . lazycat-theme-toggle)
      )
+   (current-global-map)
+   "C-z"
    )
 
   ;; 一啲方便嘅函数
@@ -1002,6 +1011,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 #+end_src
 
 ** Toggles
+使用Hydra提供一组设定常用开发的工具,减少输入或者快捷键的定义
 #+begin_src emacs-lisp :tangle suk.el
   (with-eval-after-load 'pretty-hydra
     ;; Global toggles
@@ -1059,28 +1069,32 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 ** Move cursor
 
 #+begin_src emacs-lisp :tangle suk.el
-    ;;; ### goto-line-preview ###
+  ;;; ### goto-line-preview ###
   (lazy-load-global-keys
    '(
-     ("M-g p" . goto-line-preview))
-   "goto-line-preview")
+     ("g p" . goto-line-preview))
+   "goto-line-preview"
+   "C-z")
 
-     ;;; ### basic-toolkit ###
-    (lazy-load-global-keys
+  ;;; ### basic-toolkit ###
+  (lazy-load-global-keys
    '(
-     ("M-G" . goto-column)                ;到指定列
-     ("s-g" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
+     ("g c" . goto-column)                ;到指定列
+     ("g p" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
      )
-   "basic-toolkit")
+   "basic-toolkit"
+   "C-z")
 
   (lazy-load-global-keys
    '(
-     ("C-x r ,"   . remember-init)    ;记忆初始函数
-     ("C-x r ."   . remember-jump)    ;记忆跳转函数
-     ("C-x r <" . point-stack-pop)    ;buffer索引跳转
-     ("C-x r >" . point-stack-push)   ;buffer索引标记
+     ("C-x r ," . remember-init)    ;记忆初始函数
+     ("C-x r ." . remember-jump)    ;记忆跳转函数
+     ("C-x r <" . point-stack-pop)  ;buffer索引跳转
+     ("C-x r >" . point-stack-push) ;buffer索引标记
      )
-   "my-bookmak")
+   "my-bookmak"
+   "C-z"
+   )
 
   ;;; --- 滚动其他窗口
 
@@ -1103,7 +1117,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 
 ** Move text
 #+begin_src emacs-lisp :tangle etc/init-key.el
-  ;; ### move text ###
+  ;;; ### move text ###
   (lazy-load-global-keys
    '(
      ("C-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
@@ -1113,7 +1127,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      )
    "move-text")
 
-   ;;; ### move comment ###
+  ;;; ### move comment ###
   (lazy-load-global-keys
    '(
      ("M-s-n" . comment-part-move-down)   ;向下移动注释
@@ -1144,7 +1158,6 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      ("C-S-s-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
      ("C-S-s-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
      ("C-:" . comment-or-uncomment-region+)     ;注释当前行
-
      )
    "duplicate-line")
 #+end_src
@@ -1411,7 +1424,7 @@ Use ~C-c C-h~ to open the description menu
       ("t" describe-theme)
       ("v" describe-variable)
       ("w" where-is))
-    (global-set-key (kbd "S-SPC h") 'my-hydra-describe/body))
+    (keymap-global-set "S-SPC h" #'my-hydra-describe/body))
 #+end_src
 ** Rectangle
 记录一下使用方法
@@ -1434,7 +1447,6 @@ Use ~C-c C-h~ to open the description menu
    ;;; Rectangle
   (lazy-load-global-keys
    '(
-   
      ("r" . hydra-rectangle/body)
      )
    "init-rectangle"
@@ -1469,11 +1481,13 @@ Use ~C-c C-h~ to open the description menu
 #+end_src
 Add shortcut.
 #+begin_src emacs-lisp :tangle etc/init-key.el
- (lazy-load-global-keys
-        '(("M-=" . er/expand-region)
-          ("M--" . er/contract-region)
-          )
-        "expand-region")
+  (lazy-load-global-keys
+         '(("M-=" . er/expand-region)
+           ("M--" . er/contract-region)
+           ("M-S-<Right>" . er/expand-region)
+           ("M-S-<Left>" . er/contract-region)
+           )
+         "expand-region")
 #+end_src
 ** Undo
 #+begin_src emacs-lisp :tangle suk.el
@@ -1571,17 +1585,249 @@ Add shortcuts.
        ))
 
 #+end_src
-** Misc
-#+begin_src emacs-lisp :tangle suk.el
-  
+
+* 用户界面
+:PROPERTIES:
+:CUSTOM_ID: setup-ui
+:END:
+<<setup-ui>>
+
+Add to suk.el
+  #+begin_src emacs-lisp :tangle suk.el
+  (require 'init-ui)   
+  #+end_src
+
+Setup init-ui
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+  (provide 'init-ui)
 #+end_src
+** 主题
+:PROPERTIES:
+:CUSTOM_ID: setup-theme
+:END:
+<<setup-theme>>
+
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+  ;;(require 'lazycat-theme)
+  ;;(lazycat-theme-load-dark)
+  (use-package doom-themes
+    :ensure t
+    :custom
+    (doom-themes-enable-bold t)
+    (doom-themes-enable-italic t)
+    ;; 加载一个主题，DOOM One 是 DOOM Emacs 的默认主题，非常美观
+    :init
+    (load-theme 'doom-one t)
+    )
+
+ 
+  (use-package doom-modeline
+    :hook (after-init . doom-modeline-mode)
+    :init
+    (setq doom-modeline-icon suk-icon
+          doom-modeline-minor-modes t)
+    :config
+    (column-number-mode 1)
+    :custom
+    (doom-modeline-height 30)
+    (doom-modeline-window-width-limit nil)
+    (doom-modeline-buffer-file-name-style 'truncate-with-project)
+    (doom-modeline-icon t)
+    (doom-modeline-time t)
+    (doom-modeline-vcs-max-leghth 50)
+    ;; Windows下记得加上
+    (if sys/win32p (setq inhibit-compacting-font-caches t))
+    )
+
+  (use-package hide-mode-line
+    :hook (((treemacs-mode
+             eshell-mode shell-mode
+             term-mode vterm-mode
+             embark-collect-mode
+             lsp-ui-imenu-mode
+             pdf-annot-list-mode) . turn-on-hide-mode-line-mode)
+           (dired-mode . (lambda()
+                           (and (bound-and-true-p hide-mode-line-mode)
+                                (turn-off-hide-mode-line-mode))))))
+
+  ;; A minor-mode menu for mode-line
+  (use-package minions
+    :hook (doom-modeline-mode . minions-mode))
+
+#+end_src
+** 字体
+:PROPERTIES:
+:CUSTOM_ID: setup-fonts
+:END:
+<<setup-fonts>>
+
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+    ;; 字体
+    (lazy-load-set-keys
+     '(
+       ("C--" . text-scale-decrease)        ;减小字体大小
+       ("C-=" . text-scale-increase)        ;增加字体大小
+       ("C-x C-0" . text-scale-adjust)
+       ))
 
 
+    (defun font-installed-p (font-name)
+      "Check if font with FONT-NAME is available."
+      (find-font (font-spec :name font-name)))
+
+
+  ;; Use fixed pitch where it's sensible
+  ;;  (use-package mixed-pitch :diminish)
+  (require 'load-set-font)
+#+end_src
+** 标签Tabs
+:PROPERTIES:
+:CUSTOM_ID: setup-tabs
+:END:
+<<setup-tabs>>
+
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+  (when (display-graphic-p)
+    (use-package centaur-tabs
+      :demand
+      :init
+      ;; Set the style to rounded with icons
+      (setq centaur-tabs-style "bar")
+      (setq centaur-tabs-set-icons t)
+      :config
+      (centaur-tabs-mode t)
+      :bind
+      ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
+      ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
+  )
+#+end_src
+** 图标
+:PROPERTIES:
+:CUSTOM_ID: setup-icons
+:END:
+<<setup-icons>>
+
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+  (when (display-graphic-p)
+     ;; Icons
+    (use-package nerd-icons
+      :config
+      (when (and (display-graphic-p)
+                 (not (font-installed-p nerd-icons-font-family)))
+        (nerd-icons-install-fonts t)))
+
+    ;; 图标支持
+    (use-package all-the-icons
+      ;; :ensure t
+      :load-path "~/.emacs.d/extensions/all-the-icons"
+      :if (display-graphic-p))
+    )
+#+end_src
+** 高亮
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+  (run-with-idle-timer
+   9
+   nil
+   #'(lambda()
+       ;;(require-package 'highlight-symbol)
+       ;; Highlight the current line
+       (use-package hl-line
+         :ensure nil
+         :hook ((after-init . global-hl-line-mode)
+                ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
+                 (lambda () (setq-local global-hl-line-mode nil)))))
+       ))
+#+end_src
+** 设定 hydra
+:PROPERTIES:
+:CUSTOM_ID: setup-hydra
+:END:
+<<setup-hydra>>
+*** Setup hydra
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+  ;; setup hydra
+  (use-package hydra
+    :hook (emacs-lisp-mode . hydra-add-imenu)
+    :config
+    (with-eval-after-load 'posframe
+      (setq hydra-hint-display-type 'posframe)
+      (defun hydra-set-posframe-show-params ()
+        "Set hydra-posframe style."
+        (setq hydra-posframe-show-params
+              `(
+                :left-fringe 8
+                :right-fringe 8
+                :internal-border-width 2
+                :internal-border-color ,(face-background 'posframe-border nil t)
+                :background-color ,(face-background 'tooltip nil t)
+                :foreground-color ,(face-foreground 'tooltip nil t)
+                :lines-truncate t
+                )))
+      (hydra-set-posframe-show-params)
+      (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))
+    )
+
+#+end_src
+*** Setup pretty-hydra
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+  (use-package pretty-hydra
+    :requires hydra
+    :custom (pretty-hydra-default-title-body-format-spec " %s%s")
+    :hook (emacs-lisp-mode . (lambda ()
+                               (add-to-list
+                                'imenu-generic-expression
+                                '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
+    :init
+    (cl-defun pretty-hydra-title (title &optional icon-type icon-name &key face height v-adjust)
+      "Add an icon in the hydra title."
+      (let ((face (or face `(:inherit highlight :reverse-video t)))
+            (height (or height 1.2))
+            (v-adjust (or v-adjust 0.0)))
+        (concat
+         (when (and (icons-displayable-p) icon-type icon-name)
+           (let ((f (intern (format "nerd-icons-%s" icon-type))))
+             (when (fboundp f)
+               (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
+         (propertize title 'face face)))))
+
+#+end_src
+** 设定 posframe
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+  (when (display-graphic-p)
+    (use-package posframe
+      :hook (after-load-theme . posframe-delete-all)
+      :init
+      (defface posframe-border `((t (:inherit region)))
+        "Face used by the `posframe' border."
+        :group 'posframe)
+      (defvar posframe-border-width 2
+        "Default posframe border width.")
+      )
+
+    :config
+    (posframe-delete-all)
+    )
+#+end_src
+** 杂项
+#+begin_src emacs-lisp :tangle etc/init-ui.el
+  ;; Optimization
+  (setq idle-update-delay 1.0)
+  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+  ;; (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+
+  ;; GUI Environment
+  (when (display-graphic-p)
+    ;; Don't use GTK+ tooltip
+    (when (boundp 'x-gtk-use-system-tooltips)
+      (setq x-gtk-use-system-tooltips nil))
+    ;; scroll-bar
+    (set-scroll-bar-mode 'right)
+    ;; 隐藏垂直滚动条。
+    ;;(modify-all-frames-parameters '((vertical-scroll-bars)))
+    )
+#+end_src
 * 缓存区 Buffer
-** 安装插件
-#+begin_src emacs-lisp :tangle suk.el
-  (require-package 'buffer-move)
-#+end_src
 ** 使用 ibuffer.
 #+begin_src emacs-lisp :tangle suk.el
 
@@ -2010,55 +2256,25 @@ Add to suk.el
 #+begin_src emacs-lisp :tangle suk.el
   (require 'init-search)
 #+end_src
-** 交互式搜索
-#+begin_src emacs-lisp :tangle etc/init-search.el
-
-  ;;; ### Isearch ###
-  ;;; ---
-  (lazy-load-set-keys
-   '(
-     ("TAB" . isearch-complete)               ;isearch补全
-     ("C-s" . isearch-repeat-forward)         ;重复向前搜索, 第一次可以用来搜索上一次的历史哟
-     ("C-r" . isearch-repeat-backward)        ;重复向后搜索
-     ("C-g" . isearch-abort)                  ;中止搜索
-     ("C-w" . isearch-yank-word-or-char)      ;粘帖光标后的词或字符作为搜索对象
-     ("C-y" . isearch-yank-line)              ;粘帖光标后的行作为搜索对象
-     ("M-o" . isearch-delete-char)            ;删除
-     ("M-p" . isearch-ring-retreat)           ;搜索历史向后
-     ("M-n" . isearch-ring-adjust)            ;搜索历史向前
-     ("M-Y" . isearch-yank-kill)              ;从 kill ring 中粘帖最后一项到搜索对象后
-     ("M-h" . isearch-yank-char)              ;粘帖光标后的字符到搜索对象
-     ("M-e" . isearch-edit-string)            ;编辑搜索对象
-     ("M-c" . isearch-toggle-case-fold)       ;切换大小写
-     ("M-r" . isearch-toggle-regexp)          ;切换正则表达式
-     ("M-w" . isearch-toggle-word)            ;切换词
-     ("M->" . isearch-beginning-of-buffer)    ;跳转到buffer开头并重新搜索, 搜索最前面一个
-     ("M-<" . isearch-end-of-buffer)          ;跳转到buffer末尾并重新搜索, 搜索最后面一个
-     ("M-%" . isearch-query-replace)          ;替换
-     ("M-d" . isearch-find-duplicate-word)    ;查找重复的单词
-     ("M-z" . isearch-find-duplicate-line)    ;查找重复的行
-     ("C-M-%" . isearch-query-replace-regexp) ;正则表达式替换
-     )
-   isearch-mode-map
-   )
-
-#+end_src
 ** Search tools
 *** 安装插件
 #+begin_src emacs-lisp :tangle install.el
-
-  ;;(require-package 'git-timemachine)
+  ;;在 Windows 上，如果你用 Emacs GUI 版本，默认有时会找不到 PATH 中的程序，
+  ;;可以在 Emacs 配置里手动添加环境变量，或者使用
+  ;; exec-path-from-shell 等包（但这个包通常在 macOS/Linux下更常用；
+  ;;Windows 下可能需要手工设置 exec-path）。
   (require-package 'exec-path-from-shell)
-  (require-package 'findr) ;; a light file search tools.
-  (require-package 'find-by-pinyin-dired)
-  (require-package 'jump)
+  ;; (setq exec-path (append exec-path '("C:/path/to/python" "C:/path/to/node")))
+  ;; (setenv "PATH" (concat (getenv "PATH") ";C:\\path\\to\\python;C:\\path\\to\\node"))
+
+
+
 
   ;; (require-package 'counsel) ; counsel => swiper => ivy
   ;; (require-package 'counsel-bbdb)
   ;; (require-package 'counsel-gtags)
   ;; (require-package 'counsel-css)
   (require-package 'bbdb)
-
 
   (require-package 'ivy)
   (require-package 'ivy-posframe)
@@ -2085,28 +2301,23 @@ Add to suk.el
    (setq ivy-display-style 'fancy)
 
    (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
-   (setq ivy-re-builders-alist
-         '((counsel-rg . ivy--regex-plus)
-           (swiper . ivy--regex-plus)
-           (swiper-isearch . ivy--regex-plus)
-           (t . ivy--regex-ignore-order)))
-
+ 
    (when (display-graphic-p)    
      (use-package ivy-posframe))
    )
 #+end_src
 *** counsel
 #+begin_src emacs-lisp :tangle etc/init-search.el
-    (use-package counsel
-      :after ivy
-      :ensure t
-      :bind
-      (
-       ;; ("M-y" . counsel-yank-pop)
-       ;; ("C-x C-f" . counsel-find-file)
-       ("M-x" . counsel-M-x)
-       :map ivy-minibuffer-map
-       ("M-y" . ivy-next-line)))
+  (use-package counsel
+    :after ivy
+    :ensure t
+    :bind
+    (
+     ;; ("M-y" . counsel-yank-pop)
+     ;; ("C-x C-f" . counsel-find-file)
+     ("M-x" . counsel-M-x)
+    )
+  )
 #+end_src
 *** swiper
 #+begin_src emacs-lisp :tangle etc/init-search.el
@@ -2131,33 +2342,33 @@ Add to suk.el
 #+end_src
 *** avy
 #+begin_src emacs-lisp :tangle etc/init-search.el
+  (lazy-load-global-keys
+   '(("C-:"   . avy-goto-char)
+      ("C-M-;" . avy-goto-char-2)
+      ("M-g l" . avy-goto-line)
+      ("M-g w" . avy-goto-word-1)
+      ("M-g W" . avy-goto-word-0))
+   "avy"
+   )
+
+  (with-eval-after-load 'avy
+    (setq avy-all-windows nil
+          avy-all-windows-alt t
+          avy-background t
+          avy-style 'pre)
+    (add-hook 'after-init-hook #'avy-setup-default)
+    )
+
+  (with-eval-after-load 'avy-zap
+    ;; Kill text between the point and the character CHAR
     (lazy-load-global-keys
-     ' (("C-:"   . avy-goto-char)
-        ("C-M-;" . avy-goto-char-2)
-        ("M-g l" . avy-goto-line)
-        ("M-g w" . avy-goto-word-1)
-        ("M-g W" . avy-goto-word-0))
-     "avy")
-    (with-eval-after-load 'avy
-      (setq avy-all-windows nil
-            avy-all-windows-alt t
-            avy-background t
-            avy-style 'pre)
-      (add-hook 'after-init-hook #'avy-setup-default)
+     '(("M-z" . avy-zap-to-char-dwim)
+       ("M-Z" . avy-zap-up-to-char-dwim))
+     "avy-zap"
+     "C-z")
+    )
 
 
-      )
-
-    (with-eval-after-load 'avy-zap
-      ;; Kill text between the point and the character CHAR
-      (lazy-load-global-keys
-       '(("M-z" . avy-zap-to-char-dwim)
-         ("M-Z" . avy-zap-up-to-char-dwim))
-       "avy-zap"
-       "C-z")
-      )
-
- 
 #+end_src
 ** Grep
 #+begin_src emacs-lisp :tangle etc/init-tools.el
@@ -2664,118 +2875,36 @@ Add to suk.el
   ;; the attachment to open and TAB completion works here.
   
 #+end_src
-** TODO Use plantuml  (setup path in OS )
-#+begin_src emacs-lisp :tangle etc/init-org.el
-  ;;(setq plantuml-default-exec-mode 'server) ;default
-  ;; ;; Sample jar configuration
-  ;; (setq plantuml-jar-path "/path/to/your/copy/of/plantuml.jar")
-  ;; (setq plantuml-default-exec-mode 'jar)
-
-  ;; ;; Sample executable configuration
-  ;; (setq plantuml-executable-path "/path/to/your/copy/of/plantuml.bin")
-  ;; (setq plantuml-default-exec-mode 'executable)
-  (setq plantuml-default-exec-mode 'jar)
-  (setq org-plantuml-jar-path
-        (expand-file-name "C:/green/plantuml-1.2024.3.jar"))
-  (setq org-plantuml-jar-args (list "-charset" "UTF-8"))
-  ;; plantuml-java-args
-  ;; plantuml-jar-args
-  (defun my-org-plantuml-execute (orig-fun &rest args)
-    (let (
-          (plantuml-java-args (list
-                               "-Djava.awt.headless=true"
-                               "-Dfile.encoding=UTT-8"
-                               "-jar"
-                               "--illegal-access=deny"
-                               ))
-          (plantuml-jar-args (list  "-charset" "UTF-8")) ;default value
-          )
-      (apply orig-fun args)))
-
-  (advice-add 'org-plantuml-execute :around #'my-org-plantuml-execute)
-  (add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((plantuml . t)
-     (dot . t)
-     ))
-  ;;(setq process-environment (cons "PATH=D:/green/plantUML/bin;%PATH%" process-environment))
-
-  ;; (defun my-org-export-before-processing-hook (backend)
-  ;;   (let ((process-environment (cons "PATH=%PATH%" process-environment)))
-  ;;     (org-babel-execute-src-block)
-  ;;     (org-babel-execute-buffer)))
-
-  ;; (add-hook 'org-export-before-processing-hook 'my-org-export-before-processing-hook)
-
-
-  (defun my-org-mode-refresh-images ()
-    (when (derived-mode-p 'org-mode) ; 确保当前模式是 Org-mode
-      (org-redisplay-inline-images))) ; 刷新内嵌图片
-
-  (add-hook 'org-babel-after-execute-hook 'my-org-mode-refresh-images)
-#+end_src
 ** Use toc-org
 #+begin_src emacs-lisp :tangle etc/init-org.el
   ;; org-mode
   (use-package toc-org)
 #+end_src
-** Use Tmr
-#+begin_src emacs-lisp :tangle etc/init-org.el
-  ;;;; Run commands in a popup frame
-  (defun prot-window-delete-popup-frame (&rest _)
-    "Kill selected selected frame if it has parameter `prot-window-popup-frame'.
-      Use this function via a hook."
-    (when (frame-parameter nil 'prot-window-popup-frame)
-      (delete-frame)))
-  (defmacro prot-window-define-with-popup-frame (command)
-    "Define interactive function which calls COMMAND in a new frame.
-      Make the new frame have the `prot-window-popup-frame' parameter."
-    `(defun ,(intern (format "prot-window-popup-%s" command)) ()
-       ,(format "Run `%s' in a popup frame with `prot-window-popup-frame' parameter.
-      Also see `prot-window-delete-popup-frame'." command)
-       (interactive)
-       (let ((frame (make-frame '((prot-window-popup-frame . t)))))
-         (select-frame frame)
-         (switch-to-buffer " prot-window-hidden-buffer-for-popup-frame")
-         (condition-case nil
-             (call-interactively ',command)
-           ((quit error user-error)
-            (delete-frame frame))))))
-  (declare-function org-capture "org-capture" (&optional goto keys))
-  (defvar org-capture-after-finalize-hook)
-      ;;;###autoload (autoload 'prot-window-popup-org-capture "prot-window")
-  (prot-window-define-with-popup-frame org-capture)
-  (add-hook 'org-capture-after-finalize-hook #'prot-window-delete-popup-frame)
-  (require-package 'tmr)
-  (declare-function tmr "tmr" (time &optional description acknowledgep))
-  (defvar tmr-timer-created-functions)
-      ;;;###autoload (autoload 'prot-window-popup-tmr "prot-window")
-  (prot-window-define-with-popup-frame tmr)
-  (add-hook 'tmr-timer-created-functions #'prot-window-delete-popup-frame)
-
-  ;;;; The emacsclient calls that need ot be bound to system-wide keys
-  ;; emacsclient -e '(prot-window-popup-org-capture)'
-  ;; emacsclient -e '(prot-window-popup-tmr)'
-
-#+end_src
 ** Use hydra
 #+begin_src emacs-lisp :tangle etc/init-org.el
- 
+  
   (with-eval-after-load 'hydra
     (defhydra hydra-global-org (:color blue)
-        "Org"
-        ("t" org-timer-start "Start Timer")
-        ("s" org-timer-stop "Stop Timer")
-        ("r" org-timer-set-timer "Set Timer") ; This one requires you be in an orgmode doc, as it sets the timer for the header
-        ("p" org-timer "Print Timer") ; output timer value to buffer
-        ("w" (org-clock-in '(4)) "Clock-In") ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t)
-        ("o" org-clock-out "Clock-Out") ; you might also want (setq org-log-note-clock-out t)
-        ("j" org-clock-goto "Clock Goto") ; global visit the clocked task
-        ("c" org-capture "Capture") ; Don't forget to define the captures you want http://orgmode.org/manual/Capture.html
-          ("l" (or )rg-capture-goto-last-stored "Last Capture"))
-
-     )
+      "
+  ^Org^
+  -----------------------------------------------------
+  _t_ Start Timer _w_ Clock In
+  _s_ Stop Timer  _o_ Clock out
+  _r_ Set Timer   _j_ CLock Goto
+  _p_ Print Timer _c_ Capture
+  _q_ Quit        _l_ Last Capture
+  "
+      ("t" org-timer-start "Start Timer")
+      ("s" org-timer-stop "Stop Timer")
+      ("r" org-timer-set-timer "Set Timer") ; This one requires you be in an orgmode doc, as it sets the timer for the header
+      ("p" org-timer "Print Timer")
+      ("w" (org-clock-in '(4)) "Clock-In")  ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t)
+      ("o" org-clock-out "Clock-Out")       ; you might also want (setq org-log-note-clock-out t)
+      ("j" org-clock-goto "Clock Goto")     ; global visit the clocked task
+      ("c" org-capture "Capture")           ; Don't forget to define the captures you want http://orgmode.org/manual/Capture.html
+      ("l" org-capture-goto-last-stored "Last Capture")
+      ("q" nil "Quit")                      ; 退出
+      ))
 
 
 #+end_src
@@ -2947,247 +3076,6 @@ Add to suk.el
   (global-set-key (kbd "C-<f9>") 'emacs-session-save)
 
   (emacs-session-restore)
-#+end_src
-* 用户界面
-:PROPERTIES:
-:CUSTOM_ID: setup-ui
-:END:
-<<setup-ui>>
-
-Add to suk.el
-  #+begin_src emacs-lisp :tangle suk.el
-  (require 'init-ui)   
-  #+end_src
-
-Setup init-ui
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-  (provide 'init-ui)
-#+end_src
-** 主题
-:PROPERTIES:
-:CUSTOM_ID: setup-theme
-:END:
-<<setup-theme>>
-
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-  ;;(require 'lazycat-theme)
-  ;;(lazycat-theme-load-dark)
-  (use-package doom-themes
-    :ensure t
-    :custom
-    (doom-themes-enable-bold t)
-    (doom-themes-enable-italic t)
-    ;; 加载一个主题，DOOM One 是 DOOM Emacs 的默认主题，非常美观
-    :init
-    (load-theme 'doom-one t)
-    )
-
- 
-  (use-package doom-modeline
-    :hook (after-init . doom-modeline-mode)
-    :init
-    (setq doom-modeline-icon suk-icon
-          doom-modeline-minor-modes t)
-    :config
-    (column-number-mode 1)
-    :custom
-    (doom-modeline-height 30)
-    (doom-modeline-window-width-limit nil)
-    (doom-modeline-buffer-file-name-style 'truncate-with-project)
-    (doom-modeline-icon t)
-    (doom-modeline-time t)
-    (doom-modeline-vcs-max-leghth 50)
-    ;; Windows下记得加上
-    (if sys/win32p (setq inhibit-compacting-font-caches t))
-    )
-
-  (use-package hide-mode-line
-    :hook (((treemacs-mode
-             eshell-mode shell-mode
-             term-mode vterm-mode
-             embark-collect-mode
-             lsp-ui-imenu-mode
-             pdf-annot-list-mode) . turn-on-hide-mode-line-mode)
-           (dired-mode . (lambda()
-                           (and (bound-and-true-p hide-mode-line-mode)
-                                (turn-off-hide-mode-line-mode))))))
-
-  ;; A minor-mode menu for mode-line
-  (use-package minions
-    :hook (doom-modeline-mode . minions-mode))
-
-#+end_src
-** 字体
-:PROPERTIES:
-:CUSTOM_ID: setup-fonts
-:END:
-<<setup-fonts>>
-
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-    ;; 字体
-    (lazy-load-set-keys
-     '(
-       ("C--" . text-scale-decrease)        ;减小字体大小
-       ("C-=" . text-scale-increase)        ;增加字体大小
-       ("C-x C-0" . text-scale-adjust)
-       ))
-
-
-    (defun font-installed-p (font-name)
-      "Check if font with FONT-NAME is available."
-      (find-font (font-spec :name font-name)))
-
-
-  ;; Use fixed pitch where it's sensible
-  ;;  (use-package mixed-pitch :diminish)
-  (require 'load-set-font)
-#+end_src
-** 标签Tabs
-:PROPERTIES:
-:CUSTOM_ID: setup-tabs
-:END:
-<<setup-tabs>>
-
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-  (when (display-graphic-p)
-    (use-package centaur-tabs
-      :demand
-      :init
-      ;; Set the style to rounded with icons
-      (setq centaur-tabs-style "bar")
-      (setq centaur-tabs-set-icons t)
-      :config
-      (centaur-tabs-mode t)
-      :bind
-      ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
-      ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
-  )
-#+end_src
-** 图标
-:PROPERTIES:
-:CUSTOM_ID: setup-icons
-:END:
-<<setup-icons>>
-
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-  (when (display-graphic-p)
-     ;; Icons
-    (use-package nerd-icons
-      :config
-      (when (and (display-graphic-p)
-                 (not (font-installed-p nerd-icons-font-family)))
-        (nerd-icons-install-fonts t)))
-
-    ;; 图标支持
-    (use-package all-the-icons
-      ;; :ensure t
-      :load-path "~/.emacs.d/extensions/all-the-icons"
-      :if (display-graphic-p))
-    )
-#+end_src
-** 高亮
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-  (run-with-idle-timer
-   9
-   nil
-   #'(lambda()
-       ;;(require-package 'highlight-symbol)
-       ;; Highlight the current line
-       (use-package hl-line
-         :ensure nil
-         :hook ((after-init . global-hl-line-mode)
-                ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
-                 (lambda () (setq-local global-hl-line-mode nil)))))
-       ))
-#+end_src
-** 设定 hydra
-:PROPERTIES:
-:CUSTOM_ID: setup-hydra
-:END:
-<<setup-hydra>>
-*** Setup hydra
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-  ;; setup hydra
-  (use-package hydra
-    :hook (emacs-lisp-mode . hydra-add-imenu)
-    :config
-    (with-eval-after-load 'posframe
-      (setq hydra-hint-display-type 'posframe)
-      (defun hydra-set-posframe-show-params ()
-        "Set hydra-posframe style."
-        (setq hydra-posframe-show-params
-              `(
-                :left-fringe 8
-                :right-fringe 8
-                :internal-border-width 2
-                :internal-border-color ,(face-background 'posframe-border nil t)
-                :background-color ,(face-background 'tooltip nil t)
-                :foreground-color ,(face-foreground 'tooltip nil t)
-                :lines-truncate t
-                )))
-      (hydra-set-posframe-show-params)
-      (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))
-    )
-
-#+end_src
-*** Setup pretty-hydra
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-  (use-package pretty-hydra
-    :requires hydra
-    :custom (pretty-hydra-default-title-body-format-spec " %s%s")
-    :hook (emacs-lisp-mode . (lambda ()
-                               (add-to-list
-                                'imenu-generic-expression
-                                '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
-    :init
-    (cl-defun pretty-hydra-title (title &optional icon-type icon-name &key face height v-adjust)
-      "Add an icon in the hydra title."
-      (let ((face (or face `(:inherit highlight :reverse-video t)))
-            (height (or height 1.2))
-            (v-adjust (or v-adjust 0.0)))
-        (concat
-         (when (and (icons-displayable-p) icon-type icon-name)
-           (let ((f (intern (format "nerd-icons-%s" icon-type))))
-             (when (fboundp f)
-               (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
-         (propertize title 'face face)))))
-
-#+end_src
-** 设定 posframe
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-  (when (display-graphic-p)
-    (use-package posframe
-      :hook (after-load-theme . posframe-delete-all)
-      :init
-      (defface posframe-border `((t (:inherit region)))
-        "Face used by the `posframe' border."
-        :group 'posframe)
-      (defvar posframe-border-width 2
-        "Default posframe border width.")
-      )
-
-    :config
-    (posframe-delete-all)
-    )
-#+end_src
-** 杂项
-#+begin_src emacs-lisp :tangle etc/init-ui.el
-  ;; Optimization
-  (setq idle-update-delay 1.0)
-  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
-  ;; (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-
-  ;; GUI Environment
-  (when (display-graphic-p)
-    ;; Don't use GTK+ tooltip
-    (when (boundp 'x-gtk-use-system-tooltips)
-      (setq x-gtk-use-system-tooltips nil))
-    ;; scroll-bar
-    (set-scroll-bar-mode 'right)
-    ;; 隐藏垂直滚动条。
-    ;;(modify-all-frames-parameters '((vertical-scroll-bars)))
-    )
 #+end_src
 * Completion
 ** install
@@ -3464,8 +3352,20 @@ Vertico 是 Emacs 中的一款用于增强 minibuffer 输入体验的插件，�
     ;; `completion-at-point' is often bound to M-TAB.
     (setq tab-always-indent 'complete))
 
-  ;; More utils
-  (use-package shackle)
+  ;; 在 Emacs 中，shackle 是一个专门用于控制弹出窗口（pop-up windows）和
+  ;; 缓冲区显示方式的包。它可以帮助你为特定类型的 buffer 制定“在哪个窗口
+  ;; 打开”、“打开时如何分割窗口”、“窗口大小”等规则，从而摆脱 Emacs 默认
+  ;; 情况下可能随机或难以预测的弹出方式。与较早的 popwin 类似，但
+  ;; shackle 提供了更灵活、细粒度的控制。
+  (use-package shackle
+    :init
+    (shackle-mode 1)
+    :config
+    (setq shackle-rules
+          '((compilation-mode :select t :align 'below :size 0.3)
+            ("*Help*" :select t :align 'below :size 0.3)
+            ("*Messages*" :select nil :align 'below :size 0.3)
+            ("^\\*magit.*\\*$" :regexp t :align 'right :size 0.4 :select t))))
 
   (unless (display-graphic-p)
     ;; only conole packages
@@ -4329,24 +4229,6 @@ Another tree view component
 
 
 #+end_src
-** Project
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-    ;; 使用 built-in project library
-    (require 'project)
-
-    ;; 设置项目根目录识别方式（默认是 Git、Mercurial、Bazaar、Subversion、Dockerfile 等）
-    (setq project-find-functions '(project-try-vc))
-
-    ;; 可选：自定义项目根目录识别
-    (defun my/project-root (args)
-      "Define additional ways to recognize project root."
-      (or (locate-dominating-file default-directory "package.json")
-          (locate-dominating-file default-directory "pom.xml")
-          (locate-dominating-file default-directory "setup.py"))
-      )
-
-    (add-to-list 'project-find-functions #'my/project-root)
-  #+end_src
 * 杂项
 #+begin_src emacs-lisp :tangle suk.el
   ;; 空闲时加载

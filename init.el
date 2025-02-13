@@ -240,27 +240,10 @@
     ("[-]"            . ?)
     ("[X]"            . ?)
 
-    ;; (":PROPERTIES:"   . ?)
-    ;; (":ID:"           . ?🪪)
-    ;; (":END:"          . ?🔚)
-
-    ;; ("#+ARCHIVE:"     . ?📦)
-    ;; ("#+AUTHOR:"      . ?👤)
-    ;; ("#+CREATOR:"     . ?💁)
-    ;; ("#+DATE:"        . ?📆)
-    ;; ("#+DESCRIPTION:" . ?⸙)
-    ;; ("#+EMAIL:"       . ?📧)
-    ;; ("#+HEADERS"      . ?☰)
-    ;; ("#+OPTIONS:"     . ?⚙)
-    ;; ("#+SETUPFILE:"   . ?⚒)
-    ("#+TAGS:"        . ?🏷)
-    ("#+TITLE:"       . ?📓)
-
-    ("#+BEGIN_SRC"    . ?✎)
+    (":PROPERTIES:"   . ?)
     ("#+END_SRC"      . ?□)
     ("#+BEGIN_QUOTE"  . ?«)
     ("#+END_QUOTE"    . ?»)
-    ("#+RESULTS:"     . ?💻)
     )
   "A list of symbol prettifications for `org-mode'."
   :group 'suk

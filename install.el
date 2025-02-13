@@ -49,29 +49,13 @@
 (require-package 'git-gutter) ; dependent to fringe-helper
 (require-package 'git-modes)
 (require-package 'web-mode)
-;;(require-package 'lua-mode)
 (require-package 'yaml-mode)
 (require-package 'js2-mode)
 (require-package 'rjsx-mode) ; use my package in extensions
 (require-package 'csv-mode)
-                                        ;(require-package 'emmet-mode)
-;;(require-package 'groovy-mode)
-;; magit sometime use packages which not released yet
-;; so we place it at the end to make sure other packages are installed first
 (require-package 'graphql-mode)
-;;(require-package 'auto-yasnippet)
 (require-package 'typescript-mode)
 (require-package 'nvm)
-
-;;(require-package 'elpy) ;; python
-;;(require-package 'request) ;; a http client
-;;(require-package 'websocket) ; for debug debugging of browsers
-;;(require-package 'simple-httpd)
-;;(require-package 'highlight-symbol)
-;;(require-package 'cpputils-cmake)
-;;(require-package 'rust-mode)
-;;(require-package 'cmake-mode)
-;;(require-package 'sage-shell-mode)
 
 (require-package 'sudo-edit)
 (require-package 'pdf-tools) ;; use the package in extension

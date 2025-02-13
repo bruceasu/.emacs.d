@@ -67,11 +67,7 @@
 
 ;; ### String Inflection ###
 ;; --- 单词语法风格快速转换
-(lazy-load-global-keys
- '(
-   ("C-c C-u" . string-inflection-hydra/body)
-   )
- "init-string-inflection")
+
  ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
@@ -115,7 +111,7 @@
    ;; ("C-c L" . thing-cut-line)
    ;; ("C-c A" . thing-cut-to-line-beginning)
    ;; ("C-c E" . thing-cut-to-line-end)
-
+   ("S-SPC e" . hydra-thing-edit/body)
    ("C-c e" . hydra-thing-edit/body)
    )
  "init-thing-edit"
@@ -173,6 +169,7 @@
 (lazy-load-global-keys
  '(
    ("C-c b"  . my-hydra-buffers/body)
+   ("S-SPC B"  . my-hydra-buffers/body)
    ("M-<f7>" . suk-read-mode)
    ("<f7>"   . olivetti-mode)
    ("C-;"    . suk/close-current-buffer) ;关闭当前buffer

@@ -159,12 +159,9 @@
            ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
            )
 
-;; 一啲方便嘅函数
-(global-set-key (kbd "C-x M-a") 'align-regexp)  ;; 快捷键 C-x M-a 用于对齐正则表达式
-;;(global-set-key (kbd "C-(") 'backward-sexp)     ;; 快捷键 C-( 用于向后跳跃到上一个 sexp C-M-<left> ESC C-<left>
-;;(global-set-key (kbd "C-)") 'forward-sexp)      ;; 快捷键 C-) 用于向前跳跃到下一个 sexp C-M-<right> ESC C-<right>
 (global-set-key (kbd "C-x R") 'recentf-open)    ;; 快捷键 C-x R 用于打开最近文件
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(if (display-graphic-p)
+    (global-set-key (kbd "<escape>") 'keyboard-escape-quit))
 
 (when emacs/>=29p
   ;; (keymap-global-set <key> <cmmd>)
@@ -175,7 +172,7 @@
   ) 
 (unless emacs/>=29p
   (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
-  (global-set-key (kbd "M-s<return>") 'toggle-frame-fullscreen)
+  (global-set-key (kbd "M-s-<return>") 'toggle-frame-fullscreen)
   (global-set-key (kbd "RET") #'newline-and-indent)              ;; 回车键 RET 用于创建新行并对齐
   (global-set-key (kbd "S-<return>") #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
   )
@@ -191,16 +188,17 @@
  '(
    ("C-," . bury-buffer)                ;隐藏当前buffer
    ("C-." . unbury-buffer)              ;反隐藏当前buffer
-   ;; ("s-[" . eval-expression)            ;执行表达式 M-: M-ESC :
-   ;;("s-1" . sort-lines)                 ;排序
-   ;;("s-<f12>" . calendar)
    ("C-<f12>" . lazycat-theme-toggle)
-   ;;([c-t] . transpose-chars)
-   ;; ([S-f5] . toggle-truncate-lines) ; C-x x t
-   ;; ("C-x M-a" . align-regexp)
    )
  )
 
+;; 一啲方便嘅函数
+;; 用于向后跳跃到上一个 sexp C-M-<left> / ESC C-<left>
+;; 用于向前跳跃到下一个 sexp C-M-<right> / ESC C-<right>
+;; eval-expression 执行表达式 M-: M-ESC :
+;; sort-lines, calendar, align-regexp
+;; C-t transpose-char M-t tanspose-word
+;; toggle-truncate-lines C-x x t
 ;; C-c TAB indent-region
 ;; C-u C-c TAB => (un)indent-region
 
@@ -285,8 +283,8 @@
 
 (lazy-load-global-keys
  '(
-   ("C-x r ,"   . remember-init)      ;记忆初始函数
-   ("C-x r ."   . remember-jump)      ;记忆跳转函数
+   ("C-x r ,"   . remember-init)    ;记忆初始函数
+   ("C-x r ."   . remember-jump)    ;记忆跳转函数
    ("C-x r <" . point-stack-pop)    ;buffer索引跳转
    ("C-x r >" . point-stack-push)   ;buffer索引标记
    )
@@ -309,17 +307,6 @@
    ("M-p" . window-move-down)       ;向上滚动当前窗口  scroll-down
    )
  "win-move")
-
-;; Jump to Chinese characters
-(run-with-idle-timer
- 1
- nil
- #'(lambda()     
-     (use-package ace-pinyin
-       :diminish
-       :hook (after-init . ace-pinyin-global-mode))
-     (require 'goto-chg)
-     ))
 
 ;;;###autoload
 (defun insert-hash-template ()
@@ -446,7 +433,7 @@ _w_ where is something defined
     ("t" describe-theme)
     ("v" describe-variable)
     ("w" where-is))
-  (global-set-key (kbd "C-c C-h") 'my-hydra-describe/body))
+  (global-set-key (kbd "S-SPC h") 'my-hydra-describe/body))
 
 ;;; Rectangle
 (lazy-load-global-keys
@@ -549,7 +536,7 @@ _w_ where is something defined
 
 ;; Persistent the scratch buffer
 (run-with-idle-timer
- 10 nil
+ 1 nil
  #'(lambda()
      (use-package persistent-scratch
        :diminish
@@ -948,7 +935,7 @@ _w_ where is something defined
      (require 'load-abbrev)
      ;; chmod +x
      ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
-     (add-hook 'after-save-hook'executable-make-buffer-file-executable-if-script-p)
+     (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
      (autoload 'calendar "init-calendar" "Config Chinese calendar " t)
      ))
 
