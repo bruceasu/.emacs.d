@@ -60,20 +60,19 @@
     "
 ^Bookmark^
 -------------------------------------------------------------------
-[_b_] New bookmark     [_s_] Store bookmark
-[_m_] Goto bookmark    [_l_] Load bookmark
+[_m_] New bookmark     [_s_] Store bookmark
+[_b_] Jump bookmark    [_l_] Load bookmark
 [_i_] Quick bookmark   [_r_] Register bookmark
 [_j_] Goto bookmark    [_,_] Pop bookmark
 [_q_] Quit             [_._] Push bookmark
 "
-    ("b" bookmark-set)
-    ("m" bookmark-jump)
+    ("m" bookmark-set)
     ("l" consult-register-load)
     ("s" consult-register-store)      ;; orig. abbrev-prefix-mark (unrelated)
     ("r" consult-register)
     ("i" remember-init)      ;记忆初始函数
     ("j" remember-jump)      ;记忆跳转函数
-    ("J" bookmark-jump)
+    ("b" bookmark-jump)
     ("," point-stack-pop)    ;buffer索引跳转
     ("." point-stack-push)   ;buffer索引标记
     ("q" nil :color red))
