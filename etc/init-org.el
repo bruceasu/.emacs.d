@@ -73,13 +73,13 @@
 ;; @ 符号表示带理由的提示，所以当切换到 WAITTING 时，Org 模式会问我为什么，并将
 ;; 这个添加到笔记中。
 (setq org-todo-keywords
-      '((sequence "TODO(t)" "NEXT(n!)"  "|" "DONE✔(d!)" "CANCELLED✘(c@/!)")
-        (sequence "WAIT⚑(w@/!)" "HOLD(h@/!)" "|" "ABORT" "SOME" "PHONE" "MEETING")))
+      '((sequence "TODO(t)" "NEXT(n!)"  "|" "DONE(d!)" "CANCELLED(c@/!)")
+        (sequence "WAIT(w@/!)" "HOLD(h@/!)" "|" "ABORT" "SOME" "PHONE" "MEETING")))
 (setq org-todo-keyword-faces
       '(("TODO" :foreground "red" :weight bold)
         ("NEXT" :foreground "blue" :weight bold)
-        ("DONE✔" :foreground "forest green" :weight bold)
-        ("WAIT⚑" :foreground "orange" :weight bold)
+        ("DONE" :foreground "forest green" :weight bold)
+        ("WAIT" :foreground "orange" :weight bold)
         ("HOLD" :foreground "magenta" :weight bold)
         ;;("CANCELLED" :foreground "forest grey" :weight bold)
         ("ABORT" :foreground "yellow" :weight bold)
@@ -94,10 +94,10 @@
         (?C . success)))
 
 (setq org-tag-alist '((:startgroup . nil)
-                    ("urgent-important" . ?u) ;; 第一象限：紧急且重要
-                    ("not-urgent-important" . ?n) ;; 第二象限：不紧急但重要
-                    ("urgent-not-important" . ?i) ;; 第三象限：紧急但不重要
-                    ("not-urgent-not-important" . ?t) ;; 第四象限：不紧急且不重要
+                    ("Levle1" . ?u)     ;; 第一象限：紧急且重要
+                    ("Level2" . ?n)     ;; 第二象限：不紧急但重要
+                    ("Level3" . ?i)     ;; 第三象限：紧急但不重要
+                    ("Level4" . ?t)     ;; 第四象限：不紧急且不重要
                     (:endgroup . nil)))
 
 ;; 可以使用 org-tags-view 来过滤和查看不同象限的任务
@@ -112,7 +112,7 @@
 ;;   Moving a task to DONE removes WAITTING, CANCELLED, and HOLD tags
 (setq org-todo-state-tags-triggers
       '(("CANCELLED" ("CANCELLED" . t))
-        ("WAIT⚑" ("WAITTING" . t))
+        ("WAIT" ("WAITTING" . t))
         ("HOLD" ("WAITTING") ("HOLD" . t))
         (done ("WAITING") ("HOLD"))
         ("DONE" ("WAITTING") ("CANCELLED") ("HOLD"))
@@ -245,28 +245,20 @@
           (org-paste-subtree))))))
 
 
+
 (define-key my-refile-map "," 'my-org-refile-to-previous)
 (define-key my-refile-map "." 'my-org-refile-in-file)
-;; (my-defshortcut ?i "~/cloud/orgzly/Inbox.org")
 (my-defshortcut ?e "~/.emacs.d/README.org")
-;; (my-defshortcut ?s "~/personal/sewing.org")
-;; (my-defshortcut ?b "~/personal/business.org")
-;; (my-defshortcut ?p "~/personal/google-inbox.org")
-;; (my-defshortcut ?P "~/personal/google-ideas.org")
-;; (my-defshortcut ?B "~/Dropbox/books")
-;; (my-defshortcut ?n "~/notes")
-;; (my-defshortcut ?N "~/sync/notes/QuickNote.md")
-;; (my-defshortcut ?w "~/Dropbox/public/sharing/index.org")
-;; (my-defshortcut ?W "~/Dropbox/public/sharing/blog.org")
-;; (my-defshortcut ?j "~/personal/journal.org")
-;; (my-defshortcut ?J "~/cloud/a/Journal.csv")
-;; (my-defshortcut ?I "~/Dropbox/Inbox")
-;; (my-defshortcut ?g "~/sachac.github.io/evil-plans/index.org")
-;; (my-defshortcut ?c "~/code/dev/elisp-course.org")
-;; (my-defshortcut ?C "~/personal/calendar.org")
-;; (my-defshortcut ?l "~/dropbox/public/sharing/learning.org")
-;; (my-defshortcut ?q "~/sync/notes/QuickNote.md")
-;; (my-defshortcut ?Q "~/personal/questions.org")
+(my-defshortcut ?g (expand-file-name "gtd.org" org-files-directory))
+(my-defshortcut ?w (expand-file-name "work.org" org-files-directory))
+(my-defshortcut ?f (expand-file-name "finished.org" org-files-directory))
+(my-defshortcut ?c (expand-file-name "cancel.org" org-files-directory))
+(my-defshortcut ?t (expand-file-name "trash.org" org-files-directory))
+(my-defshortcut ?n (expand-file-name "notes.org" org-files-directory))
+(my-defshortcut ?j (expand-file-name "journal.org" org-files-directory))
+(my-defshortcut ?N "~/notes")
+;; 额外定义的位置
+(load-if-exists (expand-file-name "my-defshortcuts.el" suk-emacs-config-dir))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EXPORTER
@@ -416,108 +408,31 @@
 ;; To open the attachment for a task use C-c C-a o. This prompts for
 ;; the attachment to open and TAB completion works here.
 
-;;(setq plantuml-default-exec-mode 'server) ;default
-;; ;; Sample jar configuration
-;; (setq plantuml-jar-path "/path/to/your/copy/of/plantuml.jar")
-;; (setq plantuml-default-exec-mode 'jar)
-
-;; ;; Sample executable configuration
-;; (setq plantuml-executable-path "/path/to/your/copy/of/plantuml.bin")
-;; (setq plantuml-default-exec-mode 'executable)
-(setq plantuml-default-exec-mode 'jar)
-(setq org-plantuml-jar-path
-      (expand-file-name "C:/green/plantuml-1.2024.3.jar"))
-(setq org-plantuml-jar-args (list "-charset" "UTF-8"))
-;; plantuml-java-args
-;; plantuml-jar-args
-(defun my-org-plantuml-execute (orig-fun &rest args)
-  (let (
-        (plantuml-java-args (list
-                             "-Djava.awt.headless=true"
-                             "-Dfile.encoding=UTT-8"
-                             "-jar"
-                             "--illegal-access=deny"
-                             ))
-        (plantuml-jar-args (list  "-charset" "UTF-8")) ;default value
-        )
-    (apply orig-fun args)))
-
-(advice-add 'org-plantuml-execute :around #'my-org-plantuml-execute)
-(add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((plantuml . t)
-   (dot . t)
-   ))
-;;(setq process-environment (cons "PATH=D:/green/plantUML/bin;%PATH%" process-environment))
-
-;; (defun my-org-export-before-processing-hook (backend)
-;;   (let ((process-environment (cons "PATH=%PATH%" process-environment)))
-;;     (org-babel-execute-src-block)
-;;     (org-babel-execute-buffer)))
-
-;; (add-hook 'org-export-before-processing-hook 'my-org-export-before-processing-hook)
-
-
-(defun my-org-mode-refresh-images ()
-  (when (derived-mode-p 'org-mode) ; 确保当前模式是 Org-mode
-    (org-redisplay-inline-images))) ; 刷新内嵌图片
-
-(add-hook 'org-babel-after-execute-hook 'my-org-mode-refresh-images)
-
 ;; org-mode
 (use-package toc-org)
 
-;;;; Run commands in a popup frame
-(defun prot-window-delete-popup-frame (&rest _)
-  "Kill selected selected frame if it has parameter `prot-window-popup-frame'.
-    Use this function via a hook."
-  (when (frame-parameter nil 'prot-window-popup-frame)
-    (delete-frame)))
-(defmacro prot-window-define-with-popup-frame (command)
-  "Define interactive function which calls COMMAND in a new frame.
-    Make the new frame have the `prot-window-popup-frame' parameter."
-  `(defun ,(intern (format "prot-window-popup-%s" command)) ()
-     ,(format "Run `%s' in a popup frame with `prot-window-popup-frame' parameter.
-    Also see `prot-window-delete-popup-frame'." command)
-     (interactive)
-     (let ((frame (make-frame '((prot-window-popup-frame . t)))))
-       (select-frame frame)
-       (switch-to-buffer " prot-window-hidden-buffer-for-popup-frame")
-       (condition-case nil
-           (call-interactively ',command)
-         ((quit error user-error)
-          (delete-frame frame))))))
-(declare-function org-capture "org-capture" (&optional goto keys))
-(defvar org-capture-after-finalize-hook)
-    ;;;###autoload (autoload 'prot-window-popup-org-capture "prot-window")
-(prot-window-define-with-popup-frame org-capture)
-(add-hook 'org-capture-after-finalize-hook #'prot-window-delete-popup-frame)
-(require-package 'tmr)
-(declare-function tmr "tmr" (time &optional description acknowledgep))
-(defvar tmr-timer-created-functions)
-    ;;;###autoload (autoload 'prot-window-popup-tmr "prot-window")
-(prot-window-define-with-popup-frame tmr)
-(add-hook 'tmr-timer-created-functions #'prot-window-delete-popup-frame)
-
-;;;; The emacsclient calls that need ot be bound to system-wide keys
-;; emacsclient -e '(prot-window-popup-org-capture)'
-;; emacsclient -e '(prot-window-popup-tmr)'
-
 (with-eval-after-load 'hydra
   (defhydra hydra-global-org (:color blue)
-      "Org"
-      ("t" org-timer-start "Start Timer")
-      ("s" org-timer-stop "Stop Timer")
-      ("r" org-timer-set-timer "Set Timer") ; This one requires you be in an orgmode doc, as it sets the timer for the header
-      ("p" org-timer "Print Timer") ; output timer value to buffer
-      ("w" (org-clock-in '(4)) "Clock-In") ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t)
-      ("o" org-clock-out "Clock-Out") ; you might also want (setq org-log-note-clock-out t)
-      ("j" org-clock-goto "Clock Goto") ; global visit the clocked task
-      ("c" org-capture "Capture") ; Don't forget to define the captures you want http://orgmode.org/manual/Capture.html
-        ("l" (or )rg-capture-goto-last-stored "Last Capture"))
-
-   )
+    "
+^Org^
+-----------------------------------------------------
+_t_ Start Timer _w_ Clock In
+_s_ Stop Timer  _o_ Clock out
+_r_ Set Timer   _j_ CLock Goto
+_p_ Print Timer _c_ Capture
+_q_ Quit        _l_ Last Capture
+"
+    ("t" org-timer-start "Start Timer")
+    ("s" org-timer-stop "Stop Timer")
+    ("r" org-timer-set-timer "Set Timer") ; This one requires you be in an orgmode doc, as it sets the timer for the header
+    ("p" org-timer "Print Timer")
+    ("w" (org-clock-in '(4)) "Clock-In")  ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t)
+    ("o" org-clock-out "Clock-Out")       ; you might also want (setq org-log-note-clock-out t)
+    ("j" org-clock-goto "Clock Goto")     ; global visit the clocked task
+    ("c" org-capture "Capture")           ; Don't forget to define the captures you want http://orgmode.org/manual/Capture.html
+    ("l" org-capture-goto-last-stored "Last Capture")
+    ("q" nil "Quit")                      ; 退出
+    ))
 
 ;;Prettify UI
 (use-package org-modern

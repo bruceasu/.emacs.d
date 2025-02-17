@@ -1,26 +1,14 @@
+;;注意：keystroke中的Control 和 Alternative使用\C, \M表示。
+;;如果是kbd函数，可以使用C和M表示
+
 ;; global-set-key examples:
 (global-set-key (kbd "C-x C-\\") 'next-line)
 (global-set-key [?\C-x ?\C-\\] 'next-line)
 (global-set-key [(control ?x) (control ?\\)] 'next-line)
-
-;; remove a keybinding
-
-;; for emacs 29 or after
-(keymap-global-set "C-t" nil)
-;; or use
-(keymap-global-unset "C-t")
-;; before emacs 28 or before
-(global-set-key (kbd "C-t") nil)
-;; or
-(global-unset-key (kbd "C-t"))
+(keymap-global-set [(control ?x) (control ?\\)] 'next-line)
+(keymap-set global-map "C-x" 'next-line)
 
 
-(define-prefix-command 'my-leader) ;设定leader
-(define-key keymap "keystrok" 'command-name)   ;将快捷键绑定到 leader按键后，即和键位图绑定。
-(global-set-key "keystroke" 'command-name) ; 定义全局快捷键
-(local-set-key  "keystroke" 'command-name) ; 定义局部快捷键
-;;注意：keystroke中的Control 和 Alternative使用\C, \M表示。
-;;如果是kbd函数，可以使用C和M表示
 
 ;; 方式一：
 (define-prefix-command 'SPC-map)
@@ -34,15 +22,21 @@
 
 
 ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
-(define-prefix-command 'comma-map)
-(global-set-key (kbd ",") 'comma-map)
-(global-set-key [(meta c)] 'meta-c-map)
+(define-prefix-command 'comm-map)
+(global-set-key (kbd "M-c") 'comm-map)
+(global-set-key [(meta c)]  'comm-map)
+
 ;; 演示了如何在一个模式下(这里是isearch模式), 定义快捷键.
 ;; 退出isearch-mode, 所有按键失效.
 (add-hook
   'isearch-mode-hook
   '(lambda ()
-    ;; 搜索下一个结果
+   
+    ;; 单词搜索
+    (local-set-key [(meta w)] 'isearch-forward-word)
+    (local-set-key [(meta s)] 'isearch-repeat-forward)
+    ))
+ ;; 搜索下一个结果
     (define-key isearch-mode-map [(meta n)] 'isearch-repeat-forward)
     ;; 搜索前一个结果
     (define-key isearch-mode-map [(meta p)] 'isearch-repeat-backward)
@@ -60,10 +54,6 @@
     (define-key isearch-mode-map [(hyper j)] 'isearch-delete-char)
     ;; 显示occur视图
     (define-key isearch-mode-map [(meta o)] 'isearch-occur)
-    ;; 单词搜索
-    (define-key isearch-mode-map [(meta w)] 'isearch-forward-word)
-    (define-key isearch-mode-map [(meta s)] 'isearch-repeat-forward)
-    ))
 
 ;;; ### Sdcv ###
 ;;; --- 星际译王命令行

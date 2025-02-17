@@ -1,4 +1,4 @@
-(provide 'init);; 定义一尐目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
+(provide 'init);; 定义一啲目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
 ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
 ;; 变量。
 (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
@@ -210,8 +210,6 @@
   :group 'suk
   :type 'string)
 
-
-
 (defcustom suk-prettify-symbols-alist
   '(("lambda" . ?λ)
     ("<-"     . ?←)
@@ -288,6 +286,8 @@
               (if (file-exists-p file)
                   (load file)))))
 
+(require 'basic-function)
+
 ;; This sets up the load path so that we can override it
 (setq warning-suppress-log-types '((package reinitialization)))
 ;; 指定ELPA目录
@@ -310,18 +310,12 @@
 
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/"))
-;; (add-to-list 'package-archives
-;;              '("melpa-stable" . "https://stable.melpa.org/packages/"))
 (add-to-list 'package-archives
              '("org" . "https://orgmode.org/elpa/"))
 (add-to-list 'package-archives
              '("gnu" . "https://elpa.gnu.org/packages/"))
 (add-to-list 'package-archives
              '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
-
-
-;; 若遵循「大道至简策安裝穩定版」，請消注下行。
-;; (setq package-archives '(("myelpa" . "~/myelpa/"))) 
 
 (setq package-check-signature nil) ; 个别时候会出现签名校验失败
 
@@ -349,20 +343,6 @@
   )
 
 (require 'use-package)
-
-
-(defun load-if-exists (f)
-"load the elisp file only if it exists and is readable"
-(if (file-readable-p f)
-    (load-file f)))
-
-    ;;;###autoload
-(defun my-ensure (feature)
-  "Make sure FEATURE is required."
-  (unless (featurep feature)
-    (condition-case nil
-        (require feature)
-      (error nil))))
 
 ;; On-demand installation of packages
 (defun require-package (&rest packages)

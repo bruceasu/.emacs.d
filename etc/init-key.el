@@ -6,7 +6,7 @@
  ;; '("C-z"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
  '("C-z" ))
 
-;; ### move text ###
+;;; ### move text ###
 (lazy-load-global-keys
  '(
    ("C-S-n" . move-text-down) ;把光标所在的整行文字(或标记)下移一行
@@ -16,7 +16,7 @@
    )
  "move-text")
 
- ;;; ### move comment ###
+;;; ### move comment ###
 (lazy-load-global-keys
  '(
    ("M-s-n" . comment-part-move-down)   ;向下移动注释
@@ -42,7 +42,6 @@
    ("C-S-s-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
    ("C-S-s-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
    ("C-:" . comment-or-uncomment-region+)     ;注释当前行
-
    )
  "duplicate-line")
 
@@ -149,6 +148,8 @@
 (lazy-load-global-keys
        '(("M-=" . er/expand-region)
          ("M--" . er/contract-region)
+         ("M-S-<Right>" . er/expand-region)
+         ("M-S-<Left>" . er/contract-region)
          )
        "expand-region")
 

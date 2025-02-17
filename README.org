@@ -438,7 +438,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 :END:
 <<setup-coommon-functions>>
 
-#+begin_src emacs-lisp :tangle suk.el :eval never-export
+#+begin_src emacs-lisp :tangle init.el :eval never-export
  (require 'basic-function)
 #+end_src
 *** Emacs Package 初始化

@@ -174,8 +174,20 @@
   ;; `completion-at-point' is often bound to M-TAB.
   (setq tab-always-indent 'complete))
 
-;; More utils
-(use-package shackle)
+;; 在 Emacs 中，shackle 是一个专门用于控制弹出窗口（pop-up windows）和
+;; 缓冲区显示方式的包。它可以帮助你为特定类型的 buffer 制定“在哪个窗口
+;; 打开”、“打开时如何分割窗口”、“窗口大小”等规则，从而摆脱 Emacs 默认
+;; 情况下可能随机或难以预测的弹出方式。与较早的 popwin 类似，但
+;; shackle 提供了更灵活、细粒度的控制。
+(use-package shackle
+  :init
+  (shackle-mode 1)
+  :config
+  (setq shackle-rules
+        '((compilation-mode :select t :align 'below :size 0.3)
+          ("*Help*" :select t :align 'below :size 0.3)
+          ("*Messages*" :select nil :align 'below :size 0.3)
+          ("^\\*magit.*\\*$" :regexp t :align 'right :size 0.4 :select t))))
 
 (unless (display-graphic-p)
   ;; only conole packages

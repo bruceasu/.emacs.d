@@ -1,5 +1,3 @@
-(require 'basic-function)
-
 (setq user-full-name "Suk")
 (setq user-mail-address "bruceasu@gmail.com")
 
@@ -19,12 +17,8 @@
 (put 'narrow-to-region 'disabled nil)      ;开启变窄区域
 (auto-compression-mode 1)                  ;打开压缩文件时自动解压缩
 (show-paren-mode t)                        ;显示括号匹配
-;;(blink-cursor-mode -1)
 (setq inhibit-startup-message t)           ; 关闭启动欢迎界面
-;; (setq initial-scratch-message nil)      ; 清空 *scratch* 缓冲区信息
 (setq inhibit-startup-echo-area-message t) ; 关闭启动时回显区的提示信息
-
-
 (setq read-process-output-max #x10000)  ; 64kb.  Increase how much is read from processes in a single chunk (default is 4kb)
 (setq vc-follow-symlinks t)
 (setq font-lock-maximum-decoration t)
@@ -52,7 +46,6 @@
 (setq minibuffer-message-timeout 2)       ;显示消息超时的时间
 (setq auto-revert-mode 1)                 ;自动更新buffer
 (setq show-paren-style 'parentheses)      ;括号匹配显示但不是烦人的跳到另一个括号。
-;;(setq blink-matching-paren nil)         ;当插入右括号时不显示匹配的左括号
 (setq message-log-max t)                  ;设置message记录全部消息, 而不用截去
 (setq require-final-newline nil)          ;不自动添加换行符到末尾, 有些情况会出现错误
 (setq ediff-window-setup-function
@@ -68,7 +61,6 @@
 (setq track-eol t)                        ; Keep cursor at end of lines. Require line-move-visual is nil.
 (setq line-move-visual nil)
 (setq save-interprogram-paste-before-kill t) ; Save clipboard contents into kill-ring before replace them
-;;(setq auto-save-default nil)            ; Disable auto save
 (setq echo-keystrokes 0.1)                ;加快快捷键提示的速度
 
 ;; Hanlde minified code
@@ -81,7 +73,6 @@
   ;; (setq uniquify-buffer-name-style 'forward)
   (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
   )
-;; Misc
 (if (boundp 'use-short-answers)
     (setq use-short-answers t)
   (fset 'yes-or-no-p 'y-or-n-p))
@@ -104,6 +95,14 @@
       savehist-file (expand-file-name "history" suk-emacs-var-dir) ; "~/.emacs.d/var/history"
       )
 (savehist-mode 1)
+
+;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
+;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
+;; utf-16 (utf-16 ham:  utf-16le, utf-16be, utf-16le-with-signature dang)
+;; Unicode
+;; (prefer-coding-system 'utf-16le-with-signature)
+;; (prefer-coding-system 'utf-16)
+;; (prefer-coding-system 'utf-8-dos)
 
 ;; Set UTF-8 as the default coding system
 (prefer-coding-system 'utf-8)
@@ -128,13 +127,6 @@
 
 (set-language-environment "UTF-8")
 
-;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
-;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
-;; utf-16 (utf-16 ham:  utf-16le, utf-16be, utf-16le-with-signature dang)
-;; Unicode
-;; (prefer-coding-system 'utf-16le-with-signature)
-;; (prefer-coding-system 'utf-16)
-;; (prefer-coding-system 'utf-8-dos)
 (prefer-coding-system 'utf-8)
 
 (require 'init-key)
@@ -190,6 +182,8 @@
    ("C-." . unbury-buffer)              ;反隐藏当前buffer
    ("C-<f12>" . lazycat-theme-toggle)
    )
+ (current-global-map)
+ "C-z"
  )
 
 ;; 一啲方便嘅函数
@@ -270,25 +264,29 @@
 ;;; ### goto-line-preview ###
 (lazy-load-global-keys
  '(
-   ("M-g p" . goto-line-preview))
- "goto-line-preview")
+   ("g p" . goto-line-preview))
+ "goto-line-preview"
+ "C-z")
 
-   ;;; ### basic-toolkit ###
-  (lazy-load-global-keys
+;;; ### basic-toolkit ###
+(lazy-load-global-keys
  '(
-   ("M-G" . goto-column)                ;到指定列
-   ("s-g" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
+   ("g c" . goto-column)                ;到指定列
+   ("g p" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
    )
- "basic-toolkit")
+ "basic-toolkit"
+ "C-z")
 
 (lazy-load-global-keys
  '(
-   ("C-x r ,"   . remember-init)    ;记忆初始函数
-   ("C-x r ."   . remember-jump)    ;记忆跳转函数
-   ("C-x r <" . point-stack-pop)    ;buffer索引跳转
-   ("C-x r >" . point-stack-push)   ;buffer索引标记
+   ("C-x r ," . remember-init)    ;记忆初始函数
+   ("C-x r ." . remember-jump)    ;记忆跳转函数
+   ("C-x r <" . point-stack-pop)  ;buffer索引跳转
+   ("C-x r >" . point-stack-push) ;buffer索引标记
    )
- "my-bookmak")
+ "my-bookmak"
+ "C-z"
+ )
 
 ;;; --- 滚动其他窗口
 
@@ -433,12 +431,11 @@ _w_ where is something defined
     ("t" describe-theme)
     ("v" describe-variable)
     ("w" where-is))
-  (global-set-key (kbd "S-SPC h") 'my-hydra-describe/body))
+  (keymap-global-set "S-SPC h" #'my-hydra-describe/body))
 
 ;;; Rectangle
 (lazy-load-global-keys
  '(
-
    ("r" . hydra-rectangle/body)
    )
  "init-rectangle"
@@ -516,9 +513,7 @@ _w_ where is something defined
      (use-package writeroom-mode)
      ))
 
-
-
-(require-package 'buffer-move)
+(require 'init-ui)
 
 (use-package ibuffer
   :ensure nil
@@ -920,8 +915,6 @@ _w_ where is something defined
 (global-set-key (kbd "C-<f9>") 'emacs-session-save)
 
 (emacs-session-restore)
-
-(require 'init-ui)
 
 (require 'init-completion)
 
