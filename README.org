@@ -2700,7 +2700,7 @@ Add to suk.el
             (org-paste-subtree))))))
 
 
-  
+
   (define-key my-refile-map "," 'my-org-refile-to-previous)
   (define-key my-refile-map "." 'my-org-refile-in-file)
   (my-defshortcut ?e "~/.emacs.d/README.org")
@@ -2970,7 +2970,7 @@ Add to suk.el
     )
 #+end_src
 ** Add shortcuts
-#+begin_src emacs-lisp :tangle etc/init-org.el
+#+begin_src emacs-lisp :tangle etc/init-key.el
   ;;; --- 笔记管理和组织
   (define-prefix-command 'F9-map)
   (global-set-key (kbd "<f9>") 'F9-map)
@@ -2983,7 +2983,7 @@ Add to suk.el
      ("l" . org-toggle-link-display)
      ("d" . calendar)
      ("f" . suk/file-shortcuts/body)
-     ("r" .  my-refile-map)
+     ("r" . my-refile-map)
      )
   nil
    "<f9>")
@@ -3001,10 +3001,6 @@ Add to suk.el
 
 #+end_src
 
-Load on startup.
-#+begin_src emacs-elisp :tangle suk.el
-  (require 'init-org)
-#+end_src
 * Recentf
 #+begin_src emacs-lisp :tangle suk.el
   ;; Recentf

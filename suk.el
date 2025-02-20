@@ -840,8 +840,6 @@ _w_ where is something defined
 
 (require 'init-org)
 
-(require 'init-org)
-
 ;; Recentf
 (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
 ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
