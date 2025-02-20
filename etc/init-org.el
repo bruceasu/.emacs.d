@@ -209,18 +209,19 @@
 (require 'bookmark)
 (defvar my-refile-map (make-sparse-keymap))
 (defmacro my-defshortcut (key file)
-  `(progn
-     (set-register ,key (cons 'file ,file))
-     (bookmark-store ,file (list (cons 'filename ,file)
-                                 (cons 'position 1)
-                                 (cons 'front-context-string "")) nil)
-     (define-key my-refile-map
-                 (char-to-string ,key)
-                 (lambda (prefix)
-                   (interactive "p")
-                   (let ((org-refile-targets '(((,file) :maxlevel . 6)))
-                         (current-prefix-arg (or current-prefix-arg '(4))))
-                     (call-interactively 'org-refile))))))
+`(progn
+   (set-register ,key (cons 'file ,file))
+   (bookmark-store ,file (list (cons 'filename ,file)
+                               (cons 'position 1)
+                               (cons 'front-context-string "")) nil)
+   (define-key my-refile-map
+               (char-to-string ,key)
+               (lambda (prefix)
+                 "Call org-refile to target: FILE"
+                 (interactive "p")
+                 (let ((org-refile-targets (list (cons (list ,file) '(:maxlevel . 3))))
+                       (current-prefix-arg (or current-prefix-arg '(4))))
+                   (call-interactively 'org-refile))))))
 
 (defvar my-org-last-refile-marker nil "Marker for last refile")
 (defun my-org-refile-in-file (&optional prefix)
@@ -350,25 +351,35 @@
   (if (buffer-file-name)
       (let* ((current-file (buffer-file-name))
              ;; 使用 file-name-sans-extension 获取不带扩展名的文件名
-             (base-name (file-name-sans-extension current-file))
+             ;;(base-name (file-name-sans-extension current-file))
              ;; 构建新的文件名，替换扩展名为 .html
-             (html-file (concat base-name ".html"))
+             ;;(html-file (my-cygpath-convert (concat base-name ".html")))
              ;; 定义要执行的外部命令，这里以 ls -l 为例
-             (command (format "htm-cleanup.sh %s" (shell-quote-argument html-file)))
+             ;; (command (if sys/win32p
+             ;;              ;;"echo You may need to cleanup the html file."
+             ;;              (format "c:/green/msys64/usr/bin/bash.exe --login /c/green/htm-cleanup.sh %s" html-file)
+             ;;            (format "htm-cleanup.sh %s" (shell-quote-argument html-file))))
              ;; 定义输出缓冲区名称
-             (output-buffer "*Shell Command Output*"))
+             ;;(output-buffer "*Shell Command Output*")
+             )
         (my-org-publish-buffer)
         ;; 执行自定义函数逻辑
         (message "正在处理文件: %s" current-file)
 
         ;; 异步调用外部 shell 命令
-        (async-shell-command command output-buffer)
+        ;;(async-shell-command command output-buffer)
 
         ;; 显示提示信息
-        (message "已启动异步命令: %s" command))
+        ;;(message "已启动异步命令: %s" command)
+        )
     (message "当前缓冲区没有关联的文件。")))
 
 
+(defun my-cygpath-convert (win-path)
+  "Use cygpath to convert WIN-PATH to /cygdrive style."
+  (let ((output (shell-command-to-string
+                 (format "D:/green/msys64/usr/bin/cygpath -u \"%s\"" win-path))))
+    (string-trim output)))
 
 ;; 绑定快捷键 C-c e 到上述函数
 (global-set-key (kbd "C-S-e") #'my-execute-function-and-shell-command-async)
@@ -485,3 +496,31 @@ _q_ Quit        _l_ Last Capture
   (org-roam-db-autosync-mode)
 
   )
+
+;;; --- 笔记管理和组织
+(define-prefix-command 'F9-map)
+(global-set-key (kbd "<f9>") 'F9-map)
+(lazy-load-set-keys
+ '(("a" . org-agenda)
+   ("A" . org-attach)
+   ("s" . show-org-agenda)
+   ("c" . org-capture)
+   ("i" . org-toggle-inline-images)
+   ("l" . org-toggle-link-display)
+   ("d" . calendar)
+   ("f" . suk/file-shortcuts/body)
+   ("r" .  my-refile-map)
+   )
+nil
+ "<f9>")
+  (define-prefix-command 'my-refile-map)
+  (global-set-key (kbd "C-c r") 'my-refile-map)
+  ;; I use C-c c to start capture mode
+  (global-set-key (kbd "C-c c") #'org-capture)
+  ;; ;; (global-set-key (kbd "C-c C") 'org-capture)
+  (global-set-key "\C-cl" #'org-store-link)
+  (global-set-key "\C-ca" #'org-agenda)
+  ;;(global-set-key "\C-cb" #'org-iswitchb)
+
+  ;; C-',  C-, is org-cycle-agenda-files keys
+  ;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。

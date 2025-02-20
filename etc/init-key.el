@@ -208,30 +208,3 @@
    ("C-c C-<right>" . buf-move-right)   
    )
  "buffer-move")
-
-;;; --- 笔记管理和组织
-(define-prefix-command 'F9-map)
-(global-set-key (kbd "<f9>") 'F9-map)
-(lazy-load-global-keys
- '(("a" . org-agenda)
-   ("A" . org-attach)
-   ("s" . show-org-agenda)
-   ("c" . org-capture)
-   ("i" . org-toggle-inline-images)
-   ("l" . org-toggle-link-display)
-   ("d" . calendar)
-   ("f" . suk/file-shortcuts/body)
-
-   )
- "init-org"
- "<f9>")
-
-  ;; I use C-c c to start capture mode
-  (global-set-key (kbd "C-c c") #'org-capture)
-  ;; ;; (global-set-key (kbd "C-c C") 'org-capture)
-  (global-set-key "\C-cl" #'org-store-link)
-  (global-set-key "\C-ca" #'org-agenda)
-  ;;(global-set-key "\C-cb" #'org-iswitchb)
-
-  ;; C-',  C-, is org-cycle-agenda-files keys
-  ;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。

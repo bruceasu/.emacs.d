@@ -61,7 +61,11 @@
  #'(lambda()
      (if suk-rime
          (require 'init-rime)
-       (require 'rain))
+       ;;(require 'rain)
+       (progn
+         (require 'pyim-hyly)
+         (pyim-hyly-enable))
+       )
      ))
 
 ;; 其他
