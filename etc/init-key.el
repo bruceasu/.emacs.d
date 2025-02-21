@@ -220,8 +220,8 @@
    ("i" . org-toggle-inline-images)
    ("l" . org-toggle-link-display)
    ("d" . calendar)
-   ("f" . suk/file-shortcuts/body)
    ("r" . my-refile-map)
+   ("h" . hydra-global-org/body)
    )
 nil
  "<f9>")

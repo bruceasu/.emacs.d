@@ -147,6 +147,10 @@
         ;;,(expand-file-name "folder" org-files-directory)
         ))
 
+;; default is "%s_archive::", I want to archive in a sginle file.
+;; use C-u C-c C-x C-a to change
+(setq org-archive-location "archive.org::* Archived Tasks")
+
 ;; capture template
 (setq org-default-notes-file (expand-file-name "notes.org" org-files-directory))
 ;; Capture templates for: TODO tasks, Notes,
@@ -427,21 +431,29 @@
     "
 ^Org^
 -----------------------------------------------------
-_t_ Start Timer _w_ Clock In
-_s_ Stop Timer  _o_ Clock out
-_r_ Set Timer   _j_ CLock Goto
-_p_ Print Timer _c_ Capture
-_q_ Quit        _l_ Last Capture
+_t_ Start Timer  _w_ Clock In
+_s_ Stop Timer   _o_ Clock out
+_r_ Set Timer    _j_ Clock Goto
+_p_ Print Timer  _c_ Clock Cancel
+_C_ Capture      _d_ Clock Display
+_l_ Last Capture _R_ Clock Report
+                 _m_ Clock Modeline
+_q_ Quit       
 "
     ("t" org-timer-start "Start Timer")
     ("s" org-timer-stop "Stop Timer")
     ("r" org-timer-set-timer "Set Timer") ; This one requires you be in an orgmode doc, as it sets the timer for the header
     ("p" org-timer "Print Timer")
-    ("w" (org-clock-in '(4)) "Clock-In")  ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t)
-    ("o" org-clock-out "Clock-Out")       ; you might also want (setq org-log-note-clock-out t)
-    ("j" org-clock-goto "Clock Goto")     ; global visit the clocked task
-    ("c" org-capture "Capture")           ; Don't forget to define the captures you want http://orgmode.org/manual/Capture.html
+    ("i" (org-clock-in '(4)) "Clock-In")  ; used with (org-clock-persistence-insinuate) (setq org-clock-persist t) C-c C-x C-i
+    ("o" org-clock-out "Clock-Out")       ; you might also want (setq org-log-note-clock-out t) C-c C-x C-o
+    ("j" org-clock-goto "Clock Goto")     ; global visit the clocked task C-c C-x C-j
+    ("C" org-capture "Capture")           ; Don't forget to define the captures you want http://orgmode.org/manual/Capture.html
     ("l" org-capture-goto-last-stored "Last Capture")
+    ("d" org-clock-display) ; C-c C-x C-d
+    ("R" org-clock-report) ; C-x C-x C-r
+    ;; C-c C-x C-e 手动插入纪录时间
+    ("c" org-clock-cancel) ;; C-c C-x C-x 中断任务
+    ("m" org-clock-show-current) ;; C-c C-x C-q 在modeline查看当前Clock 状态
     ("q" nil "Quit")                      ; 退出
     ))
 
