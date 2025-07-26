@@ -7,9 +7,6 @@
 [submodule "extensions/company-english-helper"]
 	path = extensions/company-english-helper
 	url = git@github.com:manateelazycat/company-english-helper.git
-[submodule "extensions/insert-translated-name"]
-	path = extensions/insert-translated-name
-	url = git@github.com:manateelazycat/insert-translated-name
 [submodule "extensions/hydra-posframe"]
 	path = extensions/hydra-posframe
 	url = git@github.com:Ladicle/hydra-posframe.git

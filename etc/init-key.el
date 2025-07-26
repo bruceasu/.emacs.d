@@ -16,16 +16,6 @@
    )
  "move-text")
 
-;;; ### move comment ###
-(lazy-load-global-keys
- '(
-   ("M-s-n" . comment-part-move-down)   ;向下移动注释
-   ("M-s-p" . comment-part-move-up)     ;向上移动注释
-   ("C-s-n" . comment-dwim-next-line)   ;移动到上一行并注释
-   ("C-s-p" . comment-dwim-prev-line)   ;移动到下一行并注释
-   )
- "move-comment")
-
 ;;; ### open new line ###
 (lazy-load-global-keys
  '(
@@ -110,7 +100,6 @@
    ;; ("C-c L" . thing-cut-line)
    ;; ("C-c A" . thing-cut-to-line-beginning)
    ;; ("C-c E" . thing-cut-to-line-end)
-   ("S-SPC e" . hydra-thing-edit/body)
    ("C-c e" . hydra-thing-edit/body)
    )
  "init-thing-edit"
@@ -128,16 +117,7 @@
 ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
-   ;;("M-2" . indent-buffer)              ;自动格式化当前Buffer
-   ;; indent-comment-buffer
-   ;;("C-x u" . mark-line)              ;选中整行
-   ("s-k" . kill-and-join-forward)      ;在缩进的行之间删除
    ;;("" . strip-blank-lines)             ; 删除空行
-   ;; strip-line-number
-   ;; delete-chars-hungry-forward
-   ;; delete-chars-hungry-backward
-   ;; underline-line-with
-   ;; current-line-move-to-top
    ("<f2>" . refresh-file)              ;自动刷新文件
    ("C-S-j" . join-lines)               ;连接下行
    ("M-q" . suk/fill-or-unfill-paragraph)
@@ -170,20 +150,14 @@
 (lazy-load-global-keys
  '(
    ("C-c b"  . my-hydra-buffers/body)
-   ("S-SPC B"  . my-hydra-buffers/body)
    ("M-<f7>" . suk-read-mode)
    ("<f7>"   . olivetti-mode)
    ("C-;"    . suk/close-current-buffer) ;关闭当前buffer
    )
  "buffer-extension")
 
-;; (lazy-load-global-keys
-;;  '(
-;;     ("<f7>" . olivetti-mode)
-;;   )
-;;  "olivetti")
 
-;; default keys: C-x LEFT/RIGHT C-, C-.
+;; default keys: C-x LEFT/RIGHT
 
 ;; --- 缓存移动
 (lazy-load-set-keys

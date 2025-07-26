@@ -157,34 +157,34 @@
 ;; appointments, phone calls, meetings, and (setq
 ;; org-protocol)
 (setq org-capture-templates
-      '(
+      `(
         ("t" "Todo"
-         entry (file+headline (expand-file-name "gtd.org" org-files-directory) "Tasks")
+         entry (file+headline ,(expand-file-name "gtd.org" org-files-directory) "Tasks")
          "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
         ("n" "Note"
-         entry (file (expand-file-name "notes.org" org-files-directory))
+         entry (file ,(expand-file-name "notes.org" org-files-directory))
          "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
         ("r" "Respond"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
+         entry (file ,(expand-file-name "gtd.org" org-files-directory))
          "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n"
          :clock-in t :clock-resume t :immediate-finish t)
         ("j" "Journal"
-         entry (file+datetree (expand-file-name "journal.org" org-files-directory))
+         entry (file+olp+datetree ,(expand-file-name "journal.org" org-files-directory))
          "* %?\nEntered on %U\n  %i\n  %a" :clock-in t :clock-resume t)
         ("w" "Review"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
+         entry (file ,(expand-file-name "gtd.org" org-files-directory))
          "* TODO Review %c\n%U\n"
          :immediate-finish t)
         ("m" "Meeting"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
+         entry (file ,(expand-file-name "gtd.org" org-files-directory))
          "* MEETING with %? :MEETING:\n%U"
          :clock-in t :clock-resume t)
         ("p" "Phone call"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
+         entry (file ,(expand-file-name "gtd.org" org-files-directory))
          "* PHONE %? :PHONE:\n%U"
          :clock-in t :clock-resume t)
         ("h" "Habit"
-         entry (file (expand-file-name "gtd.org" org-files-directory))
+         entry (file ,(expand-file-name "gtd.org" org-files-directory))
          "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
         ))
 
@@ -431,7 +431,7 @@
     "
 ^Org^
 -----------------------------------------------------
-_t_ Start Timer  _w_ Clock In
+_t_ Start Timer  _i_ Clock In
 _s_ Stop Timer   _o_ Clock out
 _r_ Set Timer    _j_ Clock Goto
 _p_ Print Timer  _c_ Clock Cancel

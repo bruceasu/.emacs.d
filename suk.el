@@ -159,20 +159,16 @@
   ;; (keymap-global-set <key> <cmmd>)
   (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)       ;; 快捷键 C-<f11> 用于切换全屏模式
   (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
-  (keymap-set global-map "RET" #'newline-and-indent)                ;; 回车键 RET 用于创建新行并对齐
-  (keymap-set global-map "S-<return>" #'comment-indent-new-line)    ;; Shift + 回车键用于取消对齐创建的新行
   ) 
 (unless emacs/>=29p
   (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
   (global-set-key (kbd "M-s-<return>") 'toggle-frame-fullscreen)
-  (global-set-key (kbd "RET") #'newline-and-indent)              ;; 回车键 RET 用于创建新行并对齐
-  (global-set-key (kbd "S-<return>") #'comment-indent-new-line)  ;; Shift + 回车键用于取消对齐创建的新行
   )
 
 (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
 
 (define-prefix-command 'leader-key)
-(global-set-key (kbd "S-SPC") 'leader-key)
+(global-set-key (kbd "S-SPC") 'leader-key) 
 (keymap-set leader-key "f" #'toggle-frame-fullscreen) ;; full screen
 ;;; ### Toolkit ###
 ;;; --- 工具函数
@@ -257,8 +253,8 @@
         ("M" diff-hl-margin-mode "margin gutter" :toggle t)
         ("D" diff-hl-dired-mode "dired gutter" :toggle t))
        ))
-    ;; (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
-    (keymap-set leader-key "t" #'toggles-hydra/body)
+     (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
+    ;;(keymap-set leader-key "t" #'toggles-hydra/body)
 ))
 
 ;;; ### goto-line-preview ###
@@ -269,13 +265,13 @@
  "C-z")
 
 ;;; ### basic-toolkit ###
-(lazy-load-global-keys
- '(
-   ("g c" . goto-column)                ;到指定列
-   ("g p" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
-   )
- "basic-toolkit"
- "C-z")
+;; (lazy-load-global-keys
+;;  '(
+;;    ("g c" . goto-column)                ;到指定列
+;;    ("g p" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
+;;    )
+;;  "basic-toolkit"
+;;  "C-z")
 
 (lazy-load-global-keys
  '(
@@ -305,81 +301,6 @@
    ("M-p" . window-move-down)       ;向上滚动当前窗口  scroll-down
    )
  "win-move")
-
-;;;###autoload
-(defun insert-hash-template ()
-  "插入HASH模板：
-#=================================================
-# <cursor>
-#-------------------------------------------------
-光标位于第二行的 # 后面。"
-  (interactive)
-  (beginning-of-line) 
-  (insert "#=================================================\n")
-  (insert "# \n")
-  (insert "#-------------------------------------------------\n")
-  ;; 将光标移动到第二行的 # 后面
-  (forward-line -2)          ; 移动到上一行（即第二行）
-  (end-of-line)              ; 移动到行尾
-
-  )
-
-;;;###autoload
-(defun insert-slash-template ()
-  "插入Slash comment模板：
-#=================================================
-# <cursor>
-#-------------------------------------------------
-光标位于第二行的 // 后面。"
-  (interactive)
-  (beginning-of-line) 
-  (insert "//=================================================\n")
-  (insert "// \n")
-  (insert "//-------------------------------------------------\n")
-  ;; 将光标移动到第二行的 # 后面
-  (forward-line -2)          ; 移动到上一行（即第二行）
-  (end-of-line)              ; 移动到行尾
-  )
-
-
-;;;###autoload
-(defun insert-star-template ()
-  "插入Slash comment模板：
-#=================================================
-# <cursor>
-#-------------------------------------------------
-光标位于第二行的 # 后面。"
-  (interactive)
-  (beginning-of-line) 
-  (insert "/*=================================================*/\n")
-  (insert "/*  */\n")
-  (insert "/*-------------------------------------------------*/\n")
-  (forward-line -2)         
-  (end-of-line)          
-  (backward-char 3)      
-  )
-
-;;;###autoload
-(defun insert-javadoc-template ()
-  "插入Javadoc模板：
-#=================================================
-# <cursor>
-#-------------------------------------------------
-光标位于第二行的 * 后面。"
-  (interactive)
-  (beginning-of-line) 
-  (insert "/**\n")
-  (insert " * \n")
-  (insert " */\n")
-  (forward-line -2)       
-  (end-of-line)         
-  )
-
-;; 绑定快捷键 C-c t 到插入自定义模板的函数
-(global-set-key (kbd "C-c t h") 'insert-hash-template)
-(global-set-key (kbd "C-c t c") 'insert-slash-template)
-(global-set-key (kbd "C-c t s") 'insert-star-template)
-(global-set-key (kbd "C-c t j") 'insert-javadoc-template)
 
 ;;;###autoload
 (with-eval-after-load 'hydra
@@ -431,7 +352,7 @@ _w_ where is something defined
     ("t" describe-theme)
     ("v" describe-variable)
     ("w" where-is))
-  (keymap-global-set "S-SPC h" #'my-hydra-describe/body))
+  (keymap-global-set "C-x C-h" #'my-hydra-describe/body))
 
 ;;; Rectangle
 (lazy-load-global-keys
@@ -578,7 +499,6 @@ _w_ where is something defined
 
 ;; Toggle two most recent buffers
 (fset 'quick-switch-buffer [?\C-x ?b return])
-(global-set-key (kbd "s-b") 'quick-switch-buffer)
 (global-set-key (kbd "C-z b") 'quick-switch-buffer)
 
 ;; Frame transparence
@@ -615,7 +535,7 @@ _w_ where is something defined
 
 (use-package ace-window
   :bind (([remap other-window] . ace-window)
-         (:map leader-key ("w" . ace-window-hydra/body)))
+         ("C-c w" . ace-window-hydra/body))
   :hook (emacs-startup . ace-window-display-mode)
   :config
   (defun toggle-window-split ()
@@ -666,6 +586,53 @@ _w_ where is something defined
               (lambda ()
                 (interactive)
                 (aw--select-window (1+ n))))))
+
+ (suk/wait-for-modules
+ (lambda()
+   (with-eval-after-load 'pretty-hydra
+     (pretty-hydra-define+ ace-window-hydra
+       (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
+               :foreign-keys warn
+               :quit-key ("q" "C-g"))
+       ("Actions"
+        (;;("TAB" other-window "switch")
+         ("x" ace-delete-window "delete")
+         ("X" ace-delete-other-windows "delete other" :exit t)
+         ("s" ace-swap-window "swap")
+         ("a" ace-select-window "select" :exit t)
+         ("m" toggle-frame-maximized "maximize" :exit t)
+         ("u" toggle-frame-fullscreen "fullscreen" :exit t))
+        "Resize"
+        (("<left>" shrink-window-horizontally "shrink H")
+         ("<right>" enlarge-window-horizontally "enlarge H")
+         ("<up>" shrink-window "shrink V")
+         ("<down>" enlarge-window "enlarge V")
+         ("n" balance-windows "balance"))
+        "Split"
+        (("r" split-window-right "horizontally")
+         ("R" split-window-horizontally-instead "horizontally instead")
+         ("v" split-window-below "vertically")
+         ("V" split-window-vertically-instead "vertically instead")
+         ("t" toggle-window-split "toggle")
+         ("o" delete-other-windows "only this"))
+        "Zoom"
+        (("+" text-scale-increase "in")
+         ("=" text-scale-increase "in")
+         ("-" text-scale-decrease "out")
+         ("0" (text-scale-increase 0) "reset"))
+        "Misc"
+        (("o" set-frame-font "frame font")
+         ("f" make-frame-command "new frame")
+         ("d" delete-frame "delete frame")
+         ("z" winner-undo "winner undo")
+         ("Z" winner-redo "winner redo"))
+        )
+       )
+     (bind-key "w" #'ace-window-hydra/body leader-key)
+     ))
+ 'ace-window
+ 'winner
+ )
 
 ;; Enforce rules for popups
 (use-package popper
@@ -768,53 +735,6 @@ _w_ where is something defined
             (delete-window window)))))
     (advice-add #'keyboard-quit :before #'popper-close-window-hack)))
 
-(suk/wait-for-modules
- (lambda()
-   (with-eval-after-load 'pretty-hydra
-     (pretty-hydra-define+ ace-window-hydra
-       (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
-               :foreign-keys warn
-               :quit-key ("q" "C-g"))
-       ("Actions"
-        (;;("TAB" other-window "switch")
-         ("x" ace-delete-window "delete")
-         ("X" ace-delete-other-windows "delete other" :exit t)
-         ("s" ace-swap-window "swap")
-         ("a" ace-select-window "select" :exit t)
-         ("m" toggle-frame-maximized "maximize" :exit t)
-         ("u" toggle-frame-fullscreen "fullscreen" :exit t))
-        "Resize"
-        (("<left>" shrink-window-horizontally "shrink H")
-         ("<right>" enlarge-window-horizontally "enlarge H")
-         ("<up>" shrink-window "shrink V")
-         ("<down>" enlarge-window "enlarge V")
-         ("n" balance-windows "balance"))
-        "Split"
-        (("r" split-window-right "horizontally")
-         ("R" split-window-horizontally-instead "horizontally instead")
-         ("v" split-window-below "vertically")
-         ("V" split-window-vertically-instead "vertically instead")
-         ("t" toggle-window-split "toggle")
-         ("o" delete-other-windows "only this"))
-        "Zoom"
-        (("+" text-scale-increase "in")
-         ("=" text-scale-increase "in")
-         ("-" text-scale-decrease "out")
-         ("0" (text-scale-increase 0) "reset"))
-        "Misc"
-        (("o" set-frame-font "frame font")
-         ("f" make-frame-command "new frame")
-         ("d" delete-frame "delete frame")
-         ("z" winner-undo "winner undo")
-         ("Z" winner-redo "winner redo"))
-        )
-       )
-     (bind-key "w" #'ace-window-hydra/body leader-key)
-     ))
- 'ace-window
- 'winner
- )
-
 (lazy-load-global-keys
  '(
    ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
@@ -826,12 +746,13 @@ _w_ where is something defined
    )
  "window-extension")
 
-(lazy-load-local-keys
+(lazy-load-global-keys
  '(
-   ("b" . suk/bookmark-launcher/body)
+   ("m" . suk/bookmark-launcher/body)
    )
- leader-key
+ ;;leader-key
  "my-bookmark"
+ "C-z"
  ) ;; 有的函数跟basic-toolkit重复
 
 ;; C-x r l to list bookmarks
