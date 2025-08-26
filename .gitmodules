@@ -34,9 +34,6 @@
 [submodule "extensions/vundo"]
 	path = extensions/vundo
 	url = https://github.com/casouri/vundo
-[submodule "extensions/fingertip"]
-	path = extensions/fingertip
-	url = https://github.com/manateelazycat/fingertip
 [submodule "extensions/input-method/pyim"]
 	path = extensions/input-method/pyim
 	url = https://github.com/tumashu/pyim

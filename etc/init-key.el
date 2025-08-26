@@ -29,9 +29,9 @@
  '(
    ("C-S-o" . duplicate-line-or-region-above) ;向上复制当前行或区域
    ("C-S-l" . duplicate-line-or-region-below) ;向下复制当前行或区域
-   ("C-S-s-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
-   ("C-S-s-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
-   ("C-:" . comment-or-uncomment-region+)     ;注释当前行
+   ;;("C-S-s-o" . duplicate-line-above-comment) ;复制当前行到上一行, 并注释当前行
+   ;;("C-S-s-l" . duplicate-line-below-comment) ;复制当前行到下一行, 并注释当前行
+   ("M-;" . comment-or-uncomment-region+) ;注释当前行
    )
  "duplicate-line")
 
@@ -109,18 +109,18 @@
 ;; --- 缓存编辑
 (lazy-load-set-keys
  '(
-   ("C-x C-x" . exchange-point-and-mark)   ;交换当前点和标记点
-   ("M-o" . backward-delete-char-untabify) ;向前删除字符
-   ("C-M-S-h" . mark-paragraph)            ;选中段落
-   ("M-SPC" . just-one-space)              ;只有一个空格在光标处
+   ("C-x C-x" . exchange-point-and-mark)       ;交换当前点和标记点
+   ("M-o"     . backward-delete-char-untabify) ;向前删除字符
+   ("C-M-S-h" . mark-paragraph)                ;选中段落
+   ("M-SPC"   . just-one-space)                ;只有一个空格在光标处
    ))
 ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
    ;;("" . strip-blank-lines)             ; 删除空行
-   ("<f2>" . refresh-file)              ;自动刷新文件
-   ("C-S-j" . join-lines)               ;连接下行
-   ("M-q" . suk/fill-or-unfill-paragraph)
+   ;; ("<f2>" . refresh-file)             ;自动刷新文件
+   ("C-S-j"   . join-lines)               ;连接下行
+   ("M-q"     . suk/fill-or-unfill-paragraph)
    ("C-x n N" . suk/xah-narrow-to-region)
    )
  "basic-toolkit")
@@ -167,8 +167,8 @@
    ("C-M-f" . forward-paragraph)        ;下一个段落
    ("C-M-b" . backward-paragraph)       ;上一个段落
    ("C-M-y" . backward-up-list)         ;向左跳出 LIST
-   ("C-M-o" . up-list)                  ;向右跳出 LIST
    ("C-M-u" . backward-down-list)       ;向左跳进 LIST
+   ("C-M-o" . up-list)                  ;向右跳出 LIST
    ("C-M-i" . down-list)                ;向右跳进 LIST
    ("C-M-a" . beginning-of-defun)       ;函数开头
    ("C-M-e" . end-of-defun)             ;函数末尾

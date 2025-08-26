@@ -43,17 +43,6 @@
        (setq ispell-program-name "aspell")
        (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together")))))
 
-;; 特有工具
-(run-with-idle-timer
- 2
- nil
- #'(lambda()
-     ;; run "M-x pdf-tools-install" at debian and open pdf in GUI Emacs
-     (use-package pdf-tools
-       :ensure t
-       :config (pdf-tools-install))
-     ))
-
 ;; 加载输入法
 (run-with-idle-timer
  1

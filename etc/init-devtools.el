@@ -1,13 +1,11 @@
 (provide 'init-devtools)
 
 ;; programming modes
-(use-package csv-mode)
 (use-package yaml-mode)
 (use-package web-mode)
 (use-package yaml-mode)
 (use-package js2-mode)
 (use-package rjsx-mode)
-(use-package csv-mode)
 (use-package typescript-mode)
 (use-package nvm)
 
@@ -18,26 +16,6 @@
   :ensure t
   :hook (prog-mode . format-all-ensure-formatter)
   :bind ("C-c f" . #'format-all-buffer))
-
-;; Format HTML, CSS and JavaScript/JSON
-;; Install: npm -g install prettier
-(when (executable-find "prettier")
-  (use-package prettier
-    :diminish
-    :hook ((js-mode js2-mode css-mode sgml-mode web-mode) . prettier-mode)
-    :init (setq prettier-pre-warm 'none)))
-
-(use-package prettier-js
-  :ensure t
-  :defer 3
-  :hook ((css-mode web-mode typescript-mode js-mode json-mode js2-mode) . prettier-js-mode))
-
-
-(use-package apheleia
-  :hook (prog-mode . apheleia-mode)
-  :config
-  (setf (alist-get 'prettier apheleia-formatters)
-        '("prettier" "--stdin-filepath" filepath)))
 
 ;; 折叠和收缩代码
 ;; builtin
@@ -50,33 +28,6 @@
         )
   :hook (prog-mode . hs-minor-mode)
   :config
-  (with-eval-after-load 'pretty-hydra
-    (pretty-hydra-define+ hideshow-hydra
-      (:title (pretty-hydra-title "HideShow" 'octicon "nf-oct-fold")
-              :color amaranth :quit-key ("q" "C-g"))
-      ("Fold"
-       (("t" hs-toggle-all "toggle all")
-        ("a" hs-show-all "show all")
-        ("i" hs-hide-all "hide all")
-        ("g" hs-toggle-hiding "toggle hiding")
-        ("c" hs-cycle "cycle block")
-        ("s" hs-show-block "show block")
-        ("h" hs-hide-block "hide block")
-        ("l" hs-hide-level "hide level"))
-       "Move"
-       (("C-a" mwim-beginning-of-code-or-line "⭰")
-        ("C-e" mwim-end-of-code-or-line "⭲")
-        ("C-b" backward-char "←")
-        ("C-n" next-line "↓")
-        ("C-p" previous-line "↑")
-        ("C-f" forward-char "→")
-        ("C-v" pager-page-down "↘")
-        ("M-v" pager-page-up "↖")
-        ("M-<" beginning-of-buffer "⭶")
-        ("M->" end-of-buffer "⭸"))
-       )
-      ))
-  (keymap-global-set "S-<f6>" #'hideshow-hydra/body)
   ;; Display line counts
   (defun hs-display-code-line-counts (ov)
     "Display line counts when hiding codes."
@@ -95,29 +46,6 @@
                     " "))))
   (setq hs-set-up-overlay #'hs-display-code-line-counts)
   )
-
-;; Jump to definition
-(use-package dumb-jump
-  :config
-  (with-eval-after-load 'pretty-hydra
-    (pretty-hydra-define+ dumb-jump-hydra
-      (:title (pretty-hydra-title "Dump Jump" 'faicon "nf-fa-anchor")
-              :color blue :quit-key ("q" "C-g"))
-      ("Jump"
-       (("j" dumb-jump-go "Go")
-        ("o" dumb-jump-go-other-window "Go other window")
-        ("e" dumb-jump-go-prefer-external "Go external")
-        ("x" dumb-jump-go-prefer-external-other-window "Go external other window"))
-       "Other"
-       (("i" dumb-jump-go-prompt "Prompt")
-        ("l" dumb-jump-quick-look "Quick look")
-        ("b" dumb-jump-back "Back")))
-      )
-    (keymap-global-set "C-M-j" #'dumb-jump-hydra/body)
-    )
-  :init
-  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-  (setq dumb-jump-selector 'completing-read))
 
 (when suk-copilot-enable
 
@@ -171,6 +99,60 @@
   ;; a valid subscription).
   )
 
+(use-package flycheck :ensure t :init (global-flycheck-mode))
+(use-package dap-mode
+  :ensure t
+  :after (lsp-mode)
+  :functions dap-hydra/nil
+  :config
+  (require 'dap-java)
+  :bind (:map lsp-mode-map
+              ("<f5>" . dap-debug)
+              ("M-<f5>" . dap-hydra))
+  :hook ((dap-mode . dap-ui-mode)
+         (dap-session-created . (lambda (&_rest) (dap-hydra)))
+         (dap-terminated . (lambda (&_rest) (dap-hydra/nil)))))
+
+(use-package dap-java :ensure nil)
+
+(use-package lsp-ui
+  :ensure t
+  :after (lsp-mode)
+  :bind (:map lsp-ui-mode-map
+              ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+              ([remap xref-find-references] . lsp-ui-peek-find-references))
+  :init (setq lsp-ui-doc-delay 1.5
+              lsp-ui-doc-position 'bottom
+              lsp-ui-doc-max-width 100
+              ))
+
+
+(use-package lsp-mode
+  :ensure t
+  :hook (
+         (lsp-mode . lsp-enable-which-key-integration)
+         (java-mode . #'lsp-deferred)
+         )
+  :init (setq
+         lsp-keymap-prefix "C-c l"              ; this is for which-key integration documentation, need to use lsp-mode-map
+         lsp-enable-file-watchers nil
+         read-process-output-max (* 1024 1024)  ; 1 mb
+         lsp-completion-provider :capf
+         lsp-idle-delay 0.500
+         )
+  :config
+  (setq lsp-intelephense-multi-root nil) ; don't scan unnecessary projects
+  (with-eval-after-load 'lsp-intelephense
+    (setf (lsp--client-multi-root (gethash 'iph lsp-clients)) nil))
+  (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+  )
+
+(use-package lsp-java
+  :ensure t
+  :config (add-hook 'java-mode-hook 'lsp))
+
+(setenv "JAVA_HOME" "D:/green/jdk-21.0.2")
+
 ;; {{ typescript
 (use-package typescript-mode
   :load-path "~/.emacs.d/extensions/typescript"
@@ -195,26 +177,13 @@
               :around #'my-typescript-beginning-of-defun-hack)
   )
 
-;; CSS
-(use-package css-mode
-  :init (setq css-indent-offset 2))
-
-;; SCSS
-(use-package scss-mode
-  :init (setq scss-compile-at-save nil))
-
-;; LESS
-(unless (fboundp 'less-css-mode)
-  (use-package less-css-mode))
-
 ;; JSON
 (unless (fboundp 'js-json-mode)
   (use-package json-mode
     :load-path "~/.emacs.d/extensions/json-mode"))
 
 ;; JavaScript
-(use-package js
-  :init (setq js-indent-level 2))
+(use-package js)
 
 (with-eval-after-load 'js-mode
   ;; '$' is part of variable name like '$item'
@@ -230,78 +199,6 @@
 
                              )))
   :config
-  (defun my-validate-json-or-js-expression (&optional not-json-p)
-    "Validate buffer or select region as JSON.
-If NOT-JSON-P is not nil, validate as Javascript expression instead of JSON."
-    (interactive "P")
-    (let* ((json-exp (if (region-active-p) (my-selected-str)
-                       (my-buffer-str)))
-           (jsbuf-offet (if not-json-p 0 (length "var a=")))
-           errs
-           first-err
-           (first-err-pos (if (region-active-p) (region-beginning) 0)))
-      (unless not-json-p
-        (setq json-exp (format "var a=%s;"  json-exp)))
-      (with-temp-buffer
-        (insert json-exp)
-        (my-ensure 'js2-mode)
-        (js2-parse)
-        (setq errs (js2-errors))
-        (cond
-         ((not errs)
-          (message "NO error found. Good job!"))
-         (t
-          ;; yes, first error in buffer is the last element in errs
-          (setq first-err (car (last errs)))
-          (setq first-err-pos (+ first-err-pos (- (cadr first-err) jsbuf-offet)))
-          (message "%d error(s), first at buffer position %d: %s"
-                   (length errs)
-                   first-err-pos
-                   (js2-get-msg (caar first-err))))))
-      (if first-err (goto-char first-err-pos))))
-
-  (defun my-print-json-path (&optional hardcoded-array-index)
-    "Print the path to the JSON value under point, and save it in the kill ring.
-If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it."
-    (interactive "P")
-    (cond
-     ((memq major-mode '(js2-mode))
-      (js2-print-json-path hardcoded-array-index))
-     (t
-      (let* ((cur-pos (point))
-             (str (my-buffer-str)))
-        (when (string= "json" (file-name-extension buffer-file-name))
-          (setq str (format "var a=%s;" str))
-          (setq cur-pos (+ cur-pos (length "var a="))))
-        (my-ensure 'js2-mode)
-        (with-temp-buffer
-          (insert str)
-          (js2-init-scanner)
-          (js2-do-parse)
-          (goto-char cur-pos)
-          (js2-print-json-path))))))
-  (defun my-print-json-path (&optional hardcoded-array-index)
-    "Print the path to the JSON value under point, and save it in the kill ring.
-If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it."
-    (interactive "P")
-    (cond
-     ((memq major-mode '(js2-mode))
-      (js2-print-json-path hardcoded-array-index))
-     (t
-      (let* ((cur-pos (point))
-             (str (my-buffer-str)))
-        (when (string= "json" (file-name-extension buffer-file-name))
-          (setq str (format "var a=%s;" str))
-          (setq cur-pos (+ cur-pos (length "var a="))))
-        (my-ensure 'js2-mode)
-        (with-temp-buffer
-          (insert str)
-          (js2-init-scanner)
-          (js2-do-parse)
-          (goto-char cur-pos)
-          (js2-print-json-path))))))
-
-
   ;;Latest rjsx-mode does not have indentation issue
   ;;@see https://emacs.stackexchange.com/questions/33536/how-to-edit-jsx-react-files-in-emacs
   (setq-default js2-additional-externs
@@ -379,10 +276,6 @@ If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it.
 
   )
 
-;; @see https://github.com/felipeochoa/rjsx-mode/issues/33
-(with-eval-after-load 'rjsx-mode
-  (define-key rjsx-mode-map "<" nil))
-
 
 (require-package 'emmet-mode)
 (use-package emmet-mode
@@ -430,183 +323,3 @@ If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it.
               js2-strict-inconsistent-return-warning nil ; return <=> return null
               js2-enter-indents-newline nil
               js2-bounce-indent-p t)
-
-(with-eval-after-load 'js-mode
-  ;; '$' is part of variable name like '$item'
-  (modify-syntax-entry ?$ "w" js-mode-syntax-table))
-
-(defun my-validate-json-or-js-expression (&optional not-json-p)
-  "Validate buffer or select region as JSON.
-If NOT-JSON-P is not nil, validate as Javascript expression instead of JSON."
-  (interactive "P")
-  (let* ((json-exp (if (region-active-p) (my-selected-str)
-                     (my-buffer-str)))
-         (jsbuf-offet (if not-json-p 0 (length "var a=")))
-         errs
-         first-err
-         (first-err-pos (if (region-active-p) (region-beginning) 0)))
-    (unless not-json-p
-      (setq json-exp (format "var a=%s;"  json-exp)))
-    (with-temp-buffer
-      (insert json-exp)
-      (my-ensure 'js2-mode)
-      (js2-parse)
-      (setq errs (js2-errors))
-      (cond
-       ((not errs)
-        (message "NO error found. Good job!"))
-       (t
-        ;; yes, first error in buffer is the last element in errs
-        (setq first-err (car (last errs)))
-        (setq first-err-pos (+ first-err-pos (- (cadr first-err) jsbuf-offet)))
-        (message "%d error(s), first at buffer position %d: %s"
-                 (length errs)
-                 first-err-pos
-                 (js2-get-msg (caar first-err))))))
-    (if first-err (goto-char first-err-pos))))
-
-(defun my-print-json-path (&optional hardcoded-array-index)
-  "Print the path to the JSON value under point, and save it in the kill ring.
-If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it."
-  (interactive "P")
-  (cond
-   ((memq major-mode '(js2-mode))
-    (js2-print-json-path hardcoded-array-index))
-   (t
-    (let* ((cur-pos (point))
-           (str (my-buffer-str)))
-      (when (string= "json" (file-name-extension buffer-file-name))
-        (setq str (format "var a=%s;" str))
-        (setq cur-pos (+ cur-pos (length "var a="))))
-      (my-ensure 'js2-mode)
-      (with-temp-buffer
-        (insert str)
-        (js2-init-scanner)
-        (js2-do-parse)
-        (goto-char cur-pos)
-        (js2-print-json-path))))))
-
-(with-eval-after-load 'js2-mode
-  ;; I hate the hotkeys to hide things
-  (define-key js2-mode-map (kbd "C-c C-e") nil)
-  (define-key js2-mode-map (kbd "C-c C-s") nil)
-  (define-key js2-mode-map (kbd "C-c C-f") nil)
-  (define-key js2-mode-map (kbd "C-c C-t") nil)
-  (define-key js2-mode-map (kbd "C-c C-o") nil)
-  (define-key js2-mode-map (kbd "C-c C-w") nil))
-;; }}
-
-(defun my-js2-mode-setup()
-  "Set up javascript."
-  ;; if use node.js we need nice output
-  (js2-imenu-extras-mode)
-  (setq mode-name "JS2")
-  ;; counsel/ivy is more generic and powerful for refactoring
-  ;; js2-mode has its own syntax linter
-
-  ;; call js-doc commands through `counsel-M-x'!
-
-  ;; @see https://github.com/mooz/js2-mode/issues/350
-  (setq forward-sexp-function nil))
-
-(add-hook 'js2-mode-hook 'my-js2-mode-setup)
-
-;; @see https://github.com/felipeochoa/rjsx-mode/issues/33
-(with-eval-after-load 'rjsx-mode
-  (define-key rjsx-mode-map "<" nil))
-
-
-;; Latest rjsx-mode does not have indentation issue
-;; @see https://emacs.stackexchange.com/questions/33536/how-to-edit-jsx-react-files-in-emacs
-(setq-default js2-additional-externs
-              '("$"
-                "$A" ; salesforce lightning component
-                "$LightningApp" ; salesforce
-                "AccessifyHTML5"
-                "Blob"
-                "FormData"
-                "KeyEvent"
-                "Raphael"
-                "React"
-                "URLSearchParams"
-                "__dirname" ; Node
-                "_content" ; Keysnail
-                "after"
-                "afterEach"
-                "angular"
-                "app"
-                "assert"
-                "assign"
-                "before"
-                "beforeEach"
-                "browser"
-                "by"
-                "clearInterval"
-                "clearTimeout"
-                "command" ; Keysnail
-                "content" ; Keysnail
-                "decodeURI"
-                "define"
-                "describe"
-                "display" ; Keysnail
-                "documentRef"
-                "element"
-                "encodeURI"
-                "expect"
-                "ext" ; Keysnail
-                "fetch"
-                "gBrowser" ; Keysnail
-                "global"
-                "goDoCommand" ; Keysnail
-                "hook" ; Keysnail
-                "inject"
-                "isDev"
-                "it"
-                "jest"
-                "jQuery"
-                "jasmine"
-                "key" ; Keysnail
-                "ko"
-                "log"
-                "mockStore"
-                "module"
-                "mountWithTheme"
-                "plugins" ; Keysnail
-                "process"
-                "require"
-                "setInterval"
-                "setTimeout"
-                "shell" ; Keysnail
-                "tileTabs" ; Firefox addon
-                "util" ; Keysnail
-                "utag"))
-
-;; Minor mode to aggressively keep your code always indented
-(use-package aggressive-indent
-  :diminish
-  :defer 2
-  :hook ((after-init . global-aggressive-indent-mode)
-         ;; NOTE: Disable in large files due to the performance issues
-         ;; https://github.com/Malabarba/aggressive-indent-mode/issues/73
-         (find-file . (lambda ()
-                        (when (too-long-file-p)
-                          (aggressive-indent-mode -1)))))
-  :config
-  ;; Disable in some modes
-  (dolist (mode '(gitconfig-mode
-                  asm-mode web-mode html-mode css-mode go-mode
-                  scala-mode shell-mode term-mode vterm-mode
-                  prolog-inferior-mode))
-    (add-to-list 'aggressive-indent-excluded-modes mode))
-
-  ;; Disable in some commands
-  (add-to-list 'aggressive-indent-protected-commands
-               #'delete-trailing-whitespace t)
-
-  ;; Be slightly less aggressive in C/C++/C#/Java/Go/Swift
-  (add-to-list 'aggressive-indent-dont-indent-if
-               '(and (derived-mode-p
-                      'c-mode 'c++-mode 'csharp-mode
-                      'java-mode 'go-mode 'swift-mode)
-                     (null (string-match "\\([;{}]\\|\\b\\(if\\|for\\|while\\)\\b\\)"
-                                         )))))

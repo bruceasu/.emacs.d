@@ -210,45 +210,7 @@
   :group 'suk
   :type 'string)
 
-(defcustom suk-prettify-symbols-alist
-  '(("lambda" . ?λ)
-    ("<-"     . ?←)
-    ("->"     . ?→)
-    ("->>"    . ?↠)
-    ("=>"     . ?⇒)
-    ("map"    . ?↦)
-    ("/="     . ?≠)
-    ("!="     . ?≠)
-    ("=="     . ?≡)
-    ("<="     . ?≤)
-    (">="     . ?≥)
-    ("=<<"    . (?= (Br . Bl) ?≪))
-    (">>="    . (?≫ (Br . Bl) ?=))
-    ("<=<"    . ?↢)
-    (">=>"    . ?↣)
-    ("&&"     . ?∧)
-    ("||"     . ?∨)
-    ("not"    . ?¬))
-  "A list of symbol prettifications. Nil to use font supports ligatures."
-  :group 'suk
-  :type '(alist :key-type string :value-type (choice character sexp)))
-
-(defcustom suk-prettify-org-symbols-alist
-  '(("[ ]"            . ?)
-    ("[-]"            . ?)
-    ("[X]"            . ?)
-
-    (":PROPERTIES:"   . ?)
-    ("#+END_SRC"      . ?□)
-    ("#+BEGIN_QUOTE"  . ?«)
-    ("#+END_QUOTE"    . ?»)
-    )
-  "A list of symbol prettifications for `org-mode'."
-  :group 'suk
-  :type '(alist :key-type string :value-type (choice character sexp)))
-
-
- (defcustom suk-rime t
+(defcustom suk-rime t
   "Display use emacs rime or not."
   :group 'suk
   :type 'boolean)
@@ -257,11 +219,6 @@
    "Enable copilot mode"
    :group 'suk
    :type 'boolean)
-
-(defcustom  suk-eglot-enable nil
-  "Enable eglot mode"
-  :group 'suk
-  :type 'boolean)
 
 ;; Load `custom-file'
 ;; If it doesn't exist, copy from the template, then load it.

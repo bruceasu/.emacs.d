@@ -9,23 +9,15 @@
  indent-tabs-mode nil  ; 永久使用空格縮排，唔好用 TAB 只係用空格代替
                        ; TAB，使用 C-q TAB 來輸入 TAB 字符
  )
-(tooltip-mode -1)                          ;不要显示任何 tooltips
 (delete-selection-mode 1)                  ;选中文本后输入会覆盖
-(size-indication-mode 1)
 (server-mode 1)
 (global-hl-line-mode 1)                    ;高亮当前行
-(put 'narrow-to-region 'disabled nil)      ;开启变窄区域
-(auto-compression-mode 1)                  ;打开压缩文件时自动解压缩
 (show-paren-mode t)                        ;显示括号匹配
 (setq inhibit-startup-message t)           ; 关闭启动欢迎界面
 (setq inhibit-startup-echo-area-message t) ; 关闭启动时回显区的提示信息
 (setq read-process-output-max #x10000)  ; 64kb.  Increase how much is read from processes in a single chunk (default is 4kb)
-(setq vc-follow-symlinks t)
-(setq font-lock-maximum-decoration t)
-
 (setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
 (setq adaptive-fill-first-line-regexp "^* *$")
-(setq set-mark-command-repeat-pop t) ; Repeating C-SPC after popping mark pops it again
 (setq sentence-end "\\([。！？￥%×（）—]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*") ; 测定句子结束识别同埋标点，不用在 `fill` 时，再句号后插入 2 个空行。
 (setq sentence-end-double-space nil)
 (add-hook 'after-change-major-mode-hook (lambda ()(modify-syntax-entry ?_ "w"))) ;; 让 `_` 被视为单词嘅组成部分
@@ -53,13 +45,11 @@
 (setq x-stretch-cursor t)                 ;光标在 TAB 字符上会显示为一个大方块
 (setq print-escape-newlines t)            ;显示字符窗中的换行符为 \n
 (setq tramp-default-method "ssh")         ;设置传送文件默认的方法
-(setq void-text-area-pointer nil)         ;禁止显示鼠标指针
 (setq auto-window-vscroll nil)            ;关闭自动调节行高
 (setq mouse-yank-at-point nil)            ;让光标无法离开视线
 (setq kill-whole-line t)                  ; C-k deletes the end of line
 (setq delete-by-moving-to-trash t)        ; Deleting files go to OS's trash folder
 (setq track-eol t)                        ; Keep cursor at end of lines. Require line-move-visual is nil.
-(setq line-move-visual nil)
 (setq save-interprogram-paste-before-kill t) ; Save clipboard contents into kill-ring before replace them
 (setq echo-keystrokes 0.1)                ;加快快捷键提示的速度
 
@@ -73,6 +63,7 @@
   ;; (setq uniquify-buffer-name-style 'forward)
   (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
   )
+
 (if (boundp 'use-short-answers)
     (setq use-short-answers t)
   (fset 'yes-or-no-p 'y-or-n-p))
@@ -735,16 +726,30 @@ _w_ where is something defined
             (delete-window window)))))
     (advice-add #'keyboard-quit :before #'popper-close-window-hack)))
 
+(suk/wait-for-modules
+ (lambda()
+   (with-eval-after-load 'pretty-hydra
+     (pretty-hydra-define+ window-extension-hydra
+       (:color amaranth :hint nil :title  (pretty-hydra-title "Window Action" 'faicon "nf-fa-th")  :quit-key ("q" "C-g"))
+       ("窗口"
+        (("v" delete-other-windows-vertically+ "垂直只留当前窗口")
+         ("h" delete-other-windows-horizontally+ "水平只留当前窗口")
+         ("'" delete-current-buffer-and-window "关闭当前buffer和窗口")
+         ("\"" delete-current-buffer-window "仅关闭窗口")
+         ("o" toggle-one-window "单窗口切换")
+         ("O" toggle-window-split "切换窗口分割"))))
+     ;; 全局快捷键呼出菜单
+     (global-set-key (kbd "C-c W") 'window-extension-hydra/body)
+     )
+   'window-extension))
+
 (lazy-load-global-keys
  '(
-   ("C-c V" . delete-other-windows-vertically+)   ;关闭上下的其他窗口
-   ("C-c H" . delete-other-windows-horizontally+) ;关闭左右的其他窗口
-   ("C-'"   . delete-current-buffer-and-window)   ;关闭当前buffer, 并关闭窗口
-   ("C-\""  . delete-current-buffer-window)       ;删除当前buffer的窗口
-   ("M-s-o" . toggle-one-window)                  ;切换一个窗口
-   ("C-x O" . toggle-window-split)
+   ("C-c W" . window-extension-hydra/body)
+
    )
- "window-extension")
+ "window-extension"
+ )
 
 (lazy-load-global-keys
  '(

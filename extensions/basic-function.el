@@ -125,27 +125,6 @@
                                    (message "Failed to run \"%s\"." ,command))))))))
 
 ;;;###autoload
-(defvar my-disable-idle-timer (daemonp)
-  "Function passed to `my-run-with-idle-timer' is run immediately.")
-
-;;;###autoload
-(defun my-run-with-idle-timer (seconds func)
-  "After SECONDS, run function FUNC once."
-  (cond
-   (my-disable-idle-timer
-    (funcall func))
-   (t
-    (run-with-idle-timer seconds nil func))))
-
-;;;###autoload
-(defun my-ensure (feature)
-  "Make sure FEATURE is required."
-  (unless (featurep feature)
-    (condition-case nil
-        (require feature)
-      (error nil))))
-
-;;;###autoload
 (defun load-if-exists (f)
   "load the elisp file only if it exists and is readable"
   (if (file-readable-p f)

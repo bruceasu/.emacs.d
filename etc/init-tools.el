@@ -82,10 +82,6 @@
 
 (use-package markdown-mode)
 
-(use-package regex-tool)
-
-;; (use-package 'command-log-mode) ;; show the command you press the shortcuts. M-x command-log-mode, M-x clm/open-command-log-buffer
-
 ;;;; The emacsclient call depends on the daemon or `server-mode' (I use the latter)
 (use-package server
   :ensure nil
@@ -93,10 +89,3 @@
   :config
   (unless (server-running-p)
     (server-start)))
-
-(use-package keyfreq
-  :ensure t
-  :config
-  (keyfreq-mode 1)
-  (keyfreq-autosave-mode 1))
-;; M-x keyfreq-show

@@ -117,7 +117,7 @@
   (defun my-git-timemachine ()
     "Open git snapshot with the selected version."
     (interactive)
-    (my-ensure 'git-timemachine)
+    (require 'git-timemachine)
     (git-timemachine--start #'my-git-timemachine-show-selected-revision))
   ;; }}
   )
