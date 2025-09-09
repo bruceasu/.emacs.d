@@ -309,7 +309,7 @@
                 (load-default-font)))))
 
 
-(when sys/win32p
+(when (eq system-type 'windows-nt)
   ;; (set-frame-font "Simsun 12")
   ;; setup change size font, base on emacs-font-size-pair-list
   (global-set-key (kbd "C-M-=") 'increase-emacs-font-size)

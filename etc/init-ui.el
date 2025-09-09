@@ -16,7 +16,7 @@
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
   :init
-  (setq doom-modeline-icon suk-icon
+  (setq doom-modeline-icon t
         doom-modeline-minor-modes t)
   :config
   (column-number-mode 1)

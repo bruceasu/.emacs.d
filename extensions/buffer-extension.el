@@ -37,6 +37,7 @@
 ;;; Require
 
 (require 'basic-toolkit)
+(require 'leader-key)
 
 ;;; Code:
 
@@ -58,13 +59,11 @@
 ;; 换行符设置(只是设定保存文件的换行符，并不是用这种换行符重新读取文件)
 ;; Dos/Unix
 ;; ---------------------------------------------------------
-;;;###autoload
 (defun set2unix ()
   "Convert the current buffer to UNIX file format."
   (interactive)
   (set-buffer-file-coding-system 'undecided-unix nil))
 
-;;;###autoload
 (defun set2dos ()
   "Convert the current buffer to DOS file format."
   (interactive)
@@ -78,98 +77,140 @@
 ;; insert a ^M character. Typing ‘C-m’ won’t work – you have to
 ;; hold down ‘Control’ while hitting ‘q’ followed by ‘m’.
 ;; ---------------------------------------------------------------
-;;;###autoload
-(defun dos2unix ()
-  "Delete `' characters in current region or buffer.
-Same as '`replace-string' `C-q' `C-m' `RET' `RET''."
+;;; --- EOL conversion helpers (content + saving format) ---
+
+(defun suk/dos2unix (&optional beg end)
+  "将当前区域或缓冲区内的 CR 去掉（把 CRLF 变成 LF），并把保存格式设为 UNIX。
+如果有选区，只处理选区；否则处理整个缓冲区。"
   (interactive)
   (save-excursion
-    (when (region-active-p)
-      (narrow-to-region (region-beginning) (region-end)))
-    (goto-char (point-min))
-    (let ((count 0))
-      (while (search-forward "\r" nil t)
-        (replace-match "" nil t)
-        (setq count (1+ count)))
-      (message "Removed %d " count))
-    (widen))
-  ;; 设置当前缓冲区的保存文件格式为 UNIX
-  (set-buffer-file-coding-system 'unix 't)
-  )
+    (save-restriction
+      (when (and (region-active-p) (not (use-region-p))) ; 兼容旧配置
+        (activate-mark))
+      (when (use-region-p)
+        (narrow-to-region (region-beginning) (region-end)))
+      (goto-char (point-min))
+      (let ((count 0))
+        (while (search-forward "\r" nil t)
+          (replace-match "" nil t)
+          (setq count (1+ count)))
+        (message "Removed %d CR (^M) chars" count))
+      (widen)))
+  ;; 设置保存为 UNIX（LF）
+  (set-buffer-file-coding-system 'unix t))
 
-;;;###autoload
-(defun unix2dos ()
-  "Convert the current buffer from Unix line endings to DOS line
-endings."
+(defun suk/unix2dos ()
+  "将当前缓冲区的 **保存格式** 设为 DOS（CRLF）。不要手工插入 CR。"
   (interactive)
+  ;; 若缓冲区中残留了文本形式的 CR（很少见），先清理一下更稳妥：
   (save-excursion
     (goto-char (point-min))
-    (while (search-forward "\n" nil t)
-      (replace-match "\r\n" nil t)))
-  ;; 设置当前缓冲区的保存文件格式为 DOS
-  (set-buffer-file-coding-system 'dos 't))
+    (while (search-forward "\r" nil t)
+      (replace-match "" nil t)))
+  (set-buffer-file-coding-system 'dos t)
+  (message "Buffer will be saved with DOS (CRLF) line endings"))
 
-
-;; ===============================================================
-;; 重新读取文件
-;; Revert buffer
-;; ---------------------------------------------------------------
-;;;###autoload
-(defun suk/revert-current-buffer ()
-  "Revert the current buffer. key \\[suk/revert-current-buffer]."
+(defun suk/toggle-eol ()
+  "在 DOS (CRLF) 与 UNIX (LF) 行尾之间切换，并同步转换内容。"
   (interactive)
-  (unless (minibuffer-window-active-p (selected-window))
-    (revert-buffer t t)
-    (message "Reverted this buffer")))
+  (if (string-match-p "dos\\'" (symbol-name buffer-file-coding-system))
+      ;; 当前是 DOS → 转成 UNIX
+      (progn
+        (suk/dos2unix)
+        (message "Converted to UNIX (LF)"))
+    ;; 当前是 UNIX → 转成 DOS
+    (progn
+      (suk/unix2dos)
+      (message "Converted to DOS (CRLF)"))))
+
+(global-set-key (kbd "C-c t e") #'suk/toggle-eol)
+
+
+;; 直接用内置 M-x revert-this-buffer（Emacs 28+）即可“一键刷新当前 buffer”。
+;; 需要换编码重读 → M-x revert-buffer-with-coding-system。
+;;; =========================================================
+;;; 快速以指定编码重新读取当前文件（无确认）
+;;; - 带前缀参数 C-u 同时把“之后保存编码”设为同一编码
+;;; ---------------------------------------------------------
+
+(defun suk/revert-with-coding (coding &optional set-for-save)
+  "用 CODING 重新读取当前文件（不询问）。若 SET-FOR-SAVE 非 nil，也把保存编码设为 CODING。"
+  (interactive (list (read-coding-system "Revert using coding: ") current-prefix-arg))
+  (unless (buffer-file-name)
+    (user-error "当前 buffer 不是文件"))
+  (let ((coding-system-for-read coding))
+    (revert-buffer t t))                   ; 忽略autosave & 不确认
+  (when set-for-save
+    (set-buffer-file-coding-system coding t))
+  (message "Reverted with %s%s" coding (if set-for-save ", and set as save coding" "")))
+
+;; --- 直达 UTF-8 / GB18030 / MS932（cp932） ---
+(defun suk/revert-utf8 (&optional set-for-save)
+  "用 UTF-8 重读当前文件。C-u 同时设为保存编码。"
+  (interactive "P")
+  (suk/revert-with-coding 'utf-8 set-for-save))
+
+(defun suk/revert-gb18030 (&optional set-for-save)
+  "用 GB18030 重读当前文件。C-u 同时设为保存编码。"
+  (interactive "P")
+  (suk/revert-with-coding 'gb18030 set-for-save))
+
+(defun suk/revert-ms932 (&optional set-for-save)
+  "用 MS932(=cp932/windows-31j) 重读当前文件。C-u 同时设为保存编码。"
+  (interactive "P")
+  (suk/revert-with-coding 'cp932 set-for-save))   ; Emacs 的编码名是 cp932
 
 ;;; =========================================================
-;;; 用新编码重新读取文件
+;;; 自动识别（优先尝试 Unicode，再尝试常见 CJK 编码）
+;;; - 尝试顺序可按需调整
+;;; - 成功即停，失败则报错
 ;;; ---------------------------------------------------------
-;;;###autoload
-(defun suk/revert-buffer-no-confirm ()
-  "执行`revert-buffer'时不需要确认. key \\[suk/revert-buffer-no-confirm]."
-  (interactive)
-  (when (buffer-file-name)
-    (revert-buffer buffer-file-name t)
-    )
-  )
+(defun suk/revert-auto-unicode-cjk (&optional set-for-save)
+  "按常见 Unicode/CJK 编码顺序重读：UTF-8/UTF-16(含BOM)/UTF-16LE/BE → CP932 → GB18030 → GBK → BIG5。
+C-u 同时把保存编码设为成功使用的编码。"
+  (interactive "P")
+  (unless (buffer-file-name)
+    (user-error "当前 buffer 不是文件"))
+  (let* ((candidates '(utf-8
+                       utf-16           ; 含 BOM 自动判别端序
+                       utf-16le utf-16be
+                       cp932            ; MS932 / Windows-31J
+                       gb18030 gbk
+                       big5))
+         (done nil)
+         (used nil))
+    (dolist (c candidates)
+      (unless done
+        (condition-case _
+            (progn
+              (let ((coding-system-for-read c))
+                (revert-buffer t t))
+              (setq done t
+                    used c))
+          (error nil))))
+    (unless done)
+    (if used
+        (progn
+          (when set-for-save
+            (set-buffer-file-coding-system used t))
+          (message "Auto-revert OK with %s%s"
+                   used (if set-for-save ", and set as save coding" "")))
+      (user-error "给定候选编码都无法成功重读。可手动试试 M-x revert-buffer-with-coding-system"))))
 
-;;; ---------------------------------------------------------
-;;;###autoload
-(defun suk/revert-buffer-with-coding-system-no-confirm (coding-system)
-  "Call `revert-buffer-with-coding-system' with CODING-SYSTEM, but when `revert-buffer' do not need confirm."
-  (interactive "Coding system for visited file (default nil): ")
-  (let ((coding-system-for-read coding-system))
-    (suk/revert-buffer-no-confirm)
-    (set-buffer-file-coding-system coding-system)
-    ))
+;;; 可选：常用快捷键（按需改）
+(global-set-key (kbd "C-c r a") #'suk/revert-auto-unicode-cjk)
 
-;;; ---------------------------------------------------------
-;;;###autoload
-(defun suk/revert-buffer-with-gbk ()
-  "Call `revert-buffer-with-coding-system-no-confirm' with gbk.
-It is bound to \\[suk/revert-buffer-with-gbk]."
-  (interactive)
-  (suk/revert-buffer-with-coding-system-no-confirm 'gb18030))
-
-;;; ---------------------------------------------------------
-;;;###autoload
-(defun suk/revert-buffer-with-utf8 ()
-  "Call `revert-buffer-with-coding-system-no-confirm' with utf-8.
-It is bound to \\[suk/revert-buffer-with-utf8]."
-  (interactive)
-  (suk/revert-buffer-with-coding-system-no-confirm 'utf-8))
 
 ;; ==============================================================
 ;; buffers
 ;; --------------------------------------------------------------
 (defvar suk/recently-closed-buffers nil
-  "A list of recently closed buffers. Each element is (buffer name, file path). The max number to track is controlled by the variable `suk/recently-closed-buffers-max'.")
+  "A list of recently closed buffers. Each element is (buffer name, file path).
+   The max number to track is controlled by the variable `suk/recently-closed-buffers-max'.")
 
 (defvar suk/recently-closed-buffers-max 40 "The maximum length for `suk/recently-closed-buffers'.")
 
 ;; ---------------------------------------------------------------
-;;;###autoload
 (defun suk/close-current-buffer ()
   "Close the current buffer.
 
@@ -223,7 +264,7 @@ prompt the user to save before closing.
         (kill-buffer (current-buffer))))))
 
 ;; ---------------------------------------------------------------
-;;;###autoload
+
 (defun suk/open-last-closed ()
   "Open the last closed file."
   (interactive)
@@ -232,7 +273,6 @@ prompt the user to save before closing.
     (progn (message "No recently close buffer in this session."))))
 
 ;; ---------------------------------------------------------------
-;;;###autoload
 (defun suk/open-recently-closed ()
   "Open recently closed file.Prompt for a choice."
   (interactive)
@@ -241,7 +281,6 @@ prompt the user to save before closing.
 ;; ---------------------------------------------------------------
 ;; List the recently closed files.
 ;; ---------------------------------------------------------------
-;;;###autoload
 (defun suk/list-recently-closed ()
   "List recently closed file."
   (interactive)
@@ -250,7 +289,10 @@ prompt the user to save before closing.
     (mapc (lambda ($f) (insert (cdr $f) "\n"))
           suk/recently-closed-buffers)))
 
-;;;###autoload
+
+;; ---------------------------------------------------------------
+;; Kill all buffers except current buffer.
+;; ---------------------------------------------------------------
 (defun suk/kill-all-buffers-except-current ()
   "Kill all buffers except current buffer.  key \\[suk/kill-all-buffers-except-current]."
   (interactive)
@@ -260,7 +302,10 @@ prompt the user to save before closing.
       (unless (eq current-buf buffer)
         (kill-buffer buffer)))))
 
-;;;###autoload
+
+;; ---------------------------------------------------------------
+;; Kill the buffer in other window. 
+;; ---------------------------------------------------------------
 (defun suk/kill-other-window-buffer ()
   "Kill the buffer in other window.  key \\[suk/kill-other-window-buffer]."
   (interactive)
@@ -268,7 +313,9 @@ prompt the user to save before closing.
   (kill-this-buffer)
   (other-window -1))
 
-;;;###autoload
+;; ---------------------------------------------------------------
+;; Delete the current file, and kill the buffer.
+;; ---------------------------------------------------------------
 (defun suk/delete-this-file ()
   "Delete the current file, and kill the buffer."
   (interactive)
@@ -278,78 +325,68 @@ prompt the user to save before closing.
                              (file-name-nondirectory buffer-file-name)))
     (delete-file (buffer-file-name))
     (kill-this-buffer)))
+;;; --------------------------------------------------------------
+;;; Unified rename/move current buffer's file with fallback
+;;; --------------------------------------------------------------
 
-;; --------------------------------------------------------------
-;; new empty buffer
-;; --------------------------------------------------------------
-;;;###autoload
-(defun suk/new-empty-buffer ()
-  "Create a new empty buffer.
-New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
-It returns the buffer."
-  (interactive)
-  (let (($buf (generate-new-buffer "untitled")))
-    (switch-to-buffer $buf)
-    ;;    (funcall initial-major-mode)
-    (text-mode)
-    (setq buffer-offer-save t)
-    $buf
-    ))
-
-;;###autoload
-(defun suk/new-org-buffer ()
-  "Create a new org-mode buffer.
-New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
-It returns the buffer."
-  (interactive)
-  (let (($buf (generate-new-buffer "untitled")))
-    (switch-to-buffer $buf)
-    (insert "#+OPTIONS: ^:{}\n#+TITLE: ")
-    (setq buffer-offer-save t)
-    (org-mode)
-    $buf
-    ))
-;; --------------------------------------------------------------
-;; Rename
-;; --------------------------------------------------------------
-;;;###autoload
-(defun suk/rename-file-and-buffer (new-name)
-  "Renames both current buffer and file it's visiting to NEW-NAME."
-  (interactive "sNew name: ")
-  (let ((name (buffer-name))
-        (filename (buffer-file-name)))
-    (if (not filename)
-        (message "Buffer '%s' is not visiting a file!" name)
-      (if (get-buffer new-name)
-          (message "A buffer named '%s' already exists!" new-name)
+(defun suk--rename-or-move (new-path &optional ok-if-exists)
+  "Rename/move current buffer's visiting file to NEW-PATH.
+Prefer `rename-file'; if it fails (e.g. cross-device), fallback to copy+delete.
+When OK-IF-EXISTS is non-nil, allow overwriting."
+  (unless (buffer-file-name)
+    (user-error "当前 buffer 没有关联文件"))
+  (let* ((old (buffer-file-name))
+         (dst (expand-file-name new-path))
+         (dst-dir (file-name-directory dst)))
+    ;; 确保目标目录存在
+    (unless (file-directory-p dst-dir)
+      (make-directory dst-dir t))
+    (condition-case err
         (progn
-          (rename-file filename new-name 1)
-          (rename-buffer new-name)
-          (set-visited-file-name new-name)
-          (set-buffer-modified-p nil))))))
+          ;; 尝试直接重命名（更快）
+          (rename-file old dst ok-if-exists)
+          (message "Renamed: %s → %s" old dst))
+      (file-error
+       ;; rename 失败（多见于跨设备），fallback：copy + delete
+       (progn
+         (when (and (file-exists-p dst) (not ok-if-exists))
+           (user-error "目标已存在：%s（使用前缀参数覆盖或改名）" dst))
+         (copy-file old dst t)     ; t = ok-if-exists 覆盖
+         (delete-file old)
+         (message "Moved by copy+delete: %s → %s" old dst)))))
+  ;; 同步 buffer → 新文件
+  (set-visited-file-name (expand-file-name new-path) t t)
+  (rename-buffer (file-name-nondirectory (buffer-file-name)) t)
+  (set-buffer-modified-p nil)
+  (message "Buffer now visiting: %s" (buffer-file-name))
+  (buffer-file-name))
+
+;;; 交互式：输入“新完整路径”（可改名，也可换目录）
+(defun suk/rename-or-move-file-here (new-path &optional overwrite)
+  "把当前文件重命名/移动到 NEW-PATH。
+带前缀参数时允许覆盖已存在的同名文件。"
+  (interactive
+   (let* ((old (or (buffer-file-name) (user-error "当前 buffer 没有关联文件")))
+          (prompt (format "新路径（默认目录：%s）: " (file-name-directory old))))
+     (list (read-file-name prompt (file-name-directory old) old nil
+                           (file-name-nondirectory old))
+           current-prefix-arg)))
+  (suk--rename-or-move new-path overwrite))
+
+;;; 交互式：输入“新目录”，文件名保持不变
+(defun suk/move-file-to-dir (dir &optional overwrite)
+  "把当前文件移动到 DIR（文件名保持不变）。
+带前缀参数时允许覆盖已存在的同名文件。"
+  (interactive
+   (list (read-directory-name "目标目录: " nil nil t) current-prefix-arg))
+  (let* ((name (file-name-nondirectory
+                (or (buffer-file-name) (user-error "当前 buffer 没有关联文件"))))
+         (dst  (expand-file-name name dir)))
+    (suk--rename-or-move dst overwrite)))
 
 ;; --------------------------------------------------------------
-;; move
+;; copy file name
 ;; --------------------------------------------------------------
-;;;###autoload
-(defun suk/move-buffer-file (dir)
-  "Move both current buffer and file it's visiting to DIR."
-  (interactive "DNew directory: ")
-  (let* ((name (buffer-name))
-         (filename (buffer-file-name))
-         (dir
-          (if (string-match dir "\\(?:/\\|\\\\)$")
-              (substring dir 0 -1) dir))
-         (newname (concat dir "/" name)))
-    (if (not filename)
-        (message "Buffer '%s' is not visiting a file!" name)
-      (copy-file filename newname 1)
-      (delete-file filename)
-      (set-visited-file-name newname)
-      (set-buffer-modified-p nil)
-      t)))
-
-;;###autoload
 (defun suk/copy-file-name ()
   "Copy the current buffer file name to the clipboard."
   (interactive)
@@ -363,238 +400,58 @@ It returns the buffer."
       (warn "Current buffer is not attached to a file!"))))
 
 
+;; --------------------------------------------------------------
+;; new empty buffer
+;; --------------------------------------------------------------
+(defun suk/new-empty-buffer ()
+  "Create a new empty buffer.
+New buffer will be named “untitled” or “untitled<2>”, “untitled<3>”, etc.
+It returns the buffer."
+  (interactive)
+  (let (($buf (generate-new-buffer "untitled")))
+    (switch-to-buffer $buf)
+    ;;    (funcall initial-major-mode)
+    (text-mode)
+    (setq buffer-offer-save t)
+    $buf
+    ))
+(global-set-key (kbd "C-c b b") #'suk/create-scratch-buffer)
+
 
 ;; --------------------------------------------------------------
 ;; Create a new scratch buffer
 ;; --------------------------------------------------------------
-;;;###autoload
-(defun suk/create-scratch-buffer ()
+(defun suk/new-scratch-buffer ()
   "Create a scratch buffer."
   (interactive)
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (lisp-interaction-mode))
 
-
-;;;###autoload
-(defun suk/create-scratch-org ()
-  "Create a scratch buffer with org-mode"
-  (interactive)
-  (find-file "/tmp/scratch.org")
-  (gnus-make-directory "/tmp"))
-
-;;;###autoload
-(defun suk/switch-to-minibuffer ()
-  "Switch to minibuffer window."
-  (interactive)
-  (if (active-minibuffer-window)
-      (select-window (active-minibuffer-window))
-    (error "Minibuffer is not active")))
-(global-set-key "\C-co" 'suk/switch-to-minibuffer) ;; Bind to `C-c o'
+(global-set-key (kbd "C-c b s") #'suk/create-scratch-buffer)
 
 
-(use-package olivetti)
-(require 'olivetti)
-(define-minor-mode suk-read-mode
-  "Minor Mode for better reading experience."
-  :init-value nil
-  :group suk
-  (if suk-read-mode
-      (progn
-        (and (fboundp 'olivetti-mode) (olivetti-mode 1))
-        (and (fboundp 'mixed-pitch-mode) (mixed-pitch-mode 1))
-        (text-scale-set +1))
-    (progn
-      (and (fboundp 'olivetti-mode) (olivetti-mode -1))
-      (and (fboundp 'mixed-pitch-mode) (mixed-pitch-mode -1))
-      (text-scale-set 0))))
-
-;; 显示当前buffer或region或函数的行数和字符数
-;; --------------------------------------------------------------
-;;;###autoload
-(defun suk/count-brf-lines (&optional is-fun)
-  "显示当前buffer或region或函数的行数和字符数."
-  (interactive "P")
-  (let (min max)
-    (if is-fun
-        (save-excursion
-          (beginning-of-defun) (setq min (point))
-          (end-of-defun) (setq max (point))
-          (message "当前函数%s内共有%d行, %d个字符" (which-function) (count-lines min max) (- max min)))
-      (if mark-active
-          (progn
-            (setq min (min (point) (mark)))
-            (setq max (max (point) (mark))))
-        (setq min (point-min))
-        (setq max (point-max)))
-      (if (or (= 1 (point-min)) mark-active)
-		  mark-active
-        (message "当前region内共有%d行, %d个字符" (count-lines min max) (- max min))
-        (message "当前buffer内共有%d行, %d个字符" (count-lines min max) (- max min)))
-      (let ((nmin min) (nmax max))
-        (save-excursion
-          (save-restriction
-            (widen)
-            (setq min (point-min))
-            (setq max (point-max))))
-        (message "narrow下buffer内共有%d行, %d个字符, 非narrow下buffer内共有%d行, %d个字符"
-                 (count-lines nmin nmax) (- nmax nmin) (count-lines min max) (- max min))))))
+;; ------------------------------------------------------------
+;; Buffer 相关 (b)
+;; ------------------------------------------------------------
+;;(keymap-set leader-key-map "b b" #'switch-to-buffer)
+;;(keymap-set leader-key-map "b d" #'kill-this-buffer)
+(keymap-set leader-key-map "b n" #'next-buffer) ;; default keys: C-x LEFT/RIGHT
+(keymap-set leader-key-map "b p" #'previous-buffer)
+(keymap-set leader-key-map "b d" #'suk/close-current-buffer)
+(keymap-set leader-key-map "b D" #'suk/delete-this-file)
+(keymap-set leader-key-map "b k" #'suk/kill-all-buffers-except-current)
+(keymap-set leader-key-map "b K" #'suk/kill-other-window-buffer)
+(keymap-set leader-key-map "b c" #'suk/copy-file-name)
+(keymap-set leader-key-map "b s" #'suk/new-scratch-buffer)
+(keymap-set leader-key-map "b b" #'suk/new-empty-buffer)
+(keymap-set leader-key-map "b r" #'suk/open-recently-closed)
+(keymap-set leader-key-map "b R" #'suk/list-recently-closed)
+(keymap-set leader-key-map "b l" #'suk/open-last-closed)
+(keymap-set leader-key-map "b L" #'suk/toggle-eol)
+(keymap-set leader-key-map "b e" #'suk/suk/revert-auto-unicode-cjk)
+(keymap-set leader-key-map "b M" #'suk/rename-or-move-file-here)
+(keymap-set leader-key-map "b m" #'suk/move-file-to-dir)
 
 
-;; =========================================================
-;; 方便的切换major mode
-;; ---------------------------------------------------------
-(defvar suk/switch-major-mode-last-mode nil)
-;; ---------------------------------------------------------
-;;;###autoload
-(defun suk/major-mode-heuristic (symbol)
-  (and (fboundp symbol)
-       (string-match ".*-mode$" (symbol-name symbol))))
-;; ---------------------------------------------------------
-;;;###autoload
-(defun suk/switch-major-mode (mode)
-  "Change major mode to MODE."
-  (interactive
-   (let ((fn suk/switch-major-mode-last-mode) val)
-     (setq val
-           (completing-read
-            (if fn (format "Change major-mode(default:%s): " fn) "Change major mode: ")
-            obarray 'suk/major-mode-heuristic t nil nil (symbol-name fn)))
-     (list (intern val))))
-  (let ((last-mode major-mode))
-    (funcall mode)
-    (setq suk/switch-major-mode-last-mode last-mode)
-    (message "Change to %s." major-mode))
-  )
-;; ---------------------------------------------------------
-;; show major mode
-;;;###autoload
-(defun suk/get-mode-name ()
-  "Show `major-mode' and `mode-name'."
-  (interactive)
-  (message "major-mode:%s, mode-name:%s" major-mode mode-name))
-
-;;;###autoload
-(defun suk/toggle-margin-right ()
-  "Toggle the right margin between `fill-column' or window width.
-This command is convenient when reading novel, documentation."
-  (interactive)
-  (if (eq (cdr (window-margins)) nil)
-      (set-window-margins nil 0 (- (window-body-width) fill-column))
-    (set-window-margins nil 0 0)))
-
-;;===================================================
-;; Update
-;;===================================================
-;;;###autoload
-(defun update-config ()
-  "Update Suk's Emacs configurations to the latest version."
-  (interactive)
-  (let ((dir (expand-file-name user-emacs-directory)))
-    (unless (file-exists-p dir)
-      (user-error "\"%s\" doesn't exist" dir))
-
-    (message "Updating configurations...")
-    (cd dir)
-    (shell-command "git pull")
-    (message "Updating configurations...done")))
-;;;###autoload
-(defalias 'suk-update-config #'update-config)
-;;;###autoload
-(defun update-packages ()
-  "Refresh package contents and update all packages."
-  (interactive)
-  (message "Updating packages...")
-  (package-upgrade-all)
-  (message "Updating packages...done"))
-(defalias 'suk-update-packages #'update-packages)
-;;;###autoload
-(defun update-config-and-packages()
-  "Update confgiurations and packages."
-  (interactive)
-  (update-config)
-  (update-packages))
-(defalias 'suk-update #'update-config-and-packages)
-;;;###autoload
-(defun update-dotfiles ()
-  "Update the dotfiles to the latest version."
-  (interactive)
-  (let ((dir (or (getenv "DOTFILES")
-                 (expand-file-name "~/.dotfiles/"))))
-    (if (file-exists-p dir)
-        (progn
-          (message "Updating dotfiles...")
-          (cd dir)
-          (shell-command "git pull")
-          (message "Updating dotfiles...done"))
-      (message "\"%s\" doesn't exist" dir))))
-(defalias 'suk-update-dotfiles #'update-dotfiles)
-;;;###autoload
-(defun update-org ()
-  "Update Org files to the latest version."
-  (interactive)
-  (let ((dir (expand-file-name "~/org/")))
-    (if (file-exists-p dir)
-        (progn
-          (message "Updating org files...")
-          (cd dir)
-          (shell-command "git pull")
-          (message "Updating org files...done"))
-      (message "\"%s\" doesn't exist" dir))))
-(defalias 'suk-update-org #'update-org)
-;;;###autoload
-(defun update-all()
-  "Update dotfiles, org files, configurations and packages to the latest."
-  (interactive)
-  (update-org)
-  (update-dotfiles)
-  (update-config-and-packages))
-(defalias 'suk-update-all #'update-all)
-
-
-(with-eval-after-load 'hydra
-  (defhydra my-hydra-buffers ()
-    "
-Describe Something: (q to quit)
-^Open/Clsoe^         ^Actions^               ^Creation^
--------------------------------------------------------------------
-_m_inbuffer          s_w_itch mode           _n_ew
-_u_tf-8 realod       _G_et mode              _s_cratch
-_g_bk reload         _d_elete file           _o_rg
-_l_ast reopen        _M_ove                  _O_rg scratch
-_R_eopen             _t_oggle margin right
-_r_ecentf            re_N_ame
-_k_ close current    _C_opy filename
-_K_ close other      _c_ount
-close _A_ll          [x] narrow-region
-"
-
-    ("n" suk/new-empty-buffer)
-    ("s" suk/create-scratch-buffer)
-    ("O" suk/create-scratch-org)
-    ("o" suk/new-org-buffer)
-	("d" suk/delete-this-file)
-    ("k" suk/close-current-buffer)
-    ("A" suk/kill-all-buffers-except-current)
-    ("K" suk/kill-other-window-buffer) ;关闭其他窗口的
-
-    ("w" suk/switch-major-mode)
-    ("C" suk/copy-file-name)
-    ("c" suk/count-brf-lines)
-    ("G" suk/get-mode-name)
-    ("M" suk/move-buffer-file)
-    ("N" suk/rename-file-and-buffer)
-    ("x" suk/xah-narrow-to-region)
-    ("t" suk/toggle-margin-right)
-
-    ("m" suk/switch-to-minibuffer)
-    ("u" suk/revert-buffer-with-utf8)
-    ("g" suk/revert-buffer-with-gbk)
-    ("l" suk/open-last-closed)
-    ("r" recentf-open)
-    ("R" suk/open-recently-closed)
-    ("q" nil))
-  ;;(global-set-key (kbd "C-c b") 'my-hydra-buffers/body)
-  )
 (provide 'buffer-extension)
-
 ;;; buffer-extension.el ends here

@@ -56,9 +56,8 @@
 ;;;###autoload
 (defun icons-displayable-p ()
   "Return non-nil if icons are displayable."
-  (and suk-icon
-       (or (featurep 'nerd-icons)
-           (require 'nerd-icons nil t))))
+  (or (featurep 'nerd-icons)
+         (require 'nerd-icons nil t)))
 
 ;;;###autoload
 (defun suk-treesit-available-p ()

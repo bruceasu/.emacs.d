@@ -35,7 +35,7 @@
         treemacs-sorting                 'alphabetic-asc
         treemacs-follow-after-init       t
         treemacs-width                   30
-        treemacs-no-png-images           (not suk-icon))
+        treemacs-no-png-images           nil)
 
   (treemacs-follow-mode t)
   (treemacs-filewatch-mode t)

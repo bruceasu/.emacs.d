@@ -4,12 +4,7 @@
 ;; basic settings
 (setq-default
  major-mode 'text-mode ; 默认使用text模式
- cursor-type 'bar      ; 设置光标样式
- tab-width 4           ; tab 的宽度为 4 空格
- indent-tabs-mode nil  ; 永久使用空格縮排，唔好用 TAB 只係用空格代替
-                       ; TAB，使用 C-q TAB 來輸入 TAB 字符
  )
-(delete-selection-mode 1)                  ;选中文本后输入会覆盖
 (server-mode 1)
 (global-hl-line-mode 1)                    ;高亮当前行
 (show-paren-mode t)                        ;显示括号匹配
@@ -18,8 +13,10 @@
 (setq read-process-output-max #x10000)  ; 64kb.  Increase how much is read from processes in a single chunk (default is 4kb)
 (setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
 (setq adaptive-fill-first-line-regexp "^* *$")
-(setq sentence-end "\\([。！？￥%×（）—]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*") ; 测定句子结束识别同埋标点，不用在 `fill` 时，再句号后插入 2 个空行。
 (setq sentence-end-double-space nil)
+(setq sentence-end
+      "\\(?:[.?!。！？…]+\\)[]\"')}”’）】』」》]*\\(?:$\\|[ \t]\\)[ \t\n]*") ; 测定句子结束识别同埋标点，不用在 `fill` 时，再句号后插入 2 个空行。
+
 (add-hook 'after-change-major-mode-hook (lambda ()(modify-syntax-entry ?_ "w"))) ;; 让 `_` 被视为单词嘅组成部分
 (add-hook 'after-change-major-mode-hook (lambda () (modify-syntax-entry ?- "w"))) ;; `-` 符号同样
 (setq suggest-key-bindings 1)             ;当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
@@ -49,9 +46,7 @@
 (setq mouse-yank-at-point nil)            ;让光标无法离开视线
 (setq kill-whole-line t)                  ; C-k deletes the end of line
 (setq delete-by-moving-to-trash t)        ; Deleting files go to OS's trash folder
-(setq track-eol t)                        ; Keep cursor at end of lines. Require line-move-visual is nil.
 (setq save-interprogram-paste-before-kill t) ; Save clipboard contents into kill-ring before replace them
-(setq echo-keystrokes 0.1)                ;加快快捷键提示的速度
 
 ;; Hanlde minified code
 (if emacs/>=27p
@@ -68,20 +63,22 @@
     (setq use-short-answers t)
   (fset 'yes-or-no-p 'y-or-n-p))
 
+;; text-mode 下自动开启合适的换行宽度
+(add-hook 'text-mode-hook
+          (lambda ()
+            (setq-local fill-column 100) ; 80/100/120
+            (auto-fill-mode 1)))
+
 ;; backup settings
 (setq make-backup-files t)
 (setq version-control t)     ; 允许多次备份
 (setq kept-old-versions 2)   ; 保留最早的2个备份文件
-(setq kept-new-version 100)  ; 保留最近的100个备份文件
+(setq kept-new-version 64)  ; 保留最近的100个备份文件
 (setq delete-old-versions t) ; 自动删除旧的备份文件
 
 (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
       history-length 1000
-      savehist-additional-variables '(mark-ring
-                                      global-mark-ring
-                                      search-ring
-                                      regexp-search-ring
-                                      extended-command-history)
+      savehist-additional-variables '(mark-ring global-mark-ring search-ring regexp-search-ring extended-command-history)
       savehist-autosave-interval 300
       savehist-file (expand-file-name "history" suk-emacs-var-dir) ; "~/.emacs.d/var/history"
       )
@@ -94,33 +91,35 @@
 ;; (prefer-coding-system 'utf-16le-with-signature)
 ;; (prefer-coding-system 'utf-16)
 ;; (prefer-coding-system 'utf-8-dos)
-
 ;; Set UTF-8 as the default coding system
-(prefer-coding-system 'utf-8)
-(setq default-buffer-file-coding-system 'utf-8)            ;缓存文件编码
-(setq default-file-name-coding-system 'utf-8)              ;文件名编码
-(setq default-keyboard-coding-system 'utf-8)               ;键盘输入编码
-(setq default-process-coding-system '(utf-8 . utf-8))      ;进程输出输入编码
-(setq default-sendmail-coding-system 'utf-8)               ;发送邮件编码
-(setq default-terminal-coding-system 'utf-8)               ;终端编码
+;; -----------------------------
+;; Emacs UTF-8 编码统一设置
+;; -----------------------------
 
-
-(set-default-coding-systems 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(setq-default buffer-file-coding-system 'utf-8)
-
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-
-(setq buffer-file-coding-system 'utf-8)
-(setq session-save-file-coding-system 'utf-8)
-
+;; 1. 设置语言环境为 UTF-8（会影响默认 buffer/file/keyboard/terminal）
 (set-language-environment "UTF-8")
 
+;; 2. 告诉 Emacs 优先使用 UTF-8 作为各种操作的默认编码
 (prefer-coding-system 'utf-8)
 
+;; 3. 设置默认编码系统（文件读写、缓冲区等）
+(set-default-coding-systems 'utf-8)
+
+;; 4. 设置终端和键盘输入输出为 UTF-8
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+;; 5. 设置进程 I/O 使用 UTF-8
+(setq default-process-coding-system '(utf-8 . utf-8))
+
+;; （可选）如果你用 Emacs 发送邮件，可以启用下面这行
+(setq default-sendmail-coding-system 'utf-8)
+
+(require 'buffer-extension)
+
 (require 'init-key)
+
+(require 'leader-key)
 
 (use-package bind-key)
 ;;(bind-key "C-c x" #'some-function some-package-mode-map)
@@ -158,11 +157,25 @@
 
 (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
 
+;; 定义leader-key.
 (define-prefix-command 'leader-key)
 (global-set-key (kbd "S-SPC") 'leader-key) 
 (keymap-set leader-key "f" #'toggle-frame-fullscreen) ;; full screen
-;;; ### Toolkit ###
-;;; --- 工具函数
+                                        ; 文件相关
+;; (keymap-set leader-key "ff" #'find-file)
+;; (keymap-set leader-key "fs" #'save-buffer)
+
+;; ;; buffer 相关
+;; (keymap-set leader-key "bb" #'switch-to-buffer)
+;; (keymap-set leader-key "bd" #'kill-this-buffer)
+
+;; ;; 窗口相关
+;; (keymap-set leader-key "wv" #'split-window-right)
+;; (keymap-set leader-key "ws" #'split-window-below)
+;; (keymap-set leader-key "wd" #'delete-window)
+
+  ;;; ### Toolkit ###
+  ;;; --- 工具函数
 (lazy-load-set-keys
  '(
    ("C-," . bury-buffer)                ;隐藏当前buffer
@@ -254,15 +267,6 @@
    ("g p" . goto-line-preview))
  "goto-line-preview"
  "C-z")
-
-;;; ### basic-toolkit ###
-;; (lazy-load-global-keys
-;;  '(
-;;    ("g c" . goto-column)                ;到指定列
-;;    ("g p" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
-;;    )
-;;  "basic-toolkit"
-;;  "C-z")
 
 (lazy-load-global-keys
  '(
@@ -438,7 +442,7 @@ _w_ where is something defined
   (when (display-graphic-p)
     (use-package nerd-icons-ibuffer
       :hook (ibuffer-mode . nerd-icons-ibuffer-mode)
-      :init (setq nerd-icons-ibuffer-icon suk-icon)))
+      :init (setq nerd-icons-ibuffer-icon t)))
   )
 
 ;; Persistent the scratch buffer

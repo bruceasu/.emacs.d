@@ -1,6 +1,8 @@
-(provide 'init);; 定义一啲目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
-;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
-;; 变量。
+(provide 'init)
+;; Define some directories to make future migration easier. 
+;; user-emacs-directory is usually ~/.emacs.d
+;; On Windows, ~/ is usually $EMACS_INSTALL_DIR, or the `HOME` variable detected by Emacs
+
 (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
 (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
 (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
@@ -13,13 +15,15 @@
 ;; OS 嘅 HOME 目录。
 (defvar user-home-dir (getenv "HOME"))
 (if (eq system-type 'windows-nt) (defvar user-home-dir (getenv "USERPROFILE")))
+
+
 ;; blink search
 (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
-;; 历史
+;; History
 (setq savehist-file (concat suk-emacs-var-dir "/history"))
 ;; Amx
 (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
-;; 自动保存
+;; Auto save
 (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
 ;; Eshell
 (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
@@ -31,30 +35,20 @@
 (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
 ;; Diary
 (setq diary-file (concat user-home-dir "/diary"))
-;; server 无效
-(require 'server)
-;;(setq server-socket-dir suk-emacs-var-dir)
-
 ;; Clear to avoid analyzing files when loading remote files.
 (setq file-name-handler-alist nil)
 ;; Don't pass case-insensitive to `auto-mode-alist'
 (setq auto-mode-case-fold nil)
 
-
- (unless (file-exists-p suk-emacs-var-dir)
+(unless (file-exists-p suk-emacs-var-dir)
   (make-directory cache-dir t))
- (setq projectile-cache-file (expand-file-name "projectile.cache" suk-emacs-var-dir))
+(setq projectile-cache-file (expand-file-name "projectile.cache" suk-emacs-var-dir))
+
+;; server
+(require 'server)
 
 ;; Ignore `cl` expiration warnings
 (setq byte-compile-warnings '(cl-function))
-
-;; original version
-;;(defun add-subdirs-to-load-path (dir)
-;;  "Recursive add directories to `load-path'."
-;;  (let ((default-directory (file-name-as-directory dir)))
-;;     (add-to-list 'load-path dir)
-;;     (normal-top-level-add-subdirs-to-load-path)))
-
 ;; 王勇的版本 https://manateelazycat.github.io/emacs/2022/03/02/emacs-load-directory-recursively.html
 (require 'cl-lib)
 (defun add-subdirs-to-load-path (search-dir isFirst)
@@ -66,40 +60,39 @@
     (add-to-list 'load-path search-dir))
   (let* ((dir (file-name-as-directory search-dir)))
     (dolist (subdir
-             ;; goleui bat bityiu ge mukluk, taising Emacs kaidung cudou.
+             ;; Filter the Unnecessary direcotires, speed up emacs startup.
              (cl-remove-if
               #'(lambda (subdir)
                   (or
-                   ;; m hai mangin
+                   ;; Not file
                    (not (file-directory-p (concat dir subdir)))
-                   ;; yiceui haamin ge mukluk
-                   (member subdir '("." ".." ; Linux/Uniux haitung ge  dongcin mukluk tungmaai fu mukluk
-                                    "dist" "node_modules" "__pycache__" ; takding ge yüyin seunggwaan ge mukluk
-                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ; baanbun hungjai mukluk
+                   ;; remove the follow directoies
+                   (member subdir '("." ".." ; The current direcotiry and parent diretory in  Linux/Uniux OS
+                                    "dist" "node_modules" "__pycache__" ; Conventional directories for specific languages.
+                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ; Version control directories.
               (directory-files dir)))
       (let ((subdir-path (concat dir (file-name-as-directory subdir))))
-        ;; mukluk bauhaam  .el .so .dll ge mangin di louging sinji gaa dou `load-path` binleung
+        ;; The directories including:  .el .so .dll will add to `load-path` variable.
         (when (cl-some #'(lambda (subdir-file)
                            (and (file-regular-p (concat subdir-path subdir-file))
                                 ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
                                 (member (file-name-extension subdir-file) '("el" "so" "dll"))))
                        (directory-files subdir-path))
 
-          ;; jüyi: add-to-list ge daisaam go caamsou bitseuiwai t, timgaa dou meibou,
-          ;; kokbou gwongdou yausin
+          ;; Notice: The third argument of add-to-list must be `t`, add to the end,
+          ;; make sure Breadth-first.
           (add-to-list 'load-path subdir-path t))
 
-        ;; geieuuk daigwai sausok ji mukluk.
+        ;; Continue recursively through subdirectories.
         (add-subdirs-to-load-path subdir-path nil)))))
 
-;; 加载定义的目录
+;; Load the defined directories.
 (add-subdirs-to-load-path suk-emacs-config-dir t)
 (add-subdirs-to-load-path suk-emacs-extension-dir t)
 (add-subdirs-to-load-path suk-emacs-themes-dir t)
 
 ;; (add-to-list 'load-path "/usr/local/share/emacs/site-lisp")
-;; (add-to-list 'load-path "~/vendor/org-mode/lisp")
-;; (add-to-list 'load-path "~/vendor/org-mode/contrib/lisp")
+
 ;; (setq custom-file "~/.config/emacs/custom-settings.el")
 ;; (load custom-file t)
 
@@ -108,7 +101,7 @@
 ;; Reset the GC setting
 (add-hook 'emacs-startup-hook
           (lambda ()
-            ;; 默认係 0.8MB
+            ;; default: 0.8MB
             ;;(setq gc-cons-threshold 80000000)
             (message "Emacs ready in %s with %d garbage collections."
                      (format "%.2f seconds"
@@ -190,11 +183,6 @@
   :group 'convenience
   :link '(url-link :tag "Homepage" "https://github.com/bruceasu/.emacs.d"))
 
-(defcustom suk-icon t
-  "Display icons or not."
-  :group 'suk
-  :type 'boolean)
-
 (defcustom org-roam-directory (expand-file-name "RoamNotes" user-home-dir)
   "The org roam directory."
   :group 'suk
@@ -251,19 +239,7 @@
 (setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
 (add-subdirs-to-load-path package-user-dir t)
 
-;; HACK: DO NOT copy package-selected-packages to init/custom file forcibly.
-;; https://github.com/jwiegley/use-package/issues/383#issuecomment-247801751
-(defun my-save-selected-packages (&optional value)
-  "Set `package-selected-packages' to VALUE but don't save to `custom-file'."
-  (when value
-    (setq package-selected-packages value)))
-
-(advice-add 'package--save-selected-packages :override #'my-save-selected-packages)
-
 (require 'package)
-;;(setq package-archives '(("melpa" . "http://melpa.org/packages/")
-;;                         ("gnu" . "http://elpa.gnu.org/packages/")
-;;                         ("nongnu" . "https://elpa.nongnu.org/nongnu/"))
 
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/"))
@@ -275,11 +251,6 @@
              '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
 
 (setq package-check-signature nil) ; 个别时候会出现签名校验失败
-
-;; 初置包官
-;; (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
-;;   (setq package-enable-at-startup nil)          ; To prevent initializing twice
-;;   (package-initialize))
 
 (unless (bound-and-true-p package--initialized)
   (package-initialize))

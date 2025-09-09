@@ -16,21 +16,31 @@
 <<babel-init>>
 
 
-呢个係我个人嘅配置。其实好长，但部分原因系我有时会将博客文章留返喺度做
-注释，仲有因为我有好多细节嘅自定义，可能我自己都唔记得晒。 如果你啱啱
-接触 Emacs Lisp，你可能唔想直接复制粘贴咁多代码块。相反，你可以复制啲
-小部分（记住每次复制时要确保括号成对）放入你嘅 ~*scratch*~ buffer 或者其
-他 ~emacs-lisp-mode~ 嘅 buffer 入面。用 ~M-x eval-buffer~ 来执行啲代码，睇
-下 Emacs 嘅表现你钟唔钟意。
+This is my personal configuration. It’s actually quite long, partly
+because sometimes I keep blog articles here as comments, and also
+because I have a lot of detailed customizations—so many that I myself
+might not remember them all.
 
-我安装咗好多软件包。当你见到 ~use-package~ 同某个包名，你可以用 ~M-x
-package-install~ 来安装嗰个包。
+If you’re just getting started with Emacs Lisp, you might not want to
+copy and paste so many code blocks directly. Instead, you can copy
+smaller sections (remember to make sure the parentheses are balanced
+each time you copy) into your ~*scratch*~ buffer or another buffer in
+~emacs-lisp-mode~. Then run ~M-x eval-buffer~ to execute the code and
+see whether you like how Emacs behaves.
 
-如果你喺睇 Org 文件。你可以将源代码块（即系 ~begin_src~ 入面嘅内容）打开
-喺独立嘅 buffer。只需要将光标移入代码块，然后按 ~C-c '~
-(~org-edit-special~)。咁样会开一个新嘅 buffer 用 =emacs-lisp-mode= ，你可
-以用 =M-x eval-buffer= 来加载修改。想深入了解函数点样运作，可以用 =M-x
-edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Edebug.html][Emacs Lisp]] 手册了解更多。
+
+I’ve installed a lot of packages. When you see ~use-package~ followed
+by a package name, you can install that package using ~M-x package-install~.
+
+If you’re viewing an Org file, you can open the source code block
+(the contents inside ~begin_src~) in a separate buffer. Just move the
+cursor into the code block and press ~C-c '~(~org-edit-special~).
+This will open a new buffer in =emacs-lisp-mode=, where you can use =M-x
+eval-buffer= to load your changes.
+
+If you want to dive deeper into how a function works, you can use =M-x
+edebug-defun= to debug the function and then call it. You can learn
+more in the [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Edebug.html][Emacs Lisp]] manual.
 <<starting-up>>
 
 #+begin_src emacs-lisp :tangle early-init.el :eval never-export
@@ -91,14 +101,14 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 #+end_src
 
 
-** 调试贴士
-如果啲嘢壞咗，我可以用：
+** Debug tips
+If something breaks, I can use:
 
-- ~check-parens~ 嚟搵唔啱嘅括號
-- ~trace-function-background~ 將資訊列印到緩衝區
-- ~profiler-start~ 嚟搵多啲有關慢函數嘅資訊
+- ~check-parens~ to find mismatched parentheses.
+- ~trace-function-background~ to print the information to a buffer.
+- ~profiler-start~ to find more information about slow functions.
 
-** 呢个係我嘅 init.el :
+** This is my 'init.el':
 :PROPERTIES:
 :CUSTOM_ID: init
 :END:
@@ -106,9 +116,11 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 
 
 #+BEGIN_SRC emacs-lisp :tangle init.el :eval never-export
-  (provide 'init);; 定义一啲目录，方便日后迁移。user-emacs-directory 通常係 ~/.emacs.d
-  ;; windows 下, ~/ 通常係 $EMACS_INSTALL_DIR, 或者 EMACS 测定嘅 `HOME`
-  ;; 变量。
+  (provide 'init)
+  ;; Define some directories to make future migration easier. 
+  ;; user-emacs-directory is usually ~/.emacs.d
+  ;; On Windows, ~/ is usually $EMACS_INSTALL_DIR, or the `HOME` variable detected by Emacs
+
   (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
   (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
   (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
@@ -117,17 +129,19 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
   (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
   (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
-  
+
   ;; OS 嘅 HOME 目录。
   (defvar user-home-dir (getenv "HOME"))
   (if (eq system-type 'windows-nt) (defvar user-home-dir (getenv "USERPROFILE")))
+
+
   ;; blink search
   (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
-  ;; 历史
+  ;; History
   (setq savehist-file (concat suk-emacs-var-dir "/history"))
   ;; Amx
   (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
-  ;; 自动保存
+  ;; Auto save
   (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
   ;; Eshell
   (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
@@ -139,89 +153,77 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
   ;; Diary
   (setq diary-file (concat user-home-dir "/diary"))
-  ;; server 无效
-  (require 'server)
-  ;;(setq server-socket-dir suk-emacs-var-dir)
-
   ;; Clear to avoid analyzing files when loading remote files.
   (setq file-name-handler-alist nil)
   ;; Don't pass case-insensitive to `auto-mode-alist'
   (setq auto-mode-case-fold nil)
 
-
-   (unless (file-exists-p suk-emacs-var-dir)
+  (unless (file-exists-p suk-emacs-var-dir)
     (make-directory cache-dir t))
-   (setq projectile-cache-file (expand-file-name "projectile.cache" suk-emacs-var-dir))
+  (setq projectile-cache-file (expand-file-name "projectile.cache" suk-emacs-var-dir))
 
+  ;; server
+  (require 'server)
 #+END_SRC
 
-*** 加载目录函数：递归  Emacs 同埋插件嘅设定目录到 `load-path`
+*** Function to load directories: recursively add Emacs and plugin configuration directories to `load-path`.
 :PROPERTIES:
 :CUSTOM_ID: load-path-settings
 :END:
 <<load-path-settings>>
 
 #+BEGIN_SRC emacs-lisp :tangle init.el  :eval never-export
-  ;; Ignore `cl` expiration warnings
-  (setq byte-compile-warnings '(cl-function))
+    ;; Ignore `cl` expiration warnings
+    (setq byte-compile-warnings '(cl-function))
+    ;; 王勇的版本 https://manateelazycat.github.io/emacs/2022/03/02/emacs-load-directory-recursively.html
+    (require 'cl-lib)
+    (defun add-subdirs-to-load-path (search-dir isFirst)
+      (interactive)
+      (when isFirst
+        ;; The original version did not add the first search-dir itself to
+        ;; the `load path`. The recursive search-dir was added before the
+        ;; recursion.
+        (add-to-list 'load-path search-dir))
+      (let* ((dir (file-name-as-directory search-dir)))
+        (dolist (subdir
+                 ;; Filter the Unnecessary direcotires, speed up emacs startup.
+                 (cl-remove-if
+                  #'(lambda (subdir)
+                      (or
+                       ;; Not file
+                       (not (file-directory-p (concat dir subdir)))
+                       ;; remove the follow directoies
+                       (member subdir '("." ".." ; The current direcotiry and parent diretory in  Linux/Uniux OS
+                                        "dist" "node_modules" "__pycache__" ; Conventional directories for specific languages.
+                                        "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ; Version control directories.
+                  (directory-files dir)))
+          (let ((subdir-path (concat dir (file-name-as-directory subdir))))
+            ;; The directories including:  .el .so .dll will add to `load-path` variable.
+            (when (cl-some #'(lambda (subdir-file)
+                               (and (file-regular-p (concat subdir-path subdir-file))
+                                    ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
+                                    (member (file-name-extension subdir-file) '("el" "so" "dll"))))
+                           (directory-files subdir-path))
 
-  ;; original version
-  ;;(defun add-subdirs-to-load-path (dir)
-  ;;  "Recursive add directories to `load-path'."
-  ;;  (let ((default-directory (file-name-as-directory dir)))
-  ;;     (add-to-list 'load-path dir)
-  ;;     (normal-top-level-add-subdirs-to-load-path)))
+              ;; Notice: The third argument of add-to-list must be `t`, add to the end,
+              ;; make sure Breadth-first.
+              (add-to-list 'load-path subdir-path t))
 
-  ;; 王勇的版本 https://manateelazycat.github.io/emacs/2022/03/02/emacs-load-directory-recursively.html
-  (require 'cl-lib)
-  (defun add-subdirs-to-load-path (search-dir isFirst)
-    (interactive)
-    (when isFirst
-      ;; The original version did not add the first search-dir itself to
-      ;; the `load path`. The recursive search-dir was added before the
-      ;; recursion.
-      (add-to-list 'load-path search-dir))
-    (let* ((dir (file-name-as-directory search-dir)))
-      (dolist (subdir
-               ;; goleui bat bityiu ge mukluk, taising Emacs kaidung cudou.
-               (cl-remove-if
-                #'(lambda (subdir)
-                    (or
-                     ;; m hai mangin
-                     (not (file-directory-p (concat dir subdir)))
-                     ;; yiceui haamin ge mukluk
-                     (member subdir '("." ".." ; Linux/Uniux haitung ge  dongcin mukluk tungmaai fu mukluk
-                                      "dist" "node_modules" "__pycache__" ; takding ge yüyin seunggwaan ge mukluk
-                                      "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ; baanbun hungjai mukluk
-                (directory-files dir)))
-        (let ((subdir-path (concat dir (file-name-as-directory subdir))))
-          ;; mukluk bauhaam  .el .so .dll ge mangin di louging sinji gaa dou `load-path` binleung
-          (when (cl-some #'(lambda (subdir-file)
-                             (and (file-regular-p (concat subdir-path subdir-file))
-                                  ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
-                                  (member (file-name-extension subdir-file) '("el" "so" "dll"))))
-                         (directory-files subdir-path))
+            ;; Continue recursively through subdirectories.
+            (add-subdirs-to-load-path subdir-path nil)))))
 
-            ;; jüyi: add-to-list ge daisaam go caamsou bitseuiwai t, timgaa dou meibou,
-            ;; kokbou gwongdou yausin
-            (add-to-list 'load-path subdir-path t))
+    ;; Load the defined directories.
+    (add-subdirs-to-load-path suk-emacs-config-dir t)
+    (add-subdirs-to-load-path suk-emacs-extension-dir t)
+    (add-subdirs-to-load-path suk-emacs-themes-dir t)
 
-          ;; geieuuk daigwai sausok ji mukluk.
-          (add-subdirs-to-load-path subdir-path nil)))))
+    ;; (add-to-list 'load-path "/usr/local/share/emacs/site-lisp")
 
-  ;; 加载定义的目录
-  (add-subdirs-to-load-path suk-emacs-config-dir t)
-  (add-subdirs-to-load-path suk-emacs-extension-dir t)
-  (add-subdirs-to-load-path suk-emacs-themes-dir t)
-
-  ;; (add-to-list 'load-path "/usr/local/share/emacs/site-lisp")
-  ;; (add-to-list 'load-path "~/vendor/org-mode/lisp")
-  ;; (add-to-list 'load-path "~/vendor/org-mode/contrib/lisp")
-  ;; (setq custom-file "~/.config/emacs/custom-settings.el")
-  ;; (load custom-file t)
+    ;; (setq custom-file "~/.config/emacs/custom-settings.el")
+    ;; (load custom-file t)
 #+END_SRC
 
-*** 设置 GC
+*** Configure GC
 :PROPERTIES:
 :CUSTOM_ID: gc-settings
 :END:
@@ -234,7 +236,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   ;; Reset the GC setting
   (add-hook 'emacs-startup-hook
             (lambda ()
-              ;; 默认係 0.8MB
+              ;; default: 0.8MB
               ;;(setq gc-cons-threshold 80000000)
               (message "Emacs ready in %s with %d garbage collections."
                        (format "%.2f seconds"
@@ -252,7 +254,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 
 #+end_src
 
-*** 常量定义
+*** Constsants
 :PROPERTIES:
 :CUSTOM_ID: const
 :END:
@@ -312,7 +314,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
     "Emacs is 30 or above.")
 #+end_src
 
-*** 載入自訂設定
+*** Load custom configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-custom
 :END:
@@ -333,11 +335,6 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
     "suk Emacs customizations."
     :group 'convenience
     :link '(url-link :tag "Homepage" "https://github.com/bruceasu/.emacs.d"))
-
-  (defcustom suk-icon t
-    "Display icons or not."
-    :group 'suk
-    :type 'boolean)
 
   (defcustom org-roam-directory (expand-file-name "RoamNotes" user-home-dir)
     "The org roam directory."
@@ -388,7 +385,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
                     (load file)))))
 #+end_src
 
-*** 通用函数
+*** Basic Functions
 :PROPERTIES:
 :CUSTOM_ID: setup-common-functions
 :END:
@@ -397,7 +394,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
 #+begin_src emacs-lisp :tangle init.el :eval never-export
  (require 'basic-function)
 #+end_src
-*** Emacs Package 初始化
+*** Emacs Package Initialization
 :PROPERTIES:
 :CUSTOM_ID: setup-package
 :END:
@@ -410,19 +407,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   (setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
   (add-subdirs-to-load-path package-user-dir t)
 
-  ;; HACK: DO NOT copy package-selected-packages to init/custom file forcibly.
-  ;; https://github.com/jwiegley/use-package/issues/383#issuecomment-247801751
-  (defun my-save-selected-packages (&optional value)
-    "Set `package-selected-packages' to VALUE but don't save to `custom-file'."
-    (when value
-      (setq package-selected-packages value)))
-
-  (advice-add 'package--save-selected-packages :override #'my-save-selected-packages)
-
   (require 'package)
-  ;;(setq package-archives '(("melpa" . "http://melpa.org/packages/")
-  ;;                         ("gnu" . "http://elpa.gnu.org/packages/")
-  ;;                         ("nongnu" . "https://elpa.nongnu.org/nongnu/"))
 
   (add-to-list 'package-archives
                '("melpa" . "https://melpa.org/packages/"))
@@ -434,11 +419,6 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
                '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
 
   (setq package-check-signature nil) ; 个别时候会出现签名校验失败
-
-  ;; 初置包官
-  ;; (unless (bound-and-true-p package--initialized) ; To avoid warnings in 27
-  ;;   (setq package-enable-at-startup nil)          ; To prevent initializing twice
-  ;;   (package-initialize))
 
   (unless (bound-and-true-p package--initialized)
     (package-initialize))
@@ -474,7 +454,7 @@ edebug-defun= 来调试个函数，然后调用佢。你可以喺 [[http://www.g
   (use-package compat :demand t)
 #+end_src
 
-*** 加载特定嘅设定文件
+*** Load specific configuration files
 :PROPERTIES:
 :CUSTOM_ID: load-file-settings
 :END:
@@ -488,14 +468,15 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 係有效嘅，另一個可能係多餘嘅，但可能係一種「皮帶加吊帶」嘅做法。由於我
 通過 =org-babel-tangle= 生成 =suk.el= ，所以我嘅 Emacs 配置可以喺唔需要先
 加載 Org 嘅情況下加載 =suk.el= 。
+
 #+begin_src emacs-lisp :tangle init.el :eval never-export
   (load-if-exists (expand-file-name "suk.el" suk-emacs-root-dir))
   (unless (server-running-p) (server-start))
 
 #+END_SRC
 
-* 我嘅設定
-** 個人信息
+* My configuration
+** Personal Information
 :PROPERTIES:
 :CUSTOM_ID: setup-personal-info
 :END:
@@ -505,13 +486,13 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq user-full-name "Suk")
   (setq user-mail-address "bruceasu@gmail.com")
 #+end_src
-** 编辑器设定
+** Editor Configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-editor
 :END:
 <<setup-editor>>
 
-*** 基本設定
+*** Basic configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-basic
 :END:
@@ -521,12 +502,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   ;; basic settings
   (setq-default
    major-mode 'text-mode ; 默认使用text模式
-   cursor-type 'bar      ; 设置光标样式
-   tab-width 4           ; tab 的宽度为 4 空格
-   indent-tabs-mode nil  ; 永久使用空格縮排，唔好用 TAB 只係用空格代替
-                         ; TAB，使用 C-q TAB 來輸入 TAB 字符
    )
-  (delete-selection-mode 1)                  ;选中文本后输入会覆盖
   (server-mode 1)
   (global-hl-line-mode 1)                    ;高亮当前行
   (show-paren-mode t)                        ;显示括号匹配
@@ -535,8 +511,10 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq read-process-output-max #x10000)  ; 64kb.  Increase how much is read from processes in a single chunk (default is 4kb)
   (setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
   (setq adaptive-fill-first-line-regexp "^* *$")
-  (setq sentence-end "\\([。！？￥%×（）—]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*") ; 测定句子结束识别同埋标点，不用在 `fill` 时，再句号后插入 2 个空行。
   (setq sentence-end-double-space nil)
+  (setq sentence-end
+        "\\(?:[.?!。！？…]+\\)[]\"')}”’）】』」》]*\\(?:$\\|[ \t]\\)[ \t\n]*") ; 测定句子结束识别同埋标点，不用在 `fill` 时，再句号后插入 2 个空行。
+
   (add-hook 'after-change-major-mode-hook (lambda ()(modify-syntax-entry ?_ "w"))) ;; 让 `_` 被视为单词嘅组成部分
   (add-hook 'after-change-major-mode-hook (lambda () (modify-syntax-entry ?- "w"))) ;; `-` 符号同样
   (setq suggest-key-bindings 1)             ;当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。
@@ -566,9 +544,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq mouse-yank-at-point nil)            ;让光标无法离开视线
   (setq kill-whole-line t)                  ; C-k deletes the end of line
   (setq delete-by-moving-to-trash t)        ; Deleting files go to OS's trash folder
-  (setq track-eol t)                        ; Keep cursor at end of lines. Require line-move-visual is nil.
   (setq save-interprogram-paste-before-kill t) ; Save clipboard contents into kill-ring before replace them
-  (setq echo-keystrokes 0.1)                ;加快快捷键提示的速度
 
   ;; Hanlde minified code
   (if emacs/>=27p
@@ -580,11 +556,16 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
     ;; (setq uniquify-buffer-name-style 'forward)
     (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
     )
-  
+
   (if (boundp 'use-short-answers)
       (setq use-short-answers t)
     (fset 'yes-or-no-p 'y-or-n-p))
 
+  ;; text-mode 下自动开启合适的换行宽度
+  (add-hook 'text-mode-hook
+            (lambda ()
+              (setq-local fill-column 100) ; 80/100/120
+              (auto-fill-mode 1)))
 #+end_src
 *** 備份設定
 :PROPERTIES:
@@ -597,7 +578,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq make-backup-files t)
   (setq version-control t)     ; 允许多次备份
   (setq kept-old-versions 2)   ; 保留最早的2个备份文件
-  (setq kept-new-version 100)  ; 保留最近的100个备份文件
+  (setq kept-new-version 64)  ; 保留最近的100个备份文件
   (setq delete-old-versions t) ; 自动删除旧的备份文件
 #+end_src
 *** 歴史
@@ -609,11 +590,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 #+begin_src emacs-lisp :tangle suk.el
   (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
         history-length 1000
-        savehist-additional-variables '(mark-ring
-                                        global-mark-ring
-                                        search-ring
-                                        regexp-search-ring
-                                        extended-command-history)
+        savehist-additional-variables '(mark-ring global-mark-ring search-ring regexp-search-ring extended-command-history)
         savehist-autosave-interval 300
         savehist-file (expand-file-name "history" suk-emacs-var-dir) ; "~/.emacs.d/var/history"
         )
@@ -625,7 +602,6 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 :END:
 <<setup-charset>>
 #+begin_src emacs-lisp :tangle suk.el
-
   ;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
   ;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
   ;; utf-16 (utf-16 ham:  utf-16le, utf-16be, utf-16le-with-signature dang)
@@ -633,33 +609,36 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   ;; (prefer-coding-system 'utf-16le-with-signature)
   ;; (prefer-coding-system 'utf-16)
   ;; (prefer-coding-system 'utf-8-dos)
-  
   ;; Set UTF-8 as the default coding system
-  (prefer-coding-system 'utf-8)
-  (setq default-buffer-file-coding-system 'utf-8)            ;缓存文件编码
-  (setq default-file-name-coding-system 'utf-8)              ;文件名编码
-  (setq default-keyboard-coding-system 'utf-8)               ;键盘输入编码
-  (setq default-process-coding-system '(utf-8 . utf-8))      ;进程输出输入编码
-  (setq default-sendmail-coding-system 'utf-8)               ;发送邮件编码
-  (setq default-terminal-coding-system 'utf-8)               ;终端编码
+  ;; -----------------------------
+  ;; Emacs UTF-8 编码统一设置
+  ;; -----------------------------
 
-
-  (set-default-coding-systems 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (setq-default buffer-file-coding-system 'utf-8)
-
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-
-  (setq buffer-file-coding-system 'utf-8)
-  (setq session-save-file-coding-system 'utf-8)
-
+  ;; 1. 设置语言环境为 UTF-8（会影响默认 buffer/file/keyboard/terminal）
   (set-language-environment "UTF-8")
 
+  ;; 2. 告诉 Emacs 优先使用 UTF-8 作为各种操作的默认编码
   (prefer-coding-system 'utf-8)
+
+  ;; 3. 设置默认编码系统（文件读写、缓冲区等）
+  (set-default-coding-systems 'utf-8)
+
+  ;; 4. 设置终端和键盘输入输出为 UTF-8
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+
+  ;; 5. 设置进程 I/O 使用 UTF-8
+  (setq default-process-coding-system '(utf-8 . utf-8))
+
+  ;; （可选）如果你用 Emacs 发送邮件，可以启用下面这行
+  (setq default-sendmail-coding-system 'utf-8)
 #+end_src
-** 伺机加载 Lazy Load
+** Buffer functions
+
+#+begin_src emacs-lisp :tangle suk.el
+  (require 'buffer-extension)
+#+end_src
+** Lazy Load
 :PROPERTIES:
 :CUSTOM_ID: setup-lazy-load
 :END:
@@ -724,7 +703,7 @@ Add to suk.el
   (require 'init-key)
 #+end_src
 
-** 何以快键 How to set keys
+** How to set keys
 *** Bindkeys examples
 通用定义方法
 #+begin_example
@@ -865,12 +844,19 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 :  (keymap-set my-keymap "C-c f" 'find-file)) ; 设置 C-c f 来执行 'find-file 命令
 : (keymap-local-set "C-p" ctl-x-map)
 
-
+*** Leader Key
+定义一个Leader-key mode. 使用 =M-m= 开启，原来的功能重新绑定到 =M-i=
+: (global-set-key (kbd "M-i") #'back-to-indentation)
+#+begin_src emacs-lisp :tangle suk.el
+  (require 'leader-key)
+#+end_src
 *** bind-keys
-是由 use-package 宏提供的一个功能，允许在一个声明中绑定多个
-键。虽然bind-keys 可以独立于 use-package 使用，但它通常与 use-package
-结合使用，以提供更清晰和模块化的键绑定配置。
-我个人是认为他比Emacs新定义的keymap-XXX 系列的实现要好。
+This is a feature provided by the use-package macro that allows
+binding multiple keys in a single statement. While bind-keys can be
+used independently of use-package , it is often used in conjunction
+with use-package to provide a cleaner and more modular key binding
+configuration. Personally, I think it's superior to Emacs's newly
+defined keymap-XXX series of implementations.
 
 #+begin_src emacs-lisp :tangle suk.el
   (use-package bind-key)
@@ -913,11 +899,8 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
 
   (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
 
-  (define-prefix-command 'leader-key)
-  (global-set-key (kbd "S-SPC") 'leader-key) 
-  (keymap-set leader-key "f" #'toggle-frame-fullscreen) ;; full screen
-  ;;; ### Toolkit ###
-  ;;; --- 工具函数
+    ;;; ### Toolkit ###
+    ;;; --- 工具函数
   (lazy-load-set-keys
    '(
      ("C-," . bury-buffer)                ;隐藏当前buffer
@@ -1019,15 +1002,6 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
    "goto-line-preview"
    "C-z")
 
-  ;;; ### basic-toolkit ###
-  ;; (lazy-load-global-keys
-  ;;  '(
-  ;;    ("g c" . goto-column)                ;到指定列
-  ;;    ("g p" . goto-percent)               ;跳转到当前Buffer的文本百分比, 单位为字符
-  ;;    )
-  ;;  "basic-toolkit"
-  ;;  "C-z")
-
   (lazy-load-global-keys
    '(
      ("C-x r ," . remember-init)    ;记忆初始函数
@@ -1122,7 +1096,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
   ;; ### String Inflection ###
   ;; --- 单词语法风格快速转换
 
-   ;;; ### basic-toolkit ###
+   ;;; ### cases ###
   (lazy-load-global-keys
    '(
      ("M-l" . downcase-char)
@@ -1186,6 +1160,7 @@ hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map：
      ("C-M-S-h" . mark-paragraph)                ;选中段落
      ("M-SPC"   . just-one-space)                ;只有一个空格在光标处
      ))
+  
   ;;; ### basic-toolkit ###
   (lazy-load-global-keys
    '(
@@ -1450,11 +1425,11 @@ Setup init-ui
     (load-theme 'doom-one t)
     )
 
- 
+
   (use-package doom-modeline
     :hook (after-init . doom-modeline-mode)
     :init
-    (setq doom-modeline-icon suk-icon
+    (setq doom-modeline-icon t
           doom-modeline-minor-modes t)
     :config
     (column-number-mode 1)
@@ -1672,7 +1647,7 @@ Setup init-ui
     (when (display-graphic-p)
       (use-package nerd-icons-ibuffer
         :hook (ibuffer-mode . nerd-icons-ibuffer-mode)
-        :init (setq nerd-icons-ibuffer-icon suk-icon)))
+        :init (setq nerd-icons-ibuffer-icon t)))
     )
 #+end_src
 ** 持久化 scratch 缓存区
@@ -1704,20 +1679,16 @@ Setup init-ui
          )))
 
 #+end_src
-** Buffer shortcuts.
+** Read mode
 #+begin_src emacs-lisp :tangle etc/init-key.el
    (lazy-load-global-keys
    '(
-     ("C-c b"  . my-hydra-buffers/body)
      ("M-<f7>" . suk-read-mode)
      ("<f7>"   . olivetti-mode)
-     ("C-;"    . suk/close-current-buffer) ;关闭当前buffer
      )
-   "buffer-extension")
+   "suk-read-mode")
 
-
-  ;; default keys: C-x LEFT/RIGHT
-
+  
 #+end_src
 ** Buffer Move
 #+begin_src emacs-lisp :tangle etc/init-key.el

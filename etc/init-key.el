@@ -57,7 +57,7 @@
 ;; ### String Inflection ###
 ;; --- 单词语法风格快速转换
 
- ;;; ### basic-toolkit ###
+ ;;; ### cases ###
 (lazy-load-global-keys
  '(
    ("M-l" . downcase-char)
@@ -114,6 +114,7 @@
    ("C-M-S-h" . mark-paragraph)                ;选中段落
    ("M-SPC"   . just-one-space)                ;只有一个空格在光标处
    ))
+
 ;;; ### basic-toolkit ###
 (lazy-load-global-keys
  '(
@@ -148,16 +149,11 @@
   )
 
 (lazy-load-global-keys
- '(
-   ("C-c b"  . my-hydra-buffers/body)
-   ("M-<f7>" . suk-read-mode)
-   ("<f7>"   . olivetti-mode)
-   ("C-;"    . suk/close-current-buffer) ;关闭当前buffer
-   )
- "buffer-extension")
-
-
-;; default keys: C-x LEFT/RIGHT
+'(
+  ("M-<f7>" . suk-read-mode)
+  ("<f7>"   . olivetti-mode)
+  )
+"suk-read-mode")
 
 ;; --- 缓存移动
 (lazy-load-set-keys
