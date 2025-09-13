@@ -10,9 +10,6 @@
 [submodule "extensions/move-text"]
 	path = extensions/move-text
 	url = git@github.com:manateelazycat/move-text.git
-[submodule "extensions/typescript"]
-	path = extensions/typescript
-	url = git@github.com:ananthakumaran/typescript.el.git
 [submodule "extensions/emacs-rime"]
 	path = extensions/emacs-rime
 	url = git@github.com:DogLooksGood/emacs-rime.git
