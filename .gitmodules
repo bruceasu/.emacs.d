@@ -13,9 +13,6 @@
 [submodule "extensions/move-text"]
 	path = extensions/move-text
 	url = git@github.com:manateelazycat/move-text.git
-[submodule "extensions/rjsx-mode"]
-	path = extensions/rjsx-mode
-	url = git@github.com:felipeochoa/rjsx-mode.git
 [submodule "extensions/typescript"]
 	path = extensions/typescript
 	url = git@github.com:ananthakumaran/typescript.el.git
