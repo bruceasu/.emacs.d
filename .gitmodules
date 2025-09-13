@@ -1,9 +1,6 @@
 [submodule "extensions/company-posframe"]
 	path = extensions/company-posframe
 	url = git@github.com:tumashu/company-posframe
-[submodule "extensions/all-the-icons"]
-	path = extensions/all-the-icons
-	url = git@github.com:domtronn/all-the-icons.el
 [submodule "extensions/company-english-helper"]
 	path = extensions/company-english-helper
 	url = git@github.com:manateelazycat/company-english-helper.git
