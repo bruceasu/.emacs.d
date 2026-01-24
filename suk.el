@@ -4,6 +4,7 @@
 ;; basic settings
 (setq-default
  major-mode 'text-mode ; 默认使用text模式
+ indent-tabs-mode nil  ; 默认只使用空格，不使用tab
  )
 (server-mode 1)
 (global-hl-line-mode 1)                    ;高亮当前行
@@ -65,15 +66,15 @@
 
 ;; text-mode 下自动开启合适的换行宽度
 (add-hook 'text-mode-hook
-          (lambda ()
-            (setq-local fill-column 100) ; 80/100/120
-            (auto-fill-mode 1)))
+	  (lambda ()
+	    (setq-local fill-column 100) ; 80/100/120
+	    (auto-fill-mode 1)))
 
 ;; backup settings
 (setq make-backup-files t)
 (setq version-control t)     ; 允许多次备份
 (setq kept-old-versions 2)   ; 保留最早的2个备份文件
-(setq kept-new-version 64)  ; 保留最近的100个备份文件
+(setq kept-new-version 64)  ; 保留最近的64个备份文件
 (setq delete-old-versions t) ; 自动删除旧的备份文件
 
 (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
@@ -119,6 +120,8 @@
 
 (require 'init-key)
 
+;; 定义一个Leader-key mode. 使用 M-m 开启，原来的功能重新绑定到 M-i
+;; (global-set-key (kbd "M-i") #'back-to-indentation)
 (require 'leader-key)
 
 (use-package bind-key)
@@ -137,18 +140,19 @@
 
 ;; Toggle fullscreen <F11> also bind to fullscreen
 (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
-           ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
-           ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
-           )
+	    ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
+	    ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
+)
 
 (global-set-key (kbd "C-x R") 'recentf-open)    ;; 快捷键 C-x R 用于打开最近文件
+
 (if (display-graphic-p)
     (global-set-key (kbd "<escape>") 'keyboard-escape-quit))
 
 (when emacs/>=29p
   ;; (keymap-global-set <key> <cmmd>)
   (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)       ;; 快捷键 C-<f11> 用于切换全屏模式
-  (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-S-<return> 也用于切换全屏模式
+  (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-s-<return> 也用于切换全屏模式
   ) 
 (unless emacs/>=29p
   (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
@@ -157,29 +161,11 @@
 
 (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
 
-;; 定义leader-key.
-(define-prefix-command 'leader-key)
-(global-set-key (kbd "S-SPC") 'leader-key) 
-(keymap-set leader-key "f" #'toggle-frame-fullscreen) ;; full screen
-                                        ; 文件相关
-;; (keymap-set leader-key "ff" #'find-file)
-;; (keymap-set leader-key "fs" #'save-buffer)
-
-;; ;; buffer 相关
-;; (keymap-set leader-key "bb" #'switch-to-buffer)
-;; (keymap-set leader-key "bd" #'kill-this-buffer)
-
-;; ;; 窗口相关
-;; (keymap-set leader-key "wv" #'split-window-right)
-;; (keymap-set leader-key "ws" #'split-window-below)
-;; (keymap-set leader-key "wd" #'delete-window)
-
-  ;;; ### Toolkit ###
-  ;;; --- 工具函数
+;;; ### Toolkit ###
 (lazy-load-set-keys
  '(
-   ("C-," . bury-buffer)                ;隐藏当前buffer
-   ("C-." . unbury-buffer)              ;反隐藏当前buffer
+   ("C-," . bury-buffer)                            ;;隐藏当前buffer
+   ("C-." . unbury-buffer)                          ;;反隐藏当前buffer
    ("C-<f12>" . lazycat-theme-toggle)
    )
  (current-global-map)
@@ -193,6 +179,7 @@
 ;; sort-lines, calendar, align-regexp
 ;; C-t transpose-char M-t tanspose-word
 ;; toggle-truncate-lines C-x x t
+;; revert-buffer-quick C-x x g
 ;; C-c TAB indent-region
 ;; C-u C-c TAB => (un)indent-region
 
@@ -209,62 +196,11 @@
 
 ;; M-x align-regexp 可以方便的对齐一些文字
 
-(with-eval-after-load 'pretty-hydra
-  ;; Global toggles
-  (with-no-warnings
-    (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
-      ("Basic"
-       (("n" (cond ((fboundp 'display-line-numbers-mode)
-                    (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
-                   ((fboundp 'gblobal-linum-mode)
-                    (global-linum-mode (if global-linum-mode -1 1))))
-         "line number"
-         :toggle (or (bound-and-true-p display-line-numbers-mode)
-                     (bound-and-true-p global-linum-mode)))
-        ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
-        ("d" global-hungry-delete-mode "hungry delete" :toggle t)
-        ("e" electric-pair-mode "electric pair" :toggle t)
-        ("c" flyspell-mode "spell check" :toggle t)
-        ("s" prettify-symbols-mode "pretty symbol" :toggle t)
-        ("l" global-page-break-lines-mode "page break lines" :toggle t)
-        ("B" display-battery-mode "battery" :toggle t)
-        ("T" display-time-mode "time" :toggle t)
-        ("a" abbrev-mode "abrev" :toggle t)
-        ("F" auto-fill-mode "auto fill" :toggle t)
-        ("m" doom-modeline-mode "modern mode-line" :toggle t)
-        ("t" toggle-truncate-lines "truncate lines" :toggle t)
-        ("u" toggle-company-ispell "Company Ispell" :toggle t))
-       "Highlight"
-       (("h l" global-hl-line-mode "line" :toggle t)
-        ("h p" show-paren-mode "paren" :toggle t)
-        ("h s" symbol-overlay-mode "symbol" :toggle t)
-        ("h r" rainbow-mode "rainbow" :toggle t)
-        ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
-         "whitespace" :toggle show-trailing-whitespace)
-        ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
-        ("h i" highlight-indent-guides-mode "indent" :toggle t)
-        ("h t" global-hl-todo-mode "todo" :toggle t))
-       "Program"
-       (("f" flymake-mode "flymake" :toggle t)
-        ("O" hs-minor-mode "hideshow" :toggle t)
-        ("U" subword-mode "subword" :toggle t)
-        ("w" whitespace-mode "whitespace" :toggle t)
-        ("W" which-function-mode "which function" :toggle t)
-        ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
-        ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
-        ("v" global-diff-hl-mode "gutter" :toggle t)
-        ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
-        ("M" diff-hl-margin-mode "margin gutter" :toggle t)
-        ("D" diff-hl-dired-mode "dired gutter" :toggle t))
-       ))
-     (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
-    ;;(keymap-set leader-key "t" #'toggles-hydra/body)
-))
-
 ;;; ### goto-line-preview ###
 (lazy-load-global-keys
  '(
-   ("g p" . goto-line-preview))
+   ("g p" . goto-line-preview)
+  )
  "goto-line-preview"
  "C-z")
 
@@ -275,8 +211,7 @@
    ("C-x r <" . point-stack-pop)  ;buffer索引跳转
    ("C-x r >" . point-stack-push) ;buffer索引标记
    )
- "my-bookmak"
- "C-z"
+ "my-bookmark"
  )
 
 ;;; --- 滚动其他窗口
@@ -296,6 +231,25 @@
    ("M-p" . window-move-down)       ;向上滚动当前窗口  scroll-down
    )
  "win-move")
+
+;; 自定义删除到字符函数
+(defun my/delete-to-char (char)
+  "删除光标位置到下一个出现的字符 CHAR 之间的所有内容（不包括 CHAR 本身）。"
+  (interactive "cDelete to char: ")
+  (let ((start (point))
+	(end (progn
+	       (search-forward (char-to-string char) (line-end-position) t))))
+    (if end
+	(progn
+	  (goto-char end)
+	  (delete-region start (- end 1))
+	  (message "Deleted from %d to %d" start (- end 1)))
+      (progn
+	(delete-region start (line-end-position))
+	(message "Character '%c' not found. Deleted to end of line." char)))))
+
+;; 绑定快捷键 C-c d 到 my/delete-to-char 函数
+(global-set-key (kbd "C-c d") 'my/delete-to-char)
 
 ;;;###autoload
 (with-eval-after-load 'hydra
@@ -366,44 +320,44 @@ _w_ where is something defined
      ;;    :load-path "~/.emacs.d/extensions/expand-region"
      ;; )
      (with-eval-after-load 'expand-region
-        (defun treesit-mark-bigger-node ()
-           "Use tree-sitter to mark regions."
-           (let* ((root (treesit-buffer-root-node))
-                  (node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
-                  (node-start (treesit-node-start node))
-                  (node-end (treesit-node-end node)))
-             ;; Node fits the region exactly. Try its parent node instead.
-             (when (and (= (region-beginning) node-start) (= (region-end) node-end))
-               (when-let ((node (treesit-node-parent node)))
-                 (setq node-start (treesit-node-start node)
-                       node-end (treesit-node-end node))))
-             (set-mark node-end)
-             (goto-char node-start)))
-        )))
+       (defun treesit-mark-bigger-node ()
+	 "Use tree-sitter to mark regions."
+	 (let* ((root (treesit-buffer-root-node))
+		(node (treesit-node-descendant-for-range root (region-beginning) (region-end)))
+		(node-start (treesit-node-start node))
+		(node-end (treesit-node-end node)))
+	   ;; Node fits the region exactly. Try its parent node instead.
+	   (when (and (= (region-beginning) node-start) (= (region-end) node-end))
+	     (when-let ((node (treesit-node-parent node)))
+	       (setq node-start (treesit-node-start node)
+		     node-end (treesit-node-end node))))
+	   (set-mark node-end)
+	   (goto-char node-start)))
+       )))
 
 ;; Treat undo history as a tree, ^x u
 (run-with-idle-timer
  2 nil
  #'(lambda()
-       (if emacs/>=28p
-           (progn
-             ;; vundo :load-path "~/.emacs.d/extensions/vundo"
-             ;; (requir 'vundo)
-             (with-eval-after-load 'vundo
-               (setq vundo-glyph-alist vundo-unicode-symbols)))
-         (progn
-           (setq undo-tree-visualizer-timestamps t
-                 undo-tree-visualizer-diff t
-                 undo-tree-enable-undo-in-region nil
-                 undo-tree-auto-save-history nil)
-           ;; HACK: keep the diff window
-           (with-no-warnings
-             (make-variable-buffer-local 'undo-tree-visualizer-diff)
-             (setq-default undo-tree-visualizer-diff t))
-           (with-eval-after-load 'undo-tree
-             (add-hook 'after-init-hook #'global-undo-tree-mode))
-           ))
-       ))
+     (if emacs/>=28p
+	 (progn
+	   ;; vundo :load-path "~/.emacs.d/extensions/vundo"
+	   ;; (requir 'vundo)
+	   (with-eval-after-load 'vundo
+	     (setq vundo-glyph-alist vundo-unicode-symbols)))
+       (progn
+	 (setq undo-tree-visualizer-timestamps t
+	       undo-tree-visualizer-diff t
+	       undo-tree-enable-undo-in-region nil
+	       undo-tree-auto-save-history nil)
+	 ;; HACK: keep the diff window
+	 (with-no-warnings
+	   (make-variable-buffer-local 'undo-tree-visualizer-diff)
+	   (setq-default undo-tree-visualizer-diff t))
+	 (with-eval-after-load 'undo-tree
+	   (add-hook 'after-init-hook #'global-undo-tree-mode))
+	 ))
+     ))
 
 ;;; ### Advice ###
 ;;; --- 各种emacs行为建议
@@ -411,14 +365,14 @@ _w_ where is something defined
 (defadvice yank (after indent-region activate)
   "To make yank content indent automatically."
   (if (member major-mode
-              '(emacs-lisp-mode
-                java-mode
-                web-mode
-                c-mode
-                c++-mode
-                js-mode
-                latex-mode
-                plain-tex-mode))
+	      '(emacs-lisp-mode
+		java-mode
+		web-mode
+		c-mode
+		c++-mode
+		js-mode
+		latex-mode
+		plain-tex-mode))
       (indent-region (region-beginning) (region-end) nil)))
 
 (run-with-idle-timer
@@ -428,8 +382,6 @@ _w_ where is something defined
      (use-package wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
      (use-package writeroom-mode)
      ))
-
-(require 'init-ui)
 
 (use-package ibuffer
   :ensure nil
@@ -452,20 +404,20 @@ _w_ where is something defined
      (use-package persistent-scratch
        :diminish
        :bind (:map persistent-scratch-mode-map
-                   ([remap kill-buffer] . (lambda (&rest _)
-                                            (interactive)
-                                            (user-error "Scratch buffer cannot be killed")))
-                   ([remap revert-buffer] . persistent-scratch-restore)
-                   ([remap revert-this-buffer] . persistent-scratch-restore))
+		   ([remap kill-buffer] . (lambda (&rest _)
+					    (interactive)
+					    (user-error "Scratch buffer cannot be killed")))
+		   ([remap revert-buffer] . persistent-scratch-restore)
+		   ([remap revert-this-buffer] . persistent-scratch-restore))
        :hook ((after-init . persistent-scratch-autosave-mode)iu
-              (lisp-interaction-mode . persistent-scratch-mode))
+	      (lisp-interaction-mode . persistent-scratch-mode))
        :init
        ;; 创建 var 文件夹
        (make-directory (expand-file-name "var" user-emacs-directory) t)
 
        (setq persistent-scratch-backup-file-name-format "%Y-%m-%d"
-             persistent-scratch-backup-directory (expand-file-name "var/persistent-scratch" user-emacs-directory)
-             persistent-scratch-save-file (expand-file-name "var/.persistent-scratch" user-emacs-directory))
+	     persistent-scratch-backup-directory (expand-file-name "var/persistent-scratch" user-emacs-directory)
+	     persistent-scratch-save-file (expand-file-name "var/.persistent-scratch" user-emacs-directory))
        (persistent-scratch-setup-default)
 
        )))
@@ -474,7 +426,7 @@ _w_ where is something defined
 (run-with-idle-timer
  1 nil
  #'(lambda()
-     (require-package 'autorevert)
+     (use-package autorevert)
      (use-package autorevert
        :ensure nil
        :diminish
@@ -496,67 +448,53 @@ _w_ where is something defined
 (fset 'quick-switch-buffer [?\C-x ?b return])
 (global-set-key (kbd "C-z b") 'quick-switch-buffer)
 
-;; Frame transparence
-(lazy-load-global-keys
- '(
-   ("C-M-9" . transwin-inc)
-   ("C-M-8" . transwin-dec)
-   ("C-M-7" . transwin-toggle)
-   )
- "transwin"
-)
-
-(with-eval-after-load 'transwin
-  (setq transwin-parameter-alpha 'alpha-background))
-
 ;; Restore old window configurations
 (use-package winner
   :ensure nil
   :commands (winner-undo winner-redo) ;; C-c <Left>/C-c <Right>
   :hook (after-init . winner-mode)
   :init (setq winner-boring-buffers '("*Completions*"
-                                      "*Compile-Log*"
-                                      "*inferior-lisp*"
-                                      "*Fuzzy Completions*"
-                                      "*Apropos*"
-                                      "*Help*"
-                                      "*cvs*"
-                                      "*Buffer List*"
-                                      "*Ibuffer*"
-                                      "*esh command on file*"))
+				      "*Compile-Log*"
+				      "*inferior-lisp*"
+				      "*Fuzzy Completions*"
+				      "*Apropos*"
+				      "*Help*"
+				      "*cvs*"
+				      "*Buffer List*"
+				      "*Ibuffer*"
+				      "*esh command on file*"))
   )
 
 ;; Quickly switch windows
-
 (use-package ace-window
   :bind (([remap other-window] . ace-window)
-         ("C-c w" . ace-window-hydra/body))
+	 ("C-c w" . ace-window-hydra/body))
   :hook (emacs-startup . ace-window-display-mode)
   :config
   (defun toggle-window-split ()
     (interactive)
     (if (= (count-windows) 2)
-        (let* ((this-win-buffer (window-buffer))
-               (next-win-buffer (window-buffer (next-window)))
-               (this-win-edges (window-edges (selected-window)))
-               (next-win-edges (window-edges (next-window)))
-               (this-win-2nd (not (and (<= (car this-win-edges)
-                                           (car next-win-edges))
-                                       (<= (cadr this-win-edges)
-                                           (cadr next-win-edges)))))
-               (splitter
-                (if (= (car this-win-edges)
-                       (car (window-edges (next-window))))
-                    'split-window-horizontally
-                  'split-window-vertically)))
-          (delete-other-windows)
-          (let ((first-win (selected-window)))
-            (funcall splitter)
-            (if this-win-2nd (other-window 1))
-            (set-window-buffer (selected-window) this-win-buffer)
-            (set-window-buffer (next-window) next-win-buffer)
-            (select-window first-win)
-            (if this-win-2nd (other-window 1))))
+	(let* ((this-win-buffer (window-buffer))
+	       (next-win-buffer (window-buffer (next-window)))
+	       (this-win-edges (window-edges (selected-window)))
+	       (next-win-edges (window-edges (next-window)))
+	       (this-win-2nd (not (and (<= (car this-win-edges)
+					   (car next-win-edges))
+				       (<= (cadr this-win-edges)
+					   (cadr next-win-edges)))))
+	       (splitter
+		(if (= (car this-win-edges)
+		       (car (window-edges (next-window))))
+		    'split-window-horizontally
+		  'split-window-vertically)))
+	  (delete-other-windows)
+	  (let ((first-win (selected-window)))
+	    (funcall splitter)
+	    (if this-win-2nd (other-window 1))
+	    (set-window-buffer (selected-window) this-win-buffer)
+	    (set-window-buffer (next-window) next-win-buffer)
+	    (select-window first-win)
+	    (if this-win-2nd (other-window 1))))
       (user-error "`toggle-window-split' only supports two windows")))
 
   ;; Bind hydra to dispatch list
@@ -567,61 +505,61 @@ _w_ where is something defined
     "Slecet the specified window."
     (when (numberp number)
       (let ((found nil))
-        (dolist (win (aw-window-list))
-          (when (and (window-live-p win)
-                     (eq number
-                         (string-to-number
-                          (window-parameter win 'ace-window-path))))
-            (setq found t)
-            (aw-switch-to-window win)))
-        (unless found
-          (message "No specified window: %d" number)))))
+	(dolist (win (aw-window-list))
+	  (when (and (window-live-p win)
+		     (eq number
+			 (string-to-number
+			  (window-parameter win 'ace-window-path))))
+	    (setq found t)
+	    (aw-switch-to-window win)))
+	(unless found
+	  (message "No specified window: %d" number)))))
   (dotimes (n 9)
     (bind-key (format "M-%d" (1+ n))
-              (lambda ()
-                (interactive)
-                (aw--select-window (1+ n))))))
+	      (lambda ()
+		(interactive)
+		(aw--select-window (1+ n))))))
 
- (suk/wait-for-modules
+(suk/wait-for-modules
  (lambda()
    (with-eval-after-load 'pretty-hydra
      (pretty-hydra-define+ ace-window-hydra
        (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
-               :foreign-keys warn
-               :quit-key ("q" "C-g"))
+	       :foreign-keys warn
+	       :quit-key ("q" "C-g"))
        ("Actions"
-        (;;("TAB" other-window "switch")
-         ("x" ace-delete-window "delete")
-         ("X" ace-delete-other-windows "delete other" :exit t)
-         ("s" ace-swap-window "swap")
-         ("a" ace-select-window "select" :exit t)
-         ("m" toggle-frame-maximized "maximize" :exit t)
-         ("u" toggle-frame-fullscreen "fullscreen" :exit t))
-        "Resize"
-        (("<left>" shrink-window-horizontally "shrink H")
-         ("<right>" enlarge-window-horizontally "enlarge H")
-         ("<up>" shrink-window "shrink V")
-         ("<down>" enlarge-window "enlarge V")
-         ("n" balance-windows "balance"))
-        "Split"
-        (("r" split-window-right "horizontally")
-         ("R" split-window-horizontally-instead "horizontally instead")
-         ("v" split-window-below "vertically")
-         ("V" split-window-vertically-instead "vertically instead")
-         ("t" toggle-window-split "toggle")
-         ("o" delete-other-windows "only this"))
-        "Zoom"
-        (("+" text-scale-increase "in")
-         ("=" text-scale-increase "in")
-         ("-" text-scale-decrease "out")
-         ("0" (text-scale-increase 0) "reset"))
-        "Misc"
-        (("o" set-frame-font "frame font")
-         ("f" make-frame-command "new frame")
-         ("d" delete-frame "delete frame")
-         ("z" winner-undo "winner undo")
-         ("Z" winner-redo "winner redo"))
-        )
+	(;;("TAB" other-window "switch")
+	 ("x" ace-delete-window "delete")
+	 ("X" ace-delete-other-windows "delete other" :exit t)
+	 ("s" ace-swap-window "swap")
+	 ("a" ace-select-window "select" :exit t)
+	 ("m" toggle-frame-maximized "maximize" :exit t)
+	 ("u" toggle-frame-fullscreen "fullscreen" :exit t))
+	"Resize"
+	(("<left>" shrink-window-horizontally "shrink H")
+	 ("<right>" enlarge-window-horizontally "enlarge H")
+	 ("<up>" shrink-window "shrink V")
+	 ("<down>" enlarge-window "enlarge V")
+	 ("n" balance-windows "balance"))
+	"Split"
+	(("r" split-window-right "horizontally")
+	 ("R" split-window-horizontally-instead "horizontally instead")
+	 ("v" split-window-below "vertically")
+	 ("V" split-window-vertically-instead "vertically instead")
+	 ("t" toggle-window-split "toggle")
+	 ("o" delete-other-windows "only this"))
+	"Zoom"
+	(("+" text-scale-increase "in")
+	 ("=" text-scale-increase "in")
+	 ("-" text-scale-decrease "out")
+	 ("0" (text-scale-increase 0) "reset"))
+	"Misc"
+	(("o" set-frame-font "frame font")
+	 ("f" make-frame-command "new frame")
+	 ("d" delete-frame "delete frame")
+	 ("z" winner-undo "winner undo")
+	 ("Z" winner-redo "winner redo"))
+	)
        )
      (bind-key "w" #'ace-window-hydra/body leader-key)
      ))
@@ -630,6 +568,7 @@ _w_ where is something defined
  )
 
 ;; Enforce rules for popups
+(use-package popper)
 (use-package popper
   :custom
   (popper-group-function #'popper-group-by-directory)
@@ -730,39 +669,7 @@ _w_ where is something defined
             (delete-window window)))))
     (advice-add #'keyboard-quit :before #'popper-close-window-hack)))
 
-(suk/wait-for-modules
- (lambda()
-   (with-eval-after-load 'pretty-hydra
-     (pretty-hydra-define+ window-extension-hydra
-       (:color amaranth :hint nil :title  (pretty-hydra-title "Window Action" 'faicon "nf-fa-th")  :quit-key ("q" "C-g"))
-       ("窗口"
-        (("v" delete-other-windows-vertically+ "垂直只留当前窗口")
-         ("h" delete-other-windows-horizontally+ "水平只留当前窗口")
-         ("'" delete-current-buffer-and-window "关闭当前buffer和窗口")
-         ("\"" delete-current-buffer-window "仅关闭窗口")
-         ("o" toggle-one-window "单窗口切换")
-         ("O" toggle-window-split "切换窗口分割"))))
-     ;; 全局快捷键呼出菜单
-     (global-set-key (kbd "C-c W") 'window-extension-hydra/body)
-     )
-   'window-extension))
-
-(lazy-load-global-keys
- '(
-   ("C-c W" . window-extension-hydra/body)
-
-   )
- "window-extension"
- )
-
-(lazy-load-global-keys
- '(
-   ("m" . suk/bookmark-launcher/body)
-   )
- ;;leader-key
- "my-bookmark"
- "C-z"
- ) ;; 有的函数跟basic-toolkit重复
+(require 'my-bookmark)
 
 ;; C-x r l to list bookmarks
 
@@ -799,8 +706,8 @@ _w_ where is something defined
   (defun suk/recentf-exclude-p (file)
     (let ((file-dir (file-truename (file-name-directory file))))
       (-any-p (lamdba (dir)
-                      (string-prefix-p dir file-dir))
-              (mapcar 'file-truename (list var package-user-dir)))))
+		      (string-prefix-p dir file-dir))
+	      (mapcar 'file-truename (list var package-user-dir)))))
   (add-to-list 'recentf-exclude #'suk/recentf-exclude-p)
   )
 
@@ -829,8 +736,8 @@ _w_ where is something defined
   (interactive "p")
   (ignore-errors
     (if (equal arg 4)
-        ;; Kill all buffers if with prefix argument.
-        (mapc 'kill-buffer (buffer-list))
+	;; Kill all buffers if with prefix argument.
+	(mapc 'kill-buffer (buffer-list))
       ;; Kill unused buffers.
       (kill-unused-buffers)
       ;; Save all buffers before exit.
@@ -850,17 +757,40 @@ _w_ where is something defined
 
 (require 'init-tools)
 
-;; 空闲时加载
-(run-with-idle-timer
- 1
- nil
- #'(lambda()
-     (require 'load-abbrev)
-     ;; chmod +x
-     ;; ref. http://th.nao.ac.jp/MEMBER/zenitani/elisp-j.html#chmod
-     (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
-     (autoload 'calendar "init-calendar" "Config Chinese calendar " t)
-     ))
+;; 折叠和收缩代码
+;; builtin
+(use-package hideshow
+  :diminish hs-minor-mode
+  :bind
+  (:map hs-minor-mode-map
+	("C-c ." . hs-toggle-hiding)
+	("C-c ," . hs-show-all)
+	)
+  :hook (prog-mode . hs-minor-mode)
+  :config
+  ;; Display line counts
+  (defun hs-display-code-line-counts (ov)
+    "Display line counts when hiding codes."
+    (when (eq 'code (overlay-get ov 'hs))
+      (overlay-put ov 'display
+		   (concat
+		    " "
+		    (propertize
+		     (if (char-displayable-p ?⏷) "⏷" "...")
+		     'face 'shadow)
+		    (propertize
+		     (format " (%d lines)"
+			     (count-lines (overlay-start ov)
+					  (overlay-end ov)))
+		     'face '(:inherit shadow :height 0.8))
+		    " "))))
+  (setq hs-set-up-overlay #'hs-display-code-line-counts)
+  )
+
+;; ===== 按环境加载 =====
+(if (display-graphic-p)
+    (load "~/.emacs.d/gui.el")
+  (load "~/.emacs.d/tui.el"))
 
 ;; Hanlde minified code
 (if emacs/>=27p (add-hook 'after-init-hook #'global-so-long-mode))

@@ -35,25 +35,6 @@
    )
  "duplicate-line")
 
-;; 自定义删除到字符函数
-(defun my/delete-to-char (char)
-  "删除光标位置到下一个出现的字符 CHAR 之间的所有内容（不包括 CHAR 本身）。"
-  (interactive "cDelete to char: ")
-  (let ((start (point))
-        (end (progn
-               (search-forward (char-to-string char) (line-end-position) t))))
-    (if end
-        (progn
-          (goto-char end)
-          (delete-region start (- end 1))
-          (message "Deleted from %d to %d" start (- end 1)))
-      (progn
-        (delete-region start (line-end-position))
-        (message "Character '%c' not found. Deleted to end of line." char)))))
-
-;; 绑定快捷键 C-c d 到 my/delete-to-char 函数
-(global-set-key (kbd "C-c d") 'my/delete-to-char)
-
 ;; ### String Inflection ###
 ;; --- 单词语法风格快速转换
 
@@ -64,6 +45,12 @@
    ("M-u" . upcase-char)
    )
  "cases")
+
+ (lazy-load-global-keys
+ '(
+   ("C-c C-u" .  string-inflection-all-cycle)
+   )
+ "string-inflection")
 
 ;;; ### Thing-edit ###
 ;;; --- 增强式编辑当前光标的对象 
@@ -127,12 +114,12 @@
  "basic-toolkit")
 
 (lazy-load-global-keys
-       '(("M-=" . er/expand-region)
-         ("M--" . er/contract-region)
-         ("M-S-<Right>" . er/expand-region)
-         ("M-S-<Left>" . er/contract-region)
-         )
-       "expand-region")
+ '(("M-=" . er/expand-region)
+   ("M--" . er/contract-region)
+   ("M-S-<Right>" . er/expand-region)
+   ("M-S-<Left>" . er/contract-region)
+   )
+ "expand-region")
 
 (if emacs/>=28p
     (lazy-load-global-keys
@@ -149,11 +136,11 @@
   )
 
 (lazy-load-global-keys
-'(
-  ("M-<f7>" . suk-read-mode)
-  ("<f7>"   . olivetti-mode)
-  )
-"suk-read-mode")
+ '(
+   ("M-<f7>" . suk-read-mode)
+   ("<f7>"   . olivetti-mode)
+   )
+ "suk-read-mode")
 
 ;; --- 缓存移动
 (lazy-load-set-keys
@@ -193,16 +180,16 @@
    ("r" . my-refile-map)
    ("h" . hydra-global-org/body)
    )
-nil
+ nil
  "<f9>")
-  (define-prefix-command 'my-refile-map)
-  (global-set-key (kbd "C-c r") 'my-refile-map)
-  ;; I use C-c c to start capture mode
-  (global-set-key (kbd "C-c c") #'org-capture)
-  ;; ;; (global-set-key (kbd "C-c C") 'org-capture)
-  (global-set-key "\C-cl" #'org-store-link)
-  (global-set-key "\C-ca" #'org-agenda)
-  ;;(global-set-key "\C-cb" #'org-iswitchb)
+(define-prefix-command 'my-refile-map)
+(global-set-key (kbd "C-c r") 'my-refile-map)
+;; I use C-c c to start capture mode
+(global-set-key (kbd "C-c c") #'org-capture)
+;; ;; (global-set-key (kbd "C-c C") 'org-capture)
+(global-set-key "\C-cl" #'org-store-link)
+(global-set-key "\C-ca" #'org-agenda)
+;;(global-set-key "\C-cb" #'org-iswitchb)
 
-  ;; C-',  C-, is org-cycle-agenda-files keys
-  ;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。
+;; C-',  C-, is org-cycle-agenda-files keys
+;; 新版的org-mode使用C-c C-, 替换了 <sTAB 提供的模板功能。

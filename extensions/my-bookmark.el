@@ -55,29 +55,19 @@
 ;;(global-set-key  [f7] 'suk/jump-to-register)
 
 
-(with-eval-after-load 'hydra
-  (defhydra suk/bookmark-launcher (:color blue)
-    "
-^Bookmark^
--------------------------------------------------------------------
-[_m_] New bookmark     [_s_] Store bookmark
-[_b_] Jump bookmark    [_l_] Load bookmark
-[_i_] Quick bookmark   [_r_] Register bookmark
-[_j_] Goto bookmark    [_,_] Pop bookmark
-[_q_] Quit             [_._] Push bookmark
-"
-    ("m" bookmark-set)
-    ("l" consult-register-load)
-    ("s" consult-register-store)      ;; orig. abbrev-prefix-mark (unrelated)
-    ("r" consult-register)
-    ("i" remember-init)      ;记忆初始函数
-    ("j" remember-jump)      ;记忆跳转函数
-    ("b" bookmark-jump)
-    ("," point-stack-pop)    ;buffer索引跳转
-    ("." point-stack-push)   ;buffer索引标记
-    ("q" nil :color red))
-  ;; (global-set-key (kbd "C-c C-y") 'suk/bookmark-launcher/body)
-  )
+(with-eval-after-load 'leader-key
+ 
+    (keymap-set leader-key-map "m m" #'bookmark-set)
+    (keymap-set leader-key-map "m b" #'bookmark-jump)
+    (keymap-set leader-key-map "m l" #'consult-register-load)
+    (keymap-set leader-key-map "m s" #'consult-register-store) ;; 保存寄存器
+    (keymap-set leader-key-map "m r" #'consult-register)
+    (keymap-set leader-key-map "m B" #'consult-bookmark)
+    (keymap-set leader-key-map "m ," #'remember-init)          ;; 记忆初始函数
+    (keymap-set leader-key-map "m ." #'remember-jump)          ;; 记忆跳转函数
+    (keymap-set leader-key-map "m <" #'point-stack-pop)        ;; buffer 索引跳转
+    (keymap-set leader-key-map "m >" #'point-stack-push))      ;; buffer 索引标记
+  
 
 ;; bookmark
 

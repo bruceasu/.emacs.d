@@ -17,7 +17,7 @@
   :hook (after-init . doom-modeline-mode)
   :init
   (setq doom-modeline-icon t
-        doom-modeline-minor-modes t)
+	doom-modeline-minor-modes t)
   :config
   (column-number-mode 1)
   :custom
@@ -33,31 +33,33 @@
 
 (use-package hide-mode-line
   :hook (((treemacs-mode
-           eshell-mode shell-mode
-           term-mode vterm-mode
-           embark-collect-mode
-           lsp-ui-imenu-mode
-           pdf-annot-list-mode) . turn-on-hide-mode-line-mode)
-         (dired-mode . (lambda()
-                         (and (bound-and-true-p hide-mode-line-mode)
-                              (turn-off-hide-mode-line-mode))))))
+	   eshell-mode shell-mode
+	   term-mode vterm-mode
+	   embark-collect-mode
+	   lsp-ui-imenu-mode
+	   pdf-annot-list-mode) . turn-on-hide-mode-line-mode)
+	 (dired-mode . (lambda()
+			 (and (bound-and-true-p hide-mode-line-mode)
+			      (turn-off-hide-mode-line-mode))))))
 
 ;; A minor-mode menu for mode-line
 (use-package minions
   :hook (doom-modeline-mode . minions-mode))
 
 ;; 字体
-  (lazy-load-set-keys
-   '(
-     ("C--" . text-scale-decrease)        ;减小字体大小
-     ("C-=" . text-scale-increase)        ;增加字体大小
-     ("C-x C-0" . text-scale-adjust)
-     ))
+(use-package all-the-icons)
+
+(lazy-load-set-keys
+ '(
+   ("C--" . text-scale-decrease)        ;减小字体大小
+   ("C-=" . text-scale-increase)        ;增加字体大小
+   ("C-x C-0" . text-scale-adjust)
+   ))
 
 
-  (defun font-installed-p (font-name)
-    "Check if font with FONT-NAME is available."
-    (find-font (font-spec :name font-name)))
+(defun font-installed-p (font-name)
+  "Check if font with FONT-NAME is available."
+  (find-font (font-spec :name font-name)))
 
 
 ;; Use fixed pitch where it's sensible
@@ -76,14 +78,14 @@
     :bind
     ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
     ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
-)
+  )
 
 (when (display-graphic-p)
-   ;; Icons
+  ;; Icons
   (use-package nerd-icons
     :config
     (when (and (display-graphic-p)
-               (not (font-installed-p nerd-icons-font-family)))
+	       (not (font-installed-p nerd-icons-font-family)))
       (nerd-icons-install-fonts t)))
 
   ;; 图标支持
@@ -97,13 +99,13 @@
  9
  nil
  #'(lambda()
-     ;;(require-package 'highlight-symbol)
+     ;;(use-package highlight-symbol)
      ;; Highlight the current line
      (use-package hl-line
        :ensure nil
        :hook ((after-init . global-hl-line-mode)
-              ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
-               (lambda () (setq-local global-hl-line-mode nil)))))
+	      ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
+	       (lambda () (setq-local global-hl-line-mode nil)))))
      ))
 
 ;; setup hydra
@@ -115,15 +117,15 @@
     (defun hydra-set-posframe-show-params ()
       "Set hydra-posframe style."
       (setq hydra-posframe-show-params
-            `(
-              :left-fringe 8
-              :right-fringe 8
-              :internal-border-width 2
-              :internal-border-color ,(face-background 'posframe-border nil t)
-              :background-color ,(face-background 'tooltip nil t)
-              :foreground-color ,(face-foreground 'tooltip nil t)
-              :lines-truncate t
-              )))
+	    `(
+	      :left-fringe 8
+	      :right-fringe 8
+	      :internal-border-width 2
+	      :internal-border-color ,(face-background 'posframe-border nil t)
+	      :background-color ,(face-background 'tooltip nil t)
+	      :foreground-color ,(face-foreground 'tooltip nil t)
+	      :lines-truncate t
+	      )))
     (hydra-set-posframe-show-params)
     (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))
   )
@@ -132,20 +134,20 @@
   :requires hydra
   :custom (pretty-hydra-default-title-body-format-spec " %s%s")
   :hook (emacs-lisp-mode . (lambda ()
-                             (add-to-list
-                              'imenu-generic-expression
-                              '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
+			     (add-to-list
+			      'imenu-generic-expression
+			      '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
   :init
   (cl-defun pretty-hydra-title (title &optional icon-type icon-name &key face height v-adjust)
     "Add an icon in the hydra title."
     (let ((face (or face `(:inherit highlight :reverse-video t)))
-          (height (or height 1.2))
-          (v-adjust (or v-adjust 0.0)))
+	  (height (or height 1.2))
+	  (v-adjust (or v-adjust 0.0)))
       (concat
        (when (and (icons-displayable-p) icon-type icon-name)
-         (let ((f (intern (format "nerd-icons-%s" icon-type))))
-           (when (fboundp f)
-             (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
+	 (let ((f (intern (format "nerd-icons-%s" icon-type))))
+	   (when (fboundp f)
+	     (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
        (propertize title 'face face)))))
 
 (when (display-graphic-p)

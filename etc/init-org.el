@@ -10,11 +10,13 @@
 (unless (file-exists-p org-persist-directory)
   (make-directory org-persist-directory t))
 (require 'org)
+
 ;; To speed up startup, don't put to init section
 (setq org-modules nil)
+
 ;;(setq org-startup-indented t)
 (setq org-startup-folded nil)
-(setq org-ellipsis  "... → ")
+;;(setq org-ellipsis  "... → ")
 (setq org-pretty-entities t)
 (setq org-hide-emphasis-markers t)
 (setq org-hide-leading-stars nil)
@@ -26,10 +28,11 @@
 ;; Use the current window for indirect buffer display
 (setq org-indirect-buffer-display 'current-window)
 (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\)$" . org-mode))
-
-(setq org-tags-column -80)
-
-(setq org-catch-invisible-edits 'smart)
+;; 图 & 附件管理
+;; • 图只放 diagrams/
+;; • Org 只引用
+;; • 不嵌入
+(setq org-image-actual-width '(600))
 
 ;; 设置打开某种文件类型
 (setq org-file-apps
@@ -38,32 +41,39 @@
         ("\\.x?html?\\'" . system)
         ("\\.pdf\\'" . system)))
 
-  ;; 运行 Org Babel Tangle 命令：`M-x org-babel-tangle`。
-  ;; 从 org 文件中生成 el 配置文件
-  ;; 保存 user-emacs-directory(~/.emacs.d/) 文件下的 org 时，
-  ;; 导出文件中 elisp 代码到文件中。
-  (defun suk/org-babel-tangle-config ()
-    (when (string-equal (file-name-directory (buffer-file-name))
-                        (expand-file-name user-emacs-directory)) ; ~/.emacs.d
-      (let ((org-confirm-babel-evaluate nil))
-        (org-babel-tangle))))
+;; 运行 Org Babel Tangle 命令：`M-x org-babel-tangle`。
+;; 从 org 文件中生成 el 配置文件
+;; 保存 user-emacs-directory(~/.emacs.d/) 文件下的 org 时，
+;; 导出文件中 elisp 代码到文件中。
+(defun suk/org-babel-tangle-config ()
+  (when (string-equal (file-name-directory (buffer-file-name))
+                      (expand-file-name user-emacs-directory)) ; ~/.emacs.d
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
 
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (add-hook 'after-save-hook #'suk/org-babel-tangle-config)))
+(add-hook 'org-mode-hook
+          (lambda ()
+            (add-hook 'after-save-hook #'suk/org-babel-tangle-config)))
 
-
-  ;;;###autoload
-  (defun suk/load-theme-org()
-    (interactive)
-    (load-theme 'doom-solarized-light)
-    )
 
   ;;;###autoload
-  (defun suk/load-theme-default()
-    (interactive)
-    (load-theme 'doom-one)
-    )
+(defun suk/load-theme-org()
+  (interactive)
+  (load-theme 'doom-solarized-light)
+  )
+
+  ;;;###autoload
+(defun suk/load-theme-default()
+  (interactive)
+  (load-theme 'doom-one)
+  )
+
+;; 1. Outline path Jump
+(setq org-goto-interface 'outline-path-completion)
+;; C-c C-j → 秒跳技术点
+;; 2. org-occur 过滤内容
+;; C-c /
+;; 3. ripgrep or grep
 
 ;; GTD
 (setq org-use-fast-todo-selection t)
@@ -94,11 +104,11 @@
         (?C . success)))
 
 (setq org-tag-alist '((:startgroup . nil)
-                    ("Levle1" . ?u)     ;; 第一象限：紧急且重要
-                    ("Level2" . ?n)     ;; 第二象限：不紧急但重要
-                    ("Level3" . ?i)     ;; 第三象限：紧急但不重要
-                    ("Level4" . ?t)     ;; 第四象限：不紧急且不重要
-                    (:endgroup . nil)))
+                      ("Levle1" . ?u)     ;; 第一象限：紧急且重要
+                      ("Level2" . ?n)     ;; 第二象限：不紧急但重要
+                      ("Level3" . ?i)     ;; 第三象限：紧急但不重要
+                      ("Level4" . ?t)     ;; 第四象限：不紧急且不重要
+                      (:endgroup . nil)))
 
 ;; 可以使用 org-tags-view 来过滤和查看不同象限的任务
 ;; 例如：M-x org-tags-view RET +urgent-important
@@ -120,30 +130,26 @@
         ("TODO" ("WAITTING") ("CANCELLED") ("HOLD"))
         ("NEXT" ("WAITTING") ("CANCELLED") ("HOLD"))
         ("SOME" ("WAITTING") ("CANCELLED") ("HOLD"))))
+
 (setq org-log-done 'time)
 
 ;; Start the weekly agenda on Monday
 (setq org-agenda-start-on-weekday 1)
-(setq org-agenda-diary-file (expand-file-name "diary.org" org-files-directory))
-(setq org-agenda-block-separator ?─)
-(setq org-agenda-time-grid
-      '((daily today require-timed)
-        (800 1000 1200 1400 1600 1800 2000)
-        " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"))
 (setq org-agenda-current-time-string
       "⭠ now ─────────────────────────────────────────────────")
-(setq org-agenda-diary-file (expand-file-name "diary.org" org-files-directory))
+(setq org-agenda-diary-file
+      (expand-file-name "diary.org" org-files-directory))
 ;; setup agenda files
 ;; org-mode manages the org-agenda-files variable automatically
 ;; using C-c [ and C-c ] to add and remove files respectively.
 ;; They can be files or directories.
 (setq org-agenda-files
-      `(,(expand-file-name "gtd.org" org-files-directory)
+      `(,(expand-file-name "index.org" org-files-directory)
+        ,(expand-file-name "gtd.org" org-files-directory)
         ,(expand-file-name "work.org" org-files-directory)
-        ,(expand-file-name "finished.org" org-files-directory)
+        ,(expand-file-name "archive.org" org-files-directory)
         ,(expand-file-name "cancel.org" org-files-directory)
         ,(expand-file-name "journal.org" org-files-directory)
-        ,(expand-file-name "trash.org" org-files-directory)
         ;;,(expand-file-name "folder" org-files-directory)
         ))
 
@@ -152,7 +158,7 @@
 (setq org-archive-location "archive.org::* Archived Tasks")
 
 ;; capture template
-(setq org-default-notes-file (expand-file-name "notes.org" org-files-directory))
+(setq org-default-notes-file (expand-file-name "index.org" org-files-directory))
 ;; Capture templates for: TODO tasks, Notes,
 ;; appointments, phone calls, meetings, and (setq
 ;; org-protocol)
@@ -161,8 +167,8 @@
         ("t" "Todo"
          entry (file+headline ,(expand-file-name "gtd.org" org-files-directory) "Tasks")
          "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-        ("n" "Note"
-         entry (file ,(expand-file-name "notes.org" org-files-directory))
+        ("i" "Inbox"
+         entry (file ,(expand-file-name "Inbox.org" org-files-directory))
          "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
         ("r" "Respond"
          entry (file ,(expand-file-name "gtd.org" org-files-directory))
@@ -171,10 +177,6 @@
         ("j" "Journal"
          entry (file+olp+datetree ,(expand-file-name "journal.org" org-files-directory))
          "* %?\nEntered on %U\n  %i\n  %a" :clock-in t :clock-resume t)
-        ("w" "Review"
-         entry (file ,(expand-file-name "gtd.org" org-files-directory))
-         "* TODO Review %c\n%U\n"
-         :immediate-finish t)
         ("m" "Meeting"
          entry (file ,(expand-file-name "gtd.org" org-files-directory))
          "* MEETING with %? :MEETING:\n%U"
@@ -192,7 +194,8 @@
 ;; Refile settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Exclude DONE state tasks from refile targets
-    ;;;###autoload
+
+;;;###autoload
 (defun suk/verify-refile-target ()
   "Exclude todo keywords with a done state from refile targets."
   (not (member (nth 2 (org-heading-components)) org-done-keywords)))
@@ -213,19 +216,19 @@
 (require 'bookmark)
 (defvar my-refile-map (make-sparse-keymap))
 (defmacro my-defshortcut (key file)
-`(progn
-   (set-register ,key (cons 'file ,file))
-   (bookmark-store ,file (list (cons 'filename ,file)
-                               (cons 'position 1)
-                               (cons 'front-context-string "")) nil)
-   (define-key my-refile-map
-               (char-to-string ,key)
-               (lambda (prefix)
-                 "Call org-refile to target: FILE"
-                 (interactive "p")
-                 (let ((org-refile-targets (list (cons (list ,file) '(:maxlevel . 3))))
-                       (current-prefix-arg (or current-prefix-arg '(4))))
-                   (call-interactively 'org-refile))))))
+  `(progn
+     (set-register ,key (cons 'file ,file))
+     (bookmark-store ,file (list (cons 'filename ,file)
+				 (cons 'position 1)
+				 (cons 'front-context-string "")) nil)
+     (define-key my-refile-map
+		 (char-to-string ,key)
+		 (lambda (prefix)
+		   "Call org-refile to target: FILE"
+		   (interactive "p")
+		   (let ((org-refile-targets (list (cons (list ,file) '(:maxlevel . 3))))
+			 (current-prefix-arg (or current-prefix-arg '(4))))
+		     (call-interactively 'org-refile))))))
 
 (defvar my-org-last-refile-marker nil "Marker for last refile")
 (defun my-org-refile-in-file (&optional prefix)
@@ -244,10 +247,10 @@
     (org-cut-subtree)
     (save-window-excursion
       (save-excursion
-        (bookmark-jump (plist-get org-bookmark-names-plist :last-refile))
-        (let ((level (org-current-level)))
-          (org-end-of-subtree t t)
-          (org-paste-subtree))))))
+	(bookmark-jump (plist-get org-bookmark-names-plist :last-refile))
+	(let ((level (org-current-level)))
+	  (org-end-of-subtree t t)
+	  (org-paste-subtree))))))
 
 
 
@@ -266,131 +269,188 @@
 (load-if-exists (expand-file-name "my-defshortcuts.el" suk-emacs-config-dir))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; EXPORTER
+;; EXPORTER
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
-  ;; Inline images in HTML instead of producting links to the image
-  (setq org-html-inline-images t)
-  ;; Use (setq org-manual.css from the norang website for export document stylesheets)
-  ;; (setq org-html-head-extra "<link rel=\"stylesheet\" href=\"org-manual.css\" type=\"text/css\" />")
-  (setq org-html-head-include-default-style nil)
-  ;; Do not generate internal css formatting for HTML exports
-  (setq org-export-htmlize-output-type (quote css))
-  ;; Increase default number of headings to export
-  (setq org-export-headline-levels 6)
-  (setq org-export-coding-system 'utf-8)
-  (setq org-table-export-default-format "orgtbl-to-csv")
-  ;; Do not generate internal css formatting for HTML exports
-  (setq org-export-htmlize-output-type 'css)
-  (setq org-export-with-timestamps nil)
-  ;; _ 不转义，相当于#+OPTIONS: ^:{} ~:{}
-  (setq org-export-with-sub-superscripts "{}") ; 处理
-  (setq org-use-sub-superscripts '{}) ; 显示
+(setq default-process-coding-system '(utf-8-unix . utf-8-unix))
+;; Inline images in HTML instead of producting links to the image
+(setq org-html-inline-images t)
+;; Use (setq org-manual.css from the norang website for export document stylesheets)
+;; (setq org-html-head-extra "<link rel=\"stylesheet\" href=\"org-manual.css\" type=\"text/css\" />")
+(setq org-html-head-include-default-style nil)
+;; Do not generate internal css formatting for HTML exports
+(setq org-export-htmlize-output-type (quote css))
+;; Increase default number of headings to export
+(setq org-export-headline-levels 6)
+(setq org-export-coding-system 'utf-8)
+(setq org-table-export-default-format "orgtbl-to-csv")
+;; Do not generate internal css formatting for HTML exports
+(setq org-export-htmlize-output-type 'css)
+(setq org-export-with-timestamps nil)
+;; _ 不转义，相当于#+OPTIONS: ^:{} ~:{}
+(setq org-export-with-sub-superscripts "{}") ; 处理
+(setq org-use-sub-superscripts '{}) ; 显示
 
-  ;; Embed inline CSS read from a file.
-  ;;;###autoload
-  (defun null-or-unboundp (var)
-    "Return t if VAR is either unbound or nil, otherwise return nil."
-    (or (not (boundp var))
-        (null (symbol-value var))))
+;; Embed inline CSS read from a file.
+;;;###autoload
+(defun null-or-unboundp (var)
+  "Return t if VAR is either unbound or nil, otherwise return nil."
+  (or (not (boundp var))
+      (null (symbol-value var))))
 
-  ;;;###autoload
-  (defun my-org-inline-css-hook (exporter)
-    "Insert custom inline css"
-    (when (eq exporter 'html)
-      (let* ((dir (ignore-errors (file-name-directory (buffer-file-name))))
-             (path (concat dir "style.css"))
-             ;;(path  org-css-file)
-             (homestyle (and (or (null dir) (null (file-exists-p path)))
-                             (not (null-or-unboundp 'my-org-inline-css-file))))
-             (final (if homestyle my-org-inline-css-file path)))
-        (if (file-exists-p final)
-            (progn
-              (setq-local org-html-head-include-default-style nil)
-              (setq-local org-html-head
-                          (concat
-                           "<style type=\"text/css\">\n"
-                           "<!--/*--><![CDATA[/*><!--*/\n"
-                           (with-temp-buffer
-                             (insert-file-contents final)
-                             (buffer-string))
-                           "/*]]>*/-->\n"
-                           "</style>\n")))))))
+;;;###autoload
+(defun my-org-inline-css-hook (exporter)
+  "Insert custom inline css"
+  (when (eq exporter 'html)
+    (let* ((dir (ignore-errors (file-name-directory (buffer-file-name))))
+           (path (concat dir "style.css"))
+           ;;(path  org-css-file)
+           (homestyle (and (or (null dir) (null (file-exists-p path)))
+                           (not (null-or-unboundp 'my-org-inline-css-file))))
+           (final (if homestyle my-org-inline-css-file path)))
+      (if (file-exists-p final)
+          (progn
+            (setq-local org-html-head-include-default-style nil)
+            (setq-local org-html-head
+                        (concat
+                         "<style type=\"text/css\">\n"
+                         "<!--/*--><![CDATA[/*><!--*/\n"
+                         (with-temp-buffer
+                           (insert-file-contents final)
+                           (buffer-string))
+                         "/*]]>*/-->\n"
+                         "</style>\n")))))))
 
-  (add-hook 'org-export-before-processing-hook #'my-org-inline-css-hook)
+(add-hook 'org-export-before-processing-hook #'my-org-inline-css-hook)
 
-  ;; https://github.com/marsmining/ox-twbs
-  ;; M-x package-install [RET] ox-twbs [RET]
-  ;; If the installation doesn’t work try refreshing the package list:
-  ;; M-x package-refresh-contents [RET]
-  ;; usage: org-twbs-export-to-html
+;; https://github.com/marsmining/ox-twbs
+;; M-x package-install [RET] ox-twbs [RET]
+;; If the installation doesn’t work try refreshing the package list:
+;; M-x package-refresh-contents [RET]
+;; usage: org-twbs-export-to-html
 
-  (use-package ox-twbs)
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (local-set-key (kbd "s-\\") 'my-org-publish-buffer)))
+(use-package ox-twbs)
+(add-hook 'org-mode-hook
+          (lambda ()
+            (local-set-key (kbd "s-\\") 'my-org-publish-buffer)))
 
-  (defun my-org-publish-buffer ()
-    (interactive)
-    (save-buffer)
-    (org-twbs-export-to-html))
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (set-fill-column 70)
-              (turn-on-font-lock)
-              (load-org-font)
-              ))
-  (defun my-execute-function-and-shell-command-async ()
-    "执行自定义函数逻辑，然后异步调用外部 shell 命令，传递当前文件名的扩展名替换为 .html 的路径作为参数。"
-    (interactive)
-    ;; 检查当前缓冲区是否关联有文件
-    (if (buffer-file-name)
-        (let* ((current-file (buffer-file-name))
-               ;; 使用 file-name-sans-extension 获取不带扩展名的文件名
-               ;;(base-name (file-name-sans-extension current-file))
-               ;; 构建新的文件名，替换扩展名为 .html
-               ;;(html-file (my-cygpath-convert (concat base-name ".html")))
-               ;; 定义要执行的外部命令，这里以 ls -l 为例
-               ;; (command (if sys/win32p
-               ;;              ;;"echo You may need to cleanup the html file."
-               ;;              (format "c:/green/msys64/usr/bin/bash.exe --login /c/green/htm-cleanup.sh %s" html-file)
-               ;;            (format "htm-cleanup.sh %s" (shell-quote-argument html-file))))
-               ;; 定义输出缓冲区名称
-               ;;(output-buffer "*Shell Command Output*")
-               )
-          (my-org-publish-buffer)
-          ;; 执行自定义函数逻辑
-          (message "正在处理文件: %s" current-file)
+(defun my-org-publish-buffer ()
+  (interactive)
+  (save-buffer)
+  (org-twbs-export-to-html))
+(add-hook 'org-mode-hook
+          (lambda ()
+            (set-fill-column 70)
+            (turn-on-font-lock)
+            (load-org-font)
+            ))
+(defun my-execute-function-and-shell-command-async ()
+  "执行自定义函数逻辑，然后异步调用外部 shell 命令，传递当前文件名的扩展名替换为 .html 的路径作为参数。"
+  (interactive)
+  ;; 检查当前缓冲区是否关联有文件
+  (if (buffer-file-name)
+      (let* ((current-file (buffer-file-name))
+             ;; 使用 file-name-sans-extension 获取不带扩展名的文件名
+             ;;(base-name (file-name-sans-extension current-file))
+             ;; 构建新的文件名，替换扩展名为 .html
+             ;;(html-file (my-cygpath-convert (concat base-name ".html")))
+             ;; 定义要执行的外部命令，这里以 ls -l 为例
+             ;; (command (if sys/win32p
+             ;;              ;;"echo You may need to cleanup the html file."
+             ;;              (format "c:/green/msys64/usr/bin/bash.exe --login /c/green/htm-cleanup.sh %s" html-file)
+             ;;            (format "htm-cleanup.sh %s" (shell-quote-argument html-file))))
+             ;; 定义输出缓冲区名称
+             ;;(output-buffer "*Shell Command Output*")
+             )
+        (my-org-publish-buffer)
+        ;; 执行自定义函数逻辑
+        (message "正在处理文件: %s" current-file)
 
-          ;; 异步调用外部 shell 命令
-          ;;(async-shell-command command output-buffer)
+        ;; 异步调用外部 shell 命令
+        ;;(async-shell-command command output-buffer)
 
-          ;; 显示提示信息
-          ;;(message "已启动异步命令: %s" command)
-          )
-      (message "当前缓冲区没有关联的文件。")))
+        ;; 显示提示信息
+        ;;(message "已启动异步命令: %s" command)
+        )
+    (message "当前缓冲区没有关联的文件。")))
 
+;; 转换msys路径（为了在Windows下使用Bash）
+(defun my-cygpath-convert (win-path)
+  "Use cygpath to convert WIN-PATH to /cygdrive style."
+  (let ((output (shell-command-to-string
+                 (format "D:/green/msys64/usr/bin/cygpath -u \"%s\"" win-path))))
+    (string-trim output)))
 
-  (defun my-cygpath-convert (win-path)
-    "Use cygpath to convert WIN-PATH to /cygdrive style."
-    (let ((output (shell-command-to-string
-                   (format "D:/green/msys64/usr/bin/cygpath -u \"%s\"" win-path))))
-      (string-trim output)))
+;; 绑定快捷键 C-c e 到上述函数
+(global-set-key (kbd "C-S-e") #'my-execute-function-and-shell-command-async)
 
-  ;; 绑定快捷键 C-c e 到上述函数
-  (global-set-key (kbd "C-S-e") #'my-execute-function-and-shell-command-async)
-
-  ;;(global-set-key (kbd "C-S-e") #'my-org-publish-buffer)
+;;(global-set-key (kbd "C-S-e") #'my-org-publish-buffer)
 (defun org-export-docx ()
   (interactive)
   (let ((docx-file (concat (file-name-sans-extension (buffer-file-name)) ".docx"))
-           (template-file (concat  suk-emacs-share-dir "/template/template.docx"))
-    (shell-command (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
-    (message "Convert finish: %s" docx-file))))
+        (template-file (concat  suk-emacs-share-dir "/template/template.docx"))
+        (shell-command (format "pandoc %s -o %s --reference-doc=%s" (buffer-file-name) docx-file template-file))
+        (message "Convert finish: %s" docx-file))))
 
-  ;; covert to html
-  (use-package htmlize :defer 2)
-  ;;(require-package 'ob-sagemath)
+;; covert to html
+(use-package htmlize :defer 2)
+;;(use-package ob-sagemath)
+
+(require 'ox-html)
+;; 导出：
+;; C-c C-e h h        ;; 整文件
+;; C-c C-e C-s h h    ;; 子树（推荐） 光标放在标题上时，执行
+
+(defvar suk/html-to-pdf-command "html2pdf"
+  "HTML to PDF command")
+(defun suk/export-whitepaper (sections output-pdf)
+  "导出指定技术章节为 PDF"
+  (let* ((org-file "tmp-whitepaper.org")
+         (html-file "tmp-whitepaper.html")
+         (pdf-file output-pdf))
+
+    ;; 1️. 生成 Org 汇编文件
+    (with-temp-file org-file
+      (insert "#+TITLE: Internal Whitepaper\n")
+      (insert "#+OPTIONS: toc:2 num:3\n")
+      (insert "#+HTML_HEAD: <link rel=\"whitepaper.css\">\n\n")
+      (insert "#+INCLUDE: \"cover.org\"\n")
+      (insert "#+INCLUDE: \"preface.org\"\n")
+      (insert "#+INCLUDE: \"disclaimer.org\"\n")
+      (insert "#+INCLUDE: \"toc.org\"\n")
+      (insert "#+INCLUDE: \"changelog.org\"\n")
+      (dolist (id sections)
+        (insert (format "#+INCLUDE: \"../tech.org\" :custom-id \"%s\"\n" id))))
+
+    ;; 2️. 打开 Org 文件并导出 HTML
+    (with-current-buffer (find-file-noselect org-file)
+      (org-mode)
+      (org-html-export-to-html))
+
+    ;; 3️. 调用外部工具生成 PDF
+    ;; 这里假设你有一个 html → pdf 的命令
+    ;; 比如：html2pdf tmp-whitepaper.html runtime.pdf
+    (let ((cmd (format "suk/html-to-pdf-command %s %s" html-file pdf-file)))
+      (message "Running: %s" cmd)
+      (shell-command cmd))
+
+    (message "Whitepaper generated: %s" pdf-file)
+    (delete-file org-file)
+    (delete-file html-file)
+  ))
+
+;;调用：
+;;* Java
+;;:PROPERTIES:
+;;:CUSTOM_ID: java
+;;:END:
+;;* Go
+;;:PROPERTIES:
+;;:CUSTOM_ID: go
+;;:END:
+
+
+;;  假设要导出的标题ID为： java, go 
+;;     (suk/export-whitepaper '("java" "go") "runtime.pdf")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  ;;; Attachments
@@ -461,8 +521,8 @@
   ;; Disable Prettify Symbols mode globally or locally as needed
   ;;(global-prettify-symbols-mode -1)
   :hook ((org-mode . org-modern-mode)
-         (org-agenda-finalize . org-modern-agenda)
-         ))
+	 (org-agenda-finalize . org-modern-agenda)
+	 ))
 
 (use-package org-roam
   :ensure t
@@ -480,22 +540,22 @@
    '(("d" "default" entry "* %<%I:%M %p>: %?"
       :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
   :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
-         :map org-mode-map
-         ("C-M-i" . completion-at-point)
-         :map org-roam-dailies-map
-         ("Y" . org-roam-dailies-capture-yesterday)
-         ("n" . org-roam-dailies-capture-today)
-         ("T" . org-roam-dailies-capture-tomorrow)
-         ("v" . org-roam-dailies-capture-date)
-         ("d" . org-roam-dailies-goto-today)
-         ("t" . org-roam-dailies-goto-tomorrow)
-         ("y" . org-roam-dailies-goto-yesterday)
-         ("c" . org-roam-dailies-goto-date)
-         ("b" . org-roam-dailies-goto-next-note)
-         ("f" . org-roam-dailies-goto-previous-note)
-         )
+	 ("C-c n f" . org-roam-node-find)
+	 ("C-c n i" . org-roam-node-insert)
+	 :map org-mode-map
+	 ("C-M-i" . completion-at-point)
+	 :map org-roam-dailies-map
+	 ("Y" . org-roam-dailies-capture-yesterday)
+	 ("n" . org-roam-dailies-capture-today)
+	 ("T" . org-roam-dailies-capture-tomorrow)
+	 ("v" . org-roam-dailies-capture-date)
+	 ("d" . org-roam-dailies-goto-today)
+	 ("t" . org-roam-dailies-goto-tomorrow)
+	 ("y" . org-roam-dailies-goto-yesterday)
+	 ("c" . org-roam-dailies-goto-date)
+	 ("b" . org-roam-dailies-goto-next-note)
+	 ("f" . org-roam-dailies-goto-previous-note)
+	 )
   :bind-keymap
   ("C-c n d" . org-roam-dailies-map)
   :config

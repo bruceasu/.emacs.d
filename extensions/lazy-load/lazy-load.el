@@ -151,23 +151,29 @@
        (t
         (signal 'wrong-type-argument (list 'string-or-vector key)))))))
 
-
-(defvar lazy-load-dangerous-prefixes
-  '("C-x" "C-c" "M-s" "M-g")
-  "不要直接解绑的危险前缀键列表。
-解绑这些相当于干掉整个大 keymap，会让很多内置功能失效。")
-
 (defun lazy-load-rebind-key (key def &optional keymap)
   "重新绑定 KEY 到 DEF。
-KEY 是字符串（如 \"C-x C-c\"）。
-DEF 是命令（函数符号）。
-KEYMAP 默认为全局 `current-global-map'。"
-  (let ((map (or keymap (current-global-map))))
-    ;; 先解绑旧的
-    (define-key map (read-kbd-macro key) nil)
-    ;; 再绑定新的
-    (define-key map (read-kbd-macro key) def)
-    (message "🔑 Rebound %s → %s" key def)))
+- KEY 是字符串（如 \"C-x C-c\"）或向量（如 [?\C-x ?\C-c]）。
+- DEF 是目标命令（函数符号）。
+- KEYMAP 默认为全局 `current-global-map'`。
+会在 minibuffer 提示原绑定命令 → 新命令。"
+  (let* ((map (or keymap (current-global-map)))
+         (kbd (if (stringp key)
+                  (read-kbd-macro key)
+                (if (vectorp key)
+                    key
+                  (signal 'wrong-type-argument (list 'string-or-vector key)))))
+         (old (lookup-key map kbd)))
+    ;; 先解绑
+    (define-key map kbd nil)
+    ;; 再绑定新命令
+    (define-key map kbd def)
+    ;; 提示消息
+    (message "🔑 Rebind %s: %s → %s"
+             (key-description kbd)
+             (or old "unbound")
+             def)))
+
 
 
 (provide 'lazy-load)

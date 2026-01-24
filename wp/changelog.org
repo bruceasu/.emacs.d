@@ -1,0 +1,12 @@
+* 版本历史
+:PROPERTIES:
+:EXPORT_EXCLUDE: nil
+:END:
+| 版本 | 日期       | 作者      | 变更说明 |
+|------+------------+-----------+----------|
+| v1.0 | 2026-01-24 | Victor Su | 初版发布 |
+| v1.1 | 2026-02-10 | Victor Su | 增加 Go Scheduler 章节 |
+| v1.2 | 2026-03-05 | Victor Su | 修订 JVM GC 参数说明 |
+#+BEGIN_EXPORT html
+<div class="page-break"></div>
+#+END_EXPORT

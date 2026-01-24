@@ -1,0 +1,19 @@
+#+TITLE: Backend Runtime Internals
+#+AUTHOR: Victor Su
+#+DATE: \today
+#+OPTIONS: toc:2 num:3
+#+HTML_HEAD: <link rel="stylesheet" href="../whitepaper.css">
+#+INCLUDE: "tech.org" :lines "1-2000"
+
+⚠️ 上面只是示意，我们要精确 INCLUDE 子树。
+
+#+INCLUDE: "cover.org"
+#+INCLUDE: "preface.org"
+#+INCLUDE: "disclaimer.org"
+#+INCLUDE: "toc.org"
+#+INCLUDE: "changelog.org"
+#+INCLUDE: "../tech.org" :custom-id "java"
+#+INCLUDE: "../tech.org" :custom-id "go"
+#+INCLUDE: "../tech.org" :custom-id "system-design"
+
+顺序 = 白皮书顺序

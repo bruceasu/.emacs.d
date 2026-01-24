@@ -52,8 +52,6 @@
 ;;appointment
 (setq appt-issue-message t)
 
-(autoload 'calendar-chinese-year "cal-china" "Chinese year data" t)
-(require 'cal-china-x)
 ;; Holidays
 ;;除去基督徒的节日、希伯来人的节日和伊斯兰教的节日。
 (setq hebrew-holidays nil
@@ -62,41 +60,6 @@
       bahai-holidays nil
 	  ;; christian-holidays nil
       )
-(setq calendar-mark-holidays-flag t
-      cal-china-x-important-holidays cal-china-x-chinese-holidays
-      cal-china-x-general-holidays '((holiday-lunar 1 15 "元宵节")
-                                     (holiday-lunar 7 7 "七夕节")
-                                     ;; 生日
-                                     (holiday-lunar 7 16  "老豆生日 (七月十六)" );阴历生日
-                                     (holiday-lunar 1 10  "老母生日 (正月初十)" );阴历生日
-                                     (holiday-lunar 4 4  "老母生日 (四月初四)" );阴历生日
-                                     (holiday-lunar 10 18 "我嘅生日 (十月十八)" );阴历生日
-                                     (holiday-lunar 9 1   "細佬生日 (九月初一)") ;阴历生日
-                                     (holiday-lunar 3 2   "女儿生日 (三月初二)") ;阴历生日
-                                     (holiday-fixed 4 8   "女儿生日 (4月8日)")   ;阳历生日
-                                     (holiday-fixed 10 12  "女儿生日 (10月12日)") ;阳历生日
-                                     (holiday-lunar 9 14   "女儿生日 (九月十四)") ;阴历生日
-                                     (holiday-lunar 6 21  "老婆生日 (六月廿一)") ;阴历生日
-                                     (holiday-fixed 3 8 "妇女节")
-                                     (holiday-fixed 3 12 "植树节")
-                                     (holiday-fixed 5 4 "青年节")
-                                     (holiday-fixed 6 1 "儿童节")
-                                     (holiday-fixed 9 10 "教师节"))
-      holiday-other-holidays '((holiday-fixed 2 14 "情人节")
-                               (holiday-fixed 4 1 "愚人节")
-                               (holiday-fixed 12 25 "圣诞节")
-                               (holiday-float 5 0 2 "母亲节")
-                               (holiday-float 6 0 3 "父亲节")
-                               (holiday-float 11 4 4 "感恩节"))
-      calendar-holidays (append cal-china-x-important-holidays
-                                cal-china-x-general-holidays
-                                cal-china-x-japanese-holidays
-              					holiday-general-holidays
-              					holiday-christian-holidays
-                                holiday-other-holidays))
-
-
-
 (setq general-holidays '((holiday-fixed 1 1   "元旦")
                          (holiday-fixed 2 14  "情人节")
                          (holiday-fixed 4 1   "愚人节")
@@ -122,6 +85,26 @@
                        (holiday-chinese 9 14   "女儿生日 (九月十四)") ;阴历生日
                        (holiday-chinese 6 21  "老婆生日 (六月廿一)") ;阴历生日
                        ))
+;; 生日
+;; (holiday-lunar 7 16  "老豆生日 (七月十六)" );阴历生日
+;; (holiday-lunar 1 10  "老母生日 (正月初十)" );阴历生日
+;; (holiday-lunar 4 4  "老母生日 (四月初四)" );阴历生日
+;; (holiday-lunar 10 18 "我嘅生日 (十月十八)" );阴历生日
+;; (holiday-lunar 9 1   "細佬生日 (九月初一)") ;阴历生日
+;; (holiday-lunar 3 2   "女儿生日 (三月初二)") ;阴历生日
+;; (holiday-lunar 9 14   "女儿生日 (九月十四)") ;阴历生日
+;; (holiday-lunar 6 21  "老婆生日 (六月廿一)") ;阴历生日
+                      
+(setq holiday-other-holidays '((holiday-fixed 2 14 "情人节")
+                               (holiday-fixed 4 1 "愚人节")
+                               (holiday-fixed 12 25 "圣诞节")
+                               (holiday-float 5 0 2 "母亲节")
+                               (holiday-float 6 0 3 "父亲节")
+                               (holiday-fixed 4 8   "女儿生日 (4月8日)")   ;阳历生日
+                               (holiday-fixed 10 12  "女儿生日 (10月12日)") ;阳历生日
+                               (holiday-float 11 4 4 "感恩节")))                            
+(setq calendar-mark-holidays-flag t)
+(setq calendar-holidays (append holiday-general-holidays holiday-christian-holidays holiday-other-holidays))
 
 (setq chinese-calendar-celestial-stem
       ["甲" "乙" "丙" "丁" "戊" "己" "庚" "辛" "壬" "癸"])

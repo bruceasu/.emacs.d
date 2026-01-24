@@ -1,0 +1,19 @@
+#+TITLE: Backend Runtime Internals
+#+SUBTITLE: Java & Go 核心机制白皮书
+#+AUTHOR: Victor Su
+#+DATE: \today
+#+OPTIONS: toc:nil num:nil
+#+HTML_HEAD: <link rel="stylesheet" href="../whitepaper.css">
+#+BEGIN_EXPORT html
+<div class="cover-page">
+  <h1>Backend Runtime Internals</h1>
+  <h2>Java & Go 核心机制白皮书</h2>
+<div class="cover-meta">
+    <p><strong>作者：</strong>Victor Su</p>
+    <p><strong>部门：</strong>Backend / Platform</p>
+    <p><strong>版本：</strong>v1.0</p>
+    <p><strong>日期：</strong><span class="date"></span></p>
+  </div>
+</div>
+<div class="page-break"></div>
+#+END_EXPORT

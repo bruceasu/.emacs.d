@@ -33,11 +33,11 @@
        :diminish flyspell-mode
        :if (executable-find "aspell")
        :hook (((text-mode outline-mode) . flyspell-mode)
-              (prog-mode . flyspell-prog-mode)
-              (flyspell-mode . (lambda ()
-                                 (unbind-key "C-;" flyspell-mode-map)
-                                 (unbind-key "C-," flyspell-mode-map)
-                                 (unbind-key "C-." flyspell-mode-map))))
+	      (prog-mode . flyspell-prog-mode)
+	      (flyspell-mode . (lambda ()
+				 (unbind-key "C-;" flyspell-mode-map)
+				 (unbind-key "C-," flyspell-mode-map)
+				 (unbind-key "C-." flyspell-mode-map))))
        :init
        (setq flyspell-issue-message-flag nil)
        (setq ispell-program-name "aspell")
@@ -49,11 +49,11 @@
  nil
  #'(lambda()
      (if suk-rime
-         (require 'init-rime)
+	 (require 'init-rime)
        ;;(require 'rain)
        (progn
-         (require 'pyim-hyly)
-         (pyim-hyly-enable))
+	 (require 'pyim-hyly)
+	 (pyim-hyly-enable))
        )
      ))
 

@@ -27,17 +27,17 @@
 (setq frame-inhibit-implied-resize t)
 (setq default-frame-alist
       (append '((width                . 140)  ; Frame幅
-                (height               . 40 )  ; Frame高
-                (left                 . 170 ) ; 配置左位置
-                (top                  . 30 )  ; 配置上位置
-                (line-spacing         . 0  )  ; 文字間隔
-                (left-fringe          . 12 )  ; 左fringe幅
-                (right-fringe         . 12 )  ; 右fringe幅
-                (menu-bar-lines       . 1  )  ; 菜单行
-                (cursor-type          . bar)  ; 光标種別
-                (alpha                . 100)  ; 透明度
-                )
-              default-frame-alist))
+		(height               . 40 )  ; Frame高
+		(left                 . 170 ) ; 配置左位置
+		(top                  . 30 )  ; 配置上位置
+		(line-spacing         . 0  )  ; 文字間隔
+		(left-fringe          . 12 )  ; 左fringe幅
+		(right-fringe         . 12 )  ; 右fringe幅
+		(menu-bar-lines       . 1  )  ; 菜单行
+		(cursor-type          . bar)  ; 光标種別
+		(alpha                . 100)  ; 透明度
+		)
+	      default-frame-alist))
 (setq initial-frame-alist default-frame-alist)
 
 ;; 元素一部分禁用

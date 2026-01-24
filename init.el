@@ -60,31 +60,31 @@
     (add-to-list 'load-path search-dir))
   (let* ((dir (file-name-as-directory search-dir)))
     (dolist (subdir
-             ;; Filter the Unnecessary direcotires, speed up emacs startup.
-             (cl-remove-if
-              #'(lambda (subdir)
-                  (or
-                   ;; Not file
-                   (not (file-directory-p (concat dir subdir)))
-                   ;; remove the follow directoies
-                   (member subdir '("." ".." ; The current direcotiry and parent diretory in  Linux/Uniux OS
-                                    "dist" "node_modules" "__pycache__" ; Conventional directories for specific languages.
-                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ; Version control directories.
-              (directory-files dir)))
+	     ;; Filter the Unnecessary direcotires, speed up emacs startup.
+	     (cl-remove-if
+	      #'(lambda (subdir)
+		  (or
+		   ;; Not file
+		   (not (file-directory-p (concat dir subdir)))
+		   ;; remove the follow directoies
+		   (member subdir '("." ".." ; The current direcotiry and parent diretory in  Linux/Uniux OS
+				    "dist" "node_modules" "__pycache__" ; Conventional directories for specific languages.
+				    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ; Version control directories.
+	      (directory-files dir)))
       (let ((subdir-path (concat dir (file-name-as-directory subdir))))
-        ;; The directories including:  .el .so .dll will add to `load-path` variable.
-        (when (cl-some #'(lambda (subdir-file)
-                           (and (file-regular-p (concat subdir-path subdir-file))
-                                ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
-                                (member (file-name-extension subdir-file) '("el" "so" "dll"))))
-                       (directory-files subdir-path))
+	;; The directories including:  .el .so .dll will add to `load-path` variable.
+	(when (cl-some #'(lambda (subdir-file)
+			   (and (file-regular-p (concat subdir-path subdir-file))
+				;; .so .dll 文件指非Elisp语言编写的Emacs动态库
+				(member (file-name-extension subdir-file) '("el" "so" "dll"))))
+		       (directory-files subdir-path))
 
-          ;; Notice: The third argument of add-to-list must be `t`, add to the end,
-          ;; make sure Breadth-first.
-          (add-to-list 'load-path subdir-path t))
+	  ;; Notice: The third argument of add-to-list must be `t`, add to the end,
+	  ;; make sure Breadth-first.
+	  (add-to-list 'load-path subdir-path t))
 
-        ;; Continue recursively through subdirectories.
-        (add-subdirs-to-load-path subdir-path nil)))))
+	;; Continue recursively through subdirectories.
+	(add-subdirs-to-load-path subdir-path nil)))))
 
 ;; Load the defined directories.
 (add-subdirs-to-load-path suk-emacs-config-dir t)
@@ -100,21 +100,21 @@
 (setq gc-cons-percentage 0.8)
 ;; Reset the GC setting
 (add-hook 'emacs-startup-hook
-          (lambda ()
-            ;; default: 0.8MB
-            ;;(setq gc-cons-threshold 80000000)
-            (message "Emacs ready in %s with %d garbage collections."
-                     (format "%.2f seconds"
-                             (float-time
-                              (time-subtract after-init-time before-init-time)))
-                     gcs-done)
-            (defun my-cleanup-gc ()
-              "Clean up gc."
-              (setq gc-cons-threshold  67108864) ; 64M
-              (setq gc-cons-percentage 0.1) ; original value
-              (garbage-collect))
-            (run-with-idle-timer 4 nil #'my-cleanup-gc)
-            (add-hook 'focus-out-hook 'garbage-collect)))
+	  (lambda ()
+	    ;; default: 0.8MB
+	    ;;(setq gc-cons-threshold 80000000)
+	    (message "Emacs ready in %s with %d garbage collections."
+		     (format "%.2f seconds"
+			     (float-time
+			      (time-subtract after-init-time before-init-time)))
+		     gcs-done)
+	    (defun my-cleanup-gc ()
+	      "Clean up gc."
+	      (setq gc-cons-threshold  67108864) ; 64M
+	      (setq gc-cons-percentage 0.1) ; original value
+	      (garbage-collect))
+	    (run-with-idle-timer 4 nil #'my-cleanup-gc)
+	    (add-hook 'focus-out-hook 'garbage-collect)))
 
 (defconst sys/win32p
   (eq system-type 'windows-nt)
@@ -203,10 +203,10 @@
   :group 'suk
   :type 'boolean)
 
- (defcustom suk-copilot-enable nil
-   "Enable copilot mode"
-   :group 'suk
-   :type 'boolean)
+(defcustom suk-copilot-enable nil
+  "Enable copilot mode"
+  :group 'suk
+  :type 'boolean)
 
 ;; Load `custom-file'
 ;; If it doesn't exist, copy from the template, then load it.
@@ -215,7 +215,7 @@
 (let ((custom-template-file
        (expand-file-name "custom-template.el" user-emacs-directory)))
   (if (and (file-exists-p custom-template-file)
-           (not (file-exists-p custom-file)))
+	   (not (file-exists-p custom-file)))
       (copy-file custom-template-file custom-file)))
 
 (load-file custom-file)
@@ -225,11 +225,11 @@
 ;; Load `custom-post.el'
 ;; Put personal configurations to override defaults here.
 (add-hook 'after-init-hook
-          (lambda ()
-            (let ((file
-                   (expand-file-name "custom-post.el" user-emacs-directory)))
-              (if (file-exists-p file)
-                  (load file)))))
+	  (lambda ()
+	    (let ((file
+		   (expand-file-name "custom-post.el" user-emacs-directory)))
+	      (if (file-exists-p file)
+		  (load file)))))
 
 (require 'basic-function)
 
@@ -271,16 +271,6 @@
   )
 
 (require 'use-package)
-
-;; On-demand installation of packages
-(defun require-package (&rest packages)
-  "Ensure PACKAGES are installed.
- If a package is not installed, it will be installed automatically."
-  (dolist (package packages)
-    (unless (package-installed-p package)
-      (package-install package)))
-  (use-package package)
-  )
 
 ;; Compatibility
 (use-package compat :demand t)
