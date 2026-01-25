@@ -9,7 +9,7 @@
 #+AUTHOR: Suk
 #+EMAIL:  bruceasu@gmail.com
 
-* 前言
+* Preface
 :PROPERTIES:
 :CUSTOM_ID: babel-init
 :END:
@@ -108,19 +108,24 @@ If something breaks, I can use:
 - ~trace-function-background~ to print the information to a buffer.
 - ~profiler-start~ to find more information about slow functions.
 
-** This is my 'init.el':
+* init.el:
 :PROPERTIES:
 :CUSTOM_ID: init
 :END:
 <<init>>
 
-*** 基本变量定义
+Create init.el file
 #+BEGIN_SRC emacs-lisp :tangle init.el :eval never-export
   (provide 'init)
+#+END_SRC
+
+** Load Basic directories configuration
+
+#+begin_src emacs-lisp :tangle init.el
   ;; Define some directories to make future migration easier. 
   ;; user-emacs-directory is usually ~/.emacs.d
   ;; On Windows, ~/ is usually $EMACS_INSTALL_DIR, or the `HOME` variable detected by Emacs
-
+ 
   (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
   (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
   (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
@@ -159,15 +164,15 @@ If something breaks, I can use:
   (setq auto-mode-case-fold nil)
 
   (unless (file-exists-p suk-emacs-var-dir)
-    (make-directory cache-dir t))
+    (make-directory suk-emacs-var-dir t))
   (setq projectile-cache-file (expand-file-name "projectile.cache" suk-emacs-var-dir))
 
   ;; server
   (require 'server)
-#+END_SRC
+#+end_src
 
-*** Function to load directories
-recursively add Emacs and plugin configuration directories to `load-path`.
+** Add load-path
+Recursively add Emacs and plugin configuration directories to `load-path`.
 :PROPERTIES:
 :CUSTOM_ID: load-path-settings
 :END:
@@ -223,14 +228,49 @@ recursively add Emacs and plugin configuration directories to `load-path`.
   ;; (setq custom-file "~/.config/emacs/custom-settings.el")
   ;; (load custom-file t)
 #+END_SRC
+** Load Basic Functions
+:PROPERTIES:
+:CUSTOM_ID: setup-common-functions
+:END:
+<<setup-coommon-functions>>
 
-*** Configure GC
+#+begin_src emacs-lisp :tangle init.el :eval never-export
+  (require 'basic-function)
+#+end_src
+** Load core.el
+#+begin_src emacs-lisp :tangle init.el
+  (load-if-exists (expand-file-name "core.el" suk-emacs-root-dir))
+#+end_src
+** Load specific configuration files
+:PROPERTIES:
+:CUSTOM_ID: load-file-settings
+:END:
+<<load-file-settings>>
+
+=suk.el= 係由 =M-x org-babel-tangle= (=C-c C-v t=) 命令生成嘅。
+
+*关于 Org 更新嘅贴士:* 我鍾意從已檢出的源代碼運行 Org Mode，而唔係用
+package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺第一次
+=use-package org= 呼叫中使用 =:load-path= 選項嚟設置加載路徑。其中一個可能
+係有效嘅，另一個可能係多餘嘅，但可能係一種「皮帶加吊帶」嘅做法。由於我
+通過 =org-babel-tangle= 生成 =suk.el= ，所以我嘅 Emacs 配置可以喺唔需要先
+加載 Org 嘅情況下加載 =suk.el= 。
+
+#+begin_src emacs-lisp :tangle init.el :eval never-export
+  (load-if-exists (expand-file-name "suk.el" suk-emacs-root-dir))
+  (unless (server-running-p) (server-start))
+
+#+END_SRC
+
+* Core configuration
+
+** Load gc configuration
 :PROPERTIES:
 :CUSTOM_ID: gc-settings
 :END:
 <<gc-settings>>
 
-#+begin_src emacs-lisp :tangle init.el :eavl never-export
+#+begin_src emacs-lisp :tangle core.el :eavl never-export
 
   (setq gc-cons-threshold most-positive-fixnum)
   (setq gc-cons-percentage 0.8)
@@ -255,13 +295,15 @@ recursively add Emacs and plugin configuration directories to `load-path`.
 
 #+end_src
 
-*** Constsants
+** Load constsants configuration
 :PROPERTIES:
 :CUSTOM_ID: const
 :END:
 <<const>>
 
-#+begin_src emacs-lisp :tangle init.el :eval never-export
+#+begin_src emacs-lisp :tangle core.el :eval never-export
+  (defconst sys/is-gui (display-graphic-p))
+  (defconst sys/is-tui (not sys/is-gui))
   (defconst sys/win32p
     (eq system-type 'windows-nt)
     "Are we running on a WinTel system?")
@@ -315,13 +357,13 @@ recursively add Emacs and plugin configuration directories to `load-path`.
     "Emacs is 30 or above.")
 #+end_src
 
-*** Load custom configuration
+** Load custom configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-custom
 :END:
 <<setup-custom>>
 
-#+begin_src emacs-lisp :tangle init.el :eval never-export
+#+begin_src emacs-lisp :tangle core.el :eval never-export
   ;; set const
   (defconst custom-template-file
     (expand-file-name "custom-template.el" user-emacs-directory)
@@ -386,22 +428,13 @@ recursively add Emacs and plugin configuration directories to `load-path`.
 		    (load file)))))
 #+end_src
 
-*** Basic Functions
-:PROPERTIES:
-:CUSTOM_ID: setup-common-functions
-:END:
-<<setup-coommon-functions>>
-
-#+begin_src emacs-lisp :tangle init.el :eval never-export
-  (require 'basic-function)
-#+end_src
-*** Emacs Package Initialization
+** Load Emacs Packages configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-package
 :END:
 <<setup-package>>
 
-#+begin_src emacs-lisp :tangle init.el :eval never-export
+#+begin_src emacs-lisp :tangle core.el :eval never-export
   ;; This sets up the load path so that we can override it
   (setq warning-suppress-log-types '((package reinitialization)))
   ;; 指定ELPA目录
@@ -445,51 +478,81 @@ recursively add Emacs and plugin configuration directories to `load-path`.
   (use-package compat :demand t)
 #+end_src
 
-*** Load specific configuration files
+** Load lazy-load
 :PROPERTIES:
-:CUSTOM_ID: load-file-settings
+:CUSTOM_ID: setup-lazy-load
 :END:
-<<load-file-settings>>
+<<setup-lazy-load>>
 
-=suk.el= 係由 =M-x org-babel-tangle= (=C-c C-v t=) 命令生成嘅。
+- Global: lazy-load-global-keys
+- Mode: lazy-load-local-keys
 
-*关于 Org 更新嘅贴士:* 我鍾意從已檢出的源代碼運行 Org Mode，而唔係用
-package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺第一次
-=use-package org= 呼叫中使用 =:load-path= 選項嚟設置加載路徑。其中一個可能
-係有效嘅，另一個可能係多餘嘅，但可能係一種「皮帶加吊帶」嘅做法。由於我
-通過 =org-babel-tangle= 生成 =suk.el= ，所以我嘅 Emacs 配置可以喺唔需要先
-加載 Org 嘅情況下加載 =suk.el= 。
 
-#+begin_src emacs-lisp :tangle init.el :eval never-export
-  (load-if-exists (expand-file-name "suk.el" suk-emacs-root-dir))
-  (unless (server-running-p) (server-start))
+Support the last parameter to pass the prefix key.
 
-#+END_SRC
+If Emacs already has a plugin loaded by default and doesn't need to
+load it dynamically at runtime, you can use ~lazy-load-set-keys~
 
-* My configuration
-** Personal Information
-:PROPERTIES:
-:CUSTOM_ID: setup-personal-info
-:END:
-<<setup-personal-info>>
+Many global keys are already bound by Emacs by default and must be
+unbound before rebinding them. For example, =Ctrl + x=. The following
+code uses ~lazy-load-unset-keys~ to unbind the default global keys.
 
-#+begin_src emacs-lisp :tangle suk.el :eval never-export
-  (setq user-full-name "Suk")
-  (setq user-mail-address "bruceasu@gmail.com")
+
+#+begin_example
+ ;;; --- unset the keys
+ (lazy-load-unset-keys  ; unset the global keys
+  '("C-z" "C-x"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
+
+  
+(lazy-load-global-keys
+ '(("M-g" . goto-line-preview))
+ "goto-line-preview")
+
+ 
+(lazy-load-local-keys
+ '(("C-c t" . ruby-hash-syntax-toggle))
+ ruby-mode-map
+ "ruby-extension")
+
+ (lazy-load-global-keys
+ '(("p" . sdcv-search-pointer)
+   ("y" . sdcv-search-pointer+)
+   ("i" . sdcv-search-input)
+   (";" . sdcv-search-input+))
+ "init-sdcv"
+ "C-z")
+
+ ;; Mac平台下交换 Option 和 Command 键。
+
+  (when (featurep 'cocoa)
+    (setq mac-option-modifier 'super)
+    (setq mac-command-modifier 'meta))
+
+#+end_example
+
+#+begin_src emacs-lisp :tangle core.el
+  (require 'lazy-load)
+    ;;; ### Unset key ###
+  ;;; --- 卸载按键
+  (lazy-load-unset-keys                   ;全局按键的卸载
+   ;; '("C-z"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
+   '("C-z" ))
+
 #+end_src
-** Editor Configuration
+
+** Load editor configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-editor
 :END:
 <<setup-editor>>
 
-*** Basic configuration
+*** Load basic configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-basic
 :END:
 <<setup-basic>>
 
-#+begin_src emacs-lisp :tangle suk.el :eval never-export
+#+begin_src emacs-lisp :tangle core.el :eval never-export
   ;; basic settings
   (setq-default
    major-mode 'text-mode ; 默认使用text模式
@@ -559,13 +622,13 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 	      (setq-local fill-column 100) ; 80/100/120
 	      (auto-fill-mode 1)))
 #+end_src
-*** Backup configuration
+*** Load backup configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-backup
 :END:
 <<setup-backup>>
 
-#+begin_src emacs-lisp :tangle suk.el :eval never-export
+#+begin_src emacs-lisp :tangle core.el :eval never-export
   ;; backup settings
   (setq make-backup-files t)
   (setq version-control t)     ; 允许多次备份
@@ -573,13 +636,13 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq kept-new-version 64)  ; 保留最近的64个备份文件
   (setq delete-old-versions t) ; 自动删除旧的备份文件
 #+end_src
-*** History configuration
+*** Load history configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-history
 :END:
 <<setup-history>>
 
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle core.el
   (setq enable-recursive-minibuffers t ; Allow commands in minibuffers
 	history-length 1000
 	savehist-additional-variables '(mark-ring global-mark-ring search-ring regexp-search-ring extended-command-history)
@@ -588,12 +651,12 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
 	)
   (savehist-mode 1)
 #+end_src
-*** File encoding configuration
+*** load file encoding configuration
 :PROPERTIES:
 :CUSTOM_ID: setup-charset
 :END:
 <<setup-charset>>
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle core.el
   ;; 重要提示:写在最后一行的，实际上最优先使用; 最前面一行，反而放到最后才识别。
   ;; utf-16le-with-signature 相当于 Windows 下的 Unicode 编码，这里也可写成
   ;; utf-16 (utf-16 ham:  utf-16le, utf-16be, utf-16le-with-signature dang)
@@ -625,360 +688,157 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   ;; （可选）如果你用 Emacs 发送邮件，可以启用下面这行
   (setq default-sendmail-coding-system 'utf-8)
 #+end_src
-** Buffer functions
+
+** Load buffer functions
 <<setup-buffer-functions>>
 Define some usefull functions of buffers.
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle core.el
   (require 'buffer-extension)
 #+end_src
 
-
-** Lazy Load
-:PROPERTIES:
-:CUSTOM_ID: setup-lazy-load
-:END:
-<<setup-lazy-load>>
-
-- Global: lazy-load-global-keys
-- Mode: lazy-load-local-keys
-
-
-Support the last parameter to pass the prefix key.
-
-If Emacs already has a plugin loaded by default and doesn't need to
-load it dynamically at runtime, you can use ~lazy-load-set-keys~
-
-Many global keys are already bound by Emacs by default and must be
-unbound before rebinding them. For example, =Ctrl + x=. The following
-code uses ~lazy-load-unset-keys~ to unbind the default global keys.
-
-
-#+begin_example
- ;;; --- unset the keys
- (lazy-load-unset-keys  ; unset the global keys
-  '("C-z" "C-x"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
-
-  
-(lazy-load-global-keys
- '(("M-g" . goto-line-preview))
- "goto-line-preview")
-
- 
-(lazy-load-local-keys
- '(("C-c t" . ruby-hash-syntax-toggle))
- ruby-mode-map
- "ruby-extension")
-
- (lazy-load-global-keys
- '(("p" . sdcv-search-pointer)
-   ("y" . sdcv-search-pointer+)
-   ("i" . sdcv-search-input)
-   (";" . sdcv-search-input+))
- "init-sdcv"
- "C-z")
-
- ;; Mac平台下交换 Option 和 Command 键。
-
-  (when (featurep 'cocoa)
-    (setq mac-option-modifier 'super)
-    (setq mac-command-modifier 'meta))
-
-#+end_example
-
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  (require 'lazy-load)
-  (provide 'init-key)
-  ;;; ### Unset key ###
-  ;;; --- 卸载按键
-  (lazy-load-unset-keys                   ;全局按键的卸载
-   ;; '("C-z"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
-   '("C-z" ))
-
-#+end_src
-Add to suk.el
-#+begin_src emacs-lisp :tangle suk.el
-  (require 'init-key)
-#+end_src
-
-** How to set keys
-*** Bindkeys examples
-
-Set Example:
-#+begin_src emacs-lisp :tangle achrives-and-examples.el
-
-  ;;注意：keystroke中的Control 和 Alternative使用\C, \M表示。
-  ;;如果是kbd函数，可以使用C和M表示
-
-  ;; global examples:
-  (global-set-key (kbd "C-x C-\\") #'next-line)
-  (global-set-key [?\C-x ?\C-\\] #'next-line)
-  (global-set-key [(control ?x) (control ?\\)] #'next-line)
-  (keymap-global-set [(control ?x) (control ?\\)] #'next-line)
-  (keymap-set global-map "C-x" #'next-line)
-
-#+END_SRC
-
-
-Unset Example:
-#+begin_src emacs-lisp :tangle achrives-and-examples.el
-  ;; remove a keybinding for emacs 29 or after
-  (keymap-global-set "C-t" nil)
-
-  ;; or use
-  (keymap-global-unset "C-t")
-
-  ;; before emacs 28 or before
-  (global-set-key (kbd "C-t") nil)
-
-  ;; or
-  (global-unset-key (kbd "C-t"))
-  #+end_src
-
-
-Keymap:
-  #+begin_src emacs-lisp :tangle achrives-and-examples.el
-    ;; 自己定义 keymap 其实很简单的，使用 defvar-keymap ，可以从上面的配置中
-    ;; 抽取 C-c n 作为一个 prefix key ，定义如下：
-    (defvar-keymap hsk/notetaking-map
-      :doc "My notetaking keymap"
-      "d" #'denote
-      "t" #'denote-keywords-add
-      "T" #'denote-keywords-remove)
-    (global-set-key (kbd "C-c n") hsk/notetaking-map)
-
-    ;; 来将上面定义的 keymap 绑定到 C-c n 上。不过从 emacs-29 开始，更推荐用
-    ;; keymap-set ，上面的代码可以改成：
-    (keymap-set global-map "C-c n" hsk/notetaking-map)
-    (keymap-global-set "C-c n" hsk/notetaking-map)
-
-    ;; 或者使用旧方法
-    ;; (define-prefix-command hsk/notetaking-map)
-    (defvar hsk/notetaking-map (make-sparse-keymap)
-      "Keymap for leader bindings.")
-
-    (global-set-key (kbd "C-c n") hsk/notetaking-map)
-    (define-key hsk/notetaking-map (kbd "d") #'denote)
-    (define-key hsk/notetaking-map (kbd "t") #'isearch-repeat-forward)
-
-
-    ;; 新方法省去了 (kbd ...) 这一层，比较方便。
-
-    ;; 比起原先每个快捷键单独定义，使用 keymap 好处是便于管理，比如之后我想更
-    ;; 换快捷键前缀，从 C-c n 换成 C-c C-n ，只要改一处 keymap-set 就可以了。
-
-    ;; 另一个优点是可以嵌套定义，比如我想要将 org-journal 相关的操作也挂到
-    ;; hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map ：
-
-    (defvar-keymap hsk/org-journal-map
-      :doc "My org-journal keymap"
-      "n" #'org-journal-new-entry
-      "s" #'org-journal-search
-      "o" #'org-journal-open-current-journal-file)
-
-    ;; 然后将它嵌套进另一个 map 下面：
-    (defvar-keymap hsk/notetaking-map
-      :doc "My notetaking keymap"
-      ;;...
-      "j" hsk/org-journal-map)
-
-    ;; 这样 org-journal-new-entry 就映射到 C-c n j n 上了，非常优雅。
-
-
-    (let ((my-keymap (make-sparse-keymap))) ; 创建一个空的 keymap
-      (keymap-set my-keymap "C-c f" 'find-file)) ; 设置 C-c f 来执行 'find-file 命令
-
-    (keymap-local-set "C-p" ctl-x-map)
-#+END_SRC
-
-
-
-*** Leader Key
-Vim 系，有Leader key机制，方便定义一组有相同前缀的快捷键群
-#+begin_src emacs-lisp :tangle achrives-and-examples.el
-  ;; 定义leader key 方式 （旧）
-  (define-prefix-command 'my-leader) 
-  (define-key keymap "keystrok" 'command-name)
-  (global-set-key "keystroke" 'command-name)
-  (local-set-key  "keystroke" 'command-name) 
-
-  ;; 方式一：
-  (define-prefix-command 'SPC-map)
-  (global-set-key (kbd "SPC") 'SPC-map)
-  (global-set-key (kbd "SPC f") 'find-file)
-
-  ;; 方式二：
-  (define-prefix-command 'SPC-map)
-  (global-set-key (kbd "SPC") #'SPC-map)
-  (define-key SPC-map (kbd "f") #'find-file)
-
-  ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
-  (define-prefix-command 'comm-map)
-  (global-set-key (kbd "M-c") 'comm-map)
-  (global-set-key [(meta c)]  'comm-map)
-
-  ;; 新方式更加直观明白
-  (defvar leader-key-map (make-sparse-keymap) "Keymap for leader key bindings.")
-  (global-set-key (kbd "M-m") leader-key-map)
-  (define-key leader-key-map (kbd "f") #'find-file)
-#+end_src
-
-#+begin_src emacs-lisp :tangle suk.el
-  ;; 定义一个Leader-key mode. 使用 M-m 开启，原来的功能重新绑定到 M-i
-  ;; (global-set-key (kbd "M-i") #'back-to-indentation)
-  (require 'leader-key)
-#+end_src
-
-
-*** bind-keys
-This is a feature provided by the use-package macro that allows
-binding multiple keys in a single statement. While bind-keys can be
-used independently of use-package , it is often used in conjunction
-with use-package to provide a cleaner and more modular key binding
-configuration. Personally, I think it's superior to Emacs's newly
-defined keymap-XXX series of implementations.
-
-#+begin_src emacs-lisp :tangle suk.el
-  (use-package bind-key)
-  ;;(bind-key "C-c x" #'some-function some-package-mode-map)
-  ;;(bind-key "C-c y" #'another-function)
-
-  ;; (bind-keys
-  ;;  ("C-x C-c" . save-buffers-kill-terminal)
-  ;;  ("C-x C-f" . find-file)
-  ;;  ("C-x C-s" . save-buffer))
-
-  ;; (bind-keys :map python-mode-map
-  ;;            ("C-c C-c" . python-shell-send-buffer)
-  ;;            ("C-c C-r" . python-shell-send-region))
-
-
-  ;; Toggle fullscreen <F11> also bind to fullscreen
-  (bind-keys ("C-<f11>" . toggle-frame-fullscreen)
-	      ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
-	      ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
-  )
-#+end_src
-
-
-*** Some Global keys
-#+begin_src emacs-lisp :tangle suk.el
-
-  (global-set-key (kbd "C-x R") 'recentf-open)    ;; 快捷键 C-x R 用于打开最近文件
-
-  (if (display-graphic-p)
-      (global-set-key (kbd "<escape>") 'keyboard-escape-quit))
-
-  (when emacs/>=29p
-    ;; (keymap-global-set <key> <cmmd>)
-    (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)       ;; 快捷键 C-<f11> 用于切换全屏模式
-    (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-s-<return> 也用于切换全屏模式
-    ) 
-  (unless emacs/>=29p
-    (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
-    (global-set-key (kbd "M-s-<return>") 'toggle-frame-fullscreen)
-    )
-
-  (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
-
-  ;;; ### Toolkit ###
+** Load buffer keys
+#+begin_src emacs-lisp :tangle core.el
+  ;; ### Buffer Edit ### 
+  ;; --- 缓存编辑
   (lazy-load-set-keys
    '(
-     ("C-," . bury-buffer)                            ;;隐藏当前buffer
-     ("C-." . unbury-buffer)                          ;;反隐藏当前buffer
-     ("C-<f12>" . lazycat-theme-toggle)
+     ("C-x C-x" . exchange-point-and-mark)       ;交换当前点和标记点
+     ("M-o"     . backward-delete-char-untabify) ;向前删除字符
+     ("C-M-S-h" . mark-paragraph)                ;选中段落
+     ("M-SPC"   . just-one-space)                ;只有一个空格在光标处
+     ))
+
+  ;;; ### basic-toolkit ###
+  (lazy-load-global-keys
+   '(
+     ;;("" . strip-blank-lines)             ; 删除空行
+     ;; ("<f2>" . refresh-file)             ;自动刷新文件
+     ("C-S-j"   . join-lines)               ;连接下行
+     ("C-c d"   . suk/delte-to-char)
+     ("M-q"     . suk/fill-or-unfill-paragraph)
+     ("C-x n N" . suk/xah-narrow-to-region)
      )
-   (current-global-map)
-   "C-z"
-   )
+   "basic-toolkit")
+#+end_src
 
-  ;; 一啲方便嘅函数
-  ;; 用于向后跳跃到上一个 sexp C-M-<left> / ESC C-<left>
-  ;; 用于向前跳跃到下一个 sexp C-M-<right> / ESC C-<right>
-  ;; eval-expression 执行表达式 M-: M-ESC :
-  ;; sort-lines, calendar, align-regexp
-  ;; C-t transpose-char M-t tanspose-word
-  ;; toggle-truncate-lines C-x x t
-  ;; revert-buffer-quick C-x x g
-  ;; C-c TAB indent-region
-  ;; C-u C-c TAB => (un)indent-region
+** Load buffer configuration
+*** Load ibuffer.
+#+begin_src emacs-lisp :tangle core.el
 
-  ;; M-x global-set-key RET 交互式的绑定你的键。
-  ;; C-x Esc Esc 调出上一条“复杂命令”
+  (use-package ibuffer
+    :ensure nil
+    :bind ("C-x C-b" . ibuffer)
+    :init (setq ibuffer-filter-group-name-face '(:inherit (font-lock-string-face bold))))
+  ;;(global-set-key (kbd "C-x C-b") 'ibuffer)
 
-  ;;Emacs 自动排版
-  ;;很简单：C-x h C-M-\
-  ;;其中C-x h 是全选
-  ;;C-M-\ 是排版
+  (with-eval-after-load 'ibuffer
+    ;; Display icons for buffers
+    (when (display-graphic-p)
+      (use-package nerd-icons-ibuffer
+	:hook (ibuffer-mode . nerd-icons-ibuffer-mode)
+	:init (setq nerd-icons-ibuffer-icon t)))
+    )
+#+end_src
+*** Load presist scratch buffer
+唔欲此临时缓冲区永存，咁可再续前缘。
+#+begin_src emacs-lisp :tangle core.el
+  ;; Persistent the scratch buffer
+  (run-with-idle-timer
+   1 nil
+   #'(lambda()
+       (use-package persistent-scratch
+	 :diminish
+	 :bind (:map persistent-scratch-mode-map
+		     ([remap kill-buffer] . (lambda (&rest _)
+					      (interactive)
+					      (user-error "Scratch buffer cannot be killed")))
+		     ([remap revert-buffer] . persistent-scratch-restore)
+		     ([remap revert-this-buffer] . persistent-scratch-restore))
+	 :hook ((after-init . persistent-scratch-autosave-mode)iu
+		(lisp-interaction-mode . persistent-scratch-mode))
+	 :init
+	 ;; 创建 var 文件夹
+	 (make-directory (expand-file-name "var" user-emacs-directory) t)
 
-  ;; C-x C-q set/unset readonly
-  ;; 大小写转换： M-u, M-l, M-c
+	 (setq persistent-scratch-backup-file-name-format "%Y-%m-%d"
+	       persistent-scratch-backup-directory (expand-file-name "var/persistent-scratch" user-emacs-directory)
+	       persistent-scratch-save-file (expand-file-name "var/.persistent-scratch" user-emacs-directory))
+	 (persistent-scratch-setup-default)
 
-  ;; M-x align-regexp 可以方便的对齐一些文字
+	 )))
 
 #+end_src
 
-
-** Toggles
-使用Hydra提供一组设定常用开发的工具,减少输入或者快捷键的定义
-#+begin_src emacs-lisp :tangle gui.el
-  (with-eval-after-load 'pretty-hydra
-    ;; Global toggles
-    (with-no-warnings
-      (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
-        ("Basic"
-         (("n" (cond ((fboundp 'display-line-numbers-mode)
-                      (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
-                     ((fboundp 'gblobal-linum-mode)
-                      (global-linum-mode (if global-linum-mode -1 1))))
-           "line number"
-           :toggle (or (bound-and-true-p display-line-numbers-mode)
-                       (bound-and-true-p global-linum-mode)))
-          ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
-          ("d" global-hungry-delete-mode "hungry delete" :toggle t)
-          ("e" electric-pair-mode "electric pair" :toggle t)
-          ("c" flyspell-mode "spell check" :toggle t)
-          ("s" prettify-symbols-mode "pretty symbol" :toggle t)
-          ("l" global-page-break-lines-mode "page break lines" :toggle t)
-          ("B" display-battery-mode "battery" :toggle t)
-          ("T" display-time-mode "time" :toggle t)
-          ("a" abbrev-mode "abrev" :toggle t)
-          ("F" auto-fill-mode "auto fill" :toggle t)
-          ("m" doom-modeline-mode "modern mode-line" :toggle t)
-          ("t" toggle-truncate-lines "truncate lines" :toggle t)
-          ("u" toggle-company-ispell "Company Ispell" :toggle t))
-         "Highlight"
-         (("h l" global-hl-line-mode "line" :toggle t)
-          ("h p" show-paren-mode "paren" :toggle t)
-          ("h s" symbol-overlay-mode "symbol" :toggle t)
-          ("h r" rainbow-mode "rainbow" :toggle t)
-          ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
-           "whitespace" :toggle show-trailing-whitespace)
-          ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
-          ("h i" highlight-indent-guides-mode "indent" :toggle t)
-          ("h t" global-hl-todo-mode "todo" :toggle t))
-         "Program"
-         (("f" flymake-mode "flymake" :toggle t)
-          ("O" hs-minor-mode "hideshow" :toggle t)
-          ("U" subword-mode "subword" :toggle t)
-          ("w" whitespace-mode "whitespace" :toggle t)
-          ("W" which-function-mode "which function" :toggle t)
-          ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
-          ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
-          ("v" global-diff-hl-mode "gutter" :toggle t)
-          ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
-          ("M" diff-hl-margin-mode "margin gutter" :toggle t)
-          ("D" diff-hl-dired-mode "dired gutter" :toggle t))
-         ))
-      (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
-      ;;(keymap-set leader-key "t" #'toggles-hydra/body)
-      ))
-
+*** Load read mode
+#+begin_src emacs-lisp :tangle core.el
+  (lazy-load-global-keys
+   '(
+     ("M-<f7>" . suk-read-mode)
+     ("<f7>"   . olivetti-mode)
+     )
+   "suk-read-mode")
 #+end_src
 
+*** Load buffer Move
+#+begin_src emacs-lisp :tangle core.el
 
-** Move cursor
+  ;; --- 缓存移动
+  (lazy-load-set-keys
+   '(
+     ;;("C-z i" . beginning-of-buffer)      ;缓存开始 M-<
+     ;;("C-z k" . end-of-buffer)            ;缓存结尾 M->
+     ("C-M-f" . forward-paragraph)        ;下一个段落
+     ("C-M-b" . backward-paragraph)       ;上一个段落
+     ("C-M-y" . backward-up-list)         ;向左跳出 LIST
+     ("C-M-u" . backward-down-list)       ;向左跳进 LIST
+     ("C-M-o" . up-list)                  ;向右跳出 LIST
+     ("C-M-i" . down-list)                ;向右跳进 LIST
+     ("C-M-a" . beginning-of-defun)       ;函数开头
+     ("C-M-e" . end-of-defun)             ;函数末尾
+     ))
+#+end_src
 
-#+begin_src emacs-lisp :tangle suk.el
+*** Load buffer autorevert
+#+begin_src emacs-lisp :tangle core.el
+  ;; Automatically reload files was modified by external program
+  (run-with-idle-timer
+   1 nil
+   #'(lambda()
+       (use-package autorevert)
+       (use-package autorevert
+	 :ensure nil
+	 :diminish
+	 :defer 2
+	 :hook (after-init . global-auto-revert-mode))))
+#+end_src
+*** Load auto save
+#+begin_src emacs-lisp :tangle core.el
+  (require 'auto-save)
+  (auto-save-enable)
+  (setq auto-save-silent t)
+  ;;(setq auto-save-delete-trailing-whitespace t)
+#+end_src
+*** Load vdiff
+#+begin_src emacs-lisp :tangle core.el
+  ;; ### vdiff ###
+  (lazy-load-global-keys
+   '(
+     ("M-s-u" . vdiff-buffers))
+   "vdiff")
+#+end_src
+*** Load buffer-move
+#+begin_src emacs-lisp :tangle core.el
+  (lazy-load-global-keys
+   '(
+     ("C-c C-<up>"    . buf-move-up)   
+     ("C-c C-<down>"  . buf-move-down)
+     ("C-c C-<left>"  . buf-move-left)  
+     ("C-c C-<right>" . buf-move-right)   
+     )
+   "buffer-move")
+#+end_src
+** Load move cursor
+#+begin_src emacs-lisp :tangle core.el
   ;;; ### goto-line-preview ###
   (lazy-load-global-keys
    '(
@@ -1016,8 +876,8 @@ defined keymap-XXX series of implementations.
    "win-move")
 #+end_src
 
-** Move text
-#+begin_src emacs-lisp :tangle etc/init-key.el
+** Load move text
+#+begin_src emacs-lisp :tangle core.el
   ;;; ### move text ###
   (lazy-load-global-keys
    '(
@@ -1029,8 +889,8 @@ defined keymap-XXX series of implementations.
    "move-text")
 #+end_src
 
-** Open new line
-#+begin_src emacs-lisp :tangle etc/init-key.el
+** Load open new line
+#+begin_src emacs-lisp :tangle core.el
   ;;; ### open new line ###
   (lazy-load-global-keys
    '(
@@ -1039,8 +899,8 @@ defined keymap-XXX series of implementations.
      )
    "open-newline")
 #+end_src
-** Duplicate line
-#+begin_src emacs-lisp :tangle etc/init-key.el
+** Load duplicate line
+#+begin_src emacs-lisp :tangle core.el
   ;; ### duplicate-line ###
   (lazy-load-global-keys
    '(
@@ -1052,31 +912,8 @@ defined keymap-XXX series of implementations.
      )
    "duplicate-line")
 #+end_src
-** Delete to character
-#+begin_src emacs-lisp :tangle suk.el
-  ;; 自定义删除到字符函数
-  (defun my/delete-to-char (char)
-    "删除光标位置到下一个出现的字符 CHAR 之间的所有内容（不包括 CHAR 本身）。"
-    (interactive "cDelete to char: ")
-    (let ((start (point))
-	  (end (progn
-		 (search-forward (char-to-string char) (line-end-position) t))))
-      (if end
-	  (progn
-	    (goto-char end)
-	    (delete-region start (- end 1))
-	    (message "Deleted from %d to %d" start (- end 1)))
-	(progn
-	  (delete-region start (line-end-position))
-	  (message "Character '%c' not found. Deleted to end of line." char)))))
-
-  ;; 绑定快捷键 C-c d 到 my/delete-to-char 函数
-  (global-set-key (kbd "C-c d") 'my/delete-to-char)
-#+end_src
-
-
-** Word Styles
-#+begin_src emacs-lisp :tangle etc/init-key.el
+** Load word styles
+#+begin_src emacs-lisp :tangle core.el
   ;; ### String Inflection ###
   ;; --- 单词语法风格快速转换
 
@@ -1095,10 +932,9 @@ defined keymap-XXX series of implementations.
    "string-inflection")
 
 #+end_src
-** Thing Edit
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;;; ### Thing-edit ###
-  ;;; --- 增强式编辑当前光标的对象 
+** Load thing edit
+#+begin_src emacs-lisp :tangle core.el
+  ;;; ### THing-edit ###
   (lazy-load-global-keys
    '(
      ;; ("C-c w" . thing-copy-word)
@@ -1136,121 +972,9 @@ defined keymap-XXX series of implementations.
      )
    "init-thing-edit"
    )
-
-
 #+end_src
-
-** Buffer Edit
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  ;; ### Buffer Edit ### 
-  ;; --- 缓存编辑
-  (lazy-load-set-keys
-   '(
-     ("C-x C-x" . exchange-point-and-mark)       ;交换当前点和标记点
-     ("M-o"     . backward-delete-char-untabify) ;向前删除字符
-     ("C-M-S-h" . mark-paragraph)                ;选中段落
-     ("M-SPC"   . just-one-space)                ;只有一个空格在光标处
-     ))
-
-  ;;; ### basic-toolkit ###
-  (lazy-load-global-keys
-   '(
-     ;;("" . strip-blank-lines)             ; 删除空行
-     ;; ("<f2>" . refresh-file)             ;自动刷新文件
-     ("C-S-j"   . join-lines)               ;连接下行
-     ("M-q"     . suk/fill-or-unfill-paragraph)
-     ("C-x n N" . suk/xah-narrow-to-region)
-     )
-   "basic-toolkit")
-#+end_src
-
-** Description Keys
-=F1 + {f/k/d/i/k}= 或者  =C-h {f/k/d/i}= 可以打开相关帮助
-Use ~C-c C-h~ to open the description menu 
-
-#+begin_src emacs-lisp :tangle suk.el
-
-  ;;;###autoload
-  (with-eval-after-load 'hydra
-    (defhydra my-hydra-describe (:color blue :hint nil)
-      "
-  Describe Something: (q to quit)
-  _a_ all help for everything screen
-  _b_ bindings
-  _c_ char
-  _C_ coding system
-  _f_ function
-  _i_ input method
-  _k_ key briefly
-  _K_ key
-  _l_ language environment
-  _m_ major mode
-  _M_ minor mode
-  _n_ current coding system briefly
-  _N_ current coding system full
-  _o_ lighter indicator
-  _O_ lighter symbol
-  _p_ package
-  _P_ text properties
-  _s_ symbol
-  _t_ theme
-  _v_ variable
-  _w_ where is something defined
-  "
-      ("b" describe-bindings)
-      ("C" describe-categories)
-      ("c" describe-char)
-      ("C" describe-coding-system)
-      ("f" describe-function)
-      ("i" describe-input-method)
-      ("K" describe-key)
-      ("k" describe-key-briefly)
-      ("l" describe-language-environment)
-      ("M" describe-minor-mode)
-      ("m" describe-mode)
-      ("N" describe-current-coding-system)
-      ("n" describe-current-coding-system-briefly)
-      ("o" describe-minor-mode-from-indicator)
-      ("O" describe-minor-mode-from-symbol)
-      ("p" describe-package)
-      ("P" describe-text-properties)
-      ("q" nil)
-      ("a" help)
-      ("s" describe-symbol)
-      ("t" describe-theme)
-      ("v" describe-variable)
-      ("w" where-is))
-    (keymap-global-set "C-x C-h" #'my-hydra-describe/body))
-#+end_src
-** Rectangle
-记录一下使用方法
-- =C-x r k=  Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
-- =C-x r M-w= Save the text of the region-rectangle as the last killed rectangle (copy-rectangle-as-kill).
-- =C-x r d= Delete the text of the region-rectangle (delete-rectangle).
-- =C-x r y= Yank the last killed rectangle with its upper left corner at point (yank-rectangle).
-- =C-x r o= Insert blank space to fill the space of the region-rectangle (open-rectangle). This pushes the previous contents of the region-rectangle to the right.
-- =C-x r N= Insert line numbers along the left edge of the region-rectangle (rectangle-number-lines). This pushes the previous contents of the region-rectangle to the right.
-- =C-x r c= Clear the region-rectangle by replacing all of its contents with spaces (clear-rectangle).
-- =M-x delete-whitespace-rectangle= Delete whitespace in each of the lines on the specified rectangle, starting from the left edge column of the rectangle.
-- =C-x r t string <RET>=  Replace rectangle contents with string on each line (string-rectangle).
--  =M-x string-insert-rectangle <RET> string <RET>= Insert string on each line of the rectangle.
--  =C-x <SPC>= Toggle Rectangle Mark mode (rectangle-mark-mode). When
-  this mode is active, the region-rectangle is highlighted and can be
-  shrunk/grown, and the standard kill and yank commands operate on it.
-  The rectangle operations fall into two classes: commands to erase or
-  insert rectangles, and comm
-#+begin_src emacs-lisp :tangle suk.el
-   ;;; Rectangle
-  (lazy-load-global-keys
-   '(
-     ("r" . hydra-rectangle/body)
-     )
-   "init-rectangle"
-   "C-z"
-   )
-#+end_src
-** Expand region
-#+begin_src emacs-lisp :tangle suk.el
+** Load expand region
+#+begin_src emacs-lisp :tangle core.el
   ;; expand-region
   (run-with-idle-timer
    2 nil
@@ -1274,9 +998,7 @@ Use ~C-c C-h~ to open the description menu
 	     (goto-char node-start)))
 	 )))
 
-#+end_src
-Add shortcut.
-#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;; Add shortcut.
   (lazy-load-global-keys
    '(("M-=" . er/expand-region)
      ("M--" . er/contract-region)
@@ -1285,39 +1007,37 @@ Add shortcut.
      )
    "expand-region")
 #+end_src
-** Undo
-#+begin_src emacs-lisp :tangle suk.el
+** Load Undo
+#+begin_src emacs-lisp :tangle core.el
   ;; Treat undo history as a tree, ^x u
   (run-with-idle-timer
    2 nil
    #'(lambda()
        (if emacs/>=28p
-	   (progn
-	     ;; vundo :load-path "~/.emacs.d/extensions/vundo"
-	     ;; (requir 'vundo)
-	     (with-eval-after-load 'vundo
-	       (setq vundo-glyph-alist vundo-unicode-symbols)))
-	 (progn
-	   (setq undo-tree-visualizer-timestamps t
-		 undo-tree-visualizer-diff t
-		 undo-tree-enable-undo-in-region nil
-		 undo-tree-auto-save-history nil)
-	   ;; HACK: keep the diff window
-	   (with-no-warnings
-	     (make-variable-buffer-local 'undo-tree-visualizer-diff)
-	     (setq-default undo-tree-visualizer-diff t))
-	   (with-eval-after-load 'undo-tree
-	     (add-hook 'after-init-hook #'global-undo-tree-mode))
-	   ))
+           (progn
+             ;; vundo :load-path "~/.emacs.d/extensions/vundo"
+             ;; (requir 'vundo)
+             (with-eval-after-load 'vundo
+               (setq vundo-glyph-alist vundo-unicode-symbols)))
+         (progn
+           (setq undo-tree-visualizer-timestamps t
+                 undo-tree-visualizer-diff t
+                 undo-tree-enable-undo-in-region nil
+                 undo-tree-auto-save-history nil)
+           ;; HACK: keep the diff window
+           (with-no-warnings
+             (make-variable-buffer-local 'undo-tree-visualizer-diff)
+             (setq-default undo-tree-visualizer-diff t))
+           (with-eval-after-load 'undo-tree
+             (add-hook 'after-init-hook #'global-undo-tree-mode))
+           ))
        ))
-#+end_src
-Add shortcuts.
-#+begin_src emacs-lisp :tangle etc/init-key.el
+  ;; Add shortcuts.
   (if emacs/>=28p
       (lazy-load-global-keys
        '(("C-x u" . vundo)
-	 ("C-/" . vundo)
-	 )
+         ("C-/" . vundo)
+         )
        "vundo")
     (lazy-load-global-keys
      '(("C-x u" . undo-trees)
@@ -1327,8 +1047,8 @@ Add shortcuts.
      "undo-tree")
     )
 #+end_src
-** Yank
-#+begin_src emacs-lisp :tangle suk.el
+** Load Yank
+#+begin_src emacs-lisp :tangle core.el
   ;;; ### Advice ###
   ;;; --- 各种emacs行为建议
   ;; 在特定地模式下粘贴时自动缩进
@@ -1345,471 +1065,535 @@ Add shortcuts.
 		  plain-tex-mode))
 	(indent-region (region-beginning) (region-end) nil)))
 #+end_src
-** Macros
-记录一下使用方式
+** Load search
+*** Load search tools
+**** Install the packages
+#+begin_src emacs-lisp :tangle core.el
+  ;;在 Windows 上，如果你用 Emacs GUI 版本，默认有时会找不到 PATH 中的程序，
+  ;;可以在 Emacs 配置里手动添加环境变量，或者使用
+  ;; exec-path-from-shell 等包（但这个包通常在 macOS/Linux下更常用；
+  ;;Windows 下可能需要手工设置 exec-path）。
+  (use-package exec-path-from-shell)
+  ;; (setq exec-path (append exec-path '("C:/path/to/python" "C:/path/to/node")))
+  ;; (setenv "PATH" (concat (getenv "PATH") ";C:\\path\\to\\python;C:\\path\\to\\node"))
 
-  - =f3= start macro(~kmacro-start-macro-or-insert-counter~),
-  - =f4= done macro or run marcro (~kmacro-end-or-call-macro~).
-  - =C-x (= start macro (~kmacro-start-macro~),
-  - =C-x )= end done marco(~kmacro-end-macro~),
-  - =C-x e= ~run marco(kmacro-end-macro)~
-  - =C-x C-k r= ~apply-macro-to-region-lines~
-  - =C-x C-k C-n= ~kmacro-cycle-ring-next~                 ;下一个键盘宏
-  - =C-x C-k C-p= ~kmacro-cycle-ring-previous~         ;上一个键盘宏
-  - =C-x C-k RET=  ~kmacro-edit-macro~                          ;编辑键盘宏
-  - ~insert-kbd-macro~
-  - =C-x C-k n=  ~name-last-kbd-macro~ is an alias for ~kmacro-name-last-macro~
-  - =C-x C-k C-d=  ~kmacro-delete-ring-head~
 
-    先定义一个宏
 
-    然后 ~name-last-kbd-macro~
 
-    然后 ~insert-kbd-macro~
-
-    等到如下类似的配置
-    : (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
-
-** Misc packages
-#+begin_src emacs-lisp :tangle suk.el
-  (run-with-idle-timer
-   2 nil
-   #'(lambda()
-       (use-package paredit) ;; useful for lisp
-       (use-package wgrep) ;; eidt the grep / rg result then apply to the origin buffer. Cancel is supportted.
-       (use-package writeroom-mode)
-       ))
+  ;; (use-package counsel) ; counsel => swiper => ivy
+  ;; (use-package counsel-bbdb)
+  ;; (use-package counsel-gtags)
+  ;; (use-package counsel-css)
+  (use-package bbdb)
+  (use-package find-file-in-project)
+  (use-package pinyinlib)
+  (use-package ace-pinyin)
+  (use-package goto-chg)
+ 
 
 #+end_src
-
-* 用户界面(GUI)
-:PROPERTIES:
-:CUSTOM_ID: setup-ui
-:END:
-<<setup-ui>>
-
-** 主题
-:PROPERTIES:
-:CUSTOM_ID: setup-theme
-:END:
-<<setup-theme>>
-
-#+begin_src emacs-lisp :tangle gui.el
-  ;;(require 'lazycat-theme)
-  ;;(lazycat-theme-load-dark)
-  (use-package doom-themes
+**** ivy
+#+begin_src emacs-lisp :tangle core.el
+  (use-package ivy
     :ensure t
-    :custom
-    (doom-themes-enable-bold t)
-    (doom-themes-enable-italic t)
-    ;; 加载一个主题，DOOM One 是 DOOM Emacs 的默认主题，非常美观
-    :init
-    (load-theme 'doom-one t)
-    )
-
-
-  (use-package doom-modeline
-    :hook (after-init . doom-modeline-mode)
-    :init
-    (setq doom-modeline-icon t
-	  doom-modeline-minor-modes t)
+    :diminish (ivy-mode)
     :config
-    (column-number-mode 1)
-    :custom
-    (doom-modeline-height 30)
-    (doom-modeline-window-width-limit nil)
-    (doom-modeline-buffer-file-name-style 'truncate-with-project)
-    (doom-modeline-icon t)
-    (doom-modeline-time t)
-    (doom-modeline-vcs-max-leghth 50)
-    ;; Windows下记得加上
-    (if sys/win32p (setq inhibit-compacting-font-caches t))
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq enable-recursive-minibuffers t)
+    (setq ivy-count-format "%d/%d ")
+    (setq ivy-display-style 'fancy)
+
+    (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
+    (when (display-graphic-p)    
+      (use-package ivy-posframe))
+    )
+#+end_src
+**** swiper
+#+begin_src emacs-lisp :tangle core.el
+
+  (use-package swiper
+    :bind
+    (
+     ("C-x M-s" . swiper)
+     ("C-s"     . swiper-isearch)
+     ("C-r"     . swiper-isearch)
+     ("C-c C-r" . ivy-resume)
+     )
+    :config
+    (progn
+      ;;(ivy-mode 1)
+      (setq ivy-use-virtual-buffers t)
+      ;;(setq ivy-display-style 'fancy)
+      (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
     )
 
-  (use-package hide-mode-line
-    :hook (((treemacs-mode
-	     eshell-mode shell-mode
-	     term-mode vterm-mode
-	     embark-collect-mode
-	     lsp-ui-imenu-mode
-	     pdf-annot-list-mode) . turn-on-hide-mode-line-mode)
-	   (dired-mode . (lambda()
-			   (and (bound-and-true-p hide-mode-line-mode)
-				(turn-off-hide-mode-line-mode))))))
-
-  ;; A minor-mode menu for mode-line
-  (use-package minions
-    :hook (doom-modeline-mode . minions-mode))
 
 #+end_src
-** 字体
-:PROPERTIES:
-:CUSTOM_ID: setup-fonts
-:END:
-<<setup-fonts>>
+**** counsel
+#+begin_src emacs-lisp :tangle core.el
+  (use-package counsel
+    :after ivy
+    :ensure t
+    :bind
+    (
+     ;; ("M-y" . counsel-yank-pop)
+     ;; ("C-x C-f" . counsel-find-file)
+     ("M-x" . counsel-M-x)
+     )
+    )
+#+end_src
+**** avy
+#+begin_src emacs-lisp :tangle core.el
+  (use-package avy)
+  (use-package avy-zap)
+  (lazy-load-global-keys
+   '(("C-:"   . avy-goto-char)
+     ("C-M-;" . avy-goto-char-2)
+     ("M-g l" . avy-goto-line)
+     ("M-g w" . avy-goto-word-1)
+     ("M-g W" . avy-goto-word-0))
+   "avy"
+   )
 
-#+begin_src emacs-lisp :tangle gui.el
-  ;; 字体
-  (use-package all-the-icons)
+  (with-eval-after-load 'avy
+    (setq avy-all-windows nil
+          avy-all-windows-alt t
+          avy-background t
+          avy-style 'pre)
+    (add-hook 'after-init-hook #'avy-setup-default)
+    )
+
+  (with-eval-after-load 'avy-zap
+    ;; Kill text between the point and the character CHAR
+    (lazy-load-global-keys
+     '(("M-z" . avy-zap-to-char-dwim)
+       ("M-Z" . avy-zap-up-to-char-dwim))
+     "avy-zap"
+     "C-z")
+    )
+
+
+#+end_src
+*** Load grep
+#+begin_src emacs-lisp :tangle core.el
   
-  (lazy-load-set-keys
-   '(
-     ("C--" . text-scale-decrease)        ;减小字体大小
-     ("C-=" . text-scale-increase)        ;增加字体大小
-     ("C-x C-0" . text-scale-adjust)
-     ))
+  ;; Writable `grep' buffer
+  (use-package wgrep
+    :init
+    (setq wgrep-auto-save-buffer t
+	  wgrep-change-readonly-file t))
+
+  ;; Search tool
+  (use-package grep
+    :ensure nil
+    :autoload grep-apply-setting
+    :init
+    (when (executable-find "rg")
+      (grep-apply-setting
+       'grep-command "rg --color=auto --null -nH --no-heading -e ")
+      (grep-apply-setting
+       'grep-template "rg --color=auto --null --no-heading -g '!*/' -e <R> <D>")
+      (grep-apply-setting
+       'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 38))
+      (grep-apply-setting
+       'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>")))
 
 
-  (defun font-installed-p (font-name)
-    "Check if font with FONT-NAME is available."
-    (find-font (font-spec :name font-name)))
+  ;; Fast search tool `ripgrep'
+  (use-package rg
+    :hook (after-init . rg-enable-default-bindings)
+    :bind (:map rg-global-map
+		("c" . rg-dwim-current-dir)
+		("f" . rg-dwim-current-file)
+		("m" . rg-menu))
+    :init (setq rg-group-result t
+		rg-show-columns t)
+    :config
+    (cl-pushnew '("tmpl" . "*.tmpl") rg-custom-type-aliases))
 
-
-  ;; Use fixed pitch where it's sensible
-  ;;  (use-package mixed-pitch :diminish)
-  (require 'load-set-font)
 #+end_src
-** 标签Tabs
-:PROPERTIES:
-:CUSTOM_ID: setup-tabs
-:END:
-<<setup-tabs>>
+** Load consult
+#+begin_src emacs-lisp :tangle core.el
+  (use-package consult
+    :bind (;; C-c bindings in `mode-specific-map'
+	   ("C-c M-x" . consult-mode-command)
+	   ([remap Info-search]        . consult-info)
+	   ([remap isearch-forward]    . consult-line)
+	   ([remap recentf-open-files] . consult-recent-file)
 
-#+begin_src emacs-lisp :tangle gui.el
-  (when (display-graphic-p)
-    (use-package centaur-tabs
-      :demand
-      :init
-      ;; Set the style to rounded with icons
-      (setq centaur-tabs-style "bar")
-      (setq centaur-tabs-set-icons t)
-      :config
-      (centaur-tabs-mode t)
-      :bind
-      ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
-      ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
+	   ;; C-x bindings in `ctl-x-map'
+	   ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+	   ("C-x b"   . consult-buffer)              ;; orig. switch-to-buffer
+	   ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+	   ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+	   ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+	   ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+	   ;; Custom M-# bindings for fast register access
+	   ("M-#"     . consult-register-load)
+	   ("M-'"     . consult-register-store)      ;; orig. abbrev-prefix-mark (unrelated)
+	   ("C-M-#"   . consult-register)
+	   ;; Other custom bindings
+	   ("M-y"     . consult-yank-pop)            ;; orig. yank-pop
+	   ;; M-g bindings in `goto-map'
+	   ("M-g e"   . consult-compile-error)
+	   ("M-g g"   . consult-goto-line)           ;; orig. goto-line
+	   ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+	   ("M-g o"   . consult-outline)             ;; Alternative: consult-org-heading
+	   ("M-g m"   . consult-mark)
+	   ("M-g k"   . consult-global-mark)
+	   ("M-g i"   . consult-imenu)
+	   ("M-g I"   . consult-imenu-multi)
+	   ;; ("M-g M"   . consult-man)
+	   ;; ("M-g I"   . consult-info)
+	   ("M-g t"   . consult-theme)
+	   ("M-g h"   . consult-history)
+	   ;; M-s bindings in `search-map'
+	   ("M-s d"   . consult-find)
+	   ("M-s D"   . consult-locate)
+	   ("M-s g"   . consult-grep)
+	   ("M-s G"   . consult-git-grep)
+	   ("M-s r"   . consult-ripgrep)
+	   ("M-s l"   . consult-line)
+	   ("M-s L"   . consult-line-multi)
+	   ("M-s k"   . consult-keep-lines)
+	   ("M-s u"   . consult-focus-lines)
+	   ;; Isearch integration
+	   ("M-s e"   . consult-isearch-history)
+	   ("C-r" .  consult-line)
+	   :map isearch-mode-map
+	   ("M-e"     . consult-isearch-history)
+	   ("M-s e"   . consult-isearch-history)
+	   ("M-s l"   . consult-line)
+	   ("M-s L"   . consult-line-multi)
+	   ) 
+
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
+
+    ;; The :init configuration is always executed (Not lazy)
+    :init
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0.5
+	  register-preview-function #'consult-register-format)
+
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
+    :config
+    (use-package consult-flyspell
+      :bind ("M-g s" . consult-flyspell))
+
+    (use-package consult-yasnippet
+      :bind ("M-g y" . consult-yasnippet))
+    ;; Use Consult to select xref locations with preview
+    (with-eval-after-load 'xref
+      (setq xref-show-xrefs-function #'consult-xref
+	    xref-show-definitions-function #'consult-xref))
     )
+
+
 #+end_src
-** 图标
-:PROPERTIES:
-:CUSTOM_ID: setup-icons
-:END:
-<<setup-icons>>
+** Recentf
+#+begin_src emacs-lisp :tangle core.el
+  ;; Recentf
+  (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
+  ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
+  (use-package recentf
+    :ensure nil
+    :defer 1
+    :init
+    (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
+    ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
+    ;;(add-hook 'after-init-hook #'recentf-mode)
+    (setq recentf-max-saved-items 500)
+    (setq recentf-max-saved-items 17)
+    (recentf-mode)
+    (recentf-track-opened-file)
 
-#+begin_src emacs-lisp :tangle gui.el
-  (when (display-graphic-p)
-    ;; Icons
-    (use-package nerd-icons
-      :config
-      (when (and (display-graphic-p)
-		 (not (font-installed-p nerd-icons-font-family)))
-	(nerd-icons-install-fonts t)))
-
-    ;; 图标支持
-    (use-package all-the-icons
-      ;; :ensure t
-      :load-path "~/.emacs.d/extensions/all-the-icons"
-      :if (display-graphic-p))
+    :config
+    (add-to-list 'recentf-exclude (expand-file-name package-user-dir))
+    (add-to-list 'recentf-exclude ".cache")
+    (add-to-list 'recentf-exclude ".cask")
+    (add-to-list 'recentf-exclude ".elfeed")
+    (add-to-list 'recentf-exclude "bookmarks")
+    (add-to-list 'recentf-exclude "cache")
+    (add-to-list 'recentf-exclude "persp-confs")
+    (add-to-list 'recentf-exclude "recentf")
+    (add-to-list 'recentf-exclude "url")
+    (add-to-list 'recentf-exclude "COMMIT_EDITMSG\\'")
+    (defun suk/recentf-exclude-p (file)
+      (let ((file-dir (file-truename (file-name-directory file))))
+	(-any-p (lamdba (dir)
+			(string-prefix-p dir file-dir))
+		(mapcar 'file-truename (list var package-user-dir)))))
+    (add-to-list 'recentf-exclude #'suk/recentf-exclude-p)
     )
+
 #+end_src
-** 高亮
-#+begin_src emacs-lisp :tangle gui.el
-  (run-with-idle-timer
-   9
-   nil
-   #'(lambda()
-       ;;(use-package highlight-symbol)
-       ;; Highlight the current line
-       (use-package hl-line
-	 :ensure nil
-	 :hook ((after-init . global-hl-line-mode)
-		((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
-		 (lambda () (setq-local global-hl-line-mode nil)))))
-       ))
+
+** Use hideshow
+#+begin_src emacs-lisp :tangle core.el
+  ;; 折叠和收缩代码
+  ;; builtin
+  (use-package hideshow
+    :diminish hs-minor-mode
+    :bind
+    (:map hs-minor-mode-map
+	  ("C-c ." . hs-toggle-hiding)
+	  ("C-c ," . hs-show-all)
+	  )
+    :hook (prog-mode . hs-minor-mode)
+    :config
+    ;; Display line counts
+    (defun hs-display-code-line-counts (ov)
+      "Display line counts when hiding codes."
+      (when (eq 'code (overlay-get ov 'hs))
+	(overlay-put ov 'display
+		     (concat
+		      " "
+		      (propertize
+		       (if (char-displayable-p ?⏷) "⏷" "...")
+		       'face 'shadow)
+		      (propertize
+		       (format " (%d lines)"
+			       (count-lines (overlay-start ov)
+					    (overlay-end ov)))
+		       'face '(:inherit shadow :height 0.8))
+		      " "))))
+    (setq hs-set-up-overlay #'hs-display-code-line-counts)
+    )
+
 #+end_src
-** 设定 hydra
+** Load hydra
 :PROPERTIES:
 :CUSTOM_ID: setup-hydra
 :END:
 <<setup-hydra>>
-*** Setup hydra
-#+begin_src emacs-lisp :tangle gui.el
+#+begin_src emacs-lisp :tangle core.el
   ;; setup hydra
-  (use-package hydra
-    :hook (emacs-lisp-mode . hydra-add-imenu)
-    :config
-    (with-eval-after-load 'posframe
-      (setq hydra-hint-display-type 'posframe)
-      (defun hydra-set-posframe-show-params ()
-	"Set hydra-posframe style."
-	(setq hydra-posframe-show-params
-	      `(
-		:left-fringe 8
-		:right-fringe 8
-		:internal-border-width 2
-		:internal-border-color ,(face-background 'posframe-border nil t)
-		:background-color ,(face-background 'tooltip nil t)
-		:foreground-color ,(face-foreground 'tooltip nil t)
-		:lines-truncate t
-		)))
-      (hydra-set-posframe-show-params)
-      (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))
-    )
+  (run-with-idle-timer
+   1 nil
+   #'(lambda()
+       (use-package hydra
+         :hook (emacs-lisp-mode . hydra-add-imenu)
+         :config
+         (with-eval-after-load 'posframe
+           (setq hydra-hint-display-type 'posframe)
+           (defun hydra-set-posframe-show-params ()
+             "Set hydra-posframe style."
+             (setq hydra-posframe-show-params
+                   `(
+                     :left-fringe 8
+                     :right-fringe 8
+                     :internal-border-width 2
+                     :internal-border-color ,(face-background 'posframe-border nil t)
+                     :background-color ,(face-background 'tooltip nil t)
+                     :foreground-color ,(face-foreground 'tooltip nil t)
+                     :lines-truncate t
+                     )))
+           (hydra-set-posframe-show-params)
+           (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))
+         )))
 
 #+end_src
-*** Setup pretty-hydra
-#+begin_src emacs-lisp :tangle gui.el
-  (use-package pretty-hydra
-    :requires hydra
-    :custom (pretty-hydra-default-title-body-format-spec " %s%s")
-    :hook (emacs-lisp-mode . (lambda ()
-			       (add-to-list
-				'imenu-generic-expression
-				'("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
-    :init
-    (cl-defun pretty-hydra-title (title &optional icon-type icon-name &key face height v-adjust)
-      "Add an icon in the hydra title."
-      (let ((face (or face `(:inherit highlight :reverse-video t)))
-	    (height (or height 1.2))
-	    (v-adjust (or v-adjust 0.0)))
-	(concat
-	 (when (and (icons-displayable-p) icon-type icon-name)
-	   (let ((f (intern (format "nerd-icons-%s" icon-type))))
-	     (when (fboundp f)
-	       (concat (apply f (list icon-name :face face :height height :v-adjust v-adjust)) " "))))
-	 (propertize title 'face face)))))
-
-#+end_src
-** 设定 posframe
-#+begin_src emacs-lisp :tangle gui.el
-  (when (display-graphic-p)
-    (use-package posframe
-      :hook (after-load-theme . posframe-delete-all)
-      :init
-      (defface posframe-border `((t (:inherit region)))
-	"Face used by the `posframe' border."
-	:group 'posframe)
-      (defvar posframe-border-width 2
-	"Default posframe border width.")
-      )
-
-    :config
-    (posframe-delete-all)
-    )
-#+end_src
-** 杂项
-#+begin_src emacs-lisp :tangle gui.el
-  ;; Optimization
-  (setq idle-update-delay 1.0)
-  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
-  ;; (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-
-  ;; GUI Environment
-  (when (display-graphic-p)
-    ;; Don't use GTK+ tooltip
-    (when (boundp 'x-gtk-use-system-tooltips)
-      (setq x-gtk-use-system-tooltips nil))
-    ;; scroll-bar
-    (set-scroll-bar-mode 'right)
-    ;; 隐藏垂直滚动条。
-    ;;(modify-all-frames-parameters '((vertical-scroll-bars)))
-    )
-#+end_src
-* 缓存区 Buffer
-** 使用 ibuffer.
-#+begin_src emacs-lisp :tangle suk.el
-
-  (use-package ibuffer
+** Load server
+#+begin_src emacs-lisp :tangle core.el
+  ;;;; The emacsclient call depends on the daemon or `server-mode' (I use the latter)
+  (use-package server
     :ensure nil
-    :bind ("C-x C-b" . ibuffer)
-    :init (setq ibuffer-filter-group-name-face '(:inherit (font-lock-string-face bold))))
-  ;;(global-set-key (kbd "C-x C-b") 'ibuffer)
-
-  (with-eval-after-load 'ibuffer
-    ;; Display icons for buffers
-    (when (display-graphic-p)
-      (use-package nerd-icons-ibuffer
-	:hook (ibuffer-mode . nerd-icons-ibuffer-mode)
-	:init (setq nerd-icons-ibuffer-icon t)))
-    )
+    :defer 1
+    :config
+    (unless (server-running-p)
+      (server-start)))
 #+end_src
-** 持久化 scratch 缓存区
-唔欲存此临时缓冲区，咁可再续前缘。
+
+** Load which-key
+:PROPERTIES:
+:CUSTOM_ID: setup-which-keys
+:END:
+<<setup-which-keys>>
+#+begin_src emacs-lisp :tangle core.el
+  ;; Display available keybindings in popup
+
+  (use-package which-key
+    :diminish
+    :bind (("C-h M-m" . which-key-show-major-mode)
+           (:map help-map ("C-h" . which-key-C-h-dispatch)))
+
+    :hook (after-init . which-key-mode)
+    ;;:custom
+    ;; 弹出方式，底部弹出
+    ;;(which-key-popup-type 'side-window)
+    :init (setq which-key-max-description-length 30
+                which-key-lighter nil
+                which-key-show-remaining-keys t)
+    :config
+    (which-key-mode))
+  (when sys/is-gui
+    (use-package which-key-posframe
+      :after (which-key posframe)
+      :config
+      (which-key-posframe-mode 1)))
+
+#+end_src
+
+** Load misc
+#+begin_src emacs-lisp :tangle  gui.el
+  (use-package emacs
+    :init
+    ;; TAB cycle if there are only few candidates
+    (setq completion-cycle-threshold 3)
+
+    ;; Only list the commands of the current modes
+    (when (boundp 'read-extended-command-predicate)
+      (setq read-extended-command-predicate
+	    #'command-completion-default-include-p))
+
+    ;; Enable indentation+completion using the TAB key.
+    ;; `completion-at-point' is often bound to M-TAB.
+    (setq tab-always-indent 'complete))
+
+  ;; 在 Emacs 中，shackle 是一个专门用于控制弹出窗口（pop-up windows）和
+  ;; 缓冲区显示方式的包。它可以帮助你为特定类型的 buffer 制定“在哪个窗口
+  ;; 打开”、“打开时如何分割窗口”、“窗口大小”等规则，从而摆脱 Emacs 默认
+  ;; 情况下可能随机或难以预测的弹出方式。与较早的 popwin 类似，但
+  ;; shackle 提供了更灵活、细粒度的控制。
+  (use-package shackle
+    :init
+    (shackle-mode 1)
+    :config
+    (setq shackle-rules
+	  '((compilation-mode :select t :align 'below :size 0.3)
+	    ("*Help*" :select t :align 'below :size 0.3)
+	    ("*Messages*" :select nil :align 'below :size 0.3)
+	    ("^\\*magit.*\\*$" :regexp t :align 'right :size 0.4 :select t))))
+
+
+#+end_src
+* My configuration
+** Personal Information
+:PROPERTIES:
+:CUSTOM_ID: setup-personal-info
+:END:
+<<setup-personal-info>>
+
+#+begin_src emacs-lisp :tangle suk.el :eval never-export
+  (setq user-full-name "Suk")
+  (setq user-mail-address "bruceasu@gmail.com")
+#+end_src
+** Load pretty-hydra
 #+begin_src emacs-lisp :tangle suk.el
-  ;; Persistent the scratch buffer
   (run-with-idle-timer
-   1 nil
+   2 nil
    #'(lambda()
-       (use-package persistent-scratch
-	 :diminish
-	 :bind (:map persistent-scratch-mode-map
-		     ([remap kill-buffer] . (lambda (&rest _)
-					      (interactive)
-					      (user-error "Scratch buffer cannot be killed")))
-		     ([remap revert-buffer] . persistent-scratch-restore)
-		     ([remap revert-this-buffer] . persistent-scratch-restore))
-	 :hook ((after-init . persistent-scratch-autosave-mode)iu
-		(lisp-interaction-mode . persistent-scratch-mode))
-	 :init
-	 ;; 创建 var 文件夹
-	 (make-directory (expand-file-name "var" user-emacs-directory) t)
-
-	 (setq persistent-scratch-backup-file-name-format "%Y-%m-%d"
-	       persistent-scratch-backup-directory (expand-file-name "var/persistent-scratch" user-emacs-directory)
-	       persistent-scratch-save-file (expand-file-name "var/.persistent-scratch" user-emacs-directory))
-	 (persistent-scratch-setup-default)
-
-	 )))
-
-#+end_src
-** Read mode
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  (lazy-load-global-keys
-   '(
-     ("M-<f7>" . suk-read-mode)
-     ("<f7>"   . olivetti-mode)
-     )
-   "suk-read-mode")
-
+       (when (display-graphic-p)
+         (use-package pretty-hydra
+           :requires hydra
+           :custom (pretty-hydra-default-title-body-format-spec " %s%s")
+           :hook (emacs-lisp-mode
+                  .
+                  (lambda ()
+                    (add-to-list
+                     'imenu-generic-expression
+                     '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
+           :init
+           (cl-defun pretty-hydra-title
+               (title &optional icon-type icon-name &key face height v-adjust)
+             "Add an icon in the hydra title."
+             (let ((face (or face `(:inherit highlight :reverse-video t)))
+                   (height (or height 1.2))
+                   (v-adjust (or v-adjust 0.0)))
+               (concat
+                (when (and (icons-displayable-p) icon-type icon-name)
+                  (let ((f (intern (format "nerd-icons-%s" icon-type))))
+                    (when (fboundp f)
+                      (concat
+                       (apply f (list icon-name :face face :height height :v-adjust v-adjust))
+                       " "))))
+                (propertize title 'face face))))))))
 
 #+end_src
-** Buffer Move
-#+begin_src emacs-lisp :tangle etc/init-key.el
-
-  ;; --- 缓存移动
-  (lazy-load-set-keys
-   '(
-     ;;("C-z i" . beginning-of-buffer)      ;缓存开始 M-<
-     ;;("C-z k" . end-of-buffer)            ;缓存结尾 M->
-     ("C-M-f" . forward-paragraph)        ;下一个段落
-     ("C-M-b" . backward-paragraph)       ;上一个段落
-     ("C-M-y" . backward-up-list)         ;向左跳出 LIST
-     ("C-M-u" . backward-down-list)       ;向左跳进 LIST
-     ("C-M-o" . up-list)                  ;向右跳出 LIST
-     ("C-M-i" . down-list)                ;向右跳进 LIST
-     ("C-M-a" . beginning-of-defun)       ;函数开头
-     ("C-M-e" . end-of-defun)             ;函数末尾
-     ))
-#+end_src
-** Buffer autorevert
+** Load posframe
 #+begin_src emacs-lisp :tangle suk.el
-  ;; Automatically reload files was modified by external program
   (run-with-idle-timer
-   1 nil
+   2 nil
    #'(lambda()
-       (use-package autorevert)
-       (use-package autorevert
-	 :ensure nil
-	 :diminish
-	 :defer 2
-	 :hook (after-init . global-auto-revert-mode))))
+       (when (display-graphic-p)
+         (use-package posframe
+           :hook (after-load-theme . posframe-delete-all)
+           :init
+           (defface posframe-border `((t (:inherit region)))
+             "Face used by the `posframe' border."
+             :group 'posframe)
+           (defvar posframe-border-width 2
+             "Default posframe border width.")
+           )
+
+         :config
+         (posframe-delete-all)
+         )))
 #+end_src
-** Auto Save
-#+begin_src emacs-lisp :tangle suk.el
-  (require 'auto-save)
-  (auto-save-enable)
-  (setq auto-save-silent t)
-  ;;(setq auto-save-delete-trailing-whitespace t)
-#+end_src
-** vdiff
-#+begin_src emacs-lisp :tangle suk.el
-  ;; ### vdiff ###
-  (lazy-load-global-keys
-   '(
-     ("M-s-u" . vdiff-buffers))
-   "vdiff")
-#+end_src
-** 移缓存区之他窗口
-#+begin_src emacs-lisp :tangle etc/init-key.el
-  (lazy-load-global-keys
-   '(
-     ("C-c C-<up>"    . buf-move-up)   
-     ("C-c C-<down>"  . buf-move-down)
-     ("C-c C-<left>"  . buf-move-left)  
-     ("C-c C-<right>" . buf-move-right)   
-     )
-   "buffer-move")
-#+end_src
-** 快切缓冲区
+
+** Set quick switch buffer key
 #+begin_src emacs-lisp :tangle suk.el
   ;; Toggle two most recent buffers
-  (fset 'quick-switch-buffer [?\C-x ?b return])
-  (global-set-key (kbd "C-z b") 'quick-switch-buffer)
+  (run-with-idle-timer
+   1 nil
+   #'(lambda()
+       (fset 'quick-switch-buffer [?\C-x ?b return])
+       (global-set-key (kbd "C-z b") 'quick-switch-buffer)))
 #+end_src
-* 窗口管理
-** 透明窗口 Transwin
-#+begin_src emacs-lisp :tangle gui.el
-  ;; Frame transparence
-  (use-package transwin)
-  (lazy-load-global-keys
-   '(
-     ("C-M-9" . transwin-inc)
-     ("C-M-8" . transwin-dec)
-     ("C-M-7" . transwin-toggle)
-     )
-   "transwin"
-   )
 
-  (with-eval-after-load 'transwin
-    (setq transwin-parameter-alpha 'alpha-background))
-
-#+end_src
-** 窗口布局先生 Winner
-恢复上一个窗口布局： =C-c <Left>=
-回到下一个窗口布局： =C-c <Right>=
-
+** Load bookmark
 #+begin_src emacs-lisp :tangle suk.el
-  ;; Restore old window configurations
-  (use-package winner
-    :ensure nil
-    :commands (winner-undo winner-redo) ;; C-c <Left>/C-c <Right>
-    :hook (after-init . winner-mode)
-    :init (setq winner-boring-buffers '("*Completions*"
-					"*Compile-Log*"
-					"*inferior-lisp*"
-					"*Fuzzy Completions*"
-					"*Apropos*"
-					"*Help*"
-					"*cvs*"
-					"*Buffer List*"
-					"*Ibuffer*"
-					"*esh command on file*"))
-    )
+  (run-with-idle-timer
+   1 nil
+   #'(lambda()
+       (require 'my-bookmark)))
+  ;; C-x r l to list bookmarks
 #+end_src
-** 窗口舞者 Ace-window
-#+begin_src emacs-lisp :tangle suk.el
+
+** Init window
+#+begin_src emacs-lisp :tangle etc/init-window.el
+  (provide 'init-window)
+#+end_src
+** Load ace-window
+#+begin_src emacs-lisp :tangle etc/init-window.el
   ;; Quickly switch windows
   (use-package ace-window
     :bind (([remap other-window] . ace-window)
-	   ("C-c w" . ace-window-hydra/body))
+           ("C-c w" . ace-window-hydra/body))
     :hook (emacs-startup . ace-window-display-mode)
     :config
     (defun toggle-window-split ()
       (interactive)
       (if (= (count-windows) 2)
-	  (let* ((this-win-buffer (window-buffer))
-		 (next-win-buffer (window-buffer (next-window)))
-		 (this-win-edges (window-edges (selected-window)))
-		 (next-win-edges (window-edges (next-window)))
-		 (this-win-2nd (not (and (<= (car this-win-edges)
-					     (car next-win-edges))
-					 (<= (cadr this-win-edges)
-					     (cadr next-win-edges)))))
-		 (splitter
-		  (if (= (car this-win-edges)
-			 (car (window-edges (next-window))))
-		      'split-window-horizontally
-		    'split-window-vertically)))
-	    (delete-other-windows)
-	    (let ((first-win (selected-window)))
-	      (funcall splitter)
-	      (if this-win-2nd (other-window 1))
-	      (set-window-buffer (selected-window) this-win-buffer)
-	      (set-window-buffer (next-window) next-win-buffer)
-	      (select-window first-win)
-	      (if this-win-2nd (other-window 1))))
-	(user-error "`toggle-window-split' only supports two windows")))
+          (let* ((this-win-buffer (window-buffer))
+                 (next-win-buffer (window-buffer (next-window)))
+                 (this-win-edges (window-edges (selected-window)))
+                 (next-win-edges (window-edges (next-window)))
+                 (this-win-2nd (not (and (<= (car this-win-edges)
+                                             (car next-win-edges))
+                                         (<= (cadr this-win-edges)
+                                             (cadr next-win-edges)))))
+                 (splitter
+                  (if (= (car this-win-edges)
+                         (car (window-edges (next-window))))
+                      'split-window-horizontally
+                    'split-window-vertically)))
+            (delete-other-windows)
+            (let ((first-win (selected-window)))
+              (funcall splitter)
+              (if this-win-2nd (other-window 1))
+              (set-window-buffer (selected-window) this-win-buffer)
+              (set-window-buffer (next-window) next-win-buffer)
+              (select-window first-win)
+              (if this-win-2nd (other-window 1))))
+        (user-error "`toggle-window-split' only supports two windows")))
 
     ;; Bind hydra to dispatch list
     (add-to-list 'aw-dispatch-alist '(?w ace-window-hydra/body) t)
@@ -1818,73 +1602,95 @@ Add shortcuts.
     (defun aw--select-window (number)
       "Slecet the specified window."
       (when (numberp number)
-	(let ((found nil))
-	  (dolist (win (aw-window-list))
-	    (when (and (window-live-p win)
-		       (eq number
-			   (string-to-number
-			    (window-parameter win 'ace-window-path))))
-	      (setq found t)
-	      (aw-switch-to-window win)))
-	  (unless found
-	    (message "No specified window: %d" number)))))
+        (let ((found nil))
+          (dolist (win (aw-window-list))
+            (when (and (window-live-p win)
+                       (eq number
+                           (string-to-number
+                            (window-parameter win 'ace-window-path))))
+              (setq found t)
+              (aw-switch-to-window win)))
+          (unless found
+            (message "No specified window: %d" number)))))
     (dotimes (n 9)
       (bind-key (format "M-%d" (1+ n))
-		(lambda ()
-		  (interactive)
-		  (aw--select-window (1+ n))))))
+                (lambda ()
+                  (interactive)
+                  (aw--select-window (1+ n))))))
 
   (suk/wait-for-modules
    (lambda()
      (with-eval-after-load 'pretty-hydra
        (pretty-hydra-define+ ace-window-hydra
-	 (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
-		 :foreign-keys warn
-		 :quit-key ("q" "C-g"))
-	 ("Actions"
-	  (;;("TAB" other-window "switch")
-	   ("x" ace-delete-window "delete")
-	   ("X" ace-delete-other-windows "delete other" :exit t)
-	   ("s" ace-swap-window "swap")
-	   ("a" ace-select-window "select" :exit t)
-	   ("m" toggle-frame-maximized "maximize" :exit t)
-	   ("u" toggle-frame-fullscreen "fullscreen" :exit t))
-	  "Resize"
-	  (("<left>" shrink-window-horizontally "shrink H")
-	   ("<right>" enlarge-window-horizontally "enlarge H")
-	   ("<up>" shrink-window "shrink V")
-	   ("<down>" enlarge-window "enlarge V")
-	   ("n" balance-windows "balance"))
-	  "Split"
-	  (("r" split-window-right "horizontally")
-	   ("R" split-window-horizontally-instead "horizontally instead")
-	   ("v" split-window-below "vertically")
-	   ("V" split-window-vertically-instead "vertically instead")
-	   ("t" toggle-window-split "toggle")
-	   ("o" delete-other-windows "only this"))
-	  "Zoom"
-	  (("+" text-scale-increase "in")
-	   ("=" text-scale-increase "in")
-	   ("-" text-scale-decrease "out")
-	   ("0" (text-scale-increase 0) "reset"))
-	  "Misc"
-	  (("o" set-frame-font "frame font")
-	   ("f" make-frame-command "new frame")
-	   ("d" delete-frame "delete frame")
-	   ("z" winner-undo "winner undo")
-	   ("Z" winner-redo "winner redo"))
-	  )
-	 )
+         (:title (pretty-hydra-title "Window Management" 'faicon "nf-fa-th")
+                 :foreign-keys warn
+                 :quit-key ("q" "C-g"))
+         ("Actions"
+          (;;("TAB" other-window "switch")
+           ("x" ace-delete-window "delete")
+           ("X" ace-delete-other-windows "delete other" :exit t)
+           ("s" ace-swap-window "swap")
+           ("a" ace-select-window "select" :exit t)
+           ("m" toggle-frame-maximized "maximize" :exit t)
+           ("u" toggle-frame-fullscreen "fullscreen" :exit t))
+          "Resize"
+          (("<left>" shrink-window-horizontally "shrink H")
+           ("<right>" enlarge-window-horizontally "enlarge H")
+           ("<up>" shrink-window "shrink V")
+           ("<down>" enlarge-window "enlarge V")
+           ("n" balance-windows "balance"))
+          "Split"
+          (("r" split-window-right "horizontally")
+           ("R" split-window-horizontally-instead "horizontally instead")
+           ("v" split-window-below "vertically")
+           ("V" split-window-vertically-instead "vertically instead")
+           ("t" toggle-window-split "toggle")
+           ("o" delete-other-windows "only this"))
+          "Zoom"
+          (("+" text-scale-increase "in")
+           ("=" text-scale-increase "in")
+           ("-" text-scale-decrease "out")
+           ("0" (text-scale-increase 0) "reset"))
+          "Misc"
+          (("o" set-frame-font "frame font")
+           ("f" make-frame-command "new frame")
+           ("d" delete-frame "delete frame")
+           ("z" winner-undo "winner undo")
+           ("Z" winner-redo "winner redo"))
+          )
+         )
        (bind-key "w" #'ace-window-hydra/body leader-key)
        ))
    'ace-window
    'winner
    )
 #+end_src
-** Enforce rules for popups
-#+begin_src emacs-lisp :tangle suk.el
+** Load winner
+#+begin_src emacs-lisp :tangle etc/init-window.el
+  ;; Restore old window configurations
+  ;; 恢复上一个窗口布局： C-c <Left>
+  ;; 回到下一个窗口布局： C-c <Right>
+
+  (use-package winner
+    :ensure nil
+    :commands (winner-undo winner-redo) ;; C-c <Left>/C-c <Right>
+    :hook (after-init . winner-mode)
+    :init (setq winner-boring-buffers '("*Completions*"
+                                        "*Compile-Log*"
+                                        "*inferior-lisp*"
+                                        "*Fuzzy Completions*"
+                                        "*Apropos*"
+                                        "*Help*"
+                                        "*cvs*"
+                                        "*Buffer List*"
+                                        "*Ibuffer*"
+                                        "*esh command on file*"))
+    )
+#+end_src
+** Load popper
+
+#+begin_src emacs-lisp :tangle etc/init-window.el
   ;; Enforce rules for popups
-  (use-package popper)
   (use-package popper
     :custom
     (popper-group-function #'popper-group-by-directory)
@@ -1988,206 +1794,518 @@ Add shortcuts.
 
 #+end_src
 
-** Window-extension
-#+begin_src emacs-lisp :tangle gui.el
-
-
-  (suk/wait-for-modules
-   (lambda()
-     (with-eval-after-load 'pretty-hydra
-       (pretty-hydra-define+ window-extension-hydra
-	 (:color amaranth :hint nil :title  (pretty-hydra-title "Window Action" 'faicon "nf-fa-th")  :quit-key ("q" "C-g"))
-	 ("窗口"
-	  (("v" delete-other-windows-vertically+ "垂直只留当前窗口")
-	   ("h" delete-other-windows-horizontally+ "水平只留当前窗口")
-	   ("'" delete-current-buffer-and-window "关闭当前buffer和窗口")
-	   ("\"" delete-current-buffer-window "仅关闭窗口")
-	   ("o" toggle-one-window "单窗口切换")
-	   ("O" toggle-window-split "切换窗口分割"))))
-       ;; 全局快捷键呼出菜单
-       (global-set-key (kbd "C-c W") 'window-extension-hydra/body)
-       )
-     'window-extension))
-
+** Set window keys
+#+begin_src emacs-lisp :tangle suk.el
   (lazy-load-global-keys
    '(
-     ("C-c W" . window-extension-hydra/body)
-
+       ("C-c w"       . ace-window-hydra/body)
+       ("C-h z"       . popper-toggle)
+       ("C-<tab>"     . popper-cycle)
+       ("C-M-<tab>"   . popper-toggle-type)
      )
-   "window-extension"
-   )
+   "init-window")
 #+end_src
-* 书签 Bookmark
+** Load rectangle
+The the shortcuts for default rectangle package
+
+- =C-x r k=  Kill the text of the region-rectangle, saving its contents as the last killed rectangle (kill-rectangle).
+- =C-x r M-w= Save the text of the region-rectangle as the last killed rectangle (copy-rectangle-as-kill).
+- =C-x r d= Delete the text of the region-rectangle (delete-rectangle).
+- =C-x r y= Yank the last killed rectangle with its upper left corner at point (yank-rectangle).
+- =C-x r o= Insert blank space to fill the space of the region-rectangle (open-rectangle). This pushes the previous contents of the region-rectangle to the right.
+- =C-x r N= Insert line numbers along the left edge of the region-rectangle (rectangle-number-lines). This pushes the previous contents of the region-rectangle to the right.
+- =C-x r c= Clear the region-rectangle by replacing all of its contents with spaces (clear-rectangle).
+- =M-x delete-whitespace-rectangle= Delete whitespace in each of the lines on the specified rectangle, starting from the left edge column of the rectangle.
+- =C-x r t string <RET>=  Replace rectangle contents with string on each line (string-rectangle).
+-  =M-x string-insert-rectangle <RET> string <RET>= Insert string on each line of the rectangle.
+-  =C-x <SPC>= Toggle Rectangle Mark mode (rectangle-mark-mode). When
+  this mode is active, the region-rectangle is highlighted and can be
+  shrunk/grown, and the standard kill and yank commands operate on it.
+  The rectangle operations fall into two classes: commands to erase or
+  insert rectangles, and comm
+*** Init hydra-rectangle
+  #+begin_src emacs-lisp :tangle etc/init-rectangle.el
+    (provide 'init-rectangle)
+
+    (use-package hydra :ensure t)
+
+    (defhydra hydra-rectangle (:hint nil)
+      "
+      ^Rectangle^
+      -----------------------------------------------------
+      _c_ Copy Rectangle     (C-x r M-w) _d_ Delete Rectangle   (C-x r d)
+      _y_ Yank Rectangle     (C-x r y)   _i_ Insert Rectangle   (C-x r i)
+      _x_ Kill Rectangle     (C-x r k)   _n_ Insert Line Number (C-x r N)
+      _s_ String Rectangle   (C-x r t)   _C_ Clear Rectangle    (C-x r c)
+      _o_ Insert blank space (C-x r o)   _m_ Mark Rectangle     (C-x SPC)
+      "
+      ("c" copy-rectangle-as-kill)    ;;  (C-x r M-w) 
+      ("y" yank-rectangle)            ;; 粘贴矩形内容 (C-x r y)
+      ("x" kill-rectangle)            ;; 删除矩形内容 (C-x r k)
+      ("d" delete-rectangle)          ;; 删除矩形内容 (C-x r d)
+      ("i" string-insert-rectangle)   ;; 插入矩形字符串 (C-x r i)
+      ("n" rectangle-number-lines)    ;; 插入行号 (C-x r N)
+      ("s" string-rectangle)          ;; 替换 (C-x r t <string> RET)
+      ("C" clear-rectangle)           ;; 清除矩形内容 (C-x r c)
+      ("o" open-rectangle)            ;;
+      ("m" rectangle-mark-mode)       ;; 启动矩形选择 (C-x r r)
+      ("q" nil "Quit")                ;; 退出
+      )
+
+    (with-eval-after-load 'pretty-hydra
+      (pretty-hydra-define+ hydra-rectangle
+        (:title (pretty-hydra-title "Rectagle Operations" 'faicon "nf-fa-th")
+                :foreign-keys warn
+                :hint nil
+                :exit t
+                :quit-key ("q" "C-g"))
+        ("Rect"
+         (("c" copy-rectangle-as-kill "Copy Rectangle") ;; C-x r M-w
+          ("m" rectangle-mark-mode "Mark Rectangle" :exit nil)  ;; 启动矩形选择 (C-x r r)
+          ("q" nil "Quit" :exit t)  ;; Exit
+          )
+         "Operations"
+         (("y" yank-rectangle "Yank Rectangle")  ;; 粘贴矩形内容 (C-x r y)
+          ("x" kill-rectangle "Kill Rectangle")   ;; 删除矩形内容 (C-x r k)
+          ("d" delete-rectangle "Delete Rectangle")  ;; 删除矩形内容 (C-x r d)
+          ("i" string-insert-rectangle "Insert Rectangle")  ;; 插入矩形字符串 (C-x r i)
+          ("n" rectangle-number-lines "Insert Line Numbers")  ;; 插入行号 (C-x r N)
+          ("s" string-rectangle "Replace with String")  ;; 替换 (C-x r t <string> RET)
+          ("c" clear-rectangle "Clear Rectangle")      ;; 清除矩形内容 (C-x r c)
+          ("o" open-rectangle "Insert Blank Space"))
+         )
+        ))
+
+    ;; 设置快捷键以便调用矩形 Hydra
+    (global-set-key (kbd "C-z r") 'hydra-rectangle/body)
+  #+end_src
+*** Set hydra-rectangle keys
 #+begin_src emacs-lisp :tangle suk.el
-  (require 'my-bookmark)
-
-  ;; C-x r l to list bookmarks
-#+end_src
-
-* 搜索
-
-** Setup
-#+begin_src emacs-lisp :tangle etc/init-search.el
-  (provide 'init-search)
-#+end_src
-Add to suk.el
-#+begin_src emacs-lisp :tangle suk.el
-  (require 'init-search)
-#+end_src
-** Search tools
-*** 安装插件
-#+begin_src emacs-lisp :tangle install.el
-  ;;在 Windows 上，如果你用 Emacs GUI 版本，默认有时会找不到 PATH 中的程序，
-  ;;可以在 Emacs 配置里手动添加环境变量，或者使用
-  ;; exec-path-from-shell 等包（但这个包通常在 macOS/Linux下更常用；
-  ;;Windows 下可能需要手工设置 exec-path）。
-  (use-package exec-path-from-shell)
-  ;; (setq exec-path (append exec-path '("C:/path/to/python" "C:/path/to/node")))
-  ;; (setenv "PATH" (concat (getenv "PATH") ";C:\\path\\to\\python;C:\\path\\to\\node"))
-
-
-
-
-  ;; (use-package counsel) ; counsel => swiper => ivy
-  ;; (use-package counsel-bbdb)
-  ;; (use-package counsel-gtags)
-  ;; (use-package counsel-css)
-  (use-package bbdb)
-
-  (use-package ivy)
-  (use-package ivy-posframe)
-  (use-package find-file-in-project)
-  (use-package swiper)
-
-  (use-package pinyinlib)
-  (use-package ace-pinyin)
-  (use-package goto-chg)
-  (use-package avy)
-  (use-package avy-zap)
-
-#+end_src
-*** ivy
-#+begin_src emacs-lisp :tangle etc/init-search.el
-  (use-package ivy
-    :ensure t
-    :diminish (ivy-mode)
-    :config
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq enable-recursive-minibuffers t)
-    (setq ivy-count-format "%d/%d ")
-    (setq ivy-display-style 'fancy)
-
-    (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
-
-    (when (display-graphic-p)    
-      (use-package ivy-posframe))
-    )
-#+end_src
-*** counsel
-#+begin_src emacs-lisp :tangle etc/init-search.el
-  (use-package counsel
-    :after ivy
-    :ensure t
-    :bind
-    (
-     ;; ("M-y" . counsel-yank-pop)
-     ;; ("C-x C-f" . counsel-find-file)
-     ("M-x" . counsel-M-x)
-     )
-    )
-#+end_src
-*** swiper
-#+begin_src emacs-lisp :tangle etc/init-search.el
-
-  (use-package swiper
-    :bind
-    (
-     ("C-x M-s" . swiper)
-     ("C-s"     . swiper-isearch)
-     ("C-r"     . swiper-isearch)
-     ("C-c C-r" . ivy-resume)
-     )
-    :config
-    (progn
-      ;;(ivy-mode 1)
-      (setq ivy-use-virtual-buffers t)
-      ;;(setq ivy-display-style 'fancy)
-      (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
-    )
-
-
-#+end_src
-*** avy
-#+begin_src emacs-lisp :tangle etc/init-search.el
+   ;;; Rectangle
   (lazy-load-global-keys
-   '(("C-:"   . avy-goto-char)
-     ("C-M-;" . avy-goto-char-2)
-     ("M-g l" . avy-goto-line)
-     ("M-g w" . avy-goto-word-1)
-     ("M-g W" . avy-goto-word-0))
-   "avy"
+   '(
+     ("r" . hydra-rectangle/body)
+     )
+   "init-rectangle"
+   "C-z"
+   )
+#+end_src
+** Set enghlis helper keys
+#+begin_src emacs-lisp :tangle core.el
+
+  ;;; ### Company en words ###
+  ;;; --- 英文助手
+  (lazy-load-global-keys
+   '(
+     ("M-r" . toggle-company-english-helper) ;英文助手
+     )
+   "company-english-helper")
+#+end_src
+** Load vertico
+:PROPERTIES:
+:CUSTOM_ID: setup-vertico
+:END:
+<<setup-vertico>>
+
+Vertico 是 Emacs 中的一款用于增强 minibuffer 输入体验的插件，特别是在
+逐步改进 completion（自动补全）和选择候选项时的界面表现。
+
+主要特点
+
+  + 垂直选择界面：
+
+    Vertico 提供了一种垂直的候选项显示方式，与默认的 minibuffer 不
+    同，它通过在屏幕上垂直列出候选项，并允许你快速浏览、选择候选项。
+    它不仅仅是补全，还是一个直观的选择界面。
+
+*** 快速和轻量：
+
+它的设计理念是简单、轻量并且快速。它不会像其他一些补全框架那样带
+有过多复杂的功能，而是专注于提供流畅的、响应迅速的候选项显示。
+
+*** 兼容性强：
+
+Vertico 是与 completion 和 minibuffer 的默认系统紧密集成的，并且
+它支持与其他补全框架如 company-mode 和 corfu 一起使用，帮助你在选
+择候选项时提供更好的体验。
+
+*** 适配性：
+
+它能够与很多流行的插件（如 Consult, Orderless, Embark）无缝配合，
+扩展候选项选择的功能。
+
+#+begin_src emacs-lisp :tangle suk.el
+  (when (display-graphic-p)
+    (use-package vertico
+      :bind (:map vertico-map
+		  ("RET"   . vertico-directory-enter)
+		  ("DEL"   . vertico-directory-delete-char)
+		  ("M-DEL" . vertico-directory-delete-word))
+      :hook ((after-init . vertico-mode)
+	     (rfn-eshadow-update-overlay . vertico-directory-tidy))
+      )
+    (use-package vertico-posframe
+      :ensure t
+      :after (posframe vertico)
+      :hook (vertico-mode . vertico-posframe-mode)
+      :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
+      )
+    )
+#+end_src
+** Load company
+*** Setup
+#+begin_src emacs-lisp :tangle etc/init-completion-company.el
+  (provide 'init-completion-company)
+  (use-package company
+    :defer 2
+    :init
+    (setq company-idle-delay nil)  ;; 禁用自动弹出补全
+    :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
+    :hook (after-init . global-company-mode)
+    :init (setq company-tooltip-align-annotations t
+                company-minimum-prefix-length 3
+                company-require-match nil
+                company-dabbrev-ignore-case nil
+                company-dabbrev-downcase nil
+                company-show-numbers t)
+    :config
+    ;;(setq switch-window-input-style 'minibuffer)
+    (setq company-minimum-prefix-length 3)
+    (setq company-show-quick-access t)
+    :bind
+    (:map company-mode-map
+          ("M-/" .#'company-complete))
+    (:map company-active-map
+          ("TAB" . #'company-complete-selection)
+          ("C-j" . company-complete-selection)
+          ("RET" . company-complete-selection)
+          ("<return>" . company-complete-selection)
+          ("M-h" . company-complete-selection)
+          ("M-H" . company-complete-common)
+          ("M-s" . company-search-candidates)
+          ("M-S" . company-filter-candidates)
+          ("M-n" . company-select-next)
+          ("M-p" . company-select-previous)
+          ("C-g" . company-abort))
+    (:map leader-key-map
+          ("y" . #'company-yasnippet))
+    )
+  (use-package company-box
+    :ensure nil)
+
+  (defun my/company-complete-dwim ()
+  "Do-What-I-Mean 补全：优先用 company，没激活时用 dabbrev。"
+  (interactive)
+  (if (and (boundp 'company-mode) company-mode)
+      (call-interactively #'company-complete)
+    (call-interactively #'dabbrev-expand)))
+
+  (global-set-key (kbd "M-/") #'my/company-complete-dwim)
+#+end_src
+*** Set company keys
+#+begin_src emacs-lisp :tangle  gui.el
+  ;;据说跟 lsp-bridge 冲突
+  (setq company-idle-delay nil) 
+  ;; (global-set-key (kbd "M-/") 'company-complete)  ;; 绑定 M-/ 为 company-complete
+  ;; (global-set-key (kbd "M-?") 'dabbrev-expand)    ;; 绑定 M-? 为 dabbrev-expand
+  (lazy-load-global-keys
+   '(
+     ;;("M-/" . company-complete)
+     ("M-/"  . my/company-complete-dwim)
+     ("M-?" . dabbrev-expand)
+
+     )
+   "init-completion-company"
+   )
+#+end_src
+** Load Session
+加载保存的事务。
+#+begin_src emacs-lisp :tangle suk.el
+  (when sys/is-gui
+    (use-package session)
+    (require 'auto-save)
+    ;; todo dont load
+    (require 'basic-toolkit)
+
+    (setq desktop-load-locked-desktop t) ; don't popup dialog ask user, load anyway
+    (setq desktop-restore-frames nil)    ; don't restore any frame
+
+    (defun emacs-session-restore ()
+      "Restore emacs session."
+      (interactive)
+      (ignore-errors
+        ;; Kill other windows.
+        (delete-other-windows)
+        ;; Kill unused buffers.
+        (kill-unused-buffers)
+        ;; Restore session.
+        (desktop-read "~/.emacs.d/var/")
+        ))
+
+    (defun emacs-session-save (&optional arg)
+      "Save emacs session."
+      (interactive "p")
+      (ignore-errors
+        (if (equal arg 4)
+            ;; Kill all buffers if with prefix argument.
+            (mapc 'kill-buffer (buffer-list))
+          ;; Kill unused buffers.
+          (kill-unused-buffers)
+          ;; Save all buffers before exit.
+          (auto-save-buffers))
+        ;; Save session.
+        (make-directory "~/.emacs.d/var/" t)
+        (desktop-save "~/.emacs.d/var/")
+        ;; Exit emacs.
+        (kill-emacs)))
+
+    (global-set-key (kbd "S-<f9>") 'emacs-session-save)
+    (global-set-key (kbd "C-<f9>") 'emacs-session-save)
+
+    (emacs-session-restore)
+    )
+#+end_src
+** Load macros
+#+begin_src emacs-lisp :tangle suk.el
+  ;; 记录一下使用方式
+
+  ;; - =f3= start macro(~kmacro-start-macro-or-insert-counter~),
+  ;; - =f4= done macro or run marcro (~kmacro-end-or-call-macro~).
+  ;; - =C-x (= start macro (~kmacro-start-macro~),
+  ;;           - =C-x )= end done marco(~kmacro-end-macro~),
+  ;; - =C-x e= ~run marco(kmacro-end-macro)~
+  ;; - =C-x C-k r= ~apply-macro-to-region-lines~
+  ;; - =C-x C-k C-n= ~kmacro-cycle-ring-next~                 ;下一个键盘宏
+  ;; - =C-x C-k C-p= ~kmacro-cycle-ring-previous~         ;上一个键盘宏
+  ;; - =C-x C-k RET=  ~kmacro-edit-macro~                          ;编辑键盘宏
+  ;; - ~insert-kbd-macro~
+  ;; - =C-x C-k n=  ~name-last-kbd-macro~ is an alias for ~kmacro-name-last-macro~
+  ;; - =C-x C-k C-d=  ~kmacro-delete-ring-head~
+
+  ;; 先定义一个宏
+  ;; 然后 ~name-last-kbd-macro~
+  ;; 然后 ~insert-kbd-macro~
+  ;; 等到如下类似的配置
+  ;; : (fset 'delete-empty-lines (kbd "M-x flush-lines RET ^\s-*$ RET"))
+#+end_src
+
+** Set keys
+*** Bindkeys examples
+- Set Example:
+#+begin_src emacs-lisp :tangle achrives-and-examples.el
+
+  ;;注意：keystroke中的Control 和 Alternative使用\C, \M表示。
+  ;;如果是kbd函数，可以使用C和M表示
+
+  ;; global examples:
+  ;; --------------------------------------------------------
+  ;; (global-set-key (kbd "C-x C-\\") #'next-line)
+  ;; (global-set-key [?\C-x ?\C-\\] #'next-line)
+  ;; (global-set-key [(control ?x) (control ?\\)] #'next-line)
+  ;; (keymap-global-set [(control ?x) (control ?\\)] #'next-line)
+  ;; (keymap-set global-map "C-x" #'next-line)
+
+#+END_SRC
+
+- Unset Example:
+#+begin_src emacs-lisp :tangle suk.el
+  ;; ;; remove a keybinding for emacs 29 or after
+  ;; (keymap-global-set "C-t" nil)
+
+  ;; ;; or use
+  ;; (keymap-global-unset "C-t")
+
+  ;; ;; before emacs 28 or before
+  ;; (global-set-key (kbd "C-t") nil)
+
+  ;; ;; or
+  ;; (global-unset-key (kbd "C-t"))
+  #+end_src
+
+- Keymap:
+  #+begin_src emacs-lisp :tangle suk.el
+    ;; ;; 自己定义 keymap 其实很简单的，使用 defvar-keymap ，可以从上面的配置中
+    ;; ;; 抽取 C-c n 作为一个 prefix key ，定义如下：
+    ;; (defvar-keymap hsk/notetaking-map
+    ;;   :doc "My notetaking keymap"
+    ;;   "d" #'denote
+    ;;   "t" #'denote-keywords-add
+    ;;   "T" #'denote-keywords-remove)
+    ;; (global-set-key (kbd "C-c n") hsk/notetaking-map)
+
+    ;; ;; 来将上面定义的 keymap 绑定到 C-c n 上。不过从 emacs-29 开始，更推荐用
+    ;; ;; keymap-set ，上面的代码可以改成：
+    ;; (keymap-set global-map "C-c n" hsk/notetaking-map)
+    ;; (keymap-global-set "C-c n" hsk/notetaking-map)
+
+    ;; ;; 或者使用旧方法
+    ;; ;; (define-prefix-command hsk/notetaking-map)
+    ;; (defvar hsk/notetaking-map (make-sparse-keymap)
+    ;;   "Keymap for leader bindings.")
+
+    ;; (global-set-key (kbd "C-c n") hsk/notetaking-map)
+    ;; (define-key hsk/notetaking-map (kbd "d") #'denote)
+    ;; (define-key hsk/notetaking-map (kbd "t") #'isearch-repeat-forward)
+
+
+    ;; ;; 新方法省去了 (kbd ...) 这一层，比较方便。
+
+    ;; ;; 比起原先每个快捷键单独定义，使用 keymap 好处是便于管理，比如之后我想更
+    ;; ;; 换快捷键前缀，从 C-c n 换成 C-c C-n ，只要改一处 keymap-set 就可以了。
+
+    ;; ;; 另一个优点是可以嵌套定义，比如我想要将 org-journal 相关的操作也挂到
+    ;; ;; hsk/notetaking-map 下面，可以先定义一个 hsk/org-journal-map ：
+
+    ;; (defvar-keymap hsk/org-journal-map
+    ;;   :doc "My org-journal keymap"
+    ;;   "n" #'org-journal-new-entry
+    ;;   "s" #'org-journal-search
+    ;;   "o" #'org-journal-open-current-journal-file)
+
+    ;; ;; 然后将它嵌套进另一个 map 下面：
+    ;; (defvar-keymap hsk/notetaking-map
+    ;;   :doc "My notetaking keymap"
+    ;;   ;;...
+    ;;   "j" hsk/org-journal-map)
+
+    ;; ;; 这样 org-journal-new-entry 就映射到 C-c n j n 上了，非常优雅。
+
+
+    ;; (let ((my-keymap (make-sparse-keymap))) ; 创建一个空的 keymap
+    ;;   (keymap-set my-keymap "C-c f" 'find-file)) ; 设置 C-c f 来执行 'find-file 命令
+
+    ;; (keymap-local-set "C-p" ctl-x-map)
+#+END_SRC
+
+*** Leader Key
+Vim 系，有Leader key机制，方便定义一组有相同前缀的快捷键群
+#+begin_src emacs-lisp :tangle suk.el
+  ;; ;; 定义leader key 方式 （旧）
+  ;; (define-prefix-command 'my-leader) 
+  ;; (define-key keymap "keystrok" 'command-name)
+  ;; (global-set-key "keystroke" 'command-name)
+  ;; (local-set-key  "keystroke" 'command-name) 
+
+  ;; ;; 方式一：
+  ;; (define-prefix-command 'SPC-map)
+  ;; (global-set-key (kbd "SPC") 'SPC-map)
+  ;; (global-set-key (kbd "SPC f") 'find-file)
+
+  ;; ;; 方式二：
+  ;; (define-prefix-command 'SPC-map)
+  ;; (global-set-key (kbd "SPC") #'SPC-map)
+  ;; (define-key SPC-map (kbd "f") #'find-file)
+
+  ;; ;; 演示了如何定义一个新的按键前缀. 这里定义了M-c作为按键前缀.
+  ;; (define-prefix-command 'comm-map)
+  ;; (global-set-key (kbd "M-c") 'comm-map)
+  ;; (global-set-key [(meta c)]  'comm-map)
+
+  ;; ;; 新方式更加直观明白
+  ;; (defvar leader-key-map (make-sparse-keymap) "Keymap for leader key bindings.")
+  ;; (global-set-key (kbd "M-m") leader-key-map)
+  ;; (define-key leader-key-map (kbd "f") #'find-file)
+
+  ;; 定义一个Leader-key mode. 使用 M-m 开启，原来的功能重新绑定到 M-i
+  ;; (global-set-key (kbd "M-i") #'back-to-indentation)
+  (require 'leader-key)
+#+end_src
+
+*** bind-keys
+This is a feature provided by the use-package macro that allows
+binding multiple keys in a single statement. While bind-keys can be
+used independently of use-package , it is often used in conjunction
+with use-package to provide a cleaner and more modular key binding
+configuration. Personally, I think it's superior to Emacs's newly
+defined keymap-XXX series of implementations.
+
+#+begin_src emacs-lisp :tangle suk.el
+  (run-with-idle-timer
+   1 nil
+   #'(lambda()
+       (use-package bind-key)
+       (when sys/is-gui
+         ;;(bind-key "C-c x" #'some-function some-package-mode-map)
+         ;;(bind-key "C-c y" #'another-function)
+
+         ;; (bind-keys
+         ;;  ("C-x C-c" . save-buffers-kill-terminal)
+         ;;  ("C-x C-f" . find-file)
+         ;;  ("C-x C-s" . save-buffer))
+
+         ;; (bind-keys :map python-mode-map
+         ;;            ("C-c C-c" . python-shell-send-buffer)
+         ;;            ("C-c C-r" . python-shell-send-region))
+
+
+         ;; Toggle fullscreen <F11> also bind to fullscreen
+         (bind-keys
+          ("C-<f11>" . toggle-frame-fullscreen)
+          ("C-S-f" . toggle-frame-fullscreen) ; Compatible with macOS
+          ("M-S-<return>" . toggle-frame-fullscreen) ; Compatible with Windos
+          ))))
+#+end_src
+
+
+*** Some Global keys
+#+begin_src emacs-lisp :tangle suk.el
+
+  (global-set-key (kbd "C-x R") 'recentf-open)    ;; 快捷键 C-x R 用于打开最近文件
+
+  (if (display-graphic-p)
+      (global-set-key (kbd "<escape>") 'keyboard-escape-quit))
+
+  (when emacs/>=29p
+    ;; (keymap-global-set <key> <cmmd>)
+    (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)       ;; 快捷键 C-<f11> 用于切换全屏模式
+    (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-s-<return> 也用于切换全屏模式
+    ) 
+  (unless emacs/>=29p
+    (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
+    (global-set-key (kbd "M-s-<return>") 'toggle-frame-fullscreen)
+    )
+
+  (global-set-key  (kbd "C-S-SPC") 'set-mark-command)
+
+  ;;; ### Toolkit ###
+  (lazy-load-set-keys
+   '(
+     ("C-," . bury-buffer)                            ;;隐藏当前buffer
+     ("C-." . unbury-buffer)                          ;;反隐藏当前buffer
+     ("C-<f12>" . lazycat-theme-toggle)
+     )
+   (current-global-map)
+   "C-z"
    )
 
-  (with-eval-after-load 'avy
-    (setq avy-all-windows nil
-	  avy-all-windows-alt t
-	  avy-background t
-	  avy-style 'pre)
-    (add-hook 'after-init-hook #'avy-setup-default)
-    )
+  ;; 一啲方便嘅函数
+  ;; 用于向后跳跃到上一个 sexp C-M-<left> / ESC C-<left>
+  ;; 用于向前跳跃到下一个 sexp C-M-<right> / ESC C-<right>
+  ;; eval-expression 执行表达式 M-: M-ESC :
+  ;; sort-lines, calendar, align-regexp
+  ;; C-t transpose-char M-t tanspose-word
+  ;; toggle-truncate-lines C-x x t
+  ;; revert-buffer-quick C-x x g
+  ;; C-c TAB indent-region
+  ;; C-u C-c TAB => (un)indent-region
 
-  (with-eval-after-load 'avy-zap
-    ;; Kill text between the point and the character CHAR
-    (lazy-load-global-keys
-     '(("M-z" . avy-zap-to-char-dwim)
-       ("M-Z" . avy-zap-up-to-char-dwim))
-     "avy-zap"
-     "C-z")
-    )
+  ;; M-x global-set-key RET 交互式的绑定你的键。
+  ;; C-x Esc Esc 调出上一条“复杂命令”
 
+  ;;Emacs 自动排版
+  ;;很简单：C-x h C-M-\
+  ;;其中C-x h 是全选
+  ;;C-M-\ 是排版
 
-#+end_src
-** Grep
-#+begin_src emacs-lisp :tangle etc/init-tools.el
-  
-  ;; Writable `grep' buffer
-  (use-package wgrep
-    :init
-    (setq wgrep-auto-save-buffer t
-	  wgrep-change-readonly-file t))
+  ;; C-x C-q set/unset readonly
+  ;; 大小写转换： M-u, M-l, M-c
 
-  ;; Search tool
-  (use-package grep
-    :ensure nil
-    :autoload grep-apply-setting
-    :init
-    (when (executable-find "rg")
-      (grep-apply-setting
-       'grep-command "rg --color=auto --null -nH --no-heading -e ")
-      (grep-apply-setting
-       'grep-template "rg --color=auto --null --no-heading -g '!*/' -e <R> <D>")
-      (grep-apply-setting
-       'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 38))
-      (grep-apply-setting
-       'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>")))
-
-
-  ;; Fast search tool `ripgrep'
-  (use-package rg
-    :hook (after-init . rg-enable-default-bindings)
-    :bind (:map rg-global-map
-		("c" . rg-dwim-current-dir)
-		("f" . rg-dwim-current-file)
-		("m" . rg-menu))
-    :init (setq rg-group-result t
-		rg-show-columns t)
-    :config
-    (cl-pushnew '("tmpl" . "*.tmpl") rg-custom-type-aliases))
+  ;; M-x align-regexp 可以方便的对齐一些文字
 
 #+end_src
-** 星际译王命令行
-#+begin_src emacs-lisp :tangle achrives-and-examples.el
+
+** Set start translator keys
+#+begin_src emacs-lisp :tangle suk.el
   ;;; ### Sdcv ###
   ;;; --- 星际译王命令行
   (when  (eq system-type 'gnu/linux)
@@ -2208,18 +2326,221 @@ Add to suk.el
      "init-translate"
      "C-z"))
 #+end_src
-* Org
-** Setup
-#+begin_src emacs-lisp :tangle etc/init-org.el
-  (provide 'init-org)
+** Load Treemacs
+A tree view component
+*** Init treemacs
+#+begin_src emacs-lisp :tangle etc/init-treemacs.el
+  ;; init-treemacs.el --- Initialize treemacs.	-*- lexical-binding: t -*-
+
+  ;;; Commentary:
+  ;;
+  ;; Treemacs: A tree layout file explorer.
+  ;;
+
+  ;;; Code:
+
+  ;; 设置 Python 可执行文件路径
+  (when sys/win32p
+    (setq python-shell-interpreter "c:/green/Python311/python.exe")
+    (setq treemacs-python-executable "c:/green/Python311/python.exe")
+    )
+
+  ;; A tree layout file explorer
+  (use-package treemacs
+    :commands (treemacs-follow-mode
+               treemacs-filewatch-mode
+               treemacs-git-mode)
+    :custom-face
+    (cfrs-border-color ((t (:inherit posframe-border))))
+    :bind (([f8]        . treemacs)
+           ("M-0"       . treemacs-select-window)
+           ("C-x t 1"   . treemacs-delete-other-windows)
+           ("C-x t t"   . treemacs)
+           ("C-x t b"   . treemacs-bookmark)
+           ("C-x t C-t" . treemacs-find-file)
+           ("C-x t M-t" . treemacs-find-tag)
+           :map treemacs-mode-map
+           ([mouse-1]   . treemacs-single-click-expand-action))
+    :config
+    (setq treemacs-collapse-dirs           (if treemacs-python-executable 3 0)
+          treemacs-missing-project-action  'remove
+          treemacs-sorting                 'alphabetic-asc
+          treemacs-follow-after-init       t
+          treemacs-width                   30
+          treemacs-no-png-images           nil)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (when sys/win32p
+      (pcase (cons (not (null (executable-find "git.exe")))
+                   (not (null (executable-find "c:/green/Python311/python.exe"))))
+        (`(t . t)
+         (treemacs-git-mode 'deferred))
+        (`(t . _)
+         (treemacs-git-mode 'simple)))
+      )
+    (unless sys/win32p
+      (pcase (cons (not (null (executable-find "git")))
+                   (not (null (executable-find "python3"))))
+        (`(t . t)
+         (treemacs-git-mode 'deferred))
+        (`(t . _)
+         (treemacs-git-mode 'simple)))
+      )
+
+    (with-eval-after-load 'nerd-icons
+          (use-package treemacs-nerd-icons
+            :demand t
+            :when (icons-displayable-p)
+            :custom-face
+            (treemacs-nerd-icons-root-face ((t (:inherit nerd-icons-green :height 1.3))))
+            (treemacs-nerd-icons-file-face ((t (:inherit nerd-icons-dsilver))))
+            :config (treemacs-load-theme "nerd-icons"))
+      )
+
+    (with-eval-after-load 'magit
+          (use-package treemacs-magit
+            :hook ((magit-post-commit
+                    git-commit-post-finish
+                    magit-post-stage
+                    magit-post-unstage)
+                   . treemacs-magit--schedule-update))
+      )
+
+
+    (use-package treemacs-tab-bar
+      :ensure t
+      :demand t
+      :config (treemacs-set-scope-type 'Tabs)))
+
+  (add-hook 'treemacs-mode-hook 'treemacs-project-follow-mode)
+  (provide 'init-treemacs)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; init-treemacs.el ends here
 #+end_src
-Add to suk.el
+*** Set treemacs key
 #+begin_src emacs-lisp :tangle suk.el
-  (require 'init-org)
+  (when sys/is-gui
+  (lazy-load-global-keys
+   '(
+     ("<f8>" . treemacs)
+     )
+   "init-treemacs"))
 #+end_src
 
-** Base settings
-#+begin_src emacs-lisp :tangle etc/init-org.el
+** Set toggles key
+使用Hydra提供一组设定常用开发的工具,减少输入或者快捷键的定义
+*** Init toggles
+#+begin_src emacs-lisp :tangle etc/init-toggles.el
+  (provide 'init-toggles)
+  (when sys/is-gui
+    (with-eval-after-load 'pretty-hydra
+      ;; Global toggles         
+      (with-no-warnings
+        (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
+          ("Basic"
+           (("n" (cond ((fboundp 'display-line-numbers-mode)
+                        (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
+                       ((fboundp 'gblobal-linum-mode)
+                        (global-linum-mode (if global-linum-mode -1 1))))
+             "line number"
+             :toggle (or (bound-and-true-p display-line-numbers-mode)
+                         (bound-and-true-p global-linum-mode)))
+            ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
+            ("d" global-hungry-delete-mode "hungry delete" :toggle t)
+            ("e" electric-pair-mode "electric pair" :toggle t)
+            ("c" flyspell-mode "spell check" :toggle t)
+            ("s" prettify-symbols-mode "pretty symbol" :toggle t)
+            ("l" global-page-break-lines-mode "page break lines" :toggle t)
+            ("B" display-battery-mode "battery" :toggle t)
+            ("T" display-time-mode "time" :toggle t)
+            ("a" abbrev-mode "abrev" :toggle t)
+            ("F" auto-fill-mode "auto fill" :toggle t)
+            ("m" doom-modeline-mode "modern mode-line" :toggle t)
+            ("t" toggle-truncate-lines "truncate lines" :toggle t)
+            ("u" toggle-company-ispell "Company Ispell" :toggle t))
+           "Highlight"
+           (("h l" global-hl-line-mode "line" :toggle t)
+            ("h p" show-paren-mode "paren" :toggle t)
+            ("h s" symbol-overlay-mode "symbol" :toggle t)
+            ("h r" rainbow-mode "rainbow" :toggle t)
+            ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
+             "whitespace" :toggle show-trailing-whitespace)
+            ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
+            ("h i" highlight-indent-guides-mode "indent" :toggle t)
+            ("h t" global-hl-todo-mode "todo" :toggle t))
+           "Program"
+           (("f" flymake-mode "flymake" :toggle t)
+            ("O" hs-minor-mode "hideshow" :toggle t)
+            ("U" subword-mode "subword" :toggle t)
+            ("w" whitespace-mode "whitespace" :toggle t)
+            ("W" which-function-mode "which function" :toggle t)
+            ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
+            ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
+            ("v" global-diff-hl-mode "gutter" :toggle t)
+            ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
+            ("M" diff-hl-margin-mode "margin gutter" :toggle t)
+            ("D" diff-hl-dired-mode "dired gutter" :toggle t))
+           ))
+        (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
+        (keymap-set leader-key "t" #'toggles-hydra/body)
+        )))
+
+  (when sys/is-tui
+    (defun toggles-hydra/body()
+      "Toggles"
+      (interactive)
+      (message "Not support in TUI")
+      )
+    )
+#+end_src
+*** Set toggle key
+#+begin_src emacs-lisp :tangle suk.el
+
+  (lazy-load-global-keys
+   '(
+     ("C-x M-t" . toggles-hydra/body)
+     )
+   "init-toggles")
+#+end_src
+** NeoTree
+Another tree view component
+#+begin_src emacs-lisp :tangle suk.el
+  ;; ;; 设置打开 NeoTree 树形列表展示
+  ;; (when sys/is-gui
+  ;;   (use-package neotree
+  ;;     :commands (projectile-switch-project neotree-dir)
+  ;;     :config
+  ;;     (setq neo-theme 'ascii           ; NeoTree 图标的样式
+  ;;           neo-window-width 35
+  ;;           neo-window-fixed-size nil) ; 设置 NeoTree 窗口的宽度可以使用鼠标调整
+  ;;     :bind ("C-c o" . projectile-switch-project)))
+
+
+#+end_src
+
+** Misc packages
+#+begin_src emacs-lisp :tangle suk.el
+  (run-with-idle-timer
+   2 nil
+   #'(lambda()
+       (use-package paredit) ;; useful for lisp
+       (use-package wgrep) ;; edit the grep / rg result then apply to the origin buffer. Cancel is supportted.
+       (use-package writeroom-mode)
+       (use-package yaml-mode)
+       (use-package markdown-mode)
+       ))
+
+  
+  (unless (display-graphic-p)
+    ;; only conole packages
+    )
+#+end_src
+
+* Org
+** Load base settings
+#+begin_src emacs-lisp :tangle suk.el
   ;;(message org-files-directory)
   ;; 创建 var 文件夹
   (make-directory (expand-file-name "var" user-emacs-directory) t)
@@ -2299,7 +2620,7 @@ Add to suk.el
 - C-c C-x C-y：粘贴子树
 
 *** 标题级搜索
-#+begin_src emacs-lisp :tangle etc/init-org.el
+#+begin_src emacs-lisp :tangle suk.el
   ;; 1. Outline path Jump
   (setq org-goto-interface 'outline-path-completion)
   ;; C-c C-j → 秒跳技术点
@@ -2308,8 +2629,8 @@ Add to suk.el
   ;; 3. ripgrep or grep
 #+end_src
 
-** GTD Agenda
-#+begin_src emacs-lisp :tangle etc/init-org.el
+** Load GTD agenda
+#+begin_src emacs-lisp :tangle suk.el
   ;; GTD
   (setq org-use-fast-todo-selection t)
   ;; ! 的含义是记录某项更改为状态的时间。我不把这个添加到完成的状态，是因为它们已
@@ -2390,7 +2711,7 @@ Add to suk.el
 
 #+end_src
 
-** Archive
+** Load archive
 - C-c C-x C-a (org-archive-subtree)：最常用的归档命令，将当前子树移动到指定归档文件/节点。
 - C-c C-x a (org-toggle-archive-tag)：给当前条目添加/移除 ARCHIVE 标签，就地归档而不移动位置。
 - C-c C-x A (org-archive-to-archive-sibling)：在同一层级创建“归档兄弟节点”。
@@ -2400,14 +2721,14 @@ Add to suk.el
   想让它们保持在原处却不再显示，则可以用 C-c C-x a。另外，也别忘了通过
   org-archive-location 配置好归档文件或归档标题，以便管理归档内容更加
   顺畅。
-#+begin_src emacs-elisp :tangle etc/init-org.el
+#+begin_src emacs-elisp :tangle suk.el
   ;; default is "%s_archive::", I want to archive in a sginle file.
   ;; use C-u C-c C-x C-a to change
   (setq org-archive-location "archive.org::* Archived Tasks")
 #+end_src
 
-** Capture
-#+begin_src emacs-lisp :tangle etc/init-org.el
+** Load capture
+#+begin_src emacs-lisp :tangle suk.el
   ;; capture template
   (setq org-default-notes-file (expand-file-name "index.org" org-files-directory))
   ;; Capture templates for: TODO tasks, Notes,
@@ -2419,7 +2740,7 @@ Add to suk.el
            entry (file+headline ,(expand-file-name "gtd.org" org-files-directory) "Tasks")
            "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
           ("i" "Inbox"
-           entry (file ,(expand-file-name "Inbox.org" org-files-directory))
+           entry (file ,(expand-file-name "inbox.org" org-files-directory))
            "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
           ("r" "Respond"
            entry (file ,(expand-file-name "gtd.org" org-files-directory))
@@ -2441,8 +2762,8 @@ Add to suk.el
            "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
           ))
 #+end_src
-** Refile
-#+begin_src emacs-lisp :tangle etc/init-org.el
+** Load refile
+#+begin_src emacs-lisp :tangle suk.el
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Refile settings
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2464,7 +2785,7 @@ Add to suk.el
 #+end_src
 
 *** Quick asscess
-#+begin_src emacs-lisp :tangle etc/init-org.el
+#+begin_src emacs-lisp :tangle suk.el
   ;; Registers allow you to jump to a file or other location quickly.
   ;; To jump to a register, use C-x r j followed by the letter of the register.
   ;; Using registers for all these file shortcuts is probably a bit of
@@ -2517,17 +2838,17 @@ Add to suk.el
   (my-defshortcut ?g (expand-file-name "gtd.org" org-files-directory))
   (my-defshortcut ?w (expand-file-name "work.org" org-files-directory))
   (my-defshortcut ?f (expand-file-name "finished.org" org-files-directory))
-  (my-defshortcut ?c (expand-file-name "cancel.org" org-files-directory))
+  (my-defshortcut ?c (expand-file-name "archive.org" org-files-directory))
   (my-defshortcut ?t (expand-file-name "trash.org" org-files-directory))
-  (my-defshortcut ?n (expand-file-name "notes.org" org-files-directory))
+  (my-defshortcut ?n (expand-file-name "inbox.org" org-files-directory))
   (my-defshortcut ?j (expand-file-name "journal.org" org-files-directory))
   (my-defshortcut ?N "~/notes")
   ;; 额外定义的位置
   (load-if-exists (expand-file-name "my-defshortcuts.el" suk-emacs-config-dir))
 
 #+end_src
-** Exporter
-#+begin_src emacs-lisp :tangle etc/init-org.el
+** Load exporter
+#+begin_src emacs-lisp :tangle suk.el
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; EXPORTER
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2659,7 +2980,7 @@ Add to suk.el
 Org → HTML → PDF
 
 **** Emacs：导出 HTML
-#+begin_src emacs-lisp :tangle etc/init-org.el
+#+begin_src emacs-lisp :tangle suk.el
   
 (require 'ox-html)
 ;; 导出：
@@ -3010,7 +3331,7 @@ org/
 #+end_src
 
 **** Emacs Lisp 自动拼装（可选）
-  #+begin_src emacs-lisp :tangle etc/init-org.el
+  #+begin_src emacs-lisp :tangle suk.el
     (defvar suk/html-to-pdf-command "html2pdf"
       "HTML to PDF command")
     (defun suk/export-whitepaper (sections output-pdf)
@@ -3064,8 +3385,8 @@ org/
     ;;     (suk/export-whitepaper '("java" "go") "runtime.pdf")
 
   #+end_src
-** Attachments
-#+begin_src emacs-lisp :tangle etc/init-org.el
+** Load attachments
+#+begin_src emacs-lisp :tangle suk.el
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;; Attachments
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3096,13 +3417,13 @@ org/
   ;; the attachment to open and TAB completion works here.
 
 #+end_src
-** Use toc-org
-#+begin_src emacs-lisp :tangle etc/init-org.el
+** Laod toc-org
+#+begin_src emacs-lisp :tangle suk.el
   ;; org-mode
   (use-package toc-org)
 #+end_src
 ** Use hydra
-#+begin_src emacs-lisp :tangle etc/init-org.el
+#+begin_src emacs-lisp :tangle suk.el
   (with-eval-after-load 'pretty-hydra
     (pretty-hydra-define+ hydra-global-org
       (:color blue :quit-key "q" :title "Org 操作")
@@ -3132,65 +3453,68 @@ org/
   (global-set-key (kbd "C-c o") 'hydra-global-org/body)
 #+end_src
 
-** Use org-modern
-#+begin_src emacs-lisp :tangle etc/init-org.el
+** Load org-modern
+#+begin_src emacs-lisp :tangle suk.el
   ;;Prettify UI
-  (use-package org-modern
-    :custom
-    ;;  (org-modern-table nil)
-    (prettify-symbols-alist nil)
-    :config
-    ;; Disable Prettify Symbols mode globally or locally as needed
-    ;;(global-prettify-symbols-mode -1)
-    :hook ((org-mode . org-modern-mode)
-	   (org-agenda-finalize . org-modern-agenda)
-	   ))
+  (when sys/is-gui
+    (use-package org-modern
+      :custom
+      ;;  (org-modern-table nil)
+      (prettify-symbols-alist nil)
+      :config
+      ;; Disable Prettify Symbols mode globally or locally as needed
+      ;;(global-prettify-symbols-mode -1)
+      :hook ((org-mode . org-modern-mode)
+             (org-agenda-finalize . org-modern-agenda)
+             )))
 
 #+end_src
-** Use org-roam
-#+begin_src emacs-lisp :tangle etc/init-org.el
-  (use-package org-roam
-    :ensure t
-    :init
-    (setq org-roam-v2-ack t)
-    (setq org-roam-db-location "~/.emacs.d/var/org-roam.db")
-    :custom
-    ;; (org-roam-directory (file-truename "~/RoadNotes"))
-    ;; The file-truename function is only necessary when you use
-    ;; symbolic links inside org-roam-directory: Org-roam does not
-    ;; resolve symbolic links.
-    (make-directory (expand-file-name "daily" org-roam-directory) t)
-    (org-roam-completion-everywhere t)
-    (org-roam-dailies-capture-templates
-     '(("d" "default" entry "* %<%I:%M %p>: %?"
-	:if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
-    :bind (("C-c n l" . org-roam-buffer-toggle)
-	   ("C-c n f" . org-roam-node-find)
-	   ("C-c n i" . org-roam-node-insert)
-	   :map org-mode-map
-	   ("C-M-i" . completion-at-point)
-	   :map org-roam-dailies-map
-	   ("Y" . org-roam-dailies-capture-yesterday)
-	   ("n" . org-roam-dailies-capture-today)
-	   ("T" . org-roam-dailies-capture-tomorrow)
-	   ("v" . org-roam-dailies-capture-date)
-	   ("d" . org-roam-dailies-goto-today)
-	   ("t" . org-roam-dailies-goto-tomorrow)
-	   ("y" . org-roam-dailies-goto-yesterday)
-	   ("c" . org-roam-dailies-goto-date)
-	   ("b" . org-roam-dailies-goto-next-note)
-	   ("f" . org-roam-dailies-goto-previous-note)
-	   )
-    :bind-keymap
-    ("C-c n d" . org-roam-dailies-map)
-    :config
-    (require 'org-roam-dailies) ;; Ensure the keymap is available
-    (org-roam-db-autosync-mode)
+** Load org-roam
+#+begin_src emacs-lisp :tangle suk.el
+  (when sys/is-gui
+    (use-package org-roam
+      :ensure t
+      :init
+      (setq org-roam-v2-ack t)
+      (setq org-roam-db-location "~/.emacs.d/var/org-roam.db")
+      :custom
+      ;; (org-roam-directory (file-truename "~/RoadNotes"))
+      ;; The file-truename function is only necessary when you use
+      ;; symbolic links inside org-roam-directory: Org-roam does not
+      ;; resolve symbolic links.
+      (make-directory (expand-file-name "daily" org-roam-directory) t)
+      (org-roam-completion-everywhere t)
+      (org-roam-dailies-capture-templates
+       '(("d" "default" entry "* %<%I:%M %p>: %?"
+          :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+      :bind (("C-c n l" . org-roam-buffer-toggle)
+             ("C-c n f" . org-roam-node-find)
+             ("C-c n i" . org-roam-node-insert)
+             :map org-mode-map
+             ("C-M-i" . completion-at-point)
+             :map org-roam-dailies-map
+             ("Y" . org-roam-dailies-capture-yesterday)
+             ("n" . org-roam-dailies-capture-today)
+             ("T" . org-roam-dailies-capture-tomorrow)
+             ("v" . org-roam-dailies-capture-date)
+             ("d" . org-roam-dailies-goto-today)
+             ("t" . org-roam-dailies-goto-tomorrow)
+             ("y" . org-roam-dailies-goto-yesterday)
+             ("c" . org-roam-dailies-goto-date)
+             ("b" . org-roam-dailies-goto-next-note)
+             ("f" . org-roam-dailies-goto-previous-note)
+             )
+      :bind-keymap
+      ("C-c n d" . org-roam-dailies-map)
+      :config
+      (require 'org-roam-dailies) ;; Ensure the keymap is available
+      (org-roam-db-autosync-mode)
 
+      )
     )
 #+end_src
 ** Add shortcuts
-#+begin_src emacs-lisp :tangle etc/init-key.el
+#+begin_src emacs-lisp :tangle suk.el
   ;;; --- 笔记管理和组织
   (define-prefix-command 'F9-map)
   (global-set-key (kbd "<f9>") 'F9-map)
@@ -3221,455 +3545,414 @@ org/
 
 #+end_src
 
-** Org in TUI
-#+begin_src emacs-lisp :tangle tui.el
-  (defconst suk/is-gui (display-graphic-p))
-  (defconst suk/is-tui (not suk/is-gui))
-  ;; =========================
-  ;; TUI
-  ;; =========================
-  ;; 启动干净
-  (setq inhibit-startup-screen t
-        ring-bell-function 'ignore
-        make-backup-files nil
-        auto-save-default nil
-        frame-inhibit-implied-resize t)
-  ;; 终端友好 UI
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  ;; 元素一部分禁用
-  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1)) 
-  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-  (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-  ;;(toggle-frame-maximized)
-
-  ;; UTF-8
-  (set-language-environment "UTF-8")
-  (prefer-coding-system 'utf-8)
-  ;; 行为
-  (column-number-mode 1)
-  ;; 剪贴板（TUI 下也有用）
-  (setq select-enable-clipboard t)
-  (fset 'yes-or-no-p 'y-or-n-p)
-
-
-  ;; 緩衝區，无令立殺之。
-  (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions))
-  (setq find-file-visit-truename t)    
-  (setq gc-cons-threshold most-positive-fixnum)
-  (setq gc-cons-percentage 0.8)
-  ;; Reset the GC setting
-  (add-hook 'emacs-startup-hook
-            (lambda ()
-              ;; 默认係 0.8MB
-              ;;(setq gc-cons-threshold 80000000)
-              (message "Emacs ready in %s with %d garbage collections."
-                       (format "%.2f seconds"
-                               (float-time
-                                (time-subtract after-init-time before-init-time)))
-                       gcs-done)
-              (defun my-cleanup-gc ()
-                "Clean up gc."
-                (setq gc-cons-threshold  67108864) ; 64M
-                (setq gc-cons-percentage 0.1) ; original value
-                (garbage-collect))
-              (run-with-idle-timer 4 nil #'my-cleanup-gc)
-              (add-hook 'focus-out-hook 'garbage-collect)))
-
-  (defvar suk-emacs-root-dir      (file-truename user-emacs-directory))
-  (defvar suk-emacs-config-dir    (expand-file-name "etc" suk-emacs-root-dir))
-  (defvar suk-emacs-extension-dir (expand-file-name "extensions" suk-emacs-root-dir))
-  (defvar suk-emacs-share-dir     (expand-file-name "share" suk-emacs-root-dir))
-  (defvar suk-emacs-themes-dir    (expand-file-name "themes" suk-emacs-share-dir))
-  (defvar suk-emacs-var-dir       (expand-file-name "var" suk-emacs-root-dir))
-  (defvar suk-emacs-tmp-dir       (expand-file-name "tmp" suk-emacs-var-dir))
-  (defvar suk-emacs-backup-dir    (expand-file-name "backup" suk-emacs-tmp-dir))
-
-  ;; OS 嘅 HOME 目录。
-  (defvar user-home-dir (getenv "HOME"))
-  (if (eq system-type 'windows-nt) (defvar user-home-dir (getenv "USERPROFILE")))
-  ;; blink search
-  (setq blink-search-db-path (expand-file-name "blink-search.db" suk-emacs-tmp-dir))
-  ;; 历史
-  (setq savehist-file (concat suk-emacs-var-dir "/history"))
-  ;; Amx
-  (setq amx-save-file (concat suk-emacs-var-dir "/amx-items"))
-  ;; 自动保存
-  (setq auto-save-list-file-prefix (concat suk-emacs-var-dir "/auto-save-list/.saves-"))
-  ;; Eshell
-  (setq eshell-directory-name (concat suk-emacs-var-dir "/eschell"))
-  (setq eshell-history-file-name (concat eshell-directory-name "/history"))
-  ;; projectitle-bookmarks
-  (setq projectile-known-projects-file (concat suk-emacs-var-dir "/projectile-bookmarks.eld"))
-  (setq backup-directory-alist `(("" . ,suk-emacs-tmp-dir)))
-  ;; Bookmark
-  (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
-  ;; Diary
-  (setq diary-file (concat user-home-dir "/diary"))
-  ;; server 无效
-  (require 'server)
-  ;;(setq server-socket-dir suk-emacs-var-dir)
-
-  ;; Clear to avoid analyzing files when loading remote files.
-  (setq file-name-handler-alist nil)
-  ;; Don't pass case-insensitive to `auto-mode-alist'
-  (setq auto-mode-case-fold nil)
-
-
-  (unless (file-exists-p suk-emacs-var-dir)
-    (make-directory cache-dir t))
-  (setq projectile-cache-file (expand-file-name "projectile.cache" suk-emacs-var-dir))
-
-  ;; Ignore `cl` expiration warnings
-  (setq byte-compile-warnings '(cl-function))
-
-  ;; original version
-  ;;(defun add-subdirs-to-load-path (dir)
-  ;;  "Recursive add directories to `load-path'."
-  ;;  (let ((default-directory (file-name-as-directory dir)))
-  ;;     (add-to-list 'load-path dir)
-  ;;     (normal-top-level-add-subdirs-to-load-path)))
-
-  ;; 王勇的版本 https://manateelazycat.github.io/emacs/2022/03/02/emacs-load-directory-recursively.html
-  (require 'cl-lib)
-  (defun add-subdirs-to-load-path (search-dir isFirst)
-    (interactive)
-    (when isFirst
-      ;; The original version did not add the first search-dir itself to
-      ;; the `load path`. The recursive search-dir was added before the
-      ;; recursion.
-      (add-to-list 'load-path search-dir))
-    (let* ((dir (file-name-as-directory search-dir)))
-      (dolist (subdir
-               ;; goleui bat bityiu ge mukluk, taising Emacs kaidung cudou.
-               (cl-remove-if
-                #'(lambda (subdir)
-                    (or
-                     ;; m hai mangin
-                     (not (file-directory-p (concat dir subdir)))
-                     ;; yiceui haamin ge mukluk
-                     (member subdir '("." ".." ; Linux/Uniux haitung ge  dongcin mukluk tungmaai fu mukluk
-                                      "dist" "node_modules" "__pycache__" ; takding ge yüyin seunggwaan ge mukluk
-                                      "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) ; baanbun hungjai mukluk
-                (directory-files dir)))
-        (let ((subdir-path (concat dir (file-name-as-directory subdir))))
-          ;; mukluk bauhaam  .el .so .dll ge mangin di louging sinji gaa dou `load-path` binleung
-          (when (cl-some #'(lambda (subdir-file)
-                             (and (file-regular-p (concat subdir-path subdir-file))
-                                  ;; .so .dll 文件指非Elisp语言编写的Emacs动态库
-                                  (member (file-name-extension subdir-file) '("el" "so" "dll"))))
-                         (directory-files subdir-path))
-
-            ;; jüyi: add-to-list ge daisaam go caamsou bitseuiwai t, timgaa dou meibou,
-            ;; kokbou gwongdou yausin
-            (add-to-list 'load-path subdir-path t))
-
-          ;; geieuuk daigwai sausok ji mukluk.
-          (add-subdirs-to-load-path subdir-path nil)))))
-
-  ;; 加载定义的目录
-  (add-subdirs-to-load-path suk-emacs-config-dir t)
-  (add-subdirs-to-load-path suk-emacs-extension-dir t)
-  (add-subdirs-to-load-path suk-emacs-themes-dir t)
-
-  (defconst sys/win32p
-    (eq system-type 'windows-nt)
-    "Are we running on a WinTel system?")
-
-  (defconst sys/linuxp
-    (eq system-type 'gnu/linux)
-    "Are we running on a GNU/Linux system?")
-
-  (defconst sys/macp
-    (eq system-type 'darwin)
-    "Are we running on a Mac system?")
-
-  (defconst sys/mac-x-p
-    (and (display-graphic-p) sys/macp)
-    "Are we running under X on a Mac system?")
-
-  (defconst sys/linux-x-p
-    (and (display-graphic-p) sys/linuxp)
-    "Are we running under X on a GNU/Linux system?")
-
-  (defconst sys/cygwinp
-    (eq system-type 'cygwin)
-    "Are we running on a Cygwin system?")
-
-  (defconst sys/rootp
-    (string-equal "root" (getenv "USER"))
-    "Are you using ROOT user?")
-
-  (defconst emacs/>=25p
-    (>= emacs-major-version 25)
-    "Emacs is 25 or above.")
-
-  (defconst emacs/>=26p
-    (>= emacs-major-version 26)
-    "Emacs is 26 or above.")
-
-  (defconst emacs/>=27p
-    (>= emacs-major-version 27)
-    "Emacs is 27 or above.")
-
-  (defconst emacs/>=28p
-    (>= emacs-major-version 28)
-    "Emacs is 28 or above.")
-
-  (defconst emacs/>=29p
-    (>= emacs-major-version 29)
-    "Emacs is 29 or above.")
-
-  (defconst emacs/>=30p
-    (>= emacs-major-version 30)
-    "Emacs is 30 or above.")
-
-  ;; Load `custom-file'
-  ;; If it doesn't exist, copy from the template, then load it.
-  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-
-  (let ((custom-template-file
-         (expand-file-name "custom-template.el" user-emacs-directory)))
-    (if (and (file-exists-p custom-template-file)
-             (not (file-exists-p custom-file)))
-        (copy-file custom-template-file custom-file)))
-
-  (if (file-exists-p custom-file)
-      (load custom-file))
-
-
-  ;;(setq package-user-dir "c:/green/emacs-suk/.local/share/elpa")
-  (require 'package)
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-  ;;(setq package-archives
-  ;;      '(("gnu" . "https://elpa.gnu.org/packages/")
-  ;;        ("melpa" . "https://melpa.org/packages/")))
-
-  (unless (bound-and-true-p package--initialized)
-    (package-initialize))
-
-  ;; =========================
-  ;; Git（TUI 下也要好用）
-  ;; =========================
-  (unless (package-installed-p 'magit)
-    (package-install 'magit))
-  (global-set-key (kbd "C-x g") #'magit-status)
-  ;; =========================
-  ;; 搜索 / 跳转（TUI 必备）
-  ;; =========================
-
-  ;;(package-initialize)
-  ;;(unless package-archive-contents
-  ;;  (package-refresh-contents))
-  (dolist (pkg '(vertico consult))
-    (unless (package-installed-p pkg)
-      (package-install pkg)))
-  (vertico-mode 1)
-  (global-set-key (kbd "C-c o") #'consult-outline)
-  (global-set-key (kbd "C-c s") #'consult-ripgrep)
-
-
-  ;;(unless (package-installed-p 'use-package)
-  ;;  (package-refresh-contents)
-  ;;  (package-install 'use-package))
-
-  ;;(require 'use-package)
-  ;;(use-package treemacs
-  ;;  :ensure t)
-
-  ;;(load "C:/green/emacs-suk/.emacs.d/share/themes/lazycat-theme/lazycat-theme.el")
-  ;;Switch to dark theme:
-  ;;(lazycat-theme-load-dark)
-  ;; Switch to light theme:
-  ;; (lazycat-theme-load-light)
-  ;; (lazycat-theme-toggle)
-  ;;(require 'lazycat-theme)
-  ;;(lazycat-theme-load)
-  ;;(run-with-idle-timer 1 nil #'lazycat-theme-load-with-sunrise)
-
-  (when my/is-tui  
-
-    ;; 行号在小屏可能太挤，可关
-    (global-display-line-numbers-mode 0)
-    (setq-default line-spacing 0.2)
-    ;; 视觉换行（写书很重要）
-    (global-visual-line-mode 1)
-    ;; 光标明显一点
-    (setq cursor-type 'bar)
-    ;; 主题（终端最稳） 颜色（终端友好）
-    (load-theme 'tango-dark t)
-    ;; 滚动更顺
-    (setq scroll-margin 3
-          scroll-conservatively 101)
-
-    ;; =========================
-    ;; Org（写书核心）
-    ;; =========================
-    (require 'org)
-    (setq 
-     ;; 不折叠太狠
-     org-startup-folded 'content
-     ;; 写书时更像文本
-     org-hide-emphasis-markers t
-     ;; Org 美化不要太激进
-     org-ellipsis " ▼")
-    (defun my/org-writing-mode ()
-      "TUI 下写书专用模式"
-      (interactive)
-      (org-content)
-      (visual-line-mode 1)
-      (setq-local line-spacing 0.2))
-    (global-set-key (kbd "C-c w") #'my/org-writing-mode)
-    (global-set-key (kbd "C-c j") #'org-goto)
-
-
-    )
-#+end_src
-* Recentf
-#+begin_src emacs-lisp :tangle suk.el
-  ;; Recentf
-  (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
-  ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
-  (use-package recentf
-    :ensure nil
-    :defer 1
-    :init
-    (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
-    ;;(setq recentf-save-file "~/.emacs.d/var/recentf")
-    ;;(add-hook 'after-init-hook #'recentf-mode)
-    (setq recentf-max-saved-items 500)
-    (setq recentf-max-saved-items 17)
-    (recentf-mode)
-    (recentf-track-opened-file)
-
-    :config
-    (add-to-list 'recentf-exclude (expand-file-name package-user-dir))
-    (add-to-list 'recentf-exclude ".cache")
-    (add-to-list 'recentf-exclude ".cask")
-    (add-to-list 'recentf-exclude ".elfeed")
-    (add-to-list 'recentf-exclude "bookmarks")
-    (add-to-list 'recentf-exclude "cache")
-    (add-to-list 'recentf-exclude "persp-confs")
-    (add-to-list 'recentf-exclude "recentf")
-    (add-to-list 'recentf-exclude "url")
-    (add-to-list 'recentf-exclude "COMMIT_EDITMSG\\'")
-    (defun suk/recentf-exclude-p (file)
-      (let ((file-dir (file-truename (file-name-directory file))))
-	(-any-p (lamdba (dir)
-			(string-prefix-p dir file-dir))
-		(mapcar 'file-truename (list var package-user-dir)))))
-    (add-to-list 'recentf-exclude #'suk/recentf-exclude-p)
-    )
-
-#+end_src
-* Session
-加载保存的事务。
-#+begin_src emacs-lisp :tangle suk.el
-  (use-package session)
-  (require 'auto-save)
-  ;; todo dont load
-  (require 'basic-toolkit)
-
-  (setq desktop-load-locked-desktop t) ; don't popup dialog ask user, load anyway
-  (setq desktop-restore-frames nil)    ; don't restore any frame
-
-  (defun emacs-session-restore ()
-    "Restore emacs session."
-    (interactive)
-    (ignore-errors
-      ;; Kill other windows.
-      (delete-other-windows)
-      ;; Kill unused buffers.
-      (kill-unused-buffers)
-      ;; Restore session.
-      (desktop-read "~/.emacs.d/var/")
-      ))
-
-  (defun emacs-session-save (&optional arg)
-    "Save emacs session."
-    (interactive "p")
-    (ignore-errors
-      (if (equal arg 4)
-	  ;; Kill all buffers if with prefix argument.
-	  (mapc 'kill-buffer (buffer-list))
-	;; Kill unused buffers.
-	(kill-unused-buffers)
-	;; Save all buffers before exit.
-	(auto-save-buffers))
-      ;; Save session.
-      (make-directory "~/.emacs.d/var/" t)
-      (desktop-save "~/.emacs.d/var/")
-      ;; Exit emacs.
-      (kill-emacs)))
-
-  (global-set-key (kbd "S-<f9>") 'emacs-session-save)
-  (global-set-key (kbd "C-<f9>") 'emacs-session-save)
-
-  (emacs-session-restore)
-#+end_src
-* Completion
-** setup
-#+begin_src emacs-lisp :tangle etc/init-completion.el
-  (provide 'init-completion)
-#+end_src
-Add to suk.el
-#+begin_src emacs-lisp :tangle suk.el
-  (require 'init-completion)
-#+end_src
-** Use vertico
+* GUI
 :PROPERTIES:
-:CUSTOM_ID: setup-vertico
+:CUSTOM_ID: setup-ui
 :END:
-<<setup-vertico>>
+<<setup-ui>>
 
-Vertico 是 Emacs 中的一款用于增强 minibuffer 输入体验的插件，特别是在
-逐步改进 completion（自动补全）和选择候选项时的界面表现。
+** Load Theme
+:PROPERTIES:
+:CUSTOM_ID: setup-theme
+:END:
+<<setup-theme>>
 
-主要特点
+#+begin_src emacs-lisp :tangle gui.el
 
-  + 垂直选择界面：
-
-    Vertico 提供了一种垂直的候选项显示方式，与默认的 minibuffer 不
-    同，它通过在屏幕上垂直列出候选项，并允许你快速浏览、选择候选项。
-    它不仅仅是补全，还是一个直观的选择界面。
-
-*** 快速和轻量：
-
-它的设计理念是简单、轻量并且快速。它不会像其他一些补全框架那样带
-有过多复杂的功能，而是专注于提供流畅的、响应迅速的候选项显示。
-
-*** 兼容性强：
-
-Vertico 是与 completion 和 minibuffer 的默认系统紧密集成的，并且
-它支持与其他补全框架如 company-mode 和 corfu 一起使用，帮助你在选
-择候选项时提供更好的体验。
-
-*** 适配性：
-
-它能够与很多流行的插件（如 Consult, Orderless, Embark）无缝配合，
-扩展候选项选择的功能。
-
-#+begin_src emacs-lisp :tangle etc/init-completion.el
-  (when (display-graphic-p)
-    (use-package vertico
-      :bind (:map vertico-map
-		  ("RET"   . vertico-directory-enter)
-		  ("DEL"   . vertico-directory-delete-char)
-		  ("M-DEL" . vertico-directory-delete-word))
-      :hook ((after-init . vertico-mode)
-	     (rfn-eshadow-update-overlay . vertico-directory-tidy))
-      )
-    (use-package vertico-posframe
+  (when sys/is-gui
+    (use-package doom-themes
       :ensure t
-      :after (posframe vertico)
-      :hook (vertico-mode . vertico-posframe-mode)
-      :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
+      :custom
+      (doom-themes-enable-bold t)
+      (doom-themes-enable-italic t)
+      ;; 加载一个主题，DOOM One 是 DOOM Emacs 的默认主题，非常美观
+      :init
+      (load-theme 'doom-one t)
       )
+
+
+    (use-package doom-modeline
+      :hook (after-init . doom-modeline-mode)
+      :init
+      (setq doom-modeline-icon t
+            doom-modeline-minor-modes t)
+      :config
+      (column-number-mode 1)
+      :custom
+      (doom-modeline-height 30)
+      (doom-modeline-window-width-limit nil)
+      (doom-modeline-buffer-file-name-style 'truncate-with-project)
+      (doom-modeline-icon t)
+      (doom-modeline-time t)
+      (doom-modeline-vcs-max-leghth 50)
+      ;; Windows下记得加上
+      (if sys/win32p (setq inhibit-compacting-font-caches t))
+      )
+
+    (use-package hide-mode-line
+      :hook (((treemacs-mode
+               eshell-mode shell-mode
+               term-mode vterm-mode
+               embark-collect-mode
+               lsp-ui-imenu-mode
+               pdf-annot-list-mode) . turn-on-hide-mode-line-mode)
+             (dired-mode . (lambda()
+                             (and (bound-and-true-p hide-mode-line-mode)
+                                  (turn-off-hide-mode-line-mode))))))
+
+    ;; A minor-mode menu for mode-line
+    (use-package minions
+      :hook (doom-modeline-mode . minions-mode))
     )
 #+end_src
-** use corfu
-#+begin_src emacs-lisp :tangle etc/init-completion.el
+** Load fonts
+:PROPERTIES:
+:CUSTOM_ID: setup-fonts
+:END:
+<<setup-fonts>>
+
+#+begin_src emacs-lisp :tangle gui.el
+  ;; 字体
+  (use-package all-the-icons)
+  
+  (lazy-load-set-keys
+   '(
+     ("C--" . text-scale-decrease)        ;减小字体大小
+     ("C-=" . text-scale-increase)        ;增加字体大小
+     ("C-x C-0" . text-scale-adjust)
+     ))
+
+
+  (defun font-installed-p (font-name)
+    "Check if font with FONT-NAME is available."
+    (find-font (font-spec :name font-name)))
+
+
+  ;; Use fixed pitch where it's sensible
+  ;;  (use-package mixed-pitch :diminish)
+  (require 'load-set-font)
+#+end_src
+** Load tabs
+:PROPERTIES:
+:CUSTOM_ID: setup-tabs
+:END:
+<<setup-tabs>>
+
+#+begin_src emacs-lisp :tangle gui.el
+  (when (display-graphic-p)
+    (use-package centaur-tabs
+      :demand
+      :init
+      ;; Set the style to rounded with icons
+      (setq centaur-tabs-style "bar")
+      (setq centaur-tabs-set-icons t)
+      :config
+      (centaur-tabs-mode t)
+      :bind
+      ("C-<prior>" . centaur-tabs-backward)  ;; Ctrl PgUp
+      ("C-<next>"  . centaur-tabs-forward))  ;; Ctrl PgDn
+    )
+#+end_src
+** Load icons
+:PROPERTIES:
+:CUSTOM_ID: setup-icons
+:END:
+<<setup-icons>>
+
+#+begin_src emacs-lisp :tangle gui.el
+  (when (display-graphic-p)
+    ;; Icons
+    (use-package nerd-icons
+      :config
+      (when (and (display-graphic-p)
+		 (not (font-installed-p nerd-icons-font-family)))
+	(nerd-icons-install-fonts t)))
+
+    ;; 图标支持
+    (use-package all-the-icons
+      ;; :ensure t
+      :load-path "~/.emacs.d/extensions/all-the-icons"
+      :if (display-graphic-p))
+    )
+#+end_src
+** Load highlight
+#+begin_src emacs-lisp :tangle gui.el
+  (run-with-idle-timer
+   9
+   nil
+   #'(lambda()
+       ;;(use-package highlight-symbol)
+       ;; Highlight the current line
+       (use-package hl-line
+         :ensure nil
+         :hook ((after-init . global-hl-line-mode)
+                ((dashboard-mode eshell-mode shell-mode term-mode vterm-mode) .
+                 (lambda () (setq-local global-hl-line-mode nil)))))
+       ))
+#+end_src
+
+** Load transwin
+#+begin_src emacs-lisp :tangle gui.el
+  ;; Frame transparence
+  (use-package transwin)
+  (lazy-load-global-keys
+   '(
+     ("C-M-9" . transwin-inc)
+     ("C-M-8" . transwin-dec)
+     ("C-M-7" . transwin-toggle)
+     )
+   "transwin"
+   )
+
+  (with-eval-after-load 'transwin
+    (setq transwin-parameter-alpha 'alpha-background))
+
+#+end_src
+
+** Load description
+=F1 + {f/k/d/i/k}= 或者  =C-h {f/k/d/i}= 可以打开相关帮助
+Use ~C-c C-h~ to open the description menu 
+*** Init description
+#+begin_src emacs-lisp :tangle etc/init-description.el
+  (provide 'init-description)
+  ;;;###autoload
+  (with-eval-after-load 'hydra
+    (defhydra my-hydra-describe (:color blue :hint nil)
+      "
+  Describe Something: (q to quit)
+  _a_ all help for everything screen
+  _b_ bindings
+  _c_ char
+  _C_ coding system
+  _f_ function
+  _i_ input method
+  _k_ key briefly
+  _K_ key
+  _l_ language environment
+  _m_ major mode
+  _M_ minor mode
+  _n_ current coding system briefly
+  _N_ current coding system full
+  _o_ lighter indicator
+  _O_ lighter symbol
+  _p_ package
+  _P_ text properties
+  _s_ symbol
+  _t_ theme
+  _v_ variable
+  _w_ where is something defined
+  "
+      ("b" describe-bindings)
+      ("C" describe-categories)
+      ("c" describe-char)
+      ("C" describe-coding-system)
+      ("f" describe-function)
+      ("i" describe-input-method)
+      ("K" describe-key)
+      ("k" describe-key-briefly)
+      ("l" describe-language-environment)
+      ("M" describe-minor-mode)
+      ("m" describe-mode)
+      ("N" describe-current-coding-system)
+      ("n" describe-current-coding-system-briefly)
+      ("o" describe-minor-mode-from-indicator)
+      ("O" describe-minor-mode-from-symbol)
+      ("p" describe-package)
+      ("P" describe-text-properties)
+      ("q" nil)
+      ("a" help)
+      ("s" describe-symbol)
+      ("t" describe-theme)
+      ("v" describe-variable)
+      ("w" where-is))
+    (keymap-global-set "C-x C-h" #'my-hydra-describe/body))
+#+end_src
+*** Set description key
+#+begin_src emacs-lisp :tangle gui.el
+  (lazy-load-global-keys
+  '(
+    ("C-x C-h" . my-hydra-describe/body)
+    )
+  "init-description")
+#+end_src
+** Load mist
+#+begin_src emacs-lisp :tangle gui.el
+  ;; Optimization
+  (setq idle-update-delay 1.0)
+  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+  ;; (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+
+  ;; GUI Environment
+  (when (display-graphic-p)
+    ;; Don't use GTK+ tooltip
+    (when (boundp 'x-gtk-use-system-tooltips)
+      (setq x-gtk-use-system-tooltips nil))
+    ;; scroll-bar
+    (set-scroll-bar-mode 'right)
+    ;; 隐藏垂直滚动条。
+    ;;(modify-all-frames-parameters '((vertical-scroll-bars)))
+    )
+#+end_src
+* TUI
+#+begin_src emacs-lisp :tangle tui.el
+    (defconst suk/is-tui (not (display-graphic-p)))
+    ;; =========================
+    ;; TUI
+    ;; =========================
+    ;; 启动干净
+    (setq inhibit-startup-screen t
+          ring-bell-function 'ignore
+          make-backup-files nil
+          auto-save-default nil
+          frame-inhibit-implied-resize t)
+    ;; 终端友好 UI
+    (when (fboundp 'menu-bar-mode) (menu-bar-mode -1)) 
+    (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+    (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+  
+    ;; UTF-8
+    (set-language-environment "UTF-8")
+    (prefer-coding-system 'utf-8)
+    ;; 行为
+    (column-number-mode 1)
+    ;; 剪贴板（TUI 下也有用）
+    (setq select-enable-clipboard t)
+    (fset 'yes-or-no-p 'y-or-n-p)
+
+    ;; =========================
+    ;; Git（TUI 下也要好用）
+    ;; =========================
+    (unless (package-installed-p 'magit)
+      (package-install 'magit))
+    (global-set-key (kbd "C-x g") #'magit-status)
+    ;; =========================
+    ;; 搜索 / 跳转（TUI 必备）
+    ;; =========================
+    (dolist (pkg '(vertico consult))
+      (unless (package-installed-p pkg)
+        (package-install pkg)))
+    (vertico-mode 1)
+    (global-set-key (kbd "C-c o") #'consult-outline)
+    (global-set-key (kbd "C-c s") #'consult-ripgrep)
+
+    ;;(load "C:/green/emacs-suk/.emacs.d/share/themes/lazycat-theme/lazycat-theme.el")
+    ;;Switch to dark theme:
+    ;;(lazycat-theme-load-dark)
+    ;; Switch to light theme:
+    ;; (lazycat-theme-load-light)
+    ;; (lazycat-theme-toggle)
+    ;;(require 'lazycat-theme)
+    ;;(lazycat-theme-load)
+    ;;(run-with-idle-timer 1 nil #'lazycat-theme-load-with-sunrise)
+
+    (when suk/is-tui  
+      ;; only conole packages
+      ;; 行号在小屏可能太挤，可关
+      (global-display-line-numbers-mode 0)
+      (setq-default line-spacing 0.2)
+      ;; 视觉换行（写书很重要）
+      (global-visual-line-mode 1)
+      ;; 光标明显一点
+      (setq cursor-type 'bar)
+      ;; 主题（终端最稳） 颜色（终端友好）
+      (load-theme 'tango-dark t)
+      ;; 滚动更顺
+      (setq scroll-margin 3
+            scroll-conservatively 101)
+
+      ;; =========================
+      ;; Org（写书核心）
+      ;; =========================
+      (require 'org)
+      (setq 
+       ;; 不折叠太狠
+       org-startup-folded 'content
+       ;; 写书时更像文本
+       org-hide-emphasis-markers t
+       ;; Org 美化不要太激进
+       org-ellipsis " ▼")
+      (defun my/org-writing-mode ()
+        "TUI 下写书专用模式"
+        (interactive)
+        (org-content)
+        (visual-line-mode 1)
+        (setq-local line-spacing 0.2))
+      (global-set-key (kbd "C-c w") #'my/org-writing-mode)
+      (global-set-key (kbd "C-c j") #'org-goto)
+
+
+      )
+
+#+end_src
+* Coding
+其实使用emacs来做工程开发是不太好，用来编写一啲脚本类嘅还好。
+** Setup
+#+begin_src emacs-lisp :tangle etc/init-devtools.el
+  (provide 'init-devtools)
+#+end_src
+** Start command
+#+begin_src emacs-lisp :tangle init.el
+  ;; programming modes
+  (defun suk/enable-devtools()
+       "Enable the develop tools."
+       (require 'init-devtools)
+       )
+#+end_src
+** Load Formatter
+#+begin_src emacs-lisp :tangle etc/init-devtools.el
+
+  ;; format all, formatter for almost languages
+  ;; great for programmers
+  (use-package format-all)
+  (use-package format-all
+    :ensure t
+    :hook (prog-mode . format-all-ensure-formatter)
+    :bind ("C-c f" . #'format-all-buffer))
+#+end_src
+** For Web
+*** Javascript
+#+begin_src emacs-lisp :tangle etc/init-devtools.el
+  ;; JSON
+  (unless (fboundp 'js-json-mode)
+    (use-package json-mode))
+
+  (use-package js2-mode
+    :mode (("\\.js\\'" . js2-minor-mode)
+           ("\\.jsx\\'" . js2-minor-jsx-mode))
+    :interpreter (("node" . js2-minor-mode)
+                  ("node" . js2-minor-jsx-mode))
+    :hook ((js2-minor-mode . (lambda()  (js2-imenu-extras-mode)
+                               (js2-highlight-unused-variables-mode)
+                               )))
+    )
+
+  (use-package nvm)
+  ;; Adds node_modules/.bin directory to `exec_path'
+  (use-package add-node-modules-path
+    :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
+
+
+#+end_src
+*** html
+#+begin_src emacs-lisp :tangle  etc/init-devtools.el
+  (use-package web-mode)
+  (use-package web-mode
+    :mode "\\.\\(php\\|[gj]sp\\|html?\\|vue\\|tsx?\\|jsx?\\)$"
+    :config
+    (setq web-mode-enable-css-colorization t)
+    (setq web-mode-imenu-regexp-list
+	  '(("<\\(h[1-9]\\)\\([^>]*\\)>\\([^<]*\\)" 1 3 ">" nil)
+	    ("^[ \t]*<\\([@a-z]+\\)[^>]*>? *$" 1 " id=\"\\([a-zA-Z0-9_]+\\)\"" "#" ">")
+	    ("^[ \t]*<\\(@[a-z.]+\\)[^>]*>? *$" 1 " contentId=\"\\([a-zA-Z0-9_]+\\)\"" "=" ">")
+	    ;; angular imenu
+	    (" \\(ng-[a-z]*\\)=\"\\([^\"]+\\)" 1 2 "="))))
+
+#+end_src
+
+** Load completion
+*** Load corfu
+#+begin_src emacs-lisp :tangle etc/init-devtools.el
   (use-package corfu
     :custom
     (corfu-cycle t)
@@ -3702,80 +3985,9 @@ Vertico 是与 completion 和 minibuffer 的默认系统紧密集成的，并且
       :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
 
 #+end_src
-** Use company
-*** Setup
-#+begin_src emacs-lisp :tangle etc/init-completion-company.el
-  (use-package company
-    :defer 2
-    :init
-    (setq company-idle-delay nil)  ;; 禁用自动弹出补全
-    :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
-    :hook (after-init . global-company-mode)
-    :init (setq company-tooltip-align-annotations t
-		company-minimum-prefix-length 3
-		company-require-match nil
-		company-dabbrev-ignore-case nil
-		company-dabbrev-downcase nil
-		company-show-numbers t)
-    :config
-    ;;(setq switch-window-input-style 'minibuffer)
-    (setq company-minimum-prefix-length 3)
-    (setq company-show-quick-access t)
-    :bind
-    (:map company-mode-map
-	  ("M-/" .#'company-complete))
-    (:map company-active-map
-	  ("TAB" . #'company-complete-selection)
-	  ("C-j" . company-complete-selection)
-	  ("RET" . company-complete-selection)
-	  ("<return>" . company-complete-selection)
-	  ("M-h" . company-complete-selection)
-	  ("M-H" . company-complete-common)
-	  ("M-s" . company-search-candidates)
-	  ("M-S" . company-filter-candidates)
-	  ("M-n" . company-select-next)
-	  ("M-p" . company-select-previous)
-	  ("C-g" . company-abort))
-    (:map leader-key-map
-	  ("y" . #'company-yasnippet))
-    )
-  (use-package company-box
-    :ensure nil)
-
-  (defun my/company-complete-dwim ()
-  "Do-What-I-Mean 补全：优先用 company，没激活时用 dabbrev。"
-  (interactive)
-  (if (and (boundp 'company-mode) company-mode)
-      (call-interactively #'company-complete)
-    (call-interactively #'dabbrev-expand)))
-
-  (global-set-key (kbd "M-/") #'my/company-complete-dwim)
-
-  
-  (provide 'init-completion-company)
-
-
-#+end_src
-*** 手动触发
-#+begin_src emacs-lisp :tangle  etc/init-completion.el
-  ;;据说跟 lsp-bridge 冲突
-  (setq company-idle-delay nil) 
-  ;; (global-set-key (kbd "M-/") 'company-complete)  ;; 绑定 M-/ 为 company-complete
-  ;; (global-set-key (kbd "M-?") 'dabbrev-expand)    ;; 绑定 M-? 为 dabbrev-expand
-  (lazy-load-global-keys
-   '(
-     ;;("M-/" . company-complete)
-     ("M-/"  . my/company-complete-dwim)
-     ("M-?" . dabbrev-expand)
-
-     )
-   "init-completion-company"
-   )
-#+end_src
-** Use orderless
-#+begin_src emacs-lisp :tangle etc/init-completion.el
-  ;; Optionally use the `orderless' completion style.
-  (use-package orderless)
+*** Load orderless
+#+begin_src emacs-lisp :tangle etc/init-devtools.el
+  ;; Optionally use the `orderless' completion style.)
   (use-package orderless
     :custom
     (completion-styles '(orderless basic))
@@ -3790,451 +4002,24 @@ Vertico 是与 completion 和 minibuffer 的默认系统紧密集成的，并且
       (orderless-regexp (pinyinlib-build-regexp-string str)))
     (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
 #+end_src
-** Use consult
-#+begin_src emacs-lisp :tangle etc/init-completion.el
-  (use-package consult
-    :bind (;; C-c bindings in `mode-specific-map'
-	   ("C-c M-x" . consult-mode-command)
-	   ([remap Info-search]        . consult-info)
-	   ([remap isearch-forward]    . consult-line)
-	   ([remap recentf-open-files] . consult-recent-file)
-
-	   ;; C-x bindings in `ctl-x-map'
-	   ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-	   ("C-x b"   . consult-buffer)              ;; orig. switch-to-buffer
-	   ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-	   ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-	   ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-	   ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-	   ;; Custom M-# bindings for fast register access
-	   ("M-#"     . consult-register-load)
-	   ("M-'"     . consult-register-store)      ;; orig. abbrev-prefix-mark (unrelated)
-	   ("C-M-#"   . consult-register)
-	   ;; Other custom bindings
-	   ("M-y"     . consult-yank-pop)            ;; orig. yank-pop
-	   ;; M-g bindings in `goto-map'
-	   ("M-g e"   . consult-compile-error)
-	   ("M-g g"   . consult-goto-line)           ;; orig. goto-line
-	   ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-	   ("M-g o"   . consult-outline)             ;; Alternative: consult-org-heading
-	   ("M-g m"   . consult-mark)
-	   ("M-g k"   . consult-global-mark)
-	   ("M-g i"   . consult-imenu)
-	   ("M-g I"   . consult-imenu-multi)
-	   ;; ("M-g M"   . consult-man)
-	   ;; ("M-g I"   . consult-info)
-	   ("M-g t"   . consult-theme)
-	   ("M-g h"   . consult-history)
-	   ;; M-s bindings in `search-map'
-	   ("M-s d"   . consult-find)
-	   ("M-s D"   . consult-locate)
-	   ("M-s g"   . consult-grep)
-	   ("M-s G"   . consult-git-grep)
-	   ("M-s r"   . consult-ripgrep)
-	   ("M-s l"   . consult-line)
-	   ("M-s L"   . consult-line-multi)
-	   ("M-s k"   . consult-keep-lines)
-	   ("M-s u"   . consult-focus-lines)
-	   ;; Isearch integration
-	   ("M-s e"   . consult-isearch-history)
-	   ("C-r" .  consult-line)
-	   :map isearch-mode-map
-	   ("M-e"     . consult-isearch-history)
-	   ("M-s e"   . consult-isearch-history)
-	   ("M-s l"   . consult-line)
-	   ("M-s L"   . consult-line-multi)
-	   ) 
-
-    ;; Enable automatic preview at point in the *Completions* buffer. This is
-    ;; relevant when you use the default completion UI.
-    :hook (completion-list-mode . consult-preview-at-point-mode)
-
-    ;; The :init configuration is always executed (Not lazy)
-    :init
-    ;; Optionally configure the register formatting. This improves the register
-    ;; preview for `consult-register', `consult-register-load',
-    ;; `consult-register-store' and the Emacs built-ins.
-    (setq register-preview-delay 0.5
-	  register-preview-function #'consult-register-format)
-
-    ;; Optionally tweak the register preview window.
-    ;; This adds thin lines, sorting and hides the mode line of the window.
-    (advice-add #'register-preview :override #'consult-register-window)
-    :config
-    (use-package consult-flyspell
-      :bind ("M-g s" . consult-flyspell))
-
-    (use-package consult-yasnippet
-      :bind ("M-g y" . consult-yasnippet))
-    ;; Use Consult to select xref locations with preview
-    (with-eval-after-load 'xref
-      (setq xref-show-xrefs-function #'consult-xref
-	    xref-show-definitions-function #'consult-xref))
-    )
-
-
-#+end_src
-** nerd-icons-completion
-#+begin_src emacs-lisp :tangle etc/init-completion.el
+*** Load nerd-icons-completion
+#+begin_src emacs-lisp :tangle etc/init-devtools.el
   (when (display-graphic-p)
     (use-package nerd-icons-completion
       :when (icons-displayable-p)
       :hook (vertico-mode . nerd-icons-completion-mode)))
 #+end_src
-** Misc
-#+begin_src emacs-lisp :tangle  etc/init-completion.el
-  (use-package emacs
-    :init
-    ;; TAB cycle if there are only few candidates
-    (setq completion-cycle-threshold 3)
-
-    ;; Only list the commands of the current modes
-    (when (boundp 'read-extended-command-predicate)
-      (setq read-extended-command-predicate
-	    #'command-completion-default-include-p))
-
-    ;; Enable indentation+completion using the TAB key.
-    ;; `completion-at-point' is often bound to M-TAB.
-    (setq tab-always-indent 'complete))
-
-  ;; 在 Emacs 中，shackle 是一个专门用于控制弹出窗口（pop-up windows）和
-  ;; 缓冲区显示方式的包。它可以帮助你为特定类型的 buffer 制定“在哪个窗口
-  ;; 打开”、“打开时如何分割窗口”、“窗口大小”等规则，从而摆脱 Emacs 默认
-  ;; 情况下可能随机或难以预测的弹出方式。与较早的 popwin 类似，但
-  ;; shackle 提供了更灵活、细粒度的控制。
-  (use-package shackle
-    :init
-    (shackle-mode 1)
-    :config
-    (setq shackle-rules
-	  '((compilation-mode :select t :align 'below :size 0.3)
-	    ("*Help*" :select t :align 'below :size 0.3)
-	    ("*Messages*" :select nil :align 'below :size 0.3)
-	    ("^\\*magit.*\\*$" :regexp t :align 'right :size 0.4 :select t))))
-
-  (unless (display-graphic-p)
-    ;; only conole packages
-    )
-
-#+end_src
-* Tools
-** setup
-#+begin_src emacs-lisp :tangle etc/init-tools.el
-  (provide 'init-tools)
-#+end_src
-Add to suk.el
-#+begin_src emacs-lisp :tangle suk.el
-  (require 'init-tools)
-#+end_src
-** Which Keys
-:PROPERTIES:
-:CUSTOM_ID: setup-which-keys
-:END:
-<<setup-which-keys>>
-*** 设置
-#+begin_src emacs-lisp :tangle etc/init-tools.el
-  ;; Display available keybindings in popup
-
-  (use-package which-key
-    :diminish
-    :bind (("C-h M-m" . which-key-show-major-mode)
-	   (:map help-map ("C-h" . which-key-C-h-dispatch)))
-
-    :hook (after-init . which-key-mode)
-    ;;:custom
-    ;; 弹出方式，底部弹出
-    ;;(which-key-popup-type 'side-window)
-    :init (setq which-key-max-description-length 30
-		which-key-lighter nil
-		which-key-show-remaining-keys t)
-    :config
-    (which-key-mode))
-
-  (use-package which-key-posframe
-    :after (which-key posframe)
-    :config
-    (which-key-posframe-mode 1))
-
-#+end_src
-
-** 英文助手
-#+begin_src emacs-lisp :tangle etc/init-tools.el
-
-  ;;; ### Company en words ###
-  ;;; --- 英文助手
-  (lazy-load-global-keys
-   '(
-     ("M-r" . toggle-company-english-helper) ;英文助手
-     )
-   "company-english-helper")
-#+end_src
-** Treemacs
-A tree view component
-#+begin_src emacs-lisp :tangle etc/init-tools.el
-  (lazy-load-global-keys
-   '(
-     ("<f8>" . treemacs)
-     )
-   "init-treemacs")
-#+end_src
-** NeoTree
-Another tree view component
-#+begin_src emacs-lisp :tangle etc/init-tools.el
-  ;; 设置打开 NeoTree 树形列表展示
-  ;;(use-package neotree)
-  ;;(use-package neotree
-  ;;  :commands (projectile-switch-project neotree-dir)
-  ;;  :config
-  ;;  (setq neo-theme 'ascii           ; NeoTree 图标的样式
-  ;;        neo-window-width 35
-  ;;        neo-window-fixed-size nil) ; 设置 NeoTree 窗口的宽度可以使用鼠标调整
-  ;;  :bind ("C-c o" . projectile-switch-project))
-
-
-#+end_src
-
-** Markdown support
-#+begin_src emacs-lisp :tangle etc/init-tools.el
-  (use-package markdown-mode)
-#+end_src
-
-
-** server
-#+begin_src emacs-lisp :tangle etc/init-tools.el
-  ;;;; The emacsclient call depends on the daemon or `server-mode' (I use the latter)
-  (use-package server
-    :ensure nil
-    :defer 1
-    :config
-    (unless (server-running-p)
-      (server-start)))
-#+end_src
-
-* Coding
-其实使用emacs来做工程开发是不太好，用来编写一啲脚本类嘅还好。
-** Setup
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-  (provide 'init-devtools)
-
-#+end_src
-** Modes
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-
-  ;; programming modes
-  (use-package yaml-mode)
-  (use-package web-mode)
-  (use-package yaml-mode)
-  (use-package js2-mode)
-  (use-package nvm)
-
-#+end_src
-** Use Formatter
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-
-  ;; format all, formatter for almost languages
-  ;; great for programmers
-  (use-package format-all)
-  (use-package format-all
-    :ensure t
-    :hook (prog-mode . format-all-ensure-formatter)
-    :bind ("C-c f" . #'format-all-buffer))
-#+end_src
-** Use hideshow
-#+begin_src emacs-lisp :tangle suk.el
-  ;; 折叠和收缩代码
-  ;; builtin
-  (use-package hideshow
-    :diminish hs-minor-mode
-    :bind
-    (:map hs-minor-mode-map
-	  ("C-c ." . hs-toggle-hiding)
-	  ("C-c ," . hs-show-all)
-	  )
-    :hook (prog-mode . hs-minor-mode)
-    :config
-    ;; Display line counts
-    (defun hs-display-code-line-counts (ov)
-      "Display line counts when hiding codes."
-      (when (eq 'code (overlay-get ov 'hs))
-	(overlay-put ov 'display
-		     (concat
-		      " "
-		      (propertize
-		       (if (char-displayable-p ?⏷) "⏷" "...")
-		       'face 'shadow)
-		      (propertize
-		       (format " (%d lines)"
-			       (count-lines (overlay-start ov)
-					    (overlay-end ov)))
-		       'face '(:inherit shadow :height 0.8))
-		      " "))))
-    (setq hs-set-up-overlay #'hs-display-code-line-counts)
-    )
-
-#+end_src
-** Use copilot
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-
-  (when suk-copilot-enable
-
-    (when sys/win32p 
-      (setq copilot-node-executable "C:\\green\\node-v20.10.0-win-x64\\node.exe")
-      (add-to-list 'load-path "C:\\green\\emacs-suk\\.emacs.d\\extensions\\copilot\\copilot.el")
-
-      )
-    (unless sys/win32p
-      (setq copilot-node-executable "~/.nvm/versions/node/v22.13.0/bin/node")
-      (add-to-list 'load-path "~/.emacs.d/extensions/copilot/copilot.el")
-      )
-
-
-    (use-package copilot)
-    (with-eval-after-load 'copilot
-
-      ;; 全局设置 Copilot 的缩进偏移量为 4
-      (setq copilot-indent-offset 4)
-      ;; 设置 Copilot 缩进偏移量
-      (let ((copilot-offsets
-	     '((python-mode . 4)
-	       (c-mode . 2)
-	       (js-mode . 2)
-	       (bat-mode . 2))))
-	(dolist (pair copilot-offsets)
-	  (let ((mode (car pair))
-		(offset (cdr pair)))
-	    (add-hook mode (lambda () (setq copilot-indent-offset offset))))))
-      (add-hook 'prog-mode-hook 'copilot-mode)
-
-      ;; To customize the behavior of copilot-mode, please check copilot-enable-predicates and copilot-disable-predicates.
-      ;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
-      (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-      (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-      (add-to-list 'copilot-major-mode-alist '("jsonl" . "json"))
-      ;; Increase the maximum character limit for Copilot
-      (setq copilot-max-char 200000) ;; Adjust the value as needed
-      ;; Disable Copilot file size warnings
-      (setq copilot-disable-size-check t) ;; Hypothetical variable
-      ;;;; 忽略 Copilot 的特定警告
-      ;;(add-to-list 'warning-suppress-types '(copilot quail--infer-indentation-offset found no mode-specific indentation offset))
-      ;;;; 设置 Emacs 的最低警告级别为 warning`，忽略 `emergency 级别以下的警告
-      ;; (setq warning-minimum-level :warning)
-      ;; 闭嘴
-      (setq copilot-indent-offset-warning-disable t)
-      )
-
-    ;; Login to Copilot by M-x copilot-login. You can also check the
-    ;; status by M-x copilot-diagnose (NotAuthorized means you don't have
-    ;; a valid subscription).
-    )
-#+end_src
-** For Java
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-  (use-package flycheck :ensure t :init (global-flycheck-mode))
-  (use-package dap-mode
-    :ensure t
-    :after (lsp-mode)
-    :functions dap-hydra/nil
-    :config
-    (require 'dap-java)
-    :bind (:map lsp-mode-map
-		("<f5>" . dap-debug)
-		("M-<f5>" . dap-hydra))
-    :hook ((dap-mode . dap-ui-mode)
-	   (dap-session-created . (lambda (&_rest) (dap-hydra)))
-	   (dap-terminated . (lambda (&_rest) (dap-hydra/nil)))))
-
-  (use-package dap-java :ensure nil)
-
-  (use-package lsp-ui
-    :ensure t
-    :after (lsp-mode)
-    :bind (:map lsp-ui-mode-map
-		([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-		([remap xref-find-references] . lsp-ui-peek-find-references))
-    :init (setq lsp-ui-doc-delay 1.5
-		lsp-ui-doc-position 'bottom
-		lsp-ui-doc-max-width 100
-		))
-
-
-  (use-package lsp-mode
-    :ensure t
-    :hook (
-	   (lsp-mode . lsp-enable-which-key-integration)
-	   (java-mode . #'lsp-deferred)
-	   )
-    :init (setq
-	   lsp-keymap-prefix "C-c l"              ; this is for which-key integration documentation, need to use lsp-mode-map
-	   lsp-enable-file-watchers nil
-	   read-process-output-max (* 1024 1024)  ; 1 mb
-	   lsp-completion-provider :capf
-	   lsp-idle-delay 0.500
-	   )
-    :config
-    (setq lsp-intelephense-multi-root nil) ; don't scan unnecessary projects
-    (with-eval-after-load 'lsp-intelephense
-      (setf (lsp--client-multi-root (gethash 'iph lsp-clients)) nil))
-    (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
-    )
-
-  (use-package lsp-java
-    :ensure t
-    :config (add-hook 'java-mode-hook 'lsp))
-
-  (setenv "JAVA_HOME" "C:/green/jdk-21.0.2")
-#+end_src
-
-** For Web
-*** Javascript
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-  ;; JSON
-  (unless (fboundp 'js-json-mode)
-    (use-package json-mode))
-
-  (use-package js2-mode
-    :mode (("\\.js\\'" . js2-minor-mode)
-	   ("\\.jsx\\'" . js2-minor-jsx-mode))
-    :interpreter (("node" . js2-minor-mode)
-		  ("node" . js2-minor-jsx-mode))
-    :hook ((js2-minor-mode . (lambda()  (js2-imenu-extras-mode)
-			       (js2-highlight-unused-variables-mode)
-			       )))
-    )
-
-  ;; Adds node_modules/.bin directory to `exec_path'
-  (use-package add-node-modules-path
-    :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
-
-
-#+end_src
-*** html
-#+begin_src emacs-lisp :tangle  etc/init-devtools.el
-  (use-package web-mode)
-  (use-package web-mode
-    :mode "\\.\\(php\\|[gj]sp\\|html?\\|vue\\|tsx?\\|jsx?\\)$"
-    :config
-    (setq web-mode-enable-css-colorization t)
-    (setq web-mode-imenu-regexp-list
-	  '(("<\\(h[1-9]\\)\\([^>]*\\)>\\([^<]*\\)" 1 3 ">" nil)
-	    ("^[ \t]*<\\([@a-z]+\\)[^>]*>? *$" 1 " id=\"\\([a-zA-Z0-9_]+\\)\"" "#" ">")
-	    ("^[ \t]*<\\(@[a-z.]+\\)[^>]*>? *$" 1 " contentId=\"\\([a-zA-Z0-9_]+\\)\"" "=" ">")
-	    ;; angular imenu
-	    (" \\(ng-[a-z]*\\)=\"\\([^\"]+\\)" 1 2 "="))))
-
-#+end_src
-
 * GUI or TUI
-#+begin_src emacs-lisp :tangle suk.el
-  ;; ===== 按环境加载 =====
+#+begin_src emacs-lisp :tangle init.el
+  ;; =====GUI or TUI =====
   (if (display-graphic-p)
-      (load "~/.emacs.d/gui.el")
-    (load "~/.emacs.d/tui.el"))
+      (load (expand-file-name "gui.el" suk-emacs-root-dir))
+    (load (expand-file-name "tui.el" suk-emacs-root-dir)))
 #+end_src
 
 * Operation System
-#+begin_src emacs-lisp :tangle suk.el
-  
-  ;; Hanlde minified code
+#+begin_src emacs-lisp :tangle init.el
+    ;; Hanlde minified code
   (if emacs/>=27p (add-hook 'after-init-hook #'global-so-long-mode))
   (when sys/linuxp
     (load-if-exists (expand-file-name "linux.el" suk-emacs-root-dir)))
@@ -4255,12 +4040,6 @@ Another tree view component
 
   ;; (setenv "JAVA_HOME" "/usr/lib/jvm/java-14-openjdk-amd64")
 
-  ;; 开发工具
-  (run-with-idle-timer
-   1 nil
-   #'(lambda()
-       (require 'init-devtools)
-       ))
 
   ;; Open files as another user
   (run-with-idle-timer

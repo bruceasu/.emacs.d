@@ -1,4 +1,5 @@
 (provide 'init)
+
 ;; Define some directories to make future migration easier. 
 ;; user-emacs-directory is usually ~/.emacs.d
 ;; On Windows, ~/ is usually $EMACS_INSTALL_DIR, or the `HOME` variable detected by Emacs
@@ -41,7 +42,7 @@
 (setq auto-mode-case-fold nil)
 
 (unless (file-exists-p suk-emacs-var-dir)
-  (make-directory cache-dir t))
+  (make-directory suk-emacs-var-dir t))
 (setq projectile-cache-file (expand-file-name "projectile.cache" suk-emacs-var-dir))
 
 ;; server
@@ -96,184 +97,29 @@
 ;; (setq custom-file "~/.config/emacs/custom-settings.el")
 ;; (load custom-file t)
 
-(setq gc-cons-threshold most-positive-fixnum)
-(setq gc-cons-percentage 0.8)
-;; Reset the GC setting
-(add-hook 'emacs-startup-hook
-	  (lambda ()
-	    ;; default: 0.8MB
-	    ;;(setq gc-cons-threshold 80000000)
-	    (message "Emacs ready in %s with %d garbage collections."
-		     (format "%.2f seconds"
-			     (float-time
-			      (time-subtract after-init-time before-init-time)))
-		     gcs-done)
-	    (defun my-cleanup-gc ()
-	      "Clean up gc."
-	      (setq gc-cons-threshold  67108864) ; 64M
-	      (setq gc-cons-percentage 0.1) ; original value
-	      (garbage-collect))
-	    (run-with-idle-timer 4 nil #'my-cleanup-gc)
-	    (add-hook 'focus-out-hook 'garbage-collect)))
-
-(defconst sys/win32p
-  (eq system-type 'windows-nt)
-  "Are we running on a WinTel system?")
-
-(defconst sys/linuxp
-  (eq system-type 'gnu/linux)
-  "Are we running on a GNU/Linux system?")
-
-(defconst sys/macp
-  (eq system-type 'darwin)
-  "Are we running on a Mac system?")
-
-(defconst sys/mac-x-p
-  (and (display-graphic-p) sys/macp)
-  "Are we running under X on a Mac system?")
-
-(defconst sys/linux-x-p
-  (and (display-graphic-p) sys/linuxp)
-  "Are we running under X on a GNU/Linux system?")
-
-(defconst sys/cygwinp
-  (eq system-type 'cygwin)
-  "Are we running on a Cygwin system?")
-
-(defconst sys/rootp
-  (string-equal "root" (getenv "USER"))
-  "Are you using ROOT user?")
-
-(defconst emacs/>=25p
-  (>= emacs-major-version 25)
-  "Emacs is 25 or above.")
-
-(defconst emacs/>=26p
-  (>= emacs-major-version 26)
-  "Emacs is 26 or above.")
-
-(defconst emacs/>=27p
-  (>= emacs-major-version 27)
-  "Emacs is 27 or above.")
-
-(defconst emacs/>=28p
-  (>= emacs-major-version 28)
-  "Emacs is 28 or above.")
-
-(defconst emacs/>=29p
-  (>= emacs-major-version 29)
-  "Emacs is 29 or above.")
-
-(defconst emacs/>=30p
-  (>= emacs-major-version 30)
-  "Emacs is 30 or above.")
-
-;; set const
-(defconst custom-template-file
-  (expand-file-name "custom-template.el" user-emacs-directory)
-  "Custom template file of Suk's Emacs.")
-
-(defconst suk-homepage
-  "https://github.com/bruceasu/.emacs.d"
-  "The Github page of this Emacs config.")
-
-
-(defgroup suk nil
-  "suk Emacs customizations."
-  :group 'convenience
-  :link '(url-link :tag "Homepage" "https://github.com/bruceasu/.emacs.d"))
-
-(defcustom org-roam-directory (expand-file-name "RoamNotes" user-home-dir)
-  "The org roam directory."
-  :group 'suk
-  :type 'string)
-
-(defcustom org-files-directory (expand-file-name "org" user-home-dir)
-  "The org roam directory."
-  :group 'suk
-  :type 'string)
-
-(defcustom my-org-inline-css-file "~/.emacs.d/share/my-org-style-min.css"
-  "The org css style file."
-  :group 'suk
-  :type 'string)
-
-(defcustom suk-rime t
-  "Display use emacs rime or not."
-  :group 'suk
-  :type 'boolean)
-
-(defcustom suk-copilot-enable nil
-  "Enable copilot mode"
-  :group 'suk
-  :type 'boolean)
-
-;; Load `custom-file'
-;; If it doesn't exist, copy from the template, then load it.
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-
-(let ((custom-template-file
-       (expand-file-name "custom-template.el" user-emacs-directory)))
-  (if (and (file-exists-p custom-template-file)
-	   (not (file-exists-p custom-file)))
-      (copy-file custom-template-file custom-file)))
-
-(load-file custom-file)
-;;(if (file-exists-p custom-file)
-;;    (load custom-file))
-
-;; Load `custom-post.el'
-;; Put personal configurations to override defaults here.
-(add-hook 'after-init-hook
-	  (lambda ()
-	    (let ((file
-		   (expand-file-name "custom-post.el" user-emacs-directory)))
-	      (if (file-exists-p file)
-		  (load file)))))
-
 (require 'basic-function)
 
-;; This sets up the load path so that we can override it
-(setq warning-suppress-log-types '((package reinitialization)))
-;; 指定ELPA目录
-(setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
-(add-subdirs-to-load-path package-user-dir t)
-
-(require 'package)
-
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/"))
-(add-to-list 'package-archives
-             '("org" . "https://orgmode.org/elpa/"))
-(add-to-list 'package-archives
-             '("gnu" . "https://elpa.gnu.org/packages/"))
-(add-to-list 'package-archives
-             '("nongnu" . "https://elpa.nongnu.org/nongnu/"))
-
-(setq package-check-signature nil) ; 个别时候会出现签名校验失败
-
-(unless (bound-and-true-p package--initialized)
-  (package-initialize))
-
-;; Should set before loading `use-package'
-;; make use-package default behavior better
-;; with `use-package-always-ensure' you won't need ":ensure t" all the time
-;; with `use-package-always-defer' you won't need ":defer t" all the time
-(setq use-package-always-ensure t
-      use-package-always-defer t
-      use-package-enable-imenu-support t
-      use-package-expand-minimally t)
-
-;; Setup `use-package'
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package)
-  )
-
-(require 'use-package)
-
-;; Compatibility
-(use-package compat :demand t)
+(load-if-exists (expand-file-name "core.el" suk-emacs-root-dir))
 
 (load-if-exists (expand-file-name "suk.el" suk-emacs-root-dir))
 (unless (server-running-p) (server-start))
+
+;; programming modes
+(defun suk/enable-devtools()
+     "Enable the develop tools."
+     (require 'init-devtools)
+     )
+
+;; =====GUI or TUI =====
+(if (display-graphic-p)
+    (load (expand-file-name "gui.el" suk-emacs-root-dir))
+  (load (expand-file-name "tui.el" suk-emacs-root-dir)))
+
+;; Hanlde minified code
+(if emacs/>=27p (add-hook 'after-init-hook #'global-so-long-mode))
+(when sys/linuxp
+  (load-if-exists (expand-file-name "linux.el" suk-emacs-root-dir)))
+(when sys/win32p
+  (load-if-exists (expand-file-name "windows.el" suk-emacs-root-dir)))
+(when sys/macp
+  (load-if-exists (expand-file-name "mac.el" suk-emacs-root-dir)))

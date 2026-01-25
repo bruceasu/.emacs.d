@@ -168,7 +168,7 @@
          entry (file+headline ,(expand-file-name "gtd.org" org-files-directory) "Tasks")
          "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
         ("i" "Inbox"
-         entry (file ,(expand-file-name "Inbox.org" org-files-directory))
+         entry (file ,(expand-file-name "inbox.org" org-files-directory))
          "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
         ("r" "Respond"
          entry (file ,(expand-file-name "gtd.org" org-files-directory))
@@ -260,9 +260,9 @@
 (my-defshortcut ?g (expand-file-name "gtd.org" org-files-directory))
 (my-defshortcut ?w (expand-file-name "work.org" org-files-directory))
 (my-defshortcut ?f (expand-file-name "finished.org" org-files-directory))
-(my-defshortcut ?c (expand-file-name "cancel.org" org-files-directory))
+(my-defshortcut ?c (expand-file-name "archive.org" org-files-directory))
 (my-defshortcut ?t (expand-file-name "trash.org" org-files-directory))
-(my-defshortcut ?n (expand-file-name "notes.org" org-files-directory))
+(my-defshortcut ?n (expand-file-name "inbox.org" org-files-directory))
 (my-defshortcut ?j (expand-file-name "journal.org" org-files-directory))
 (my-defshortcut ?N "~/notes")
 ;; 额外定义的位置

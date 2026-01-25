@@ -2,12 +2,6 @@
 
 ;; (setenv "JAVA_HOME" "/usr/lib/jvm/java-14-openjdk-amd64")
 
-;; 开发工具
-(run-with-idle-timer
- 1 nil
- #'(lambda()
-     (require 'init-devtools)
-     ))
 
 ;; Open files as another user
 (run-with-idle-timer

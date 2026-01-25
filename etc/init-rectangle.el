@@ -1,7 +1,6 @@
 (provide 'init-rectangle)
 
-(use-package hydra
-  :ensure t)
+(use-package hydra :ensure t)
 
 (defhydra hydra-rectangle (:hint nil)
   "

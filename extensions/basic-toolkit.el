@@ -104,7 +104,23 @@ Optional argument REVERSE default is delete forward, if reverse is non-nil delet
   "Delete chars backward use `hungry' style."
   (interactive)
   (delete-chars-hungry-forward t))
-
+  
+;; 自定义删除到字符函数
+(defun suk/delete-to-char (char)
+    "删除光标位置到下一个出现的字符 CHAR 之间的所有内容（不包括 CHAR 本身）。"
+    (interactive "cDelete to char: ")
+    (let ((start (point))
+	  (end (progn
+		 (search-forward (char-to-string char) (line-end-position) t))))
+      (if end
+	  (progn
+	    (goto-char end)
+	    (delete-region start (- end 1))
+	    (message "Deleted from %d to %d" start (- end 1)))
+	(progn
+	  (delete-region start (line-end-position))
+	  (message "Character '%c' not found. Deleted to end of line." char)))))
+	  
 (defun reverse-chars-in-region (start end)
   "Reverse the region character by character without reversing lines."
   (interactive "r")

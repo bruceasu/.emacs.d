@@ -1,0 +1,61 @@
+(provide 'init-toggles)
+(when sys/is-gui
+  (with-eval-after-load 'pretty-hydra
+    ;; Global toggles         
+    (with-no-warnings
+      (pretty-hydra-define+ toggles-hydra (:title (pretty-hydra-title "Toggles" 'faicon "nf-fa-toggle_on") :color amaranth :quit-key ("q" "C-g"))
+        ("Basic"
+         (("n" (cond ((fboundp 'display-line-numbers-mode)
+                      (display-line-numbers-mode (if display-line-numbers-mode -1 1)))
+                     ((fboundp 'gblobal-linum-mode)
+                      (global-linum-mode (if global-linum-mode -1 1))))
+           "line number"
+           :toggle (or (bound-and-true-p display-line-numbers-mode)
+                       (bound-and-true-p global-linum-mode)))
+          ("i" global-aggressive-indent-mode "aggressive indent" :toggle t)
+          ("d" global-hungry-delete-mode "hungry delete" :toggle t)
+          ("e" electric-pair-mode "electric pair" :toggle t)
+          ("c" flyspell-mode "spell check" :toggle t)
+          ("s" prettify-symbols-mode "pretty symbol" :toggle t)
+          ("l" global-page-break-lines-mode "page break lines" :toggle t)
+          ("B" display-battery-mode "battery" :toggle t)
+          ("T" display-time-mode "time" :toggle t)
+          ("a" abbrev-mode "abrev" :toggle t)
+          ("F" auto-fill-mode "auto fill" :toggle t)
+          ("m" doom-modeline-mode "modern mode-line" :toggle t)
+          ("t" toggle-truncate-lines "truncate lines" :toggle t)
+          ("u" toggle-company-ispell "Company Ispell" :toggle t))
+         "Highlight"
+         (("h l" global-hl-line-mode "line" :toggle t)
+          ("h p" show-paren-mode "paren" :toggle t)
+          ("h s" symbol-overlay-mode "symbol" :toggle t)
+          ("h r" rainbow-mode "rainbow" :toggle t)
+          ("h w" (setq-default show-trailing-whitespace (not show-trailing-whitespace))
+           "whitespace" :toggle show-trailing-whitespace)
+          ("h d" rainbow-delimiters-mode "delimiter" :toggle t)
+          ("h i" highlight-indent-guides-mode "indent" :toggle t)
+          ("h t" global-hl-todo-mode "todo" :toggle t))
+         "Program"
+         (("f" flymake-mode "flymake" :toggle t)
+          ("O" hs-minor-mode "hideshow" :toggle t)
+          ("U" subword-mode "subword" :toggle t)
+          ("w" whitespace-mode "whitespace" :toggle t)
+          ("W" which-function-mode "which function" :toggle t)
+          ("E" toggle-debug-on-error "debug on error" :toggle (default-value 'debug-on-error))
+          ("Q" toggle-debug-on-quit "debug on quit" :toggle (default-value 'debug-on-quit))
+          ("v" global-diff-hl-mode "gutter" :toggle t)
+          ("V" diff-hql-flydiff-mode "live gutter" :toggle t)
+          ("M" diff-hl-margin-mode "margin gutter" :toggle t)
+          ("D" diff-hl-dired-mode "dired gutter" :toggle t))
+         ))
+      (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
+      (keymap-set leader-key "t" #'toggles-hydra/body)
+      )))
+
+(when sys/is-tui
+  (defun toggles-hydra/body()
+    "Toggles"
+    (interactive)
+    (message "Not support in TUI")
+    )
+  )
