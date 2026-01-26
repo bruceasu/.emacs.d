@@ -1,4 +1,4 @@
-# -*- coding: utf-8
+﻿# -*- coding: utf-8
 #+OPTIONS: ^:{}
 #+TITLE: SUK 嘅 EMACS 配置
 #+STARTUP: showeverything
@@ -41,6 +41,22 @@ eval-buffer= to load your changes.
 If you want to dive deeper into how a function works, you can use =M-x
 edebug-defun= to debug the function and then call it. You can learn
 more in the [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Edebug.html][Emacs Lisp]] manual.
+This file reads like a handbook:
+
+- Start with the shared startup and core wiring.
+- Then read the Org handbook for task flow and writing tools.
+- After that, scan the UI handbook for display and interaction choices.
+- Finish with the platform handbook for Linux, Windows, and macOS details.
+
+The layout is split into a few clear output files:
+
+- `core.el` for shared startup and package wiring.
+- `gui.el` for GUI-only appearance and frame helpers.
+- `tui.el` for terminal-only display tweaks.
+- `linux.el` / `windows.el` / `mac.el` for platform differences.
+- `extensions/init-coding.el` for coding loaders and language wiring.
+- `etc/init-org.el` plus `etc/init-org-*.el` for Org workflows.
+- `suk.el` for personal workflows that are not tied to one UI.
 <<starting-up>>
 
 #+begin_src emacs-lisp :tangle early-init.el :eval never-export
@@ -158,8 +174,7 @@ Create init.el file
   (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
   ;; Diary
   (setq diary-file (concat user-home-dir "/diary"))
-  ;; Clear to avoid analyzing files when loading remote files.
-  (setq file-name-handler-alist nil)
+  ;; Keep file handlers for remote and compressed files.
   ;; Don't pass case-insensitive to `auto-mode-alist'
   (setq auto-mode-case-fold nil)
 
@@ -438,7 +453,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   ;; This sets up the load path so that we can override it
   (setq warning-suppress-log-types '((package reinitialization)))
   ;; 指定ELPA目录
-  (setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
+  ;; (setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
   (add-subdirs-to-load-path package-user-dir t)
 
   (require 'package)
@@ -801,15 +816,7 @@ Define some usefull functions of buffers.
 *** Load buffer autorevert
 #+begin_src emacs-lisp :tangle core.el
   ;; Automatically reload files was modified by external program
-  (run-with-idle-timer
-   1 nil
-   #'(lambda()
-       (use-package autorevert)
-       (use-package autorevert
-	 :ensure nil
-	 :diminish
-	 :defer 2
-	 :hook (after-init . global-auto-revert-mode))))
+  (run-with-idle-timer 1 nil #'global-auto-revert-mode 1)
 #+end_src
 *** Load auto save
 #+begin_src emacs-lisp :tangle core.el
@@ -1266,7 +1273,7 @@ Define some usefull functions of buffers.
 	   ("M-s e"   . consult-isearch-history)
 	   ("M-s l"   . consult-line)
 	   ("M-s L"   . consult-line-multi)
-	   ) 
+	   )
 
     ;; Enable automatic preview at point in the *Completions* buffer. This is
     ;; relevant when you use the default completion UI.
@@ -1955,52 +1962,61 @@ Vertico 是与 completion 和 minibuffer 的默认系统紧密集成的，并且
 ** Load company
 *** Setup
 #+begin_src emacs-lisp :tangle etc/init-completion-company.el
+  ;;; init-completion-company.el --- Completion support -*- lexical-binding: t; -*-
+
+  ;;; Code:
+
   (provide 'init-completion-company)
-  (use-package company
-    :defer 2
-    :init
-    (setq company-idle-delay nil)  ;; 禁用自动弹出补全
-    :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
-    :hook (after-init . global-company-mode)
-    :init (setq company-tooltip-align-annotations t
-                company-minimum-prefix-length 3
-                company-require-match nil
-                company-dabbrev-ignore-case nil
-                company-dabbrev-downcase nil
-                company-show-numbers t)
-    :config
-    ;;(setq switch-window-input-style 'minibuffer)
-    (setq company-minimum-prefix-length 3)
-    (setq company-show-quick-access t)
-    :bind
-    (:map company-mode-map
-          ("M-/" .#'company-complete))
-    (:map company-active-map
-          ("TAB" . #'company-complete-selection)
-          ("C-j" . company-complete-selection)
-          ("RET" . company-complete-selection)
-          ("<return>" . company-complete-selection)
-          ("M-h" . company-complete-selection)
-          ("M-H" . company-complete-common)
-          ("M-s" . company-search-candidates)
-          ("M-S" . company-filter-candidates)
-          ("M-n" . company-select-next)
-          ("M-p" . company-select-previous)
-          ("C-g" . company-abort))
-    (:map leader-key-map
-          ("y" . #'company-yasnippet))
-    )
-  (use-package company-box
-    :ensure nil)
 
   (defun my/company-complete-dwim ()
-  "Do-What-I-Mean 补全：优先用 company，没激活时用 dabbrev。"
-  (interactive)
-  (if (and (boundp 'company-mode) company-mode)
-      (call-interactively #'company-complete)
-    (call-interactively #'dabbrev-expand)))
+    "Complete with company when available, otherwise fall back to dabbrev."
+    (interactive)
+    (if (and (boundp 'company-mode) company-mode)
+        (call-interactively #'company-complete)
+      (call-interactively #'dabbrev-expand)))
+
+  (when (locate-library "company")
+    (use-package company
+      :defer 2
+      :defines (company-dabbrev-ignore-case company-dabbrev-downcase)
+      :init
+      (setq company-idle-delay nil
+            company-tooltip-align-annotations t
+            company-minimum-prefix-length 3
+            company-require-match nil
+            company-dabbrev-ignore-case nil
+            company-dabbrev-downcase nil
+            company-show-numbers t)
+      :config
+      (unless (bound-and-true-p global-corfu-mode)
+        (global-company-mode 1))
+      (setq company-minimum-prefix-length 3)
+      (setq company-show-quick-access t)
+      :bind
+      (:map company-mode-map
+            ("M-/" . company-complete))
+      (:map company-active-map
+            ("TAB" . company-complete-selection)
+            ("C-j" . company-complete-selection)
+            ("RET" . company-complete-selection)
+            ("<return>" . company-complete-selection)
+            ("M-h" . company-complete-selection)
+            ("M-H" . company-complete-common)
+            ("M-s" . company-search-candidates)
+            ("M-S" . company-filter-candidates)
+            ("M-n" . company-select-next)
+            ("M-p" . company-select-previous)
+            ("C-g" . company-abort))
+      (:map leader-key-map
+            ("y" . company-yasnippet))))
+
+  (when (locate-library "company-box")
+    (use-package company-box
+      :ensure nil))
 
   (global-set-key (kbd "M-/") #'my/company-complete-dwim)
+
+  ;;; init-completion-company.el ends here
 #+end_src
 *** Set company keys
 #+begin_src emacs-lisp :tangle  gui.el
@@ -2259,7 +2275,7 @@ defined keymap-XXX series of implementations.
     ;; (keymap-global-set <key> <cmmd>)
     (keymap-set global-map "C-<f11>" #'toggle-frame-fullscreen)       ;; 快捷键 C-<f11> 用于切换全屏模式
     (keymap-set global-map "M-s-<return>" #'toggle-frame-fullscreen)  ;; 快捷键 M-s-<return> 也用于切换全屏模式
-    ) 
+    )
   (unless emacs/>=29p
     (global-set-key (kbd "C-<f11>") 'toggle-frame-fullscreen)      ;; 快捷键 C-<f11> 用于切换全屏模式
     (global-set-key (kbd "M-s-<return>") 'toggle-frame-fullscreen)
@@ -2327,93 +2343,127 @@ defined keymap-XXX series of implementations.
      "C-z"))
 #+end_src
 ** Load Treemacs
-A tree view component
+Treemacs is the tree view for project navigation.
+*** Windows helper
+#+begin_src emacs-lisp :tangle etc/init-treemacs-windows.el
+  ;;; init-treemacs-windows.el --- Windows helpers for treemacs -*- lexical-binding: t; -*-
+
+  ;;; Code:
+
+  (defun suk/treemacs-windows-python-executable ()
+    "Return a usable Python executable for Treemacs on Windows."
+    (seq-some
+     (lambda (name)
+       (when-let ((path (executable-find name)))
+         ;; Windows Store app aliases are placeholders and cannot be used by
+         ;; Treemacs as child processes.
+         (unless (string-match-p "/Microsoft/WindowsApps/"
+                                 (subst-char-in-string ?\\ ?/ path))
+           path)))
+     '("python.exe" "python3.exe" "python")))
+
+  (defun suk/treemacs-windows-git-mode ()
+    "Return a conservative Treemacs Git mode for Windows."
+    (cond
+     ((executable-find "git.exe") 'simple)
+     ((executable-find "git") 'simple)
+     (t nil)))
+
+  (provide 'init-treemacs-windows)
+
+  ;;; init-treemacs-windows.el ends here
+#+end_src
 *** Init treemacs
 #+begin_src emacs-lisp :tangle etc/init-treemacs.el
-  ;; init-treemacs.el --- Initialize treemacs.	-*- lexical-binding: t -*-
+  ;; init-treemacs.el --- Initialize treemacs. -*- lexical-binding: t -*-
 
   ;;; Commentary:
   ;;
-  ;; Treemacs: A tree layout file explorer.
+  ;; Treemacs: a tree layout file explorer.
   ;;
 
   ;;; Code:
 
-  ;; 设置 Python 可执行文件路径
-  (when sys/win32p
-    (setq python-shell-interpreter "c:/green/Python311/python.exe")
-    (setq treemacs-python-executable "c:/green/Python311/python.exe")
-    )
+  (require 'basic-function)
 
-  ;; A tree layout file explorer
-  (use-package treemacs
-    :commands (treemacs-follow-mode
-               treemacs-filewatch-mode
-               treemacs-git-mode)
-    :custom-face
-    (cfrs-border-color ((t (:inherit posframe-border))))
-    :bind (([f8]        . treemacs)
-           ("M-0"       . treemacs-select-window)
-           ("C-x t 1"   . treemacs-delete-other-windows)
-           ("C-x t t"   . treemacs)
-           ("C-x t b"   . treemacs-bookmark)
-           ("C-x t C-t" . treemacs-find-file)
-           ("C-x t M-t" . treemacs-find-tag)
-           :map treemacs-mode-map
-           ([mouse-1]   . treemacs-single-click-expand-action))
-    :config
-    (setq treemacs-collapse-dirs           (if treemacs-python-executable 3 0)
-          treemacs-missing-project-action  'remove
-          treemacs-sorting                 'alphabetic-asc
-          treemacs-follow-after-init       t
-          treemacs-width                   30
-          treemacs-no-png-images           nil)
+  (when (and (boundp 'sys/win32p) sys/win32p)
+    (require 'init-treemacs-windows nil t))
 
-    (treemacs-follow-mode t)
-    (treemacs-filewatch-mode t)
-    (when sys/win32p
-      (pcase (cons (not (null (executable-find "git.exe")))
-                   (not (null (executable-find "c:/green/Python311/python.exe"))))
-        (`(t . t)
-         (treemacs-git-mode 'deferred))
-        (`(t . _)
-         (treemacs-git-mode 'simple)))
-      )
-    (unless sys/win32p
-      (pcase (cons (not (null (executable-find "git")))
-                   (not (null (executable-find "python3"))))
-        (`(t . t)
-         (treemacs-git-mode 'deferred))
-        (`(t . _)
-         (treemacs-git-mode 'simple)))
-      )
+  (defun suk/treemacs-python-executable ()
+    "Return a usable Python executable for Treemacs, or nil."
+    (if (and (boundp 'sys/win32p) sys/win32p)
+        (and (fboundp 'suk/treemacs-windows-python-executable)
+             (suk/treemacs-windows-python-executable))
+      (seq-some #'executable-find '("python3" "python"))))
 
-    (with-eval-after-load 'nerd-icons
-          (use-package treemacs-nerd-icons
-            :demand t
-            :when (icons-displayable-p)
-            :custom-face
-            (treemacs-nerd-icons-root-face ((t (:inherit nerd-icons-green :height 1.3))))
-            (treemacs-nerd-icons-file-face ((t (:inherit nerd-icons-dsilver))))
-            :config (treemacs-load-theme "nerd-icons"))
-      )
+  (when (locate-library "treemacs")
+    (use-package treemacs
+      :demand t
+      :custom-face
+      (cfrs-border-color ((t (:inherit posframe-border))))
+      :bind (([f8]        . treemacs)
+             ("M-0"       . treemacs-select-window)
+             ("C-x t 1"   . treemacs-delete-other-windows)
+             ("C-x t t"   . treemacs)
+             ("C-x t b"   . treemacs-bookmark)
+             ("C-x t C-t" . treemacs-find-file)
+             ("C-x t M-t" . treemacs-find-tag)
+             :map treemacs-mode-map
+             ([mouse-1]   . treemacs-single-click-expand-action))
+      :config
+      (setq treemacs-python-executable (suk/treemacs-python-executable)
+            treemacs-collapse-dirs     (if treemacs-python-executable 3 0)
+            treemacs-missing-project-action  'remove
+            treemacs-sorting                 'alphabetic-asc
+            treemacs-follow-after-init       t
+            treemacs-width                   30
+            treemacs-no-png-images           nil)
 
-    (with-eval-after-load 'magit
+      (treemacs-follow-mode t)
+      ;; Windows file watching is more fragile, so keep it conservative.
+      (if (and (boundp 'sys/win32p) sys/win32p)
+          (when (fboundp 'suk/treemacs-windows-git-mode)
+            (let ((mode (suk/treemacs-windows-git-mode)))
+              (when mode
+                (treemacs-git-mode mode))))
+        (treemacs-filewatch-mode t)
+        (pcase (cons (not (null (executable-find "git")))
+                     (not (null (executable-find "python3"))))
+          (`(t . t)
+           (treemacs-git-mode 'deferred))
+          (`(t . _)
+           (treemacs-git-mode 'simple))))
+
+      (when (and (fboundp 'icons-displayable-p)
+                 (icons-displayable-p)
+                 (locate-library "treemacs-nerd-icons"))
+        (use-package treemacs-nerd-icons
+          :demand t
+          :custom-face
+          (treemacs-nerd-icons-root-face ((t (:inherit nerd-icons-green :height 1.3))))
+          (treemacs-nerd-icons-file-face ((t (:inherit nerd-icons-dsilver))))
+          :config
+          (treemacs-load-theme "nerd-icons")))
+
+      (when (locate-library "treemacs-magit")
+        (with-eval-after-load 'magit
           (use-package treemacs-magit
             :hook ((magit-post-commit
                     git-commit-post-finish
                     magit-post-stage
                     magit-post-unstage)
-                   . treemacs-magit--schedule-update))
-      )
+                   . treemacs-magit--schedule-update))))
 
+      (when (locate-library "treemacs-tab-bar")
+        (use-package treemacs-tab-bar
+          :ensure t
+          :demand t
+          :config
+          (treemacs-set-scope-type 'Tabs)))))
 
-    (use-package treemacs-tab-bar
-      :ensure t
-      :demand t
-      :config (treemacs-set-scope-type 'Tabs)))
+  (when (fboundp 'treemacs-project-follow-mode)
+    (add-hook 'treemacs-mode-hook #'treemacs-project-follow-mode))
 
-  (add-hook 'treemacs-mode-hook 'treemacs-project-follow-mode)
   (provide 'init-treemacs)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2422,11 +2472,11 @@ A tree view component
 *** Set treemacs key
 #+begin_src emacs-lisp :tangle suk.el
   (when sys/is-gui
-  (lazy-load-global-keys
-   '(
-     ("<f8>" . treemacs)
-     )
-   "init-treemacs"))
+    (lazy-load-global-keys
+     '(
+       ("<f8>" . treemacs)
+       )
+     "init-treemacs"))
 #+end_src
 
 ** Set toggles key
@@ -2538,7 +2588,12 @@ Another tree view component
     )
 #+end_src
 
-* Org
+* Org Handbook
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no
+:END:
+This section keeps the historical Org notes as documentation only.
+The live entry point is split across `etc/init-org.el` and `etc/init-org-*.el`.
 ** Load base settings
 #+begin_src emacs-lisp :tangle suk.el
   ;;(message org-files-directory)
@@ -2584,18 +2639,22 @@ Another tree view component
 
   ;; 运行 Org Babel Tangle 命令：`M-x org-babel-tangle`。
   ;; 从 org 文件中生成 el 配置文件
-  ;; 保存 user-emacs-directory(~/.emacs.d/) 文件下的 org 时，
-  ;; 导出文件中 elisp 代码到文件中。
+  ;; Regenerate explicitly because README.org and all generated files may be
+  ;; edited independently during the incremental migration.
   (defun suk/org-babel-tangle-config ()
-    (when (string-equal (file-name-directory (buffer-file-name))
-                        (expand-file-name user-emacs-directory)) ; ~/.emacs.d
+    (interactive)
+    (when (and buffer-file-name
+               (file-equal-p buffer-file-name
+                             (expand-file-name "README.org" user-emacs-directory)))
       (let ((org-confirm-babel-evaluate nil))
         (org-babel-tangle))))
 
   (add-hook 'org-mode-hook
             (lambda ()
-              (add-hook 'after-save-hook #'suk/org-babel-tangle-config)))
-
+              (when (and buffer-file-name
+                         (file-equal-p buffer-file-name
+                                       (expand-file-name "README.org" user-emacs-directory)))
+                (add-hook 'after-save-hook #'suk/org-babel-tangle-config nil t))))
 
     ;;;###autoload
   (defun suk/load-theme-org()
@@ -2612,6 +2671,15 @@ Another tree view component
   
 
 #+end_src
+** Load Org modules
+The files in =etc/init-org*.el= are maintained directly. The examples below
+are reference material and are not tangled into =suk.el=. Edit the module
+files to change the live Org workflow.
+
+#+begin_src emacs-lisp :tangle suk.el
+  (require 'init-org)
+#+end_src
+
 ** Usally commands
 *** 标题重构技巧
 - M-↑ / M-↓：移动技术点
@@ -2620,7 +2688,7 @@ Another tree view component
 - C-c C-x C-y：粘贴子树
 
 *** 标题级搜索
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   ;; 1. Outline path Jump
   (setq org-goto-interface 'outline-path-completion)
   ;; C-c C-j → 秒跳技术点
@@ -2630,7 +2698,7 @@ Another tree view component
 #+end_src
 
 ** Load GTD agenda
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   ;; GTD
   (setq org-use-fast-todo-selection t)
   ;; ! 的含义是记录某项更改为状态的时间。我不把这个添加到完成的状态，是因为它们已
@@ -2721,14 +2789,14 @@ Another tree view component
   想让它们保持在原处却不再显示，则可以用 C-c C-x a。另外，也别忘了通过
   org-archive-location 配置好归档文件或归档标题，以便管理归档内容更加
   顺畅。
-#+begin_src emacs-elisp :tangle suk.el
+#+begin_src emacs-elisp :tangle no
   ;; default is "%s_archive::", I want to archive in a sginle file.
   ;; use C-u C-c C-x C-a to change
   (setq org-archive-location "archive.org::* Archived Tasks")
 #+end_src
 
 ** Load capture
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   ;; capture template
   (setq org-default-notes-file (expand-file-name "index.org" org-files-directory))
   ;; Capture templates for: TODO tasks, Notes,
@@ -2763,7 +2831,7 @@ Another tree view component
           ))
 #+end_src
 ** Load refile
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Refile settings
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2785,7 +2853,7 @@ Another tree view component
 #+end_src
 
 *** Quick asscess
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   ;; Registers allow you to jump to a file or other location quickly.
   ;; To jump to a register, use C-x r j followed by the letter of the register.
   ;; Using registers for all these file shortcuts is probably a bit of
@@ -2848,7 +2916,7 @@ Another tree view component
 
 #+end_src
 ** Load exporter
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; EXPORTER
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2922,7 +2990,8 @@ Another tree view component
             (lambda ()
               (set-fill-column 70)
               (turn-on-font-lock)
-              (load-org-font)
+              (when (and (display-graphic-p) (fboundp 'load-org-font))
+                (load-org-font))
               ))
   (defun my-execute-function-and-shell-command-async ()
     "执行自定义函数逻辑，然后异步调用外部 shell 命令，传递当前文件名的扩展名替换为 .html 的路径作为参数。"
@@ -2980,7 +3049,7 @@ Another tree view component
 Org → HTML → PDF
 
 **** Emacs：导出 HTML
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   
 (require 'ox-html)
 ;; 导出：
@@ -3386,7 +3455,7 @@ org/
 
   #+end_src
 ** Load attachments
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;; Attachments
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3418,12 +3487,12 @@ org/
 
 #+end_src
 ** Laod toc-org
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   ;; org-mode
   (use-package toc-org)
 #+end_src
 ** Use hydra
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   (with-eval-after-load 'pretty-hydra
     (pretty-hydra-define+ hydra-global-org
       (:color blue :quit-key "q" :title "Org 操作")
@@ -3454,7 +3523,7 @@ org/
 #+end_src
 
 ** Load org-modern
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   ;;Prettify UI
   (when sys/is-gui
     (use-package org-modern
@@ -3470,7 +3539,7 @@ org/
 
 #+end_src
 ** Load org-roam
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   (when sys/is-gui
     (use-package org-roam
       :ensure t
@@ -3490,6 +3559,9 @@ org/
       :bind (("C-c n l" . org-roam-buffer-toggle)
              ("C-c n f" . org-roam-node-find)
              ("C-c n i" . org-roam-node-insert)
+             ("C-c n t" . org-roam-tag-add)
+             ("C-c n a" . org-roam-alias-add)
+             ("C-c n o" . org-id-get-create)
              :map org-mode-map
              ("C-M-i" . completion-at-point)
              :map org-roam-dailies-map
@@ -3514,7 +3586,7 @@ org/
     )
 #+end_src
 ** Add shortcuts
-#+begin_src emacs-lisp :tangle suk.el
+#+begin_src emacs-lisp :tangle no
   ;;; --- 笔记管理和组织
   (define-prefix-command 'F9-map)
   (global-set-key (kbd "<f9>") 'F9-map)
@@ -3545,7 +3617,13 @@ org/
 
 #+end_src
 
-* GUI
+* UI Handbook
+UI 只分成两个运行环境：
+
+- `GUI` 只放图形界面才该加载的功能。
+- `TUI` 只放纯终端环境才有意义的功能。
+
+** GUI / Graphical-only
 :PROPERTIES:
 :CUSTOM_ID: setup-ui
 :END:
@@ -3794,7 +3872,7 @@ Use ~C-c C-h~ to open the description menu
     ;;(modify-all-frames-parameters '((vertical-scroll-bars)))
     )
 #+end_src
-* TUI
+** TUI / Terminal-only
 #+begin_src emacs-lisp :tangle tui.el
     (defconst suk/is-tui (not (display-graphic-p)))
     ;; =========================
@@ -3885,139 +3963,434 @@ Use ~C-c C-h~ to open the description menu
       )
 
 #+end_src
-* Coding
-其实使用emacs来做工程开发是不太好，用来编写一啲脚本类嘅还好。
-** Setup
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-  (provide 'init-devtools)
-#+end_src
-** Start command
+* Coding Handbook
+工程开发主要分成几个层次：
+
+- `extensions/init-coding.el` 作为总入口，负责加载 coding 相关子模块。
+- `extensions/init-coding-web.el` 放 Web、JavaScript 和 completion 基础。
+- `extensions/init-coding-lsp.el` 使用 Emacs 内置 Eglot，连接 JDT LS、gopls 和 Python language server。
+- `extensions/init-coding-core.el` 识别 Maven、Go 和 Python 项目，并提供项目级 build/test 命令。
+- `extensions/init-devtools.el` 只是兼容层，旧入口会转到新的 web 模块。
+- `etc/init-treemacs.el` 和 `etc/init-treemacs-windows.el` 负责目录导航。
+
+Java、Go 和 Python 使用传统的 `java-mode`、`go-mode` 和 `python-mode`，不依赖
+Tree-sitter grammar。Maven 和 Go module 由项目文件识别，不需要单独的 `gomod`
+grammar。Eglot、构建、测试和调试功能不受影响。
+
+** Start Command
 #+begin_src emacs-lisp :tangle init.el
-  ;; programming modes
-  (defun suk/enable-devtools()
-       "Enable the develop tools."
-       (require 'init-devtools)
-       )
-#+end_src
-** Load Formatter
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
+  ;; coding modes
+  (defun suk/enable-coding ()
+    "Enable coding-related tools."
+    (interactive)
+    (require 'init-coding))
 
-  ;; format all, formatter for almost languages
-  ;; great for programmers
-  (use-package format-all)
-  (use-package format-all
-    :ensure t
-    :hook (prog-mode . format-all-ensure-formatter)
-    :bind ("C-c f" . #'format-all-buffer))
-#+end_src
-** For Web
-*** Javascript
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-  ;; JSON
-  (unless (fboundp 'js-json-mode)
-    (use-package json-mode))
+  (defalias 'suk/enable-devtools #'suk/enable-coding)
+  (add-hook 'after-init-hook #'suk/enable-coding)
 
-  (use-package js2-mode
-    :mode (("\\.js\\'" . js2-minor-mode)
-           ("\\.jsx\\'" . js2-minor-jsx-mode))
-    :interpreter (("node" . js2-minor-mode)
-                  ("node" . js2-minor-jsx-mode))
-    :hook ((js2-minor-mode . (lambda()  (js2-imenu-extras-mode)
-                               (js2-highlight-unused-variables-mode)
-                               )))
-    )
-
-  (use-package nvm)
-  ;; Adds node_modules/.bin directory to `exec_path'
-  (use-package add-node-modules-path
-    :hook ((web-mode js-mode js2-mode) . add-node-modules-path))
-
-
-#+end_src
-*** html
-#+begin_src emacs-lisp :tangle  etc/init-devtools.el
-  (use-package web-mode)
-  (use-package web-mode
-    :mode "\\.\\(php\\|[gj]sp\\|html?\\|vue\\|tsx?\\|jsx?\\)$"
-    :config
-    (setq web-mode-enable-css-colorization t)
-    (setq web-mode-imenu-regexp-list
-	  '(("<\\(h[1-9]\\)\\([^>]*\\)>\\([^<]*\\)" 1 3 ">" nil)
-	    ("^[ \t]*<\\([@a-z]+\\)[^>]*>? *$" 1 " id=\"\\([a-zA-Z0-9_]+\\)\"" "#" ">")
-	    ("^[ \t]*<\\(@[a-z.]+\\)[^>]*>? *$" 1 " contentId=\"\\([a-zA-Z0-9_]+\\)\"" "=" ">")
-	    ;; angular imenu
-	    (" \\(ng-[a-z]*\\)=\"\\([^\"]+\\)" 1 2 "="))))
-
-#+end_src
-
-** Load completion
-*** Load corfu
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-  (use-package corfu
-    :custom
-    (corfu-cycle t)
-    (corfu-auto t)
-    (corfu-auto-prefix 2)
-    (corfu-auto-delay 1)
-    (corfu-popupinfo-delay '(0.5 . 0.2))
-    (corfu-preview-current 'insert)
-    (corfu-preselect 'prompt)
-    (corfu-on-exeact-match nil)
-    :bind (:map corfu-map
-                ("TAB" . corfu-next)
-                ([tab] . corfu-next)
-                ("C-n" . corfu-next)
-                ("S-TAB" . corfu-previous)
-                ([backtab] . corfu-previous)
-                ("C-p" . corfu-previous)
-                ("S-<return>" . corfu-insert)
-                ("RET" . nil)
-                ("<return>" . corfu-mode)
-                ("C-y" . corfu-yank)
-                ("C-g" . corfu-abort))
-    :init
-    (global-corfu-mode)
-    (corfu-history-mode))
-
-  (when (display-graphic-p)
-    (use-package nerd-icons-corfu
-      :after corfu
-      :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
-
-#+end_src
-*** Load orderless
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-  ;; Optionally use the `orderless' completion style.)
-  (use-package orderless
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-overrides '((file (styles basic partial-completion))))
-    (orderless-component-separator #'orderless-escapable-split-on-space))
-  ;; Support Pinyin
-  (use-package pinyinlib
-    :after orderless
-    :autoload pinyinlib-build-regexp-string
-    :init
-    (defun completion--regex-pinyin (str)
-      (orderless-regexp (pinyinlib-build-regexp-string str)))
-    (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
-#+end_src
-*** Load nerd-icons-completion
-#+begin_src emacs-lisp :tangle etc/init-devtools.el
-  (when (display-graphic-p)
-    (use-package nerd-icons-completion
-      :when (icons-displayable-p)
-      :hook (vertico-mode . nerd-icons-completion-mode)))
-#+end_src
-* GUI or TUI
-#+begin_src emacs-lisp :tangle init.el
-  ;; =====GUI or TUI =====
+  ;; Load exactly one UI layer.
   (if (display-graphic-p)
       (load (expand-file-name "gui.el" suk-emacs-root-dir))
     (load (expand-file-name "tui.el" suk-emacs-root-dir)))
 #+end_src
 
-* Operation System
+** Loader
+#+begin_src emacs-lisp :tangle extensions/init-coding.el
+  ;;; init-coding.el --- Entry point for coding tools -*- lexical-binding: t; -*-
+
+  ;;; Code:
+
+  (require 'basic-function)
+
+  (let ((dir (file-name-directory (or load-file-name buffer-file-name))))
+    (load-if-exists (expand-file-name "leader-key.el" dir))
+    ;; Reuse the shared coding layers.
+    (load-if-exists (expand-file-name "init-coding-web.el" dir))
+    (require 'init-treemacs nil t)
+    ;; New coding-specific layers.
+    (load-if-exists (expand-file-name "init-coding-core.el" dir))
+    (load-if-exists (expand-file-name "init-coding-lsp.el" dir))
+    (load-if-exists (expand-file-name "init-coding-nav.el" dir))
+    (load-if-exists (expand-file-name "init-coding-debug.el" dir))
+    (load-if-exists (expand-file-name "init-coding-files.el" dir)))
+
+  (provide 'init-coding)
+
+  ;;; init-coding.el ends here
+#+end_src
+
+** Project and language defaults
+#+begin_src emacs-lisp :tangle extensions/init-coding-core.el
+  ;;; init-coding-core.el --- Language defaults for coding -*- lexical-binding: t; -*-
+  (require 'project)
+  (require 'seq)
+
+  (defun suk/coding-project-root ()
+    "Return the current project root or `default-directory'."
+    (if-let ((project (project-current nil))) (project-root project) default-directory))
+
+  (defun suk/coding-project-file (name)
+    "Return NAME in the current project when it exists."
+    (let ((file (expand-file-name name (suk/coding-project-root))))
+      (and (file-exists-p file) file)))
+
+  (defun suk/coding-executable-command (&rest names)
+    "Return the first executable command found among NAMES."
+    (or (seq-some (lambda (name)
+                    (when-let ((path (executable-find name)))
+                      (shell-quote-argument path))) names)
+        (car names)))
+
+  (defun suk/coding-maven-command ()
+    "Return the project Maven wrapper or the system Maven command."
+    (cond ((suk/coding-project-file "mvnw.cmd")
+           (shell-quote-argument (suk/coding-project-file "mvnw.cmd")))
+          ((suk/coding-project-file "mvnw")
+           (shell-quote-argument (suk/coding-project-file "mvnw")))
+          (t (suk/coding-executable-command "mvn"))))
+
+  (defun suk/coding-project-kind ()
+    "Return the current project's supported build kind."
+    (cond ((suk/coding-project-file "pom.xml") 'maven)
+          ((suk/coding-project-file "go.mod") 'go)
+          ((or (suk/coding-project-file "pyproject.toml")
+               (suk/coding-project-file "setup.py")
+               (suk/coding-project-file "setup.cfg")) 'python)))
+
+  (defun suk/coding-build-command ()
+    "Return the build command for the current project."
+    (pcase (suk/coding-project-kind)
+      ('maven (format "%s -DskipTests package" (suk/coding-maven-command)))
+      ('go "go build ./...")
+      ('python (format "%s -m compileall ." (suk/coding-executable-command "python3" "python")))
+      (_ (suk/coding-default-compiler-command))))
+
+  (defun suk/coding-test-command ()
+    "Return the test command for the current project."
+    (pcase (suk/coding-project-kind)
+      ('maven (format "%s test" (suk/coding-maven-command)))
+      ('go "go test ./...")
+      ('python (format "%s -m unittest discover" (suk/coding-executable-command "python3" "python")))
+      (_ (suk/coding-default-compiler-command))))
+
+  (defun suk/coding-default-compiler-command ()
+    "Guess a reasonable compile command for the current buffer."
+    (cond
+     ((derived-mode-p 'python-mode)
+      (if (buffer-file-name)
+          (format "%s %s" (suk/coding-executable-command "python3" "python")
+                  (shell-quote-argument (buffer-file-name)))
+        (suk/coding-executable-command "python3" "python")))
+     ((derived-mode-p 'go-mode) "go test ./...")
+     ((derived-mode-p 'java-mode)
+      (if (suk/coding-project-file "pom.xml")
+          (format "%s test" (suk/coding-maven-command))
+        (if (and (buffer-file-name) (file-name-extension (buffer-file-name)))
+            (format "javac %s" (shell-quote-argument
+                                 (file-name-nondirectory (buffer-file-name))))
+          "javac")))
+     ((derived-mode-p 'js-mode 'js-ts-mode 'js2-mode 'web-mode)
+      (if (buffer-file-name)
+          (format "%s %s" (or (executable-find "node") "node")
+                  (shell-quote-argument (buffer-file-name))) "node"))
+     (t "make -k")))
+
+  (defun suk/coding-buffer-common-setup ()
+    "Common editing defaults for programming buffers."
+    (display-line-numbers-mode 1)
+    (setq-local show-trailing-whitespace t)
+    (setq-local compile-command (suk/coding-test-command))
+    (subword-mode 1)
+    (flymake-mode 1))
+
+  (defun suk/coding-python-setup ()
+    "Python defaults."
+    (setq-local python-indent-offset 4)
+    (setq-local python-shell-interpreter
+                (or (executable-find "python3") (executable-find "python")
+                    python-shell-interpreter))
+    (suk/coding-buffer-common-setup))
+
+  (defun suk/coding-go-setup ()
+    "Go defaults."
+    (setq-local tab-width 4)
+    (suk/coding-buffer-common-setup)
+    (when (and (executable-find "gofmt") (fboundp 'gofmt-before-save))
+      (add-hook 'before-save-hook #'gofmt-before-save nil t)))
+
+  (defun suk/coding-java-setup ()
+    "Java defaults."
+    (setq-local c-basic-offset 4)
+    (suk/coding-buffer-common-setup))
+
+  (defun suk/coding-web-setup ()
+    "Web defaults."
+    (setq-local css-indent-offset 2)
+    (setq-local js-indent-level 2)
+    (suk/coding-buffer-common-setup))
+
+  (add-hook 'prog-mode-hook #'suk/coding-buffer-common-setup)
+  (add-hook 'python-mode-hook #'suk/coding-python-setup)
+  (add-hook 'go-mode-hook #'suk/coding-go-setup)
+  (add-hook 'java-mode-hook #'suk/coding-java-setup)
+  (add-hook 'web-mode-hook #'suk/coding-web-setup)
+  (add-hook 'js-mode-hook #'suk/coding-web-setup)
+  (add-hook 'js2-mode-hook #'suk/coding-web-setup)
+  (add-hook 'js-ts-mode-hook #'suk/coding-web-setup)
+  (provide 'init-coding-core)
+#+end_src
+
+** Eglot
+#+begin_src emacs-lisp :tangle extensions/init-coding-lsp.el
+  ;;; init-coding-lsp.el --- Lightweight Eglot integration -*- lexical-binding: t; -*-
+  (require 'eglot)
+  (require 'leader-key)
+
+  (defcustom suk/coding-auto-start-eglot t
+    "Start Eglot automatically when a supported language server exists."
+    :type 'boolean :group 'suk)
+
+  (defun suk/coding-find-executable (name)
+    "Find executable NAME, including user-level Python scripts on Windows."
+    (or (executable-find name)
+        (when-let ((appdata (and (eq system-type 'windows-nt) (getenv "APPDATA"))))
+          (car (file-expand-wildcards
+                (expand-file-name
+                 (format "Python/Python*/Scripts/%s.exe" name) appdata))))))
+
+  (defun suk/coding-language-server ()
+    "Return the language server executable for the current buffer."
+    (cond
+     ((derived-mode-p 'java-mode) (suk/coding-find-executable "jdtls"))
+     ((derived-mode-p 'go-mode) (suk/coding-find-executable "gopls"))
+     ((derived-mode-p 'python-mode)
+      (seq-some #'suk/coding-find-executable
+                '("basedpyright-langserver" "pyright-langserver"
+                  "pylsp" "jedi-language-server")))))
+
+  (defun suk/coding-register-eglot-servers ()
+    "Register installed language servers using their absolute paths."
+    (when-let ((server (suk/coding-find-executable "jdtls")))
+      (add-to-list 'eglot-server-programs `((java-mode) ,server)))
+    (when-let ((server (suk/coding-find-executable "gopls")))
+      (add-to-list 'eglot-server-programs `((go-mode) ,server)))
+    (when-let ((server (or (suk/coding-find-executable "basedpyright-langserver")
+                           (suk/coding-find-executable "pyright-langserver"))))
+      (add-to-list 'eglot-server-programs
+                   `((python-mode) ,server "--stdio"))))
+  (suk/coding-register-eglot-servers)
+
+  (defun suk/coding-eglot-ensure ()
+    "Start Eglot when this buffer has an installed language server."
+    (when (and suk/coding-auto-start-eglot (suk/coding-language-server))
+      (eglot-ensure)))
+
+  (defun suk/coding-eglot-start ()
+    "Start Eglot or explain which language server is missing."
+    (interactive)
+    (if-let ((server (suk/coding-language-server)))
+        (progn (message "Starting Eglot with %s" server) (eglot-ensure))
+      (user-error "No language server found; install jdtls, gopls, basedpyright, pyright, pylsp, or jedi-language-server")))
+
+  (dolist (hook '(java-mode-hook go-mode-hook python-mode-hook))
+    (add-hook hook #'suk/coding-eglot-ensure))
+
+  (with-eval-after-load 'leader-key
+    (keymap-set leader-key-map "l l" #'suk/coding-eglot-start)
+    (keymap-set leader-key-map "l r" #'eglot-rename)
+    (keymap-set leader-key-map "l a" #'eglot-code-actions)
+    (keymap-set leader-key-map "l f" #'eglot-format-buffer)
+    (keymap-set leader-key-map "l d" #'xref-find-definitions)
+    (keymap-set leader-key-map "l R" #'xref-find-references)
+    (keymap-set leader-key-map "l s" #'consult-eglot-symbols)
+    (keymap-set leader-key-map "l e" #'flymake-show-buffer-diagnostics))
+  (provide 'init-coding-lsp)
+#+end_src
+
+** Build, test, and debug
+#+begin_src emacs-lisp :tangle extensions/init-coding-debug.el
+  ;;; init-coding-debug.el --- Coding debug helpers -*- lexical-binding: t; -*-
+  (require 'leader-key)
+
+  (defun suk/coding-compile-dwim ()
+    "Build from the current project root."
+    (interactive)
+    (let ((default-directory (suk/coding-project-root)))
+      (compile (suk/coding-build-command))))
+  (defun suk/coding-test-project ()
+    "Run tests from the current project root."
+    (interactive)
+    (let ((default-directory (suk/coding-project-root)))
+      (compile (suk/coding-test-command))))
+  (defun suk/coding-recompile () (interactive) (recompile))
+  (defun suk/coding-toggle-debug-error () (interactive) (toggle-debug-on-error))
+  (defun suk/coding-toggle-debug-quit () (interactive) (toggle-debug-on-quit))
+  (defun suk/coding-python-repl () (interactive) (run-python nil nil t))
+  (defun suk/coding-python-send-buffer ()
+    (interactive)
+    (if (derived-mode-p 'python-mode)
+        (python-shell-send-buffer) (user-error "Not in a Python buffer")))
+  (defun suk/coding-gdb () (interactive) (call-interactively #'gdb))
+
+  (with-eval-after-load 'leader-key
+    (keymap-set leader-key-map "d c" #'suk/coding-compile-dwim)
+    (keymap-set leader-key-map "d t" #'suk/coding-test-project)
+    (keymap-set leader-key-map "d r" #'suk/coding-recompile)
+    (keymap-set leader-key-map "d e" #'suk/coding-toggle-debug-error)
+    (keymap-set leader-key-map "d q" #'suk/coding-toggle-debug-quit)
+    (keymap-set leader-key-map "d p" #'suk/coding-python-send-buffer)
+    (keymap-set leader-key-map "d g" #'suk/coding-gdb)
+    (keymap-set leader-key-map "d R" #'suk/coding-python-repl))
+  (provide 'init-coding-debug)
+#+end_src
+
+** Navigation
+#+begin_src emacs-lisp :tangle extensions/init-coding-nav.el
+  ;;; init-coding-nav.el --- Coding navigation helpers -*- lexical-binding: t; -*-
+  (require 'leader-key)
+  (require 'goto-line-preview nil t)
+  (defun suk/coding-open-project-root ()
+    "Open the current project root in Dired."
+    (interactive) (dired (suk/coding-project-root)))
+  (defun suk/coding-open-file-tree ()
+    "Open Treemacs for the current project."
+    (interactive)
+    (if (fboundp 'treemacs) (treemacs) (suk/coding-open-project-root)))
+  (defun suk/coding-open-ibuffer () (interactive) (ibuffer))
+  (with-eval-after-load 'leader-key
+    (keymap-set leader-key-map "n t" #'suk/coding-open-file-tree)
+    (keymap-set leader-key-map "n d" #'dired-jump)
+    (when (fboundp 'goto-line-preview)
+      (keymap-set leader-key-map "n g" #'goto-line-preview))
+    (keymap-set leader-key-map "n i" #'consult-imenu)
+    (keymap-set leader-key-map "n b" #'suk/coding-open-ibuffer)
+    (keymap-set leader-key-map "n p" #'suk/coding-open-project-root))
+  (global-set-key (kbd "C-x C-j") #'dired-jump)
+  (provide 'init-coding-nav)
+#+end_src
+
+#+begin_src emacs-lisp :tangle extensions/init-coding-files.el
+  ;;; init-coding-files.el --- Coding file navigation helpers -*- lexical-binding: t; -*-
+  (require 'leader-key)
+  (with-eval-after-load 'leader-key
+    (keymap-set leader-key-map "f j" #'dired-jump)
+    (keymap-set leader-key-map "f i" #'ibuffer)
+    (keymap-set leader-key-map "f t" #'suk/coding-open-file-tree))
+  (provide 'init-coding-files)
+#+end_src
+
+** Web / Completion
+#+begin_src emacs-lisp :tangle extensions/init-coding-web.el
+  ;;; init-coding-web.el --- Web and completion support for coding -*- lexical-binding: t; -*-
+
+  ;;; Code:
+
+  (require 'basic-function)
+
+  ;; Formatting
+  (when (locate-library "format-all")
+    (use-package format-all
+      :ensure t
+      :hook (prog-mode . format-all-ensure-formatter)
+      :bind ("C-c f" . format-all-buffer)))
+
+  ;; Web / JavaScript
+  (when (locate-library "js2-mode")
+    (use-package js2-mode
+      :mode (("\\.js\\'" . js2-mode)
+             ("\\.mjs\\'" . js2-mode)
+             ("\\.cjs\\'" . js2-mode))))
+
+  (when (locate-library "web-mode")
+    (use-package web-mode
+      :mode (("\\.\\(php\\|[gj]sp\\|html?\\|vue\\|tsx?\\|jsx?\\)\\'" . web-mode))
+      :config
+      (setq web-mode-enable-css-colorization t
+            web-mode-markup-indent-offset 2
+            web-mode-code-indent-offset 2
+            web-mode-css-indent-offset 2)))
+
+  (when (locate-library "add-node-modules-path")
+    (use-package add-node-modules-path
+      :hook ((web-mode js-mode js2-mode js-ts-mode) . add-node-modules-path)))
+
+  ;; Completion
+  (when (locate-library "corfu")
+    (use-package corfu
+      :custom
+      (corfu-cycle t)
+      (corfu-auto t)
+      (corfu-auto-prefix 2)
+      (corfu-auto-delay 1)
+      (corfu-popupinfo-delay '(0.5 . 0.2))
+      (corfu-preview-current 'insert)
+      (corfu-preselect 'prompt)
+      (corfu-on-exact-match nil)
+      :bind (:map corfu-map
+                  ("TAB" . corfu-next)
+                  ([tab] . corfu-next)
+                  ("C-n" . corfu-next)
+                  ("S-TAB" . corfu-previous)
+                  ([backtab] . corfu-previous)
+                  ("C-p" . corfu-previous)
+                  ("S-<return>" . corfu-insert)
+                  ("RET" . nil)
+                  ("<return>" . corfu-mode)
+                  ("C-y" . corfu-yank)
+                  ("C-g" . corfu-abort))
+      :init
+      (global-corfu-mode)
+      (corfu-history-mode)))
+
+  (when (and (display-graphic-p) (locate-library "nerd-icons-corfu"))
+    (use-package nerd-icons-corfu
+      :after corfu
+      :init
+      (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
+
+  (when (locate-library "orderless")
+    (use-package orderless
+      :custom
+      (completion-styles '(orderless basic))
+      (completion-category-overrides '((file (styles basic partial-completion))))
+      (orderless-component-separator #'orderless-escapable-split-on-space)))
+
+  (when (and (locate-library "pinyinlib") (locate-library "orderless"))
+    (use-package pinyinlib
+      :after orderless
+      :autoload pinyinlib-build-regexp-string
+      :init
+      (defun completion--regex-pinyin (str)
+        (orderless-regexp (pinyinlib-build-regexp-string str)))
+      (add-to-list 'orderless-matching-styles 'completion--regex-pinyin)))
+
+  (when (and (display-graphic-p) (locate-library "nerd-icons-completion"))
+    (use-package nerd-icons-completion
+      :when (icons-displayable-p)
+      :hook (vertico-mode . nerd-icons-completion-mode)))
+
+  (provide 'init-coding-web)
+
+  ;;; init-coding-web.el ends here
+#+end_src
+
+** Compatibility
+#+begin_src emacs-lisp :tangle extensions/init-devtools.el
+  ;;; init-devtools.el --- Compatibility loader for coding web support -*- lexical-binding: t; -*-
+
+  ;;; Code:
+
+  (require 'basic-function)
+
+  (let ((dir (file-name-directory (or load-file-name buffer-file-name))))
+    (load-if-exists (expand-file-name "init-coding-web.el" dir)))
+
+  (provide 'init-devtools)
+
+  ;;; init-devtools.el ends here
+#+end_src
+
+* Platform Handbook
 #+begin_src emacs-lisp :tangle init.el
     ;; Hanlde minified code
   (if emacs/>=27p (add-hook 'after-init-hook #'global-so-long-mode))
@@ -4245,5 +4618,3 @@ libvterm 后端和 Emacs 的强大功能，提供了接近原生终端的体验�
   ;; =========================================================
   ;; async-shell-command
 #+end_src
-
-

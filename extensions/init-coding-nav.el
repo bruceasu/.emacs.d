@@ -1,0 +1,21 @@
+;;; init-coding-nav.el --- Coding navigation helpers -*- lexical-binding: t; -*-
+(require 'leader-key)
+(require 'goto-line-preview nil t)
+(defun suk/coding-open-project-root ()
+  "Open the current project root in Dired."
+  (interactive) (dired (suk/coding-project-root)))
+(defun suk/coding-open-file-tree ()
+  "Open Treemacs for the current project."
+  (interactive)
+  (if (fboundp 'treemacs) (treemacs) (suk/coding-open-project-root)))
+(defun suk/coding-open-ibuffer () (interactive) (ibuffer))
+(with-eval-after-load 'leader-key
+  (keymap-set leader-key-map "n t" #'suk/coding-open-file-tree)
+  (keymap-set leader-key-map "n d" #'dired-jump)
+  (when (fboundp 'goto-line-preview)
+    (keymap-set leader-key-map "n g" #'goto-line-preview))
+  (keymap-set leader-key-map "n i" #'consult-imenu)
+  (keymap-set leader-key-map "n b" #'suk/coding-open-ibuffer)
+  (keymap-set leader-key-map "n p" #'suk/coding-open-project-root))
+(global-set-key (kbd "C-x C-j") #'dired-jump)
+(provide 'init-coding-nav)

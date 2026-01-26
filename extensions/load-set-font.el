@@ -183,6 +183,11 @@
   "Increase Emacs's font-size acording emacs-font-size-pair-list."
   (interactive) (emacs-step-font-size -1))
 
+;; (when (fboundp 'variable-pitch-mmode)
+;;   (set-face-attribute 'variable-pitch nil :family "asu-cjk-serif" :height 120))
+;; (when (fboundp 'fixed-pitch-mode)
+;;   (set-face-attribute 'mixed-pitch nil :family "asu-cjk-mono" :height 120))
+
 
 (defvar loaded-font-type nil
   "Current font type.")
@@ -269,10 +274,10 @@
     (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
     ;; (face-remap-add-relative 'default nil :font "asu-cjk-code")
 
-    ;;(set-face-attribute 'org-block nil :family "M+CodeLat50 Nerd Font Mono")
-;;    (set-face-attribute 'org-code nil :family "M+CodeLat50 Nerd Font Mono")
+    (set-face-attribute 'org-block nil :family "asu-cjk-sans")
+    (set-face-attribute 'org-code nil :family "asu-cjk-code")
     (set-face-attribute 'org-table nil :family "M+CodeLat50 Nerd Font Mono")
-    ;;(set-face-attribute 'org-table nil :family "asu-cjk-mono")
+    ;; (set-face-attribute 'org-table nil :family "更紗等幅ゴシック J")
     ;; (set-face-attribute 'org-table nil :family "asu-cjk-code")
     ;; (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
     ;; (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")

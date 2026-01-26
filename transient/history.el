@@ -1,3 +1,2 @@
 ((magit-commit nil)
- (magit-dispatch nil)
- (rg-menu nil))
+ (magit-dispatch nil))

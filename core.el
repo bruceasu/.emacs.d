@@ -138,7 +138,7 @@
 ;; This sets up the load path so that we can override it
 (setq warning-suppress-log-types '((package reinitialization)))
 ;; 指定ELPA目录
-(setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
+;; (setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
 (add-subdirs-to-load-path package-user-dir t)
 
 (require 'package)
@@ -385,15 +385,7 @@
    ))
 
 ;; Automatically reload files was modified by external program
-(run-with-idle-timer
- 1 nil
- #'(lambda()
-     (use-package autorevert)
-     (use-package autorevert
-       :ensure nil
-       :diminish
-       :defer 2
-       :hook (after-init . global-auto-revert-mode))))
+(run-with-idle-timer 1 nil #'global-auto-revert-mode 1)
 
 (require 'auto-save)
 (auto-save-enable)
@@ -798,7 +790,7 @@
 	 ("M-s e"   . consult-isearch-history)
 	 ("M-s l"   . consult-line)
 	 ("M-s L"   . consult-line-multi)
-	 ) 
+	 )
 
   ;; Enable automatic preview at point in the *Completions* buffer. This is
   ;; relevant when you use the default completion UI.

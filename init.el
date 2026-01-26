@@ -36,8 +36,7 @@
 (setq bookmark-default-file (concat suk-emacs-var-dir "/emacs.bmk"))
 ;; Diary
 (setq diary-file (concat user-home-dir "/diary"))
-;; Clear to avoid analyzing files when loading remote files.
-(setq file-name-handler-alist nil)
+;; Keep file handlers for remote and compressed files.
 ;; Don't pass case-insensitive to `auto-mode-alist'
 (setq auto-mode-case-fold nil)
 
@@ -104,13 +103,16 @@
 (load-if-exists (expand-file-name "suk.el" suk-emacs-root-dir))
 (unless (server-running-p) (server-start))
 
-;; programming modes
-(defun suk/enable-devtools()
-     "Enable the develop tools."
-     (require 'init-devtools)
-     )
+;; coding modes
+(defun suk/enable-coding ()
+  "Enable coding-related tools."
+  (interactive)
+  (require 'init-coding))
 
-;; =====GUI or TUI =====
+(defalias 'suk/enable-devtools #'suk/enable-coding)
+(add-hook 'after-init-hook #'suk/enable-coding)
+
+;; Load exactly one UI layer.
 (if (display-graphic-p)
     (load (expand-file-name "gui.el" suk-emacs-root-dir))
   (load (expand-file-name "tui.el" suk-emacs-root-dir)))

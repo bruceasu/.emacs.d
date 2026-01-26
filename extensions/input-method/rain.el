@@ -32,7 +32,6 @@
    ("\C-f" . quail-next-translation)
    ("\C-b" . quail-prev-translation)
  ) t nil nil nil nil nil nil nil nil t)
-;;(set-input-method "chinese-he-rain")
 (setq default-input-method "chinese-he-rain")
 (quail-define-rules
 	("," ["，" ","])
