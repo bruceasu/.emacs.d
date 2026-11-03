@@ -10,7 +10,7 @@
 ;; 提前做呢个操作！
 (setq package-enable-at-startup nil)
 ;;唔好允许从软件包缓存加载（原因一样）。
-(setq package-quickstart nil)
+(setq package-quickstart t)
 ;; `use-package` 喺 29 版本开始内置。它必须喺加载 `use-package` 之
 ;; 前设置。
 (setq use-package-enable-imenu-support t)

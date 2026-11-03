@@ -11,8 +11,9 @@
      (require 'my-sudo)
      ;; (use-package sudo-edit)
      (lazy-load-global-keys
-      '(("C-z C-s" . suk/sudo/body))
+      '(("a s" . suk/sudo/body))
       "my-sudo"
+      "M-m"
       )
      ))
 
@@ -37,19 +38,32 @@
        (setq ispell-program-name "aspell")
        (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together")))))
 
+;; Pyim is vendored locally and declares these ELPA dependencies.
+(use-package async)
+(use-package xr)
+
 ;; 加载输入法
 (run-with-idle-timer
  1
  nil
  #'(lambda()
-     (if suk-rime
-	 (require 'init-rime)
-       ;;(require 'rain)
-       (progn
+     (let ((rime-ready
+	    (and suk-rime
+		 (condition-case nil
+		     (progn
+		       (require 'init-rime)
+		       (and (boundp 'rime--module-path)
+			    (stringp rime--module-path)
+			    (file-exists-p rime--module-path)
+			    (boundp 'rime-user-data-dir)
+			    (file-directory-p
+			     (expand-file-name rime-user-data-dir))))
+		   (error nil)))))
+       (unless rime-ready
+	 (when suk-rime
+	   (display-warning 'suk "Rime is unavailable; using Pyim instead."))
 	 (require 'pyim-hyly)
-	 (pyim-hyly-enable))
-       )
-     ))
+	 (pyim-hyly-enable)))))
 
 ;; 其他
 (run-with-idle-timer

@@ -22,7 +22,7 @@
 (keymap-set leader-key-map "b K" #'suk/kill-other-window-buffer)
 (keymap-set leader-key-map "b c" #'suk/copy-file-name)
 (keymap-set leader-key-map "b s" #'suk/new-scratch-buffer)
-(keymap-set leader-key-map "b b" #'suk/new-empty-buffer)
+(keymap-set leader-key-map "b N" #'suk/new-empty-buffer)
 (keymap-set leader-key-map "b r" #'suk/open-recently-closed)
 (keymap-set leader-key-map "b R" #'suk/list-recently-closed)
 (keymap-set leader-key-map "b l" #'suk/open-last-closed)

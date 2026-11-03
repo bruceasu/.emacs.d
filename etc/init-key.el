@@ -1,10 +1,5 @@
 (require 'lazy-load)
 (provide 'init-key)
-;;; ### Unset key ###
-;;; --- 卸载按键
-(lazy-load-unset-keys                   ;全局按键的卸载
- ;; '("C-z"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
- '("C-z" ))
 
 ;;; ### move text ###
 (lazy-load-global-keys

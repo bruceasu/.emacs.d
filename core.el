@@ -112,6 +112,11 @@
   :group 'suk
   :type 'boolean)
 
+(defcustom suk-enable-appearance t
+  "Load optional themes, fonts, icons, and other appearance packages."
+  :group 'suk
+  :type 'boolean)
+
 ;; Load `custom-file'
 ;; If it doesn't exist, copy from the template, then load it.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
@@ -135,11 +140,8 @@
 	      (if (file-exists-p file)
 		  (load file)))))
 
-;; This sets up the load path so that we can override it
+;; This sets up the package manager.
 (setq warning-suppress-log-types '((package reinitialization)))
-;; 指定ELPA目录
-;; (setq package-user-dir (expand-file-name "elpa" "~/.local/share"))
-(add-subdirs-to-load-path package-user-dir t)
 
 (require 'package)
 
@@ -156,6 +158,8 @@
 
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
+
+;; Run `package-quickstart-refresh' after changing installed packages.
 
 ;; Should set before loading `use-package'
 ;; make use-package default behavior better
@@ -178,11 +182,6 @@
 (use-package compat :demand t)
 
 (require 'lazy-load)
-  ;;; ### Unset key ###
-;;; --- 卸载按键
-(lazy-load-unset-keys                   ;全局按键的卸载
- ;; '("C-z"  "s-W" "s-z" "M-h" "C-\\" "s-c" "s-x" "s-v"))
- '("C-z" ))
 
 ;; basic settings
 (setq-default
@@ -190,7 +189,6 @@
  indent-tabs-mode nil  ; 默认只使用空格，不使用tab
  )
 (server-mode 1)
-(global-hl-line-mode 1)                    ;高亮当前行
 (show-paren-mode t)                        ;显示括号匹配
 (setq inhibit-startup-message t)           ; 关闭启动欢迎界面
 (setq inhibit-startup-echo-area-message t) ; 关闭启动时回显区的提示信息
@@ -325,17 +323,8 @@
 
 (use-package ibuffer
   :ensure nil
-  :bind ("C-x C-b" . ibuffer)
-  :init (setq ibuffer-filter-group-name-face '(:inherit (font-lock-string-face bold))))
+  :bind ("C-x C-b" . ibuffer))
 ;;(global-set-key (kbd "C-x C-b") 'ibuffer)
-
-(with-eval-after-load 'ibuffer
-  ;; Display icons for buffers
-  (when (display-graphic-p)
-    (use-package nerd-icons-ibuffer
-      :hook (ibuffer-mode . nerd-icons-ibuffer-mode)
-      :init (setq nerd-icons-ibuffer-icon t)))
-  )
 
 ;; Persistent the scratch buffer
 (run-with-idle-timer
@@ -372,8 +361,6 @@
 ;; --- 缓存移动
 (lazy-load-set-keys
  '(
-   ;;("C-z i" . beginning-of-buffer)      ;缓存开始 M-<
-   ;;("C-z k" . end-of-buffer)            ;缓存结尾 M->
    ("C-M-f" . forward-paragraph)        ;下一个段落
    ("C-M-b" . backward-paragraph)       ;上一个段落
    ("C-M-y" . backward-up-list)         ;向左跳出 LIST
@@ -410,10 +397,10 @@
 ;;; ### goto-line-preview ###
 (lazy-load-global-keys
  '(
-   ("g p" . goto-line-preview)
+   ("n g" . goto-line-preview)
   )
  "goto-line-preview"
- "C-z")
+ "M-m")
 
 (lazy-load-global-keys
  '(
@@ -616,66 +603,15 @@
 
 ;;在 Windows 上，如果你用 Emacs GUI 版本，默认有时会找不到 PATH 中的程序，
 ;;可以在 Emacs 配置里手动添加环境变量，或者使用
-;; exec-path-from-shell 等包（但这个包通常在 macOS/Linux下更常用；
+;; Configure `exec-path' manually where needed.
 ;;Windows 下可能需要手工设置 exec-path）。
-(use-package exec-path-from-shell)
 ;; (setq exec-path (append exec-path '("C:/path/to/python" "C:/path/to/node")))
 ;; (setenv "PATH" (concat (getenv "PATH") ";C:\\path\\to\\python;C:\\path\\to\\node"))
 
 
 
 
-;; (use-package counsel) ; counsel => swiper => ivy
-;; (use-package counsel-bbdb)
-;; (use-package counsel-gtags)
-;; (use-package counsel-css)
-(use-package bbdb)
-(use-package find-file-in-project)
 (use-package pinyinlib)
-(use-package ace-pinyin)
-(use-package goto-chg)
-
-(use-package ivy
-  :ensure t
-  :diminish (ivy-mode)
-  :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t)
-  (setq ivy-count-format "%d/%d ")
-  (setq ivy-display-style 'fancy)
-
-  (define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
-  (when (display-graphic-p)    
-    (use-package ivy-posframe))
-  )
-
-(use-package swiper
-  :bind
-  (
-   ("C-x M-s" . swiper)
-   ("C-s"     . swiper-isearch)
-   ("C-r"     . swiper-isearch)
-   ("C-c C-r" . ivy-resume)
-   )
-  :config
-  (progn
-    ;;(ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    ;;(setq ivy-display-style 'fancy)
-    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
-  )
-
-(use-package counsel
-  :after ivy
-  :ensure t
-  :bind
-  (
-   ;; ("M-y" . counsel-yank-pop)
-   ;; ("C-x C-f" . counsel-find-file)
-   ("M-x" . counsel-M-x)
-   )
-  )
 
 (use-package avy)
 (use-package avy-zap)
@@ -699,10 +635,10 @@
 (with-eval-after-load 'avy-zap
   ;; Kill text between the point and the character CHAR
   (lazy-load-global-keys
-   '(("M-z" . avy-zap-to-char-dwim)
-     ("M-Z" . avy-zap-up-to-char-dwim))
+   '(("z" . avy-zap-to-char-dwim)
+     ("Z" . avy-zap-up-to-char-dwim))
    "avy-zap"
-   "C-z")
+   "M-m n")
   )
 
 ;; Writable `grep' buffer
@@ -725,19 +661,6 @@
      'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 38))
     (grep-apply-setting
      'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>")))
-
-
-;; Fast search tool `ripgrep'
-(use-package rg
-  :hook (after-init . rg-enable-default-bindings)
-  :bind (:map rg-global-map
-	      ("c" . rg-dwim-current-dir)
-	      ("f" . rg-dwim-current-file)
-	      ("m" . rg-menu))
-  :init (setq rg-group-result t
-	      rg-show-columns t)
-  :config
-  (cl-pushnew '("tmpl" . "*.tmpl") rg-custom-type-aliases))
 
 (use-package consult
   :bind (;; C-c bindings in `mode-specific-map'
@@ -784,7 +707,6 @@
 	 ("M-s u"   . consult-focus-lines)
 	 ;; Isearch integration
 	 ("M-s e"   . consult-isearch-history)
-	 ("C-r" .  consult-line)
 	 :map isearch-mode-map
 	 ("M-e"     . consult-isearch-history)
 	 ("M-s e"   . consult-isearch-history)
@@ -818,6 +740,10 @@
     (setq xref-show-xrefs-function #'consult-xref
 	  xref-show-definitions-function #'consult-xref))
   )
+
+(use-package magit
+  :commands magit-status
+  :bind ("C-x g" . magit-status))
 
 ;; Recentf
 (setq recentf-save-file (concat suk-emacs-var-dir "/recentf"))
@@ -884,29 +810,21 @@
   )
 
 ;; setup hydra
-(run-with-idle-timer
- 1 nil
- #'(lambda()
-     (use-package hydra
-       :hook (emacs-lisp-mode . hydra-add-imenu)
-       :config
-       (with-eval-after-load 'posframe
-         (setq hydra-hint-display-type 'posframe)
-         (defun hydra-set-posframe-show-params ()
-           "Set hydra-posframe style."
-           (setq hydra-posframe-show-params
-                 `(
-                   :left-fringe 8
-                   :right-fringe 8
-                   :internal-border-width 2
-                   :internal-border-color ,(face-background 'posframe-border nil t)
-                   :background-color ,(face-background 'tooltip nil t)
-                   :foreground-color ,(face-foreground 'tooltip nil t)
-                   :lines-truncate t
-                   )))
-         (hydra-set-posframe-show-params)
-         (add-hook 'after-load-theme-hook #'hydra-set-posframe-show-params t))
-       )))
+(use-package hydra
+  :demand t
+  :hook (emacs-lisp-mode . hydra-add-imenu))
+(use-package pretty-hydra
+  :demand t
+  :after hydra
+  :hook (emacs-lisp-mode
+         .
+         (lambda ()
+           (add-to-list
+            'imenu-generic-expression
+            '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2)))))
+(defun pretty-hydra-title (title &rest _args)
+  "Return TITLE without optional appearance enhancements."
+  title)
 
 ;;;; The emacsclient call depends on the daemon or `server-mode' (I use the latter)
 (use-package server
@@ -932,11 +850,20 @@
               which-key-show-remaining-keys t)
   :config
   (which-key-mode))
-(when sys/is-gui
-  (use-package which-key-posframe
-    :after (which-key posframe)
-    :config
-    (which-key-posframe-mode 1)))
+
+(use-package emacs
+  :init
+  ;; TAB cycle if there are only few candidates
+  (setq completion-cycle-threshold 3)
+
+  ;; Only list the commands of the current modes
+  (when (boundp 'read-extended-command-predicate)
+    (setq read-extended-command-predicate
+	  #'command-completion-default-include-p))
+
+  ;; Enable indentation+completion using the TAB key.
+  ;; `completion-at-point' is often bound to M-TAB.
+  (setq tab-always-indent 'complete))
 
 ;;; ### Company en words ###
 ;;; --- 英文助手
@@ -945,3 +872,25 @@
    ("M-r" . toggle-company-english-helper) ;英文助手
    )
  "company-english-helper")
+
+(use-package vertico
+  :bind (:map vertico-map
+              ("RET"   . vertico-directory-enter)
+              ("DEL"   . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  :hook ((after-init . vertico-mode)
+         (rfn-eshadow-update-overlay . vertico-directory-tidy)))
+
+;;据说跟 lsp-bridge 冲突
+(setq company-idle-delay nil)
+;; (global-set-key (kbd "M-/") 'company-complete)  ;; 绑定 M-/ 为 company-complete
+;; (global-set-key (kbd "M-?") 'dabbrev-expand)    ;; 绑定 M-? 为 dabbrev-expand
+(lazy-load-global-keys
+ '(
+   ;;("M-/" . company-complete)
+   ("M-/"  . my/company-complete-dwim)
+   ("M-?" . dabbrev-expand)
+
+   )
+ "init-completion-company"
+ )

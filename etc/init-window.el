@@ -2,8 +2,7 @@
 
 ;; Quickly switch windows
 (use-package ace-window
-  :bind (([remap other-window] . ace-window)
-         ("C-c w" . ace-window-hydra/body))
+   :bind ([remap other-window] . ace-window)
   :hook (emacs-startup . ace-window-display-mode)
   :config
   (defun toggle-window-split ()
@@ -96,7 +95,7 @@
          ("Z" winner-redo "winner redo"))
         )
        )
-     (bind-key "w" #'ace-window-hydra/body leader-key)
+      (keymap-set leader-key-map "w h" #'ace-window-hydra/body)
      ))
  'ace-window
  'winner

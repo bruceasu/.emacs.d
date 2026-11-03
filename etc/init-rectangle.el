@@ -1,6 +1,6 @@
 (provide 'init-rectangle)
 
-(use-package hydra :ensure t)
+(require 'hydra)
 
 (defhydra hydra-rectangle (:hint nil)
   "
@@ -48,6 +48,3 @@
       ("o" open-rectangle "Insert Blank Space"))
      )
     ))
-
-;; 设置快捷键以便调用矩形 Hydra
-(global-set-key (kbd "C-z r") 'hydra-rectangle/body)

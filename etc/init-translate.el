@@ -6,37 +6,38 @@
 
 ;;; Code:
 
-(require 'sdcv)
-(setq sdcv-say-word-p t)                ;say word after search
+  (when (and (eq system-type 'gnu/linux) (locate-library (symbol-name 'sdcv)))
+    (require 'sdcv)
+    (setq sdcv-say-word-p t)                ;say word after search
 
-(setq sdcv-dictionary-data-dir "~/.local/share/sdcv-dict") ;设置星际译王本地词典的目录
+    (setq sdcv-dictionary-data-dir "~/.local/share/sdcv-dict") ;设置星际译王本地词典的目录
 
-(setq sdcv-dictionary-simple-list    ;星际译王屏幕取词词典, 简单, 快速
-      '("懒虫简明英汉词典"
-        "懒虫简明汉英词典"
-        "KDic11万英汉词典"))
+    (setq sdcv-dictionary-simple-list    ;星际译王屏幕取词词典, 简单, 快速
+          '("懒虫简明英汉词典"
+            "懒虫简明汉英词典"
+            "KDic11万英汉词典"))
 
-(setq sdcv-dictionary-complete-list     ;星际译王的词典, 完全, 详细
-      '(
-        "懒虫简明英汉词典"
-        "英汉汉英专业词典"
-        "XDICT英汉辞典"
-        "stardict1.3英汉辞典"
-        "WordNet"
-        "XDICT汉英辞典"
-        "Jargon"
-        "懒虫简明汉英词典"
-        "FOLDOC"
-        "新世纪英汉科技大词典"
-        "KDic11万英汉词典"
-        "朗道汉英字典5.0"
-        "CDICT5英汉辞典"
-        "新世纪汉英科技大词典"
-        "牛津英汉双解美化版"
-        "21世纪双语科技词典"
-        "quick_eng-zh_CN"
-        ))
-
+    (setq sdcv-dictionary-complete-list     ;星际译王的词典, 完全, 详细
+          '(
+            "懒虫简明英汉词典"
+            "英汉汉英专业词典"
+            "XDICT英汉辞典"
+            "stardict1.3英汉辞典"
+            "WordNet"
+            "XDICT汉英辞典"
+            "Jargon"
+            "懒虫简明汉英词典"
+            "FOLDOC"
+            "新世纪英汉科技大词典"
+            "KDic11万英汉词典"
+            "朗道汉英字典5.0"
+            "CDICT5英汉辞典"
+            "新世纪汉英科技大词典"
+            "牛津英汉双解美化版"
+            "21世纪双语科技词典"
+            "quick_eng-zh_CN"
+            ))
+  )
 
 ;; 谷歌翻译，
 (use-package google-translate
@@ -49,22 +50,17 @@
                 google-translate-default-target-language "zh-CN"
                 google-translate-default-source-language "en")
   (setq-default google-translate-enable-ido-completion t)
-  :bind(
-        ;; 配置快捷键
-        ("C-x t s" . google-translate-at-point)
-        ("C-x t q" . google-translate-query-translate)
-        ("C-x t S" . google-translate-smooth-translate)
-  ))
+  )
 ;; A multi dictionaries interface
 (use-package fanyi
   :bind (("C-c d f" . fanyi-dwim)
          ("C-c d d" . fanyi-dwim2)
          ("C-c d h" . fanyi-from-history))
-  :custom (fanyi-providers '(fanyi-haici-provider fanyi-longman-provider))
+  :custom (fanyi-providers '(fanyi-haici-provider fanyi-longman-provider)))
 
-  (use-package go-translate
-    :bind (("C-c d g" . gts-do-translate))
-    :init (setq gts-translate-list '(("en" "zh") ("zh" "en")))))
+(use-package go-translate
+  :bind (("C-c d g" . gts-do-translate))
+  :init (setq gts-translate-list '(("en" "zh") ("zh" "en"))))
 
 ;; Youdao Dictionay
 (use-package youdao-dictionary
@@ -81,7 +77,7 @@
          ("C-c d i" . 'youdao-dictionary-search-from-input)
          :map youdao-dictionary-mode-map
          ("h"       . my-youdao-dictionary-help)
-         ("?"       . my-youdao-dictionary-help)
+         ("?"       . my-youdao-dictionary-help))
   :init
   (setq url-automatic-caching t)
   (setq youdao-dictionary-use-chinese-word-segmentation t) ; 中文分词
@@ -108,13 +104,13 @@
     (defun my-youdao-dictionary-search-at-point ()
       "Search word at point and display result with `posframe', `pos-tip' or buffer."
       (interactive)
-      (if (posframe-workable-p)
+      (if (and (fboundp 'posframe-workable-p) (posframe-workable-p))
           (youdao-dictionary-search-at-point-posframe)
         (youdao-dictionary-search-at-point)))
 
     (defun my-youdao-dictionary--posframe-tip (string)
       "Show STRING using `posframe-show'."
-      (unless (posframe-workable-p)
+      (unless (and (fboundp 'posframe-workable-p) (posframe-workable-p))
         (error "Posframe not workable"))
 
       (if-let ((word (youdao-dictionary--region-or-word)))

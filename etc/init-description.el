@@ -1,7 +1,5 @@
-(provide 'init-description)
-;;;###autoload
-(with-eval-after-load 'hydra
-  (defhydra my-hydra-describe (:color blue :hint nil)
+(require 'hydra)
+(defhydra my-hydra-describe (:color blue :hint nil)
     "
 Describe Something: (q to quit)
 _a_ all help for everything screen
@@ -49,4 +47,6 @@ _w_ where is something defined
     ("t" describe-theme)
     ("v" describe-variable)
     ("w" where-is))
-  (keymap-global-set "C-x C-h" #'my-hydra-describe/body))
+(with-eval-after-load 'leader-key
+  (keymap-set leader-key-map "h" #'my-hydra-describe/body))
+(provide 'init-description)

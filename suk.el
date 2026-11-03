@@ -1,59 +1,13 @@
 (setq user-full-name "Suk")
 (setq user-mail-address "bruceasu@gmail.com")
 
-(run-with-idle-timer
- 2 nil
- #'(lambda()
-     (when (display-graphic-p)
-       (use-package pretty-hydra
-         :requires hydra
-         :custom (pretty-hydra-default-title-body-format-spec " %s%s")
-         :hook (emacs-lisp-mode
-                .
-                (lambda ()
-                  (add-to-list
-                   'imenu-generic-expression
-                   '("Hydras" "^.*(\\(pretty-hydra-define\\) \\([a-zA-Z-]+\\)" 2))))
-         :init
-         (cl-defun pretty-hydra-title
-             (title &optional icon-type icon-name &key face height v-adjust)
-           "Add an icon in the hydra title."
-           (let ((face (or face `(:inherit highlight :reverse-video t)))
-                 (height (or height 1.2))
-                 (v-adjust (or v-adjust 0.0)))
-             (concat
-              (when (and (icons-displayable-p) icon-type icon-name)
-                (let ((f (intern (format "nerd-icons-%s" icon-type))))
-                  (when (fboundp f)
-                    (concat
-                     (apply f (list icon-name :face face :height height :v-adjust v-adjust))
-                     " "))))
-              (propertize title 'face face))))))))
-
-(run-with-idle-timer
- 2 nil
- #'(lambda()
-     (when (display-graphic-p)
-       (use-package posframe
-         :hook (after-load-theme . posframe-delete-all)
-         :init
-         (defface posframe-border `((t (:inherit region)))
-           "Face used by the `posframe' border."
-           :group 'posframe)
-         (defvar posframe-border-width 2
-           "Default posframe border width.")
-         )
-
-       :config
-       (posframe-delete-all)
-       )))
-
-;; Toggle two most recent buffers
-(run-with-idle-timer
- 1 nil
- #'(lambda()
-     (fset 'quick-switch-buffer [?\C-x ?b return])
-     (global-set-key (kbd "C-z b") 'quick-switch-buffer)))
+(require 'leader-key)
+;; Keep the leader buffer prefix on the built-in switch command.
+(keymap-set leader-key-map "b b" #'switch-to-buffer)
+(lazy-load-global-keys
+ '(("h" . ace-window-hydra/body))
+ "init-window"
+ "M-m w")
 
 (run-with-idle-timer
  1 nil
@@ -62,12 +16,9 @@
 ;; C-x r l to list bookmarks
 
 (lazy-load-global-keys
- '(
-     ("C-c w"       . ace-window-hydra/body)
-     ("C-h z"       . popper-toggle)
-     ("C-<tab>"     . popper-cycle)
-     ("C-M-<tab>"   . popper-toggle-type)
-   )
+ '(("C-h z" . popper-toggle)
+   ("C-<tab>" . popper-cycle)
+   ("C-M-<tab>" . popper-toggle-type))
  "init-window")
 
 ;;; Rectangle
@@ -76,27 +27,10 @@
    ("r" . hydra-rectangle/body)
    )
  "init-rectangle"
- "C-z"
+ "M-m"
  )
 
 (when (display-graphic-p)
-  (use-package vertico
-    :bind (:map vertico-map
-		("RET"   . vertico-directory-enter)
-		("DEL"   . vertico-directory-delete-char)
-		("M-DEL" . vertico-directory-delete-word))
-    :hook ((after-init . vertico-mode)
-	   (rfn-eshadow-update-overlay . vertico-directory-tidy))
-    )
-  (use-package vertico-posframe
-    :ensure t
-    :after (posframe vertico)
-    :hook (vertico-mode . vertico-posframe-mode)
-    :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
-    )
-  )
-
-(when sys/is-gui
   (use-package session)
   (require 'auto-save)
   ;; todo dont load
@@ -254,6 +188,10 @@
 ;; 定义一个Leader-key mode. 使用 M-m 开启，原来的功能重新绑定到 M-i
 ;; (global-set-key (kbd "M-i") #'back-to-indentation)
 (require 'leader-key)
+(lazy-load-global-keys
+ '(("h" . my-hydra-describe/body))
+ "init-description"
+ "M-m")
 
 (run-with-idle-timer
  1 nil
@@ -300,13 +238,10 @@
 ;;; ### Toolkit ###
 (lazy-load-set-keys
  '(
-   ("C-," . bury-buffer)                            ;;隐藏当前buffer
-   ("C-." . unbury-buffer)                          ;;反隐藏当前buffer
-   ("C-<f12>" . lazycat-theme-toggle)
+   ("b ," . bury-buffer)
+   ("b ." . unbury-buffer)
    )
- (current-global-map)
- "C-z"
- )
+ leader-key-map)
 
 ;; 一啲方便嘅函数
 ;; 用于向后跳跃到上一个 sexp C-M-<left> / ESC C-<left>
@@ -332,38 +267,26 @@
 
 ;; M-x align-regexp 可以方便的对齐一些文字
 
-;;; ### Sdcv ###
-;;; --- 星际译王命令行
-(when  (eq system-type 'gnu/linux)
-  (lazy-load-global-keys
-   '(("p" . sdcv-search-pointer)           ;光标处的单词, buffer显示
-     ("P" . sdcv-search-pointer+)          ;光标处的单词, tooltip显示
-     ("i" . sdcv-search-input)             ;输入的单词, buffer显示
-     (";" . sdcv-search-input+)
-     ("y" . my-youdao-dictionary-search-at-point)
-     ("Y" . youdao-dictionary-search-at-point)
-     ("g" . google-translate-at-point)
-     ("G" . google-translate-query-translate)
-     ("s" . google-translate-smooth-translate)
-     ("f" . fanyi-dwim)
-     ("d" . fanyi-dwim2)
-     ("h" . fanyi-from-history)
-     )
-   "init-translate"
-   "C-z"))
-
-(when sys/is-gui
-  (lazy-load-global-keys
-   '(
-     ("<f8>" . treemacs)
-     )
-   "init-treemacs"))
-
+;;; Translation commands; local Sdcv bindings are Linux-only.
 (lazy-load-global-keys
- '(
-   ("C-x M-t" . toggles-hydra/body)
-   )
- "init-toggles")
+ '(("y" . my-youdao-dictionary-search-at-point)
+   ("Y" . youdao-dictionary-search-at-point)
+   ("g" . google-translate-at-point)
+   ("G" . google-translate-query-translate)
+   ("s" . google-translate-smooth-translate)
+   ("f" . fanyi-dwim)
+   ("d" . fanyi-dwim2)
+   ("h" . fanyi-from-history))
+ "init-translate"
+ "M-m x")
+(when (and (eq system-type 'gnu/linux) (locate-library (symbol-name 'sdcv)))
+  (lazy-load-global-keys
+   '(("p" . sdcv-search-pointer)
+     ("P" . sdcv-search-pointer+)
+     ("i" . sdcv-search-input)
+     (";" . sdcv-search-input+))
+   "init-translate"
+   "M-m x"))
 
 ;; ;; 设置打开 NeoTree 树形列表展示
 ;; (when sys/is-gui
@@ -433,8 +356,8 @@
 
 ;; 运行 Org Babel Tangle 命令：`M-x org-babel-tangle`。
 ;; 从 org 文件中生成 el 配置文件
-;; Regenerate explicitly because README.org and all generated files may be
-;; edited independently during the incremental migration.
+;; README.org is canonical for tangled files; Org workflow modules are
+;; maintained directly under etc/.
 (defun suk/org-babel-tangle-config ()
   (interactive)
   (when (and buffer-file-name

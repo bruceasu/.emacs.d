@@ -5,16 +5,18 @@
 (require 'basic-function)
 
 (let ((dir (file-name-directory (or load-file-name buffer-file-name))))
-  (load-if-exists (expand-file-name "leader-key.el" dir))
-  ;; Reuse the shared coding layers.
-  (load-if-exists (expand-file-name "init-coding-web.el" dir))
-  (require 'init-treemacs nil t)
-  ;; New coding-specific layers.
-  (load-if-exists (expand-file-name "init-coding-core.el" dir))
-  (load-if-exists (expand-file-name "init-coding-lsp.el" dir))
-  (load-if-exists (expand-file-name "init-coding-nav.el" dir))
-  (load-if-exists (expand-file-name "init-coding-debug.el" dir))
-  (load-if-exists (expand-file-name "init-coding-files.el" dir)))
+  (dolist (module '("init-coding-core.el"
+                    "init-coding-web.el"
+                    "init-coding-lsp.el"
+                    "init-coding-nav.el"
+                    "init-coding-debug.el"
+                    "init-coding-files.el"))
+    (condition-case err
+        (load-if-exists (expand-file-name module dir))
+      (error
+       (display-warning 'suk
+                        (format "Coding module %s failed: %s"
+                                module (error-message-string err)))))))
 
 (provide 'init-coding)
 

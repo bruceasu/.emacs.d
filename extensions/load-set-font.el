@@ -1,327 +1,249 @@
-;;; load-set-font.el --- load my fonts.
-;;
-;; Copyright (C) 2018 Suk
-;;
-;; Author: Suk
-;;
-;; This file is not part of GNU Emacs.
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or
-;; (at your option) any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-;; Floor, Boston, MA 02110-1301, USA.
-;;
-;;; Commentary:
-;; Fonts Setting
-;;
+;;; load-set-font.el --- Configure monospaced fonts -*- lexical-binding: t; -*-
+
+;; This file is directly maintained.  README.org loads it but does not tangle it.
+
 ;;; Code:
 
+(require 'cl-lib)
 
-;;===================================================
-;; Fonts
-;;===================================================
-;;;###autoload
+(defvar efl
+  '("asu-cjk-code"
+    "Cascadia Code"
+    "JetBrains Mono"
+    "Source Code Pro"
+    "Consolas"
+    "DejaVu Sans Mono"
+    "Migu 1M Less"
+    "Ubuntu Mono"
+    "Victor Mono"
+    "Monaco"
+    "Courier New")
+  "Preferred monospaced fonts for Latin text, in priority order.")
+
+(defvar cfl
+  '("asu-cjk-code"
+    "Sarasa Mono SC"
+    "Sarasa Mono HK"
+    "Sarasa Mono TC"
+    "Sarasa Mono JP"
+    "LXGW WenKai Mono"
+    "Migu 1M Less"
+    "Noto Sans Mono CJK SC"
+    "Noto Sans Mono CJK TC"
+    "Noto Sans Mono CJK JP"
+    "WenQuanYi Zen Hei Mono")
+  "Preferred monospaced fonts for CJK text, in priority order.")
+
+(defvar suk-fixed-width-table-font-candidates
+  '("M+CodeLat50 Nerd Font Mono"
+    "M+CodeLat50"
+    "Migu 1M Less"
+    "Sarasa Mono SC"
+    "asu-cjk-code")
+  "Fonts preferred for tables, with Latin glyphs half the CJK cell width.")
+
+(defvar emacs-font-size-pair-list
+  '((12 . 12) (14 . 14) (16 . 16) (18 . 18) (20 . 20)
+    (22 . 22) (24 . 24) (26 . 26) (28 . 28) (30 . 30)
+    (32 . 32) (36 . 36))
+  "Supported font sizes as (LATIN-PIXELS . CJK-PIXELS) pairs.")
+
+(defvar emacs-font-size-pair '(24 . 24)
+  "Current font sizes as (LATIN-PIXELS . CJK-PIXELS).")
+
+(defvar en-font nil "Selected monospaced Latin font family.")
+(defvar cn-font nil "Selected monospaced CJK font family.")
+(defvar emacs-english-font nil "Current monospaced Latin font family.")
+(defvar emacs-cjk-font nil "Current monospaced CJK font family.")
+
+(defun suk-font-family-list (&optional frame)
+  "Return cached font families available on FRAME."
+  (let* ((frame (or frame (selected-frame)))
+         (cached (frame-parameter frame 'suk-font-family-cache)))
+    (or cached
+        (let ((families
+               (mapcar #'downcase (font-family-list frame))))
+          (set-frame-parameter frame 'suk-font-family-cache families)
+          families))))
+
+(defun available-font (font-list &optional frame)
+  "Return the first available family in FONT-LIST on FRAME."
+  (let ((families (suk-font-family-list frame)))
+    (cl-find-if (lambda (font) (member (downcase font) families)) font-list)))
+
+(defun font-exist-p (fontname &optional frame)
+  "Return non-nil if FONTNAME is available on FRAME."
+  (and (stringp fontname)
+       (member (downcase fontname) (suk-font-family-list frame))))
+
 (defun suk-install-fonts ()
-  "Install necessary fonts."
+  "Install Nerd Icons fonts and refresh cached font-family lists."
   (interactive)
-  (all-the-icons-install-fonts)
-  (nerd-icons-install-fonts))
+  (unless (require 'nerd-icons nil t)
+    (user-error "The nerd-icons package is not available"))
+  (nerd-icons-install-fonts)
+  (dolist (frame (frame-list))
+    (set-frame-parameter frame 'suk-font-family-cache nil)))
 
-(defun config-font-size (en-size cn-size)
-  (when (display-graphic-p)
-    (set-face-attribute 'default nil :family cn-size)
-    (dolist (charset '(kana han cjk-misc bopomofo))
-      (set-fontset-font (frame-parameter nil 'font) charset
-                        (font-spec :family cn-font :size cn-size)))))
+(defun suk-font-for-frame (preferred candidates frame)
+  "Choose PREFERRED on FRAME, or the first available family in CANDIDATES."
+  (or (and (font-exist-p preferred frame) preferred)
+      (available-font candidates frame)))
 
-(defun font-exist-p (fontname)
-  "Test if this FONTNAME is exist or not."
-  (if (or (not fontname) (string= fontname ""))
-      nil
-    (if (not (x-list-fonts fontname))
-        nil t)))
+(defun set-font (latin cjk size-pair &optional frame)
+  "Set LATIN and CJK fonts on FRAME using pixel SIZE-PAIR."
+  (let ((frame (or frame (selected-frame))))
+    (when (and (frame-live-p frame) (display-graphic-p frame))
+      (when (font-exist-p latin frame)
+        ;; Integer `font-spec :size' and CJK `font-spec :size' use pixels.
+        (set-frame-font (font-spec :family latin :size (car size-pair))
+                        t (list frame))
+        (dolist (face '(default fixed-pitch fixed-pitch-serif variable-pitch))
+          (set-face-attribute face frame :family latin))
+        (when (font-exist-p cjk frame)
+          (dolist (charset '(han hangul kana cjk-misc bopomofo
+                             japanese-jisx0208 japanese-jisx0212
+                             katakana-jisx0201))
+            (set-fontset-font
+             nil charset
+             (font-spec :family cjk :size (cdr size-pair))
+             frame)))
+        (setq emacs-english-font latin
+              emacs-cjk-font (and (font-exist-p cjk frame) cjk)
+              en-font (or en-font latin)
+              cn-font (or cn-font (and (font-exist-p cjk frame) cjk)))
+        (set-frame-parameter frame 'suk-font-state
+                             (list latin emacs-cjk-font size-pair))
+        t))))
 
-;; adjust the fonts
-(defun available-font (font-list)
-  "Get the first available font from FONT-LIST."
-  (catch 'font
-    (dolist (font font-list)
-      (if (member font (font-family-list))
-	  (throw 'font font)))))
+(defun suk-apply-frame-font (frame)
+  "Apply the configured monospaced fonts to FRAME if needed."
+  (when (and (frame-live-p frame) (display-graphic-p frame))
+    (let* ((latin (suk-font-for-frame emacs-english-font efl frame))
+           (cjk (suk-font-for-frame emacs-cjk-font cfl frame))
+           (state (list latin cjk emacs-font-size-pair)))
+      (unless (equal state (frame-parameter frame 'suk-font-state))
+        (when latin
+          (set-font latin cjk emacs-font-size-pair frame)))
+      (suk-set-table-face-font frame)))
+  frame)
 
-(setq efl '(
-        "asu-cjk-code"
-	"Cascadia Code"
-	"Source Code Pro"
-	"LXGW WenKai Mono"
-	"霞鹜文楷等宽"
-	"JetBrains Mono"
-	"Victor Mono"
-	"Consolas"
-	"Courier New"
-	"Monaco"
-	"Ubuntu Mono"
-	"lucida grande"
-	"lucida sans unicode"
-	"lucida"
-	"helvetica"
-	"Tahoma"
-	"Times New Roman"
-	"Migu 1M Less"
-	"DejaVu Sans Mono"
-	))
-
-(setq cfl '(
-        "asu-cjk-code"
-	"asu-cjk-sans"
-	"asu-cjk-serif"
-	"KleeOne+CJK"
-	"LXGW WenKai"
-	"霞鹜文楷"
-	"LXGW WenKai Mono"
-	"霞鹜文楷等宽"
-	"仓耳今楷01-27533 W04"
-	"Hiragino Sans GB"
-	"Microsoft YaHei"
-	"微软雅黑"
-	"WenQuanYi Micro Hei"
-	"Sarasa Mono SC"
-	"Sarasa Mono HK"
-	"Sarasa Mono TC"
-	"Sarasa Mono JP"
-	"Simsun"
-	"宋体"
-	))
-(setq en-font "Time New Roman"
-      cn-font "LXGW WenKai")
-
-(setq cn-font (available-font cfl))
-(setq en-font (available-font efl))
-
-;; Fonts
-(setq emacs-font-size-pair '(24 . 24))
-
-(setq en-font-size (car emacs-font-size-pair)
-      cn-font-size (cdr emacs-font-size-pair))
-
-(defvar emacs-english-font en-font
-  "The font name of English.")
-
-(defvar emacs-cjk-font cn-font
-  "The font name for CJK.")
-
-(defvar emacs-font-size-pair (emacs-english-font . emacs-cjk-font)
-  "Default font size pair for (latin . cjk).")
-
-
-;; (config-font-size 17 18)
-(config-font-size (default-value 'en-font-size) (default-value 'cn-font-size))
-
-
-;; 解决卡顿
-(setq inhibit-compacting-font-caches t)
-;;只渲染当前屏幕语法高亮，加快显示速度
-(setq font-lock-maximum-decoration t)
-(global-font-lock-mode t)
-(setq font-lock-maximum-size 5000000); set 5mb file size limit for fontification
-
-(defun set-font (latin cjk size-pair)
-  "Setup Emacs LATIN and CJK fonts with SIZE-PAIR on x window-system."
-  (when (font-exist-p latin)
-    (set-frame-font (format "%s:pixelsize=%d" latin (car size-pair)) t)
-    ;; (dolist (face '(default fixed-pitch fixed-pitch-serif variable-pitch))
-    ;;   (set-face-attribute face nil :family latin))
-    )
-
-  (when (font-exist-p cjk)
-    ;;(set-face-attribute 'default nil :family "JetBrainsMono NFM")
-    (dolist (charset
-	         '(kana
-               han
-               symbol
-               cjk-misc
-               bopomofo
-               japanese-jisx0208
-               japanese-jisx0212
-               katakana-jisx0201
-               ;;latin
-               symbol
-               ))
-      (set-fontset-font
-       (frame-parameter nil 'font) charset
-       (font-spec :family cjk :size (cdr size-pair))))
-    (setq face-font-rescale-alist
- 	      (mapcar (lambda (item) (cons item 1.0)) cfl))
-    ))
-
-(defun emacs-step-font-size (step)
-  "Increase/Decrease Emacs's font by STEP size."
-  (let ((scale-steps emacs-font-size-pair-list))
-    (if (< step 0) (setq scale-steps (reverse scale-steps)))
-    (setq emacs-font-size-pair
-          (or (cadr (member emacs-font-size-pair scale-steps))
-              emacs-font-size-pair))
-    (when emacs-font-size-pair
-      (message "emacs font size set to %.1f" (car emacs-font-size-pair))
-      (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair))))
-
-(defun increase-emacs-font-size ()
-  "Decrease Emacs's font-size acording emacs-font-size-pair-list."
-  (interactive) (emacs-step-font-size 1))
-
-(defun decrease-emacs-font-size ()
-  "Increase Emacs's font-size acording emacs-font-size-pair-list."
-  (interactive) (emacs-step-font-size -1))
-
-;; (when (fboundp 'variable-pitch-mmode)
-;;   (set-face-attribute 'variable-pitch nil :family "asu-cjk-serif" :height 120))
-;; (when (fboundp 'fixed-pitch-mode)
-;;   (set-face-attribute 'mixed-pitch nil :family "asu-cjk-mono" :height 120))
-
-
-(defvar loaded-font-type nil
-  "Current font type.")
-;;----------------------------------------------------------
 (defun load-default-font ()
-  "Load default font setting."
+  "Apply the configured monospaced fonts to the selected frame."
   (interactive)
-  (unless (eq loaded-font-type 1)
-    (setq emacs-english-font en-font)
-    (setq emacs-cjk-font cn-font)
-    ;; Setup font size based on emacs-font-size-pair
-    (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-    ;; 还是等宽字体比较顺眼
-    (when (fboundp 'variable-pitch-mode) (variable-pitch-mode nil))
-    (when (fboundp 'mixed-pitch-mode) (mixed-pitch-mode nil))
-    (setq loaded-font-type 1)
-    (message "Set default font")
-  ))
+  (suk-apply-frame-font (selected-frame)))
 
-;;----------------------------------------------------------
 (defun load-program-font ()
-  "Load Program font."
+  "Apply the same monospaced font profile used by other buffers."
   (interactive)
-  (unless (eq loaded-font-type 2)
-    (setq emacs-english-font "asu-cjk-code")
-    ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
-    (setq emacs-cjk-font "asu-cjk-code")
-    (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-    (when (member "Symbols Nerd Font Mono" (font-family-list))
-      (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
-      ;; FontAwesome 范围
-      (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
-      ;; 扩展至可能包含 Material Design Icons 的范围
-      (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
-    ;; 还是等宽字体比较顺眼
-    (when (fboundp 'variable-pitch-mode) (variable-pitch-mode nil))
-    (when (fboundp 'mixed-pitch-mode) (mixed-pitch-mode nil))
-    (setq loaded-font-type 2)
-    (message "Set program font")))
+  (load-default-font))
 
-;;(add-hook 'prog-mode-hook 'load-program-font)
-(add-hook 'prog-mode-hook  (lambda () (variable-pitch-mode -1)))
+(defun suk-table-font-family (&optional frame)
+  "Return the preferred fixed-width table font available on FRAME."
+  (or (available-font suk-fixed-width-table-font-candidates frame)
+      (suk-font-for-frame emacs-cjk-font cfl (or frame (selected-frame)))
+      (suk-font-for-frame emacs-english-font efl (or frame (selected-frame)))))
 
-;;----------------------------------------------------------
+(defface suk-fixed-width-table-face
+  '((t (:inherit fixed-pitch)))
+  "Face for tables that need fixed Latin-to-CJK cell widths.")
+
+(defun suk-set-table-face-font (&optional frame)
+  "Set table faces to the preferred fixed-width font on FRAME."
+  (let* ((frame (or frame (selected-frame)))
+         (family (suk-table-font-family frame)))
+    (when family
+      (set-face-attribute 'suk-fixed-width-table-face frame :family family)
+      (when (facep 'org-table)
+        (set-face-attribute 'org-table frame :family family)))))
+
 (defun load-org-font ()
-  "Load org mode font."
-  (interactive)
-  (unless (eq loaded-font-type 3)
-    ;;(load-default-font)
-    ;; (set-face-attribute FACE FRAME &rest ARGS)
-    ;; or (set-face-attribute FACE FRAME &rest ARGS)
-    ;; 字体和字号
-    ;; :family 指定字体家族，如 "Monaco"、"DejaVu Sans Mono"。
-    ;; :height 指定字体大小，以 1/10 点为单位，如 120 表示 12 点大小。
-    ;; :weight 指定字重，如 'normal、'bold。
-    ;; :width 指定字体宽度，如 'normal、'condensed。
-    ;; 颜色
-    ;; :foreground 指定前景色，即文字颜色。
-    ;; :background 指定背景色。
-    ;; 下划线、删除线等
-    ;; :underline 指定是否添加下划线，可以是 t、nil 或颜色名称/值。
-    ;; :overline 指定是否添加上划线。
-    ;; :strike-through 或 :strike 指定是否添加删除线。
-    ;; 其他
-    ;; :slant 指定字体倾斜样式，如 'italic、'oblique、'normal。
-    ;; :inherit 指定从其他 face 继承属性。
-    ;; 关于 :font 参数
-    ;; :font 参数可以用于直接指定整个字体描述字符串，
-    ;; 这是一种快捷方式，它允许你同时指定字体家族、大小等信息，格式通常是 "家族-大小"，
-    ;; 如 "Monaco-12"。使用 :font 时，可能无法单独指定字重、宽度等属性。
-    ;; (set-face-attribute 'default nil
-    ;;                     :family "asu-cjk-sans" ; 字体家族，如 "Sarasa Mono SC"
-    ;;                     :height 120 ; 字号，120 表示 12pt
-    ;;                     :weight 'normal ; 字体粗细
-    ;;                     :width 'normal) ; 字体宽度
-    ;;(variable-pitch-mode -1)
-    ;; 设置英文字体并指定字号。
-    (setq emacs-english-font "asu-cjk-code")
-    ;;(setq emacs-english-font "M+CodeLat50 Nerd Font Mono")
-    ;; 给相应的字符集设置中文字体。
-    ;; abcdefg
-    ;; hij汉字
-    (setq emacs-cjk-font "asu-cjk-code")
-    (set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-    ;; (face-remap-add-relative 'default nil :font "asu-cjk-code")
-
-    (set-face-attribute 'org-block nil :family "asu-cjk-sans")
-    (set-face-attribute 'org-code nil :family "asu-cjk-code")
-    (set-face-attribute 'org-table nil :family "M+CodeLat50 Nerd Font Mono")
-    ;; (set-face-attribute 'org-table nil :family "更紗等幅ゴシック J")
-    ;; (set-face-attribute 'org-table nil :family "asu-cjk-code")
-    ;; (set-face-attribute 'org-level-1 nil :family "asu-cjk-sans")
-    ;; (set-face-attribute 'org-level-2 nil :family "asu-cjk-sans")
-    ;; (set-face-attribute 'org-level-3 nil :family "asu-cjk-sans")
-    ;; (set-face-attribute 'org-level-4 nil :family "asu-cjk-sans")
-    ;; (set-face-attribute 'org-level-5 nil :family "asu-cjk-sans")
-    ;; (set-face-attribute 'org-level-6 nil :family "asu-cjk-sans")
-    ;; (set-face-attribute 'org-level-7 nil :family "asu-cjk-sans")
-    ;; (set-face-attribute 'org-level-8 nil :family "asu-cjk-sans")
-    ;; (when (member "Symbols Nerd Font Mono" (font-family-list))
-    ;; (set-fontset-font t 'symbol "Symbols Nerd Font Mono")
-    ;; ;; FontAwesome 范围
-    ;; (set-fontset-font t '(#xf000 . #xf2e0) "Symbols Nerd Font Mono")
-    ;; ;; 扩展至可能包含 Material Design Icons 的范围
-    ;; (set-fontset-font t '(#xe000 . #xf8ff) "Symbols Nerd Font Mono"))
-    ;; 还是等宽字体比较顺眼
-    (when (fboundp 'variable-pitch-mode) (variable-pitch-mode nil))
-    (when (fboundp 'mixed-pitch-mode) (mixed-pitch-mode nil))
-    (setq loaded-font-type 3)
-    (message "Set org-mode font")))
+  "Keep Org text monospaced and give Org tables their fixed-width font."
+  (when (display-graphic-p)
+    (let ((family (or emacs-english-font en-font))
+          (frame (selected-frame)))
+      (when family
+        (set-face-attribute 'org-block frame :family family)
+        (set-face-attribute 'org-code frame :family family)))
+    (suk-set-table-face-font (selected-frame))
+    (when (fboundp 'variable-pitch-mode)
+      (variable-pitch-mode -1))
+    (when (fboundp 'mixed-pitch-mode)
+      (mixed-pitch-mode -1))))
 
 (with-eval-after-load 'org
-  (add-hook 'org-mode-hook 'load-org-font)
-)
+  (add-hook 'org-mode-hook #'load-org-font))
 
+(defun suk-markdown-table-line-matcher (limit)
+  "Match Markdown pipe-table rows up to LIMIT."
+  (let (matched)
+    (while (and (not matched)
+                (re-search-forward "^[ \t]*|.*|[ \t]*$" limit t))
+      (when (or (not (fboundp 'markdown-table-at-point-p))
+                (save-excursion
+                  (goto-char (match-beginning 0))
+                  (markdown-table-at-point-p)))
+        (setq matched t)))
+    matched))
 
-;;; ----------------------------------------------------------
+(defvar-local suk-markdown-table-font-enabled nil
+  "Non-nil when the table font-lock rule is installed in this buffer.")
 
-;; 解决 daemon 时， 字体无效。
-(when (and (fboundp 'daemonp) (daemonp))
-  (add-hook 'after-make-frame-functions
-            (lambda (frame)
-              (with-selected-frame frame
-                (load-default-font)))))
+(defun suk-markdown-setup-table-font ()
+  "Use the fixed-width table face for Markdown pipe-table rows."
+  (unless suk-markdown-table-font-enabled
+    (font-lock-add-keywords
+     nil '((suk-markdown-table-line-matcher
+            (0 'suk-fixed-width-table-face prepend)))
+     'append)
+    (setq suk-markdown-table-font-enabled t))
+  (suk-set-table-face-font (selected-frame))
+  (when (and font-lock-mode (fboundp 'font-lock-flush))
+    (font-lock-flush)))
 
+(with-eval-after-load 'markdown-mode
+  (add-hook 'markdown-mode-hook #'suk-markdown-setup-table-font))
+
+(defun emacs-step-font-size (step)
+  "Move the font size by STEP entries in `emacs-font-size-pair-list'."
+  (let* ((sizes (copy-sequence emacs-font-size-pair-list))
+         (current (or (cl-position emacs-font-size-pair sizes :test #'equal)
+                      0))
+         (target (max 0 (min (1- (length sizes)) (+ current step)))))
+    (when sizes
+      (setq emacs-font-size-pair (nth target sizes))
+      (dolist (frame (frame-list))
+        (set-frame-parameter frame 'suk-font-state nil)
+        (suk-apply-frame-font frame))
+      (message "Font size set to %d/%d pixels"
+               (car emacs-font-size-pair)
+               (cdr emacs-font-size-pair))))
+
+(defun increase-emacs-font-size ()
+  "Increase the font size by one configured step."
+  (interactive)
+  (emacs-step-font-size 1))
+
+(defun decrease-emacs-font-size ()
+  "Decrease the font size by one configured step."
+  (interactive)
+  (emacs-step-font-size -1))
 
 (when (eq system-type 'windows-nt)
-  ;; (set-frame-font "Simsun 12")
-  ;; setup change size font, base on emacs-font-size-pair-list
-  (global-set-key (kbd "C-M-=") 'increase-emacs-font-size)
-  (global-set-key (kbd "C-M--") 'decrease-emacs-font-size)
-  )
+  (global-set-key (kbd "C-M-=") #'increase-emacs-font-size)
+  (global-set-key (kbd "C-M--") #'decrease-emacs-font-size))
 
-(add-hook 'after-init-hook #'load-default-font)
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (when (fboundp 'variable-pitch-mode)
+              (variable-pitch-mode -1))
+            (when (fboundp 'mixed-pitch-mode)
+              (mixed-pitch-mode -1))))
+
+(add-hook 'after-make-frame-functions #'suk-apply-frame-font)
+(if after-init-time
+    (load-default-font)
+  (add-hook 'after-init-hook #'load-default-font))
 
 (provide 'load-set-font)
-;;; load-set-font.el ends here.
+;;; load-set-font.el ends here

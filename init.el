@@ -86,10 +86,20 @@
 	;; Continue recursively through subdirectories.
 	(add-subdirs-to-load-path subdir-path nil)))))
 
-;; Load the defined directories.
+;; Load configuration and theme libraries recursively.
 (add-subdirs-to-load-path suk-emacs-config-dir t)
-(add-subdirs-to-load-path suk-emacs-extension-dir t)
 (add-subdirs-to-load-path suk-emacs-themes-dir t)
+
+;; Add only local extension directories used by the active configuration.
+;; Package.el manages package-user-dir itself; scanning it recursively is unnecessary.
+(dolist (relative-dir
+         '("" "company-english-helper" "duplicate-line" "emacs-rime"
+           "expand-region" "goto-line-preview" "input-method"
+           "input-method/pyim" "lazy-load" "lazycat" "move-text"
+           "open-newline" "sdcv" "thing-edit" "vdiff" "vundo"))
+  (let ((dir (expand-file-name relative-dir suk-emacs-extension-dir)))
+    (when (file-directory-p dir)
+      (add-to-list 'load-path dir t))))
 
 ;; (add-to-list 'load-path "/usr/local/share/emacs/site-lisp")
 
@@ -107,15 +117,52 @@
 (defun suk/enable-coding ()
   "Enable coding-related tools."
   (interactive)
-  (require 'init-coding))
+  (condition-case err
+      (require 'init-coding)
+    (error
+     (display-warning 'suk
+                      (format "Coding features failed: %s"
+                              (error-message-string err))))))
 
 (defalias 'suk/enable-devtools #'suk/enable-coding)
 (add-hook 'after-init-hook #'suk/enable-coding)
 
-;; Load exactly one UI layer.
-(if (display-graphic-p)
-    (load (expand-file-name "gui.el" suk-emacs-root-dir))
-  (load (expand-file-name "tui.el" suk-emacs-root-dir)))
+(defun suk/configure-frame-ui (frame)
+  "Load the UI adapter and optional appearance for FRAME."
+  (with-selected-frame frame
+    (condition-case err
+        (if (display-graphic-p frame)
+            (unless (featurep 'suk-ui-gui)
+              (load (expand-file-name "gui.el" suk-emacs-root-dir) nil t))
+          (unless (featurep 'suk-ui-tui)
+            (load (expand-file-name "tui.el" suk-emacs-root-dir) nil t)))
+      (error
+       (display-warning 'suk
+                        (format "UI adapter failed: %s"
+                                (error-message-string err)))))
+    (when suk-enable-appearance
+      (run-with-idle-timer 0.5 nil #'suk/load-frame-appearance frame))))
+
+(defun suk/load-frame-appearance (frame)
+  "Load optional appearance after startup for FRAME."
+  (when (and suk-enable-appearance (frame-live-p frame))
+    (with-selected-frame frame
+      (let ((appearance-feature
+             (if (display-graphic-p frame)
+                 'suk-appearance-gui
+               'suk-appearance-tui)))
+        (unless (featurep appearance-feature)
+          (condition-case err
+              (when (load (expand-file-name "appearance.el" suk-emacs-root-dir) nil t)
+                (provide appearance-feature))
+            (error
+             (display-warning 'suk
+                              (format "Appearance layer failed: %s"
+                                     (error-message-string err))))))))))
+
+(add-hook 'after-make-frame-functions #'suk/configure-frame-ui)
+(unless (daemonp)
+  (suk/configure-frame-ui (selected-frame)))
 
 ;; Hanlde minified code
 (if emacs/>=27p (add-hook 'after-init-hook #'global-so-long-mode))

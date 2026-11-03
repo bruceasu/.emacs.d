@@ -7,7 +7,11 @@
 (defun suk/coding-open-file-tree ()
   "Open Treemacs for the current project."
   (interactive)
-  (if (fboundp 'treemacs) (treemacs) (suk/coding-open-project-root)))
+  (if (and (display-graphic-p)
+           (require 'init-treemacs nil t)
+           (fboundp 'treemacs))
+      (treemacs)
+    (suk/coding-open-project-root)))
 (defun suk/coding-open-ibuffer () (interactive) (ibuffer))
 (with-eval-after-load 'leader-key
   (keymap-set leader-key-map "n t" #'suk/coding-open-file-tree)

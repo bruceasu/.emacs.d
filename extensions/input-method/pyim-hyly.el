@@ -32,7 +32,7 @@
 ;; (setq pyim-page-tooltip 'popon)
    
 ;; 使用 posframe 来绘制选词框
-(require 'posframe)
+(require 'posframe nil t)
 ;;(setq pyim-page-tooltip 'posframe)
 
 ;; 按照优先顺序自动选择一个可用的 tooltip
@@ -101,11 +101,11 @@
 ;; 开启代码搜索中文功能（比如拼音，五笔码等）
 (pyim-isearch-mode 1)
 (setq-default pyim-english-input-switch-functions
-              '(pyim-probe-program-mode 
-              pyim-probe-org-seepd-commands
-               pyim-rpobe-isearch-mode
+              '(pyim-probe-program-mode
+                pyim-probe-org-speed-commands
+                pyim-probe-isearch-mode
                 pyim-probe-org-structure-template
-                 pyim-probe-dynamic-english))
+                pyim-probe-dynamic-english))
 ;;;###autoload
 (defun pyim-hyly-enable ()
   "Add huyanluanyu dict to pyim."

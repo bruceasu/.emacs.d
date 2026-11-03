@@ -1,5 +1,5 @@
 (provide 'init-toggles)
-(when sys/is-gui
+(when (display-graphic-p)
   (with-eval-after-load 'pretty-hydra
     ;; Global toggles         
     (with-no-warnings
@@ -48,14 +48,5 @@
           ("M" diff-hl-margin-mode "margin gutter" :toggle t)
           ("D" diff-hl-dired-mode "dired gutter" :toggle t))
          ))
-      (keymap-global-set "C-x M-t"  #'toggles-hydra/body)
-      (keymap-set leader-key "t" #'toggles-hydra/body)
+      (keymap-set leader-key-map "t" #'toggles-hydra/body)
       )))
-
-(when sys/is-tui
-  (defun toggles-hydra/body()
-    "Toggles"
-    (interactive)
-    (message "Not support in TUI")
-    )
-  )

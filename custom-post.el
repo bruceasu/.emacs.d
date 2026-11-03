@@ -1,7 +1,4 @@
 ;;( suk/create-scratch-buffer)
-(require 'pyim-hyly)
-(pyim-hyly-enable)
-
 (defun org-export-docx ()
   (interactive)
   (let ((docx-file (concat (file-name-sans-extension (buffer-file-name)) ".docx"))

@@ -52,7 +52,7 @@
   ("A" thing-cut-to-line-beginning)
   ("E" thing-cut-to-line-end)
   ("b" show-file-name)
-  
+
   ("q" nil "Cancel")
   )
 
