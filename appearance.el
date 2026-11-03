@@ -78,12 +78,27 @@
 
 (when (display-graphic-p)
   (use-package vertico-posframe
-    :ensure t
-    :after (posframe vertico)
+    :demand t
     :hook (vertico-mode . vertico-posframe-mode)
     :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
+    :config
+    ;; Appearance loads after Vertico has already started during init.
+    (when (bound-and-true-p vertico-mode)
+      (vertico-posframe-mode 1))
     )
   )
+
+(when (display-graphic-p)
+  (use-package org-modern
+    :init
+    ;; Emacs 30 cannot run org-modern byte-code compiled with Emacs 31.
+    ;; Load the source so `without-restriction' expands for this Emacs.
+    (when (< emacs-major-version 31)
+      (load "org-modern.el" nil t t))
+    :custom
+    (prettify-symbols-alist nil)
+    :hook ((org-mode . org-modern-mode)
+           (org-agenda-finalize . org-modern-agenda))))
 
 (when (display-graphic-p)
   (use-package doom-themes

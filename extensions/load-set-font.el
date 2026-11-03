@@ -34,14 +34,6 @@
     "WenQuanYi Zen Hei Mono")
   "Preferred monospaced fonts for CJK text, in priority order.")
 
-(defvar suk-fixed-width-table-font-candidates
-  '("M+CodeLat50 Nerd Font Mono"
-    "M+CodeLat50"
-    "Migu 1M Less"
-    "Sarasa Mono SC"
-    "asu-cjk-code")
-  "Fonts preferred for tables, with Latin glyphs half the CJK cell width.")
-
 (defvar emacs-font-size-pair-list
   '((12 . 12) (14 . 14) (16 . 16) (18 . 18) (20 . 20)
     (22 . 22) (24 . 24) (26 . 26) (28 . 28) (30 . 30)
@@ -98,8 +90,13 @@
         ;; Integer `font-spec :size' and CJK `font-spec :size' use pixels.
         (set-frame-font (font-spec :family latin :size (car size-pair))
                         t (list frame))
-        (dolist (face '(default fixed-pitch fixed-pitch-serif variable-pitch))
-          (set-face-attribute face frame :family latin))
+        ;; Keep the frame font as the source of the family.  Setting a family
+        ;; such as "asu-cjk-code" on a face makes Emacs parse its hyphens as
+        ;; foundry/family fields and can replace the frame font with a fallback.
+        (dolist (face '(fixed-pitch fixed-pitch-serif variable-pitch))
+          (set-face-attribute face frame
+                              :family 'unspecified
+                              :inherit 'default))
         (when (font-exist-p cjk frame)
           (dolist (charset '(han hangul kana cjk-misc bopomofo
                              japanese-jisx0208 japanese-jisx0212
@@ -138,38 +135,42 @@
   (interactive)
   (load-default-font))
 
-(defun suk-table-font-family (&optional frame)
-  "Return the preferred fixed-width table font available on FRAME."
-  (or (available-font suk-fixed-width-table-font-candidates frame)
-      (suk-font-for-frame emacs-cjk-font cfl (or frame (selected-frame)))
-      (suk-font-for-frame emacs-english-font efl (or frame (selected-frame)))))
-
 (defface suk-fixed-width-table-face
   '((t (:inherit fixed-pitch)))
   "Face for tables that need fixed Latin-to-CJK cell widths.")
 
 (defun suk-set-table-face-font (&optional frame)
-  "Set table faces to the preferred fixed-width font on FRAME."
-  (let* ((frame (or frame (selected-frame)))
-         (family (suk-table-font-family frame)))
-    (when family
-      (set-face-attribute 'suk-fixed-width-table-face frame :family family)
-      (when (facep 'org-table)
-        (set-face-attribute 'org-table frame :family family)))))
+  "Make Org and Markdown table faces inherit the fixed-pitch font on FRAME.
+
+Keep the family unspecified so table text uses FRAME's configured Latin font
+and CJK fontset.  Assigning a fallback family directly can be parsed
+incorrectly for hyphenated family names and bypass the frame's CJK fallback."
+  (let ((frame (or frame (selected-frame))))
+    (set-face-attribute 'suk-fixed-width-table-face frame
+                        :family 'unspecified
+                        :inherit 'fixed-pitch)
+    (when (facep 'org-table)
+      ;; Org's built-in face specifies colors but does not inherit a fixed
+      ;; pitch face.  Keep its colors while inheriting the configured mono font.
+      (set-face-attribute 'org-table frame
+                          :family 'unspecified
+                          :inherit 'fixed-pitch))))
 
 (defun load-org-font ()
   "Keep Org text monospaced and give Org tables their fixed-width font."
   (when (display-graphic-p)
-    (let ((family (or emacs-english-font en-font))
-          (frame (selected-frame)))
-      (when family
-        (set-face-attribute 'org-block frame :family family)
-        (set-face-attribute 'org-code frame :family family)))
-    (suk-set-table-face-font (selected-frame))
+    (let ((frame (selected-frame)))
+      (dolist (face '(org-block org-code
+                      org-document-title org-document-info
+                      org-level-1 org-level-2 org-level-3 org-level-4
+                      org-level-5 org-level-6 org-level-7 org-level-8))
+        (when (facep face)
+          (set-face-attribute face frame :family 'unspecified))))
     (when (fboundp 'variable-pitch-mode)
       (variable-pitch-mode -1))
     (when (fboundp 'mixed-pitch-mode)
-      (mixed-pitch-mode -1))))
+      (mixed-pitch-mode -1)))
+  (suk-set-table-face-font (selected-frame)))
 
 (with-eval-after-load 'org
   (add-hook 'org-mode-hook #'load-org-font))
@@ -217,7 +218,7 @@
         (suk-apply-frame-font frame))
       (message "Font size set to %d/%d pixels"
                (car emacs-font-size-pair)
-               (cdr emacs-font-size-pair))))
+               (cdr emacs-font-size-pair)))))
 
 (defun increase-emacs-font-size ()
   "Increase the font size by one configured step."

@@ -60,14 +60,14 @@ The layout is split into a few clear output files:
 
 ** Source ownership
 
-| Files | Maintenance rule |
-|-------+------------------|
-| Files named by a =:tangle= block in README.org | README.org is the source of truth for that output; edit the block and run =M-x org-babel-tangle=. |
-| custom.el, custom-post.el | Directly maintained user settings and after-init overrides; they are not tangled from README.org. |
-| extensions/load-set-font.el | Directly maintained font module; README.org loads it but does not tangle its implementation. |
-| extensions/input-method/pyim-hyly.el and vendored trees such as extensions/input-method/pyim, extensions/emacs-rime, and extensions/company-english-helper | Directly maintained or vendored code; these are not generated from README.org. |
-| etc/init-org.el, etc/init-org-*.el, etc/my-defshortcuts.el | Directly maintained Org modules. suk.el loads the Org entry point; these files intentionally remain modular. |
-| etc/init-calendar.el, etc/init-devtools.el, etc/init-key.el, etc/init-tools.el, etc/init-vcs.el | No reference from the current startup path was found. Treat these as legacy until explicitly reconnected; do not edit them expecting them to affect the running configuration. |
+| Files                                                                                                                                                      | Maintenance rule                                                                                                                                                               |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Files named by a =:tangle= block in README.org                                                                                                               | README.org is the source of truth for that output; edit the block and run =M-x org-babel-tangle=.                                                                                |
+| custom.el, custom-post.el                                                                                                                                  | Directly maintained user settings and after-init overrides; they are not tangled from README.org.                                                                              |
+| extensions/load-set-font.el                                                                                                                                | Directly maintained font module; README.org loads it but does not tangle its implementation.                                                                                   |
+| extensions/input-method/pyim-hyly.el and vendored trees such as extensions/input-method/pyim, extensions/emacs-rime, and extensions/company-english-helper | Directly maintained or vendored code; these are not generated from README.org.                                                                                                 |
+| etc/init-org.el, etc/init-org-*.el, etc/my-defshortcuts.el                                                                                                 | Directly maintained Org modules. suk.el loads the Org entry point; these files intentionally remain modular.                                                                   |
+| etc/init-calendar.el, etc/init-devtools.el, etc/init-key.el, etc/init-tools.el, etc/init-vcs.el                                                            | No reference from the current startup path was found. Treat these as legacy until explicitly reconnected; do not edit them expecting them to affect the running configuration. |
 
 The active etc modules generated from this file include init-completion-company,
 init-description, init-rime, init-rectangle, init-thing-edit,
@@ -485,6 +485,7 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (setq warning-suppress-log-types '((package reinitialization)))
 
   (require 'package)
+  (require 'cl-lib)
 
   (add-to-list 'package-archives
                '("melpa" . "https://melpa.org/packages/"))
@@ -501,6 +502,36 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
     (package-initialize))
 
   ;; Run `package-quickstart-refresh' after changing installed packages.
+
+  ;; Refresh stale archive indexes before `use-package' tries to install packages.
+  (defconst suk-package-archive-refresh-interval (* 30 24 60 60))
+  (defun suk-package-archives-stale-p ()
+    "Return non-nil when a package archive index is missing or over 30 days old."
+    (cl-some
+     (lambda (archive)
+       (let* ((contents
+               (expand-file-name
+                "archive-contents"
+                (expand-file-name (car archive)
+                                  (expand-file-name "archives" package-user-dir))))
+              (attributes (and (file-exists-p contents)
+                               (file-attributes contents)))
+              (modified (and attributes
+                             (file-attribute-modification-time attributes))))
+         (or (not modified)
+             (> (float-time (time-subtract (current-time) modified))
+                 suk-package-archive-refresh-interval))))
+     package-archives))
+
+  (when (suk-package-archives-stale-p)
+    (condition-case err
+        (package-refresh-contents)
+      (error
+       (display-warning
+        'suk
+        (format "Could not refresh package archive metadata: %s"
+                (error-message-string err))
+        :warning))))
 
   ;; Should set before loading `use-package'
   ;; make use-package default behavior better
@@ -520,7 +551,18 @@ package.el。我會將 Lisp 目錄加入我嘅 =load-path= ，同時我都會喺
   (require 'use-package)
 
   ;; Compatibility
-  (use-package compat :demand t)
+  (use-package compat
+    :demand t
+    ;; Vertico uses this Emacs 30 completion-metadata compatibility wrapper.
+    :config
+    (when (< emacs-major-version 31)
+      (require 'compat-30)
+      ;; If compat was byte-compiled by a newer Emacs, its Emacs 30 wrapper
+      ;; may be missing.  Emacs 30's native implementation has the same API.
+      (when (and (not (fboundp 'compat--completion-metadata-get))
+                 (fboundp 'completion-metadata-get))
+        (defalias 'compat--completion-metadata-get
+          #'completion-metadata-get))))
 #+end_src
 
 ** Load lazy-load
@@ -1986,10 +2028,13 @@ Vertico 是与 completion 和 minibuffer 的默认系统紧密集成的，并且
 #+begin_src emacs-lisp :tangle appearance.el
   (when (display-graphic-p)
     (use-package vertico-posframe
-      :ensure t
-      :after (posframe vertico)
+      :demand t
       :hook (vertico-mode . vertico-posframe-mode)
       :init (setq vertico-posframe-parameters '((left-fringe  . 8) (right-fringe . 8)))
+      :config
+      ;; Appearance loads after Vertico has already started during init.
+      (when (bound-and-true-p vertico-mode)
+        (vertico-posframe-mode 1))
       )
     )
 #+end_src
@@ -3672,10 +3717,15 @@ org/
 #+end_src
 
 ** Load org-modern
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle appearance.el
   ;;Prettify UI
   (when sys/is-gui
     (use-package org-modern
+      :init
+      ;; Emacs 30 cannot run org-modern byte-code compiled with Emacs 31.
+      ;; Load the source so `without-restriction' expands for this Emacs.
+      (when (< emacs-major-version 31)
+        (load "org-modern.el" nil t t))
       :custom
       ;;  (org-modern-table nil)
       (prettify-symbols-alist nil)

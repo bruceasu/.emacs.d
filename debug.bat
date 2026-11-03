@@ -1,2 +1,2 @@
 @echo off
-c:\green\emacs-29.2\bin\runemacs --debug-init
+c:\green\emacs-30.2\bin\runemacs --debug-init

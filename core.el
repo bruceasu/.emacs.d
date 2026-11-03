@@ -144,6 +144,7 @@
 (setq warning-suppress-log-types '((package reinitialization)))
 
 (require 'package)
+(require 'cl-lib)
 
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/"))
@@ -160,6 +161,36 @@
   (package-initialize))
 
 ;; Run `package-quickstart-refresh' after changing installed packages.
+
+;; Refresh stale archive indexes before `use-package' tries to install packages.
+(defconst suk-package-archive-refresh-interval (* 30 24 60 60))
+(defun suk-package-archives-stale-p ()
+  "Return non-nil when a package archive index is missing or over 30 days old."
+  (cl-some
+   (lambda (archive)
+     (let* ((contents
+             (expand-file-name
+              "archive-contents"
+              (expand-file-name (car archive)
+                                (expand-file-name "archives" package-user-dir))))
+            (attributes (and (file-exists-p contents)
+                             (file-attributes contents)))
+            (modified (and attributes
+                           (file-attribute-modification-time attributes))))
+       (or (not modified)
+           (> (float-time (time-subtract (current-time) modified))
+              suk-package-archive-refresh-interval))))
+   package-archives))
+
+(when (suk-package-archives-stale-p)
+  (condition-case err
+      (package-refresh-contents)
+    (error
+     (display-warning
+      'suk
+      (format "Could not refresh package archive metadata: %s"
+              (error-message-string err))
+      :warning))))
 
 ;; Should set before loading `use-package'
 ;; make use-package default behavior better
@@ -179,7 +210,18 @@
 (require 'use-package)
 
 ;; Compatibility
-(use-package compat :demand t)
+(use-package compat
+  :demand t
+  ;; Vertico uses this Emacs 30 completion-metadata compatibility wrapper.
+  :config
+  (when (< emacs-major-version 31)
+    (require 'compat-30)
+    ;; If compat was byte-compiled by a newer Emacs, its Emacs 30 wrapper
+    ;; may be missing.  Emacs 30's native implementation has the same API.
+    (when (and (not (fboundp 'compat--completion-metadata-get))
+               (fboundp 'completion-metadata-get))
+      (defalias 'compat--completion-metadata-get
+        #'completion-metadata-get))))
 
 (require 'lazy-load)
 
